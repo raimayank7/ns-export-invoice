@@ -768,6 +768,11 @@
     function render() { buildEditor(); fillForm(); draw(); setStatus(); labelButtons(); if (histOpen) renderHistory(); }
     render();
     document.addEventListener('ns-lang', render);
+    var typed = false;
+    ed.addEventListener('input', function () { typed = true; });
+    /* the form shows at once (it used to wait for the data home, up to 6 s on a first visit, while the preview already showed);
+           saved defaults arrive later and never overwrite what the visitor has started typing */
+    if (!/[?&](open|from)=/.test(location.search)) root.classList.add('live');
     NSStore.ready().then(function () {
       return NSStore.meta('settings').then(function (c) { CFG = c || {}; }, function () {});
     }).then(function () {
@@ -783,6 +788,7 @@
         return fromQuote(from).then(function (ok) { if (ok) { render(); saveDraft(); return suggestNumber(true); } });
       }
       if (dr) return;
+      if (typed) return suggestNumber(false);
       /* a fresh start: the hub's defaults and the default business */
       var seller = doc.seller;
       doc = blank(); doc.seller = seller;

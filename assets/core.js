@@ -352,14 +352,64 @@
     });
   };
 
+  /* ---------- motion: a panel, tab or list that the user brings up fades in. Works for every tool without changing it:
+     an element losing `hidden`, or a container whose content is replaced right after a tap (never while typing, so the
+     live preview stays still). Add data-still to any box that must never move. Off with "reduce motion". */
+  NS.motion = function () {
+    if (!window.MutationObserver || !Element.prototype.animate || !document.body) return;
+    var calm = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)');
+    var tap = 0, key = 0, todo = [], queued = false;
+    var mark = function (e) { if (!e || e.isTrusted !== false) tap = Date.now(); };   /* real taps only, not clicks a tool makes itself */
+    document.addEventListener('pointerdown', mark, true);
+    document.addEventListener('click', mark, true);
+    window.addEventListener('hashchange', mark);
+    document.addEventListener('input', function () { key = Date.now(); }, true);
+    document.addEventListener('keydown', function (e) { if (e.key !== 'Enter' && e.key !== ' ') key = Date.now(); }, true);
+    var SKIP = 'option,datalist,script,style,svg,canvas,img,#ns-toast,.boot,dialog';
+    function fit(el) {
+      if (!el || el.nodeType !== 1 || el.matches(SKIP) || el.closest('[data-still],.boot')) return false;
+      var h = el.offsetHeight;
+      return h > 24;
+    }
+    function run() {
+      queued = false;
+      var list = todo; todo = [];
+      list.forEach(function (el) {
+        if (list.some(function (o) { return o !== el && o.contains(el); })) return;   /* the outer box already moves */
+        if (el._nsMoved && Date.now() - el._nsMoved < 400) return;   /* one tap, one fade */
+        el._nsMoved = Date.now();
+        el.animate([{ opacity: 0, transform: 'translateY(8px)' }, { opacity: 1, transform: 'none' }], { duration: 240, easing: 'cubic-bezier(.2,.7,.3,1)' });
+      });
+    }
+    function add(el) {
+      if (todo.indexOf(el) < 0) todo.push(el);
+      if (!queued) { queued = true; requestAnimationFrame(run); }
+    }
+    new MutationObserver(function (ms) {
+      if (calm && calm.matches) return;
+      var now = Date.now(), user = now - tap < 1500 && now - key > 700;
+      ms.forEach(function (m) {
+        if (m.type === 'attributes') { if (user && m.oldValue !== null && !m.target.hidden && fit(m.target)) add(m.target); return; }
+        if (!user || !m.addedNodes.length) return;
+        var el = m.target;
+        if (el === document.body || el.id === 'main') { Array.prototype.forEach.call(m.addedNodes, function (n) { if (fit(n)) add(n); }); return; }
+        if (fit(el)) add(el);
+      });
+    }).observe(document.body, { subtree: true, childList: true, attributes: true, attributeFilter: ['hidden'], attributeOldValue: true });
+  };
+
   /* ---------- page start ---------- */
   NS.start = function () {
-    if (NS.initLang) NS.initLang();
+    var lang = NS.initLang ? NS.initLang() : null;
     NS.initTheme();
+    NS.motion();
     var y = NS.$('[data-year]'); if (y) y.textContent = new Date().getFullYear();
     NS.sponsor();
     if ('serviceWorker' in navigator && location.protocol === 'https:') navigator.serviceWorker.register('/sw.js').catch(function () {});
-    document.documentElement.classList.add('ready');
+    /* the loading screen stays until the screen text is in the reader's language (at most 1.2 s), so English never flashes first */
+    var show = function () { if (!NS.leaving) document.documentElement.classList.add('ready'); };
+    if (lang && lang.then) Promise.race([lang, new Promise(function (r) { setTimeout(r, 1200); })]).then(show, show);
+    else show();
   };
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', NS.start); else NS.start();
 })();

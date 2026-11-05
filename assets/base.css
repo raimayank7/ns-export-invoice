@@ -157,3 +157,29 @@ dialog::backdrop{background:rgba(5,12,20,.55)}
 .gf-alt{margin:-4px 0 0;grid-column:1/-1}
 .gf-btn{display:inline-block;margin-top:4px;font-weight:600}
 @media (max-width:520px){.gf-dlg .fg{grid-template-columns:1fr}}
+
+/* shown inside the Nivesh Sahayak App (html.embed, set at first paint when the page is in a frame): only the tool */
+html.embed .hd,html.embed .ft,html.embed .remind,html.embed .skip,html.embed [data-guide-en],html.embed .sponsor-slot{display:none!important}
+html.embed #main>*:not(#tool):not(#my-app):not(dialog):not(script){display:none!important}
+html.embed #main>#tool,html.embed #main>#my-app{margin-top:12px}
+
+/* motion: soft transitions everywhere (core.js NS.motion fades in panels, tabs and lists as they change); all off with "reduce motion" */
+@media (prefers-reduced-motion:no-preference){
+  @view-transition{navigation:auto}
+  ::view-transition-old(root),::view-transition-new(root){animation-duration:.22s}
+  .btn,.icon-btn,.link,.hd nav a,.cards a,.lang-pick,details.faq,input,select,textarea{transition:background-color .18s,border-color .18s,color .18s,box-shadow .18s,transform .12s,outline-color .18s}
+  .btn:active,.icon-btn:active{transform:scale(.96)}
+  .btn.primary:hover{box-shadow:0 4px 14px color-mix(in srgb,var(--accent) 30%,transparent)}
+  .cards a:hover{transform:translateY(-2px);box-shadow:0 8px 22px rgba(10,30,50,.10)}
+  html.ready #main>*{animation:ns-up .38s cubic-bezier(.2,.7,.3,1) backwards}
+  html.ready #main>:nth-child(2){animation-delay:.04s}html.ready #main>:nth-child(3){animation-delay:.08s}
+  html.ready #main>:nth-child(4){animation-delay:.12s}html.ready #main>:nth-child(n+5){animation-delay:.16s}
+  dialog[open]{animation:ns-pop .22s cubic-bezier(.2,.8,.3,1.1)}
+  dialog[open]::backdrop{animation:ns-fade .22s ease-out}
+  details.faq[open]>:not(summary){animation:ns-up .25s ease-out}
+  .sponsor-slot:not([hidden]){animation:ns-fade .4s ease-out}
+}
+@keyframes ns-up{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+@keyframes ns-pop{from{opacity:0;transform:translateY(12px) scale(.97)}to{opacity:1;transform:none}}
+@keyframes ns-fade{from{opacity:0}to{opacity:1}}
+@media print{html.ready #main>*{animation:none!important}}
