@@ -199,7 +199,11 @@
   var HOME = new URL('/', (window.NS_CFG || {}).vault || 'https://my.niveshsahayak.in/vault.html', location.href);
   /* this page may choose and allow the folder itself: it is the data home's site, open as a page of its own */
   NS.folderHere = function () { return location.origin === HOME.origin && window.top === window; };
-  NS.folderSupported = function () { return 'showDirectoryPicker' in window; };
+  /* computers only (owner): phones and tablets keep "Save a backup file" (Android Chrome has the folder picker too, so look at the device) */
+  NS.folderSupported = function () {
+    return 'showDirectoryPicker' in window && !/Android|iPhone|iPad|iPod|Mobile|Tablet/i.test(navigator.userAgent) &&
+      !(window.matchMedia && matchMedia('(pointer: coarse)').matches && !matchMedia('(any-pointer: fine)').matches);
+  };
   var AF_OPEN = /[?&]autosave=1/.test(location.search);   /* read now: the My data page tidies its address later */
   NS.folderHome = function () { window.open(HOME.href + '?autosave=1', '_blank', 'noopener'); };
   function folderOn(name) { NS.toast(NS.t('oa.done', { name: name })); hideReminder(); afBar(null); }
@@ -270,6 +274,68 @@
     });
   }
   if (document.readyState === 'complete') setTimeout(folderStart, 1500); else window.addEventListener('load', function () { setTimeout(folderStart, 1500); });
+
+  /* ---------- tool settings live in the data home too ----------
+     Tools keep a few settings in this site's localStorage (turnover band, Tally ledger names, price list and barcode label layouts,
+     GST calendar, profit and loss drafts, HSN band, stock report choices, recent GSTIN look-ups, last return period picked).
+     Each change is also copied into the data home (meta 'prefs' = {key: {v, t}}), so it is in "Back up everything", the one auto save
+     and on every site and device the backup is restored to. On load the newer side wins; values only on this site are carried in.
+     Not copied: look and place (theme, language, side menu, chosen business, last screen) and unsaved drafts of a document. */
+  var PREF = /^ns-(aato|tally-led|prl|bc-set|gstcal|gstcal-told|gstcal-note|pl-draft-.+|hsn-band|stock-(sv|lv|mv)|gstin-recent|c8|g1|g3|td)$/;
+  var lsSet = Storage.prototype.setItem, lsDel = Storage.prototype.removeItem, prefDue = {}, prefT = 0;
+  function prefStamps(v) {
+    if (v) { try { lsSet.call(localStorage, 'ns-prefs-t', JSON.stringify(v)); } catch (e) {} return v; }
+    try { return JSON.parse(localStorage.getItem('ns-prefs-t') || '{}') || {}; } catch (e) { return {}; }
+  }
+  function prefPush() {
+    var due = prefDue; prefDue = {};
+    if (!Object.keys(due).length || !window.NSStore) return;
+    NSStore.ready().then(function (m) {
+      if (m !== 'vault') { Object.assign(prefDue, due); return; }   /* the data home is not reachable: next time */
+      return NSStore.meta('prefs').then(function (all) {
+        all = all || {};
+        Object.keys(due).forEach(function (k) { if (!all[k] || (all[k].t || 0) <= due[k].t) all[k] = due[k]; });
+        return NSStore.meta('prefs', all);
+      });
+    }).catch(function () {});
+  }
+  function prefMark(k, v) {
+    var t = Date.now(), st = prefStamps(); st[k] = t; prefStamps(st);
+    prefDue[k] = { v: v, t: t };
+    clearTimeout(prefT); prefT = setTimeout(prefPush, 800);
+  }
+  try {
+    Storage.prototype.setItem = function (k, v) { lsSet.call(this, k, v); if (this === window.localStorage && PREF.test(k)) prefMark(k, String(v)); };
+    Storage.prototype.removeItem = function (k) { lsDel.call(this, k); if (this === window.localStorage && PREF.test(k)) prefMark(k, null); };
+  } catch (e) {}
+  function prefPull() {
+    if (!window.NSStore) return;
+    NSStore.ready().then(function (m) {
+      if (m !== 'vault') return;
+      return NSStore.meta('prefs').then(function (all) {
+        all = all || {};
+        var st = prefStamps(), mine = {}, got = 0;
+        for (var i = 0; i < localStorage.length; i++) { var k = localStorage.key(i); if (PREF.test(k)) mine[k] = 1; }
+        Object.keys(all).forEach(function (k) {
+          var r = all[k];
+          if (!PREF.test(k) || !r || (st[k] || 0) >= (r.t || 0)) return;
+          try { if (r.v == null) lsDel.call(localStorage, k); else lsSet.call(localStorage, k, r.v); } catch (e) { return; }
+          st[k] = r.t; got++;
+        });
+        /* settings made here before (or while the data home was away) that it doesn't have yet: carry them in */
+        Object.keys(mine).forEach(function (k) {
+          if (all[k] && (all[k].t || 0) >= (st[k] || 0)) return;
+          prefDue[k] = { v: localStorage.getItem(k), t: st[k] || Date.now() };
+        });
+        prefStamps(st);
+        if (Object.keys(prefDue).length) prefPush();
+        if (got) document.dispatchEvent(new CustomEvent('ns-prefs', { detail: got }));
+      });
+    }).catch(function () {});
+  }
+  NS.prefPull = prefPull;
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', prefPull); else setTimeout(prefPull, 0);
+
 
   /* ---------- "My data" dialog (same on every site): a settings window with a side list of parts, each part = rows
      (name + one status line + "?" for the long help + small buttons on the right). Other files add rows/parts through NS.mdExt
