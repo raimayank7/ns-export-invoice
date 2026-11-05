@@ -803,6 +803,19 @@
     'hs.i.none': 'No saved items yet. Items you add in any Nivesh Sahayak document maker show up here.', 'hs.i.sum': 'Saved items: {n}. Needing a look: {bad}.',
     'hs.i.name': 'Item or service', 'hs.i.nohsn': 'No HSN/SAC', 'hs.i.svc': 'Marked as a service, but the code is not a SAC (99…)', 'hs.i.goods': 'Marked as goods, but the code is a SAC (99…)',
     'hs.i.rate': '{r}% is not a GST rate in use', 'hs.i.save': 'Save', 'hs.i.saved': '{n} saved.',
+    /* hsn: full official list and rate entries */
+    'hs.d.load': 'Loading the official HSN list…', 'hs.d.err': 'Could not load the official HSN list. Check your internet and open the page again.',
+    'hs.d.off': 'Official description', 'hs.d.notin': 'This code is not in the official HSN list. Check the digits.', 'hs.d.sub': '{n} codes under this one in the official list',
+    'hs.r.h': 'GST rate in the notifications', 'hs.r.one': 'GST rate: {r}', 'hs.r.many': 'More than one rate. Pick the entry whose description fits your goods.',
+    'hs.r.part': 'Only part of this code', 'hs.r.chg': 'Changed by {n}', 'hs.r.list': 'See the list ({n})', 'hs.r.nil': 'Nil',
+    'hs.r.fit': 'Check the description: if your goods do not fit it, another rate may apply.',
+    'hs.r.none': 'No entry names this code. Goods not named in Schedules I, III, IV, V or VI are at 18% (Schedule II, S. No. 639), unless they are nil-rated or covered by another notification.',
+    'hs.r.svc': 'Service rates are in Notification 11/2017-Central Tax (Rate) and its amendments, which this tool does not show yet. Check the rate on the official search below.',
+    'hs.r.src': 'Rates word for word from CBIC Notifications 9/2025, 10/2025 and 14/2025-Central Tax (Rate) with all amendments up to 02/2026 and 03/2026 (in force from 1 Nov 2026). Checked on {d}. The rate shown is the total GST (CGST + SGST, or IGST). A few goods also have special rates or exemptions in other notifications.',
+    'hs.h.find2': 'Find the code and rate', 'hs.f.help2': 'Type a code or English words. Searches all official HSN and SAC codes and the rate entries of the notifications.',
+    'hs.f.codes': 'Codes in the official list', 'hs.f.rates': 'Rate entries in the notifications', 'hs.f.more': 'Showing the first {n}. Type more to narrow it down.',
+    'hs.f.next2': 'Tap a code to see its description and GST rate.',
+    'hs.i.auto': 'Filled in from the notification: {r}%', 'hs.i.pick': 'Choose the rate', 'hs.i.notr': '{r}% is not among the rates in the notifications for this code ({list})',
     /* links to the Nivesh Sahayak App from every site */
     'nav.app': 'Nivesh Sahayak App', 'hub.app': 'Dues, money received and paid, purchases, expenses and party statements in one place',
     /* Batch 3: locked backup, Google Drive sync, send to accountant, help tips, GST calendar */
@@ -1129,7 +1142,9 @@
     'desk.k_cmd': 'Search and jump anywhere', 'desk.k_menu': 'Show or hide the menu', 'desk.k_secs': 'Open screen 1 to 9 of the menu', 'desk.k_inv': 'New invoice',
     'desk.k_min': 'Money received (in the App)', 'desk.k_mout': 'Money paid (in the App)', 'desk.k_pbill': 'Purchase bill (in the App)', 'desk.k_exp': 'Expense (in the App)',
     'desk.k_find': 'Search in this list', 'desk.k_help': 'This list', 'desk.k_save': 'Save the document', 'desk.k_print': 'Print the document', 'desk.k_esc': 'Close a window',
-    'desk.k_note': 'On a Mac use Cmd instead of Ctrl, and Option instead of Alt.'
+    'desk.k_note': 'On a Mac use Cmd instead of Ctrl, and Option instead of Alt.',
+    /* notice when a file of the page did not load (ad blocker, old saved copy): build.py CRITICAL */
+    'blk.msg': "Part of this page did not load, so some boxes may stay empty or buttons may not work.", 'blk.tip': "An ad blocker or an old saved copy of the page can cause this. Reload the page. If it happens again, turn the ad blocker off for niveshsahayak.in: this site shows no Google ads and keeps your data on your own device.", 'blk.reload': "Reload the page", 'blk.close': "Close"
   };
 
   var packs = { en: EN }, cur = 'en';
