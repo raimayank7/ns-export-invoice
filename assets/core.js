@@ -274,26 +274,41 @@
 
   /* ---------- one sponsor card (only where the page has a slot) ---------- */
   var RIVAL = /invoice|billing|bill\s?book|accounting|gst\s?software|vyapar|khatabook|zoho|tally|busy|marg|quickbooks|refrens|swipe/i;
+  /* own (Ko-fi) and family (GroupChatOn sites) cards are never shown here; under the card a short line invites businesses to
+     promote themselves (sponsor.niveshsahayak.in/promote/). data-sponsor="rotate" (bottom of the App) moves to the next card every 30 s */
   NS.sponsor = function () {
     var slot = NS.$('[data-sponsor]');
     if (!slot || NS._sp) return;
     NS._sp = true;
     var india = /Calcutta|Kolkata/.test((Intl.DateTimeFormat().resolvedOptions() || {}).timeZone || '');
+    var promo = function () { return '<p class="sp-promo"><a href="https://sponsor.niveshsahayak.in/promote/" target="_blank" rel="noopener">' + NS.esc(NS.t('sp.promo')) + ' →</a></p>'; };
+    var card = function (p) {
+      var img = p.imgs && p.imgs.length ? p.imgs[Math.floor(Math.random() * p.imgs.length)] : '';
+      return '<a class="sponsor" href="' + NS.esc(p.href) + '" target="_blank" rel="sponsored noopener">' +
+        (img ? '<img src="' + NS.esc(img) + '" alt="" loading="lazy" width="96" height="96">' : '') +
+        '<span><small>' + NS.esc(NS.t('sp.label')) + '</small><b>' + NS.esc(p.title || '') + '</b>' + (p.line ? '<span>' + NS.esc(p.line) + '</span>' : '') +
+        (p.cta ? '<em>' + NS.esc(p.cta) + ' →</em>' : '') + '</span></a>';
+    };
+    var show = function (list) {
+      var i = 0, draw = function () { slot.innerHTML = (list.length ? card(list[i % list.length]) : '') + promo(); };
+      draw(); slot.hidden = false;
+      document.addEventListener('ns-lang', draw);
+      if (slot.getAttribute('data-sponsor') !== 'rotate' || list.length < 2) return;
+      setInterval(function () {
+        if (document.hidden || slot.matches(':hover,:focus-within')) return;
+        slot.classList.add('sp-out');
+        setTimeout(function () { i++; draw(); slot.classList.remove('sp-out'); }, 250);
+      }, 30000);
+    };
     fetch('https://share.groupchaton.com/promos.json', { mode: 'cors' }).then(function (r) { return r.json(); }).then(function (j) {
       var list = (j.promos || []).filter(function (p) {
         if (!p || !p.href || p.own || p.family) return false;
         if (p.india && !india) return false;
         return !RIVAL.test([p.title, p.line, p.href].join(' '));
       });
-      if (!list.length) return;
-      var p = list[Math.floor(Math.random() * list.length)];
-      var img = p.imgs && p.imgs.length ? p.imgs[Math.floor(Math.random() * p.imgs.length)] : '';
-      slot.innerHTML = '<a class="sponsor" href="' + NS.esc(p.href) + '" target="_blank" rel="sponsored noopener">' +
-        (img ? '<img src="' + NS.esc(img) + '" alt="" loading="lazy" width="96" height="96">' : '') +
-        '<span><small>' + NS.esc(NS.t('sp.label')) + '</small><b>' + NS.esc(p.title || '') + '</b>' + (p.line ? '<span>' + NS.esc(p.line) + '</span>' : '') +
-        (p.cta ? '<em>' + NS.esc(p.cta) + ' →</em>' : '') + '</span></a>';
-      slot.hidden = false;
-    }).catch(function () {});
+      for (var k = list.length - 1; k > 0; k--) { var r = Math.floor(Math.random() * (k + 1)), x = list[k]; list[k] = list[r]; list[r] = x; }
+      show(list);
+    }).catch(function () { show([]); });
   };
 
   /* ---------- PDF for the share sheet: the printed sheets drawn into a PDF in the browser (html2canvas + jsPDF, loaded only when needed) ---------- */

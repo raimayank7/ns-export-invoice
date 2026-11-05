@@ -107,6 +107,8 @@ details.faq summary{font-weight:700;cursor:pointer;font-family:var(--font-head)}
 .ft ul{list-style:none;margin:0;padding:0}
 .ft li{margin:4px 0}
 .ft a{color:var(--soft)}
+.ft .free-line{margin:20px 0 0;padding:10px 14px;border-radius:10px;background:var(--surface2);color:var(--ink);display:flex;flex-wrap:wrap;gap:4px 12px;align-items:center}
+.ft .free-line a{color:var(--accent);font-weight:700}
 .ft .base{margin-top:20px;display:flex;flex-wrap:wrap;gap:8px 18px;justify-content:space-between}
 
 /* sponsor card (one, small) */
@@ -117,6 +119,10 @@ details.faq summary{font-weight:700;cursor:pointer;font-family:var(--font-head)}
 .sponsor b{display:block}
 .sponsor span span{display:block;color:var(--soft);font-size:.9rem}
 .sponsor em{font-style:normal;color:var(--link);font-weight:600;font-size:.9rem}
+/* the line under the card for businesses that want a card of their own; the App's card fades to the next one every 30 s */
+.sp-promo{margin:6px 2px 0;font-size:.82rem;text-align:end}.sp-promo a{color:var(--soft)}.sp-promo a:hover{color:var(--link)}
+.sponsor-slot{transition:opacity .25s}.sponsor-slot.sp-out{opacity:0}
+@media print{.sponsor-slot{display:none!important}}
 
 /* dialogs, toast, reminder */
 dialog{border:1px solid var(--line);border-radius:16px;background:var(--surface);color:var(--ink);padding:0;width:min(640px,calc(100vw - 24px));max-height:calc(100vh - 40px)}
@@ -248,3 +254,18 @@ html.pin-wait #my-app,html.pin-wait #app,html.pin-wait .hero{visibility:hidden}
 .b2-types legend{font-size:.85rem;font-weight:600;padding:0;margin-bottom:4px}
 .b2-types label.chk{min-height:36px;font-weight:500}
 @media (max-width:520px){.b2-row{grid-template-columns:minmax(0,1fr) minmax(0,1fr) 44px}.b2-row>label:first-child{grid-column:1/-1}}
+
+/* Report it notice + contact form (contact.js) */
+.tell{border-top:1px solid var(--line);background:var(--surface2)}
+.tell .wrap{display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:8px 14px;padding-top:10px;padding-bottom:10px;font-size:.92rem;color:var(--soft);text-align:center}
+.tell .btn{min-height:36px}
+html.embed .tell{display:none}
+.ct-form{display:grid;gap:12px;max-width:640px}
+.ct-f{display:grid;gap:4px}.ct-f label{font-weight:600;font-size:.92rem}
+.ct-form textarea{min-height:120px;resize:vertical}
+.ct-2{display:grid;gap:12px;grid-template-columns:repeat(auto-fit,minmax(min(240px,100%),1fr))}
+.ct-hp{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap}   /* robot trap; no left:-9999px, which scrolls RTL pages sideways */
+.ct-priv{font-size:.85rem;color:var(--soft);margin:0}
+.ct-out{margin:0;font-weight:600}.ct-out:empty{display:none}.ct-out.ok{color:var(--ok)}.ct-out.bad{color:var(--bad)}
+.ct-btns{display:flex;gap:8px}
+@media print{.tell{display:none}}

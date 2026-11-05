@@ -1144,7 +1144,19 @@
     'desk.k_find': 'Search in this list', 'desk.k_help': 'This list', 'desk.k_save': 'Save the document', 'desk.k_print': 'Print the document', 'desk.k_esc': 'Close a window',
     'desk.k_note': 'On a Mac use Cmd instead of Ctrl, and Option instead of Alt.',
     /* notice when a file of the page did not load (ad blocker, old saved copy): build.py CRITICAL */
-    'blk.msg': "Part of this page did not load, so some boxes may stay empty or buttons may not work.", 'blk.tip': "An ad blocker or an old saved copy of the page can cause this. Reload the page. If it happens again, turn the ad blocker off for niveshsahayak.in: this site shows no Google ads and keeps your data on your own device.", 'blk.reload': "Reload the page", 'blk.close': "Close"
+    /* line under the promotion card (core.js NS.sponsor) */
+    'sp.promo': "Want your business on this card? Promote it here",
+    'blk.msg': "Part of this page did not load, so some boxes may stay empty or buttons may not work.", 'blk.tip': "An ad blocker or an old saved copy of the page can cause this. Reload the page. If it happens again, turn the ad blocker off for niveshsahayak.in: this site shows no Google ads and keeps your data on your own device.", 'blk.reload': "Reload the page", 'blk.close': "Close",
+    /* Report it + contact form (contact.js) */
+    'ct.note': 'Found a mistake or something not working? Please tell us. It helps everyone.', 'ct.btn': 'Report it', 'ct.title': 'Report a mistake',
+    'ct.topic': 'What is it about?', 'ct.t_err': 'A mistake (rule, amount or word)', 'ct.t_bug': 'Something is not working', 'ct.t_q': 'A question',
+    'ct.t_idea': 'An idea for a new feature', 'ct.t_other': 'Something else', 'ct.msg': 'Your message', 'ct.msg_ph': 'What happened, and what did you expect?',
+    'ct.name': 'Your name (optional)', 'ct.reply': 'Email or WhatsApp number (optional, only if you want a reply)',
+    'ct.priv': "Please don't send invoices or your customers' details. To find the problem we also send the page address, language and screen size.",
+    'ct.send': 'Send', 'ct.sending': 'Sending…', 'ct.ok': 'Thank you! Your message has reached us.', 'ct.fail': 'It could not be sent. Please try again, or use the other contact form.',
+    'ct.other': 'Open the other contact form', 'ct.short': 'Please write a few more words.', 'ct.wait': 'Please wait a minute before sending again.',
+    /* free forever promise and the Support us link (footer, status bar, sponsor.niveshsahayak.in) */
+    'f.support': 'Support us', 'free.forever': 'Free forever: every Nivesh Sahayak tool is free to use, and always will be.', 'h.design2': 'All three designs are free to use.'
   };
 
   var packs = { en: EN }, cur = 'en';
