@@ -183,3 +183,16 @@ html.embed #main>#tool,html.embed #main>#my-app{margin-top:12px}
 @keyframes ns-pop{from{opacity:0;transform:translateY(12px) scale(.97)}to{opacity:1;transform:none}}
 @keyframes ns-fade{from{opacity:0}to{opacity:1}}
 @media print{html.ready #main>*{animation:none!important}}
+
+/* alignment pass on every site (owner, 2026-11-05) */
+/* header controls one height, on one line */
+.hd nav>a,.hd nav>.btn,.hd nav>button,.hd nav>select{min-height:40px;box-sizing:border-box}
+.hd nav>a,.hd nav>.btn,.hd nav>button{display:inline-flex;align-items:center;justify-content:center}
+/* money and numbers never break in the middle on screen (printed documents keep their own layout) */
+@media screen{
+  :is(td.n,th.n,.amt):not(#sheet *,.sh *){white-space:nowrap;font-variant-numeric:tabular-nums}
+}
+/* on phones a table that is wider than the screen scrolls by itself instead of pushing the page sideways */
+@media screen and (max-width:620px){
+  #main table:not(#sheet *,.sh *,:is(.tbl-wrap,.gt-scroll,.tbl,.sb-sheet-wrap,.prose) table){display:block;overflow-x:auto;max-width:100%;-webkit-overflow-scrolling:touch}
+}
