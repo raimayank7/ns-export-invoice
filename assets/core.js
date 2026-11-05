@@ -328,7 +328,8 @@
 
   /* ---------- one sponsor card (only where the page has a slot) ---------- */
   var RIVAL = /invoice|billing|bill\s?book|accounting|gst\s?software|vyapar|khatabook|zoho|tally|busy|marg|quickbooks|refrens|swipe/i;
-  /* own (Ko-fi) and family (GroupChatOn sites) cards are never shown here; under the card a short line invites businesses to
+  /* own (Ko-fi) and family (GroupChatOn sites) cards are never shown here, except Nivesh Sahayak's own website-design card
+     (family 'designs', labelled with its tag, not marked sponsored); under the card a short line invites businesses to
      promote themselves (promo.niveshsahayak.in). data-sponsor="rotate" (bottom of the App) moves to the next card every 30 s */
   NS.sponsor = function () {
     var slot = NS.$('[data-sponsor]');
@@ -337,10 +338,10 @@
     var india = /Calcutta|Kolkata/.test((Intl.DateTimeFormat().resolvedOptions() || {}).timeZone || '');
     var promo = function () { return '<p class="sp-promo"><a href="https://promo.niveshsahayak.in/" target="_blank" rel="noopener">' + NS.esc(NS.t('sp.promo')) + ' →</a></p>'; };
     var card = function (p) {
-      var img = p.imgs && p.imgs.length ? p.imgs[Math.floor(Math.random() * p.imgs.length)] : '';
-      return '<a class="sponsor" href="' + NS.esc(p.href) + '" target="_blank" rel="sponsored noopener">' +
+      var img = p.imgs && p.imgs.length ? p.imgs[Math.floor(Math.random() * p.imgs.length)] : (p.img_icon || '');
+      return '<a class="sponsor" href="' + NS.esc(p.href) + '" target="_blank" rel="' + (p.own ? 'noopener' : 'sponsored noopener') + '">' +
         (img ? '<img src="' + NS.esc(img) + '" alt="" loading="lazy" width="96" height="96">' : '') +
-        '<span><small>' + NS.esc(NS.t('sp.label')) + '</small><b>' + NS.esc(p.title || '') + '</b>' + (p.line ? '<span>' + NS.esc(p.line) + '</span>' : '') +
+        '<span><small>' + NS.esc(p.tag || NS.t('sp.label')) + '</small><b>' + NS.esc(p.title || '') + '</b>' + (p.line ? '<span>' + NS.esc(p.line) + '</span>' : '') +
         (p.cta ? '<em>' + NS.esc(p.cta) + ' →</em>' : '') + '</span></a>';
     };
     var show = function (list) {
@@ -356,7 +357,7 @@
     };
     fetch('https://share.groupchaton.com/promos.json', { mode: 'cors' }).then(function (r) { return r.json(); }).then(function (j) {
       var list = (j.promos || []).filter(function (p) {
-        if (!p || !p.href || p.own || p.family) return false;
+        if (!p || !p.href || ((p.own || p.family) && p.family !== 'designs')) return false;
         if (p.india && !india) return false;
         return !RIVAL.test([p.title, p.line, p.href].join(' '));
       });
