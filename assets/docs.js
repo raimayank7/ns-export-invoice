@@ -19,7 +19,7 @@
     challan: { prefix: 'DC', kinds: ['job', 'approval', 'sale', 'transfer', 'other'], title: 'challan', purpose: true, transport: true, gstFlag: true, gstOff: true, copy: 'dc',
       status: ['dsent', 'dret', 'inv'], toInvoice: true, noLbl: 'dcno', party: 'consignee', note: { job: 'dcjob', approval: 'dcnote', sale: 'dcnote', transfer: 'dcnote', other: 'dcnote' }, refLbl: 'ref' },
     po: { prefix: 'PO', kinds: ['po'], deliv: true, gstFlag: true, status: ['popen', 'prec', 'scan'], noLbl: 'pono', party: 'vendor', shipLbl: 'deliverto', refLbl: 'vqref', buying: true },
-    note: { prefix: 'CN', prefixes: { credit: 'CN', debit: 'DN' }, kinds: ['credit', 'debit'], orig: true, gstFlag: true, copy: 'note', status: ['nissued', 'nadj', 'nref'],
+    note: { prefix: 'CN', prefixes: { credit: 'CN', debit: 'DN' }, kinds: ['credit', 'debit'], split: { credit: 'credit-note', debit: 'debit-note' }, orig: true, gstFlag: true, copy: 'note', status: ['nissued', 'nadj', 'nref'],
       noLbl: { credit: 'cnno', debit: 'dnno' }, party: 'issuedto', note: { credit: 'cnnote', debit: 'dnnote' }, refLbl: 'ref' },
     /* self invoice: a registered buyer bills itself for a purchase from an unregistered supplier under reverse charge (always GST, RC = Yes) */
     self: { prefix: 'SI', kinds: ['self'], alwaysTax: true, rc: true, rcFixed: true, recv: true, buying: true, status: ['siopen', 'sipaid'], noLbl: 'sino', party: 'supplier', note: 'sinote', refLbl: 'ref' },
@@ -109,7 +109,7 @@
   function blank() {
     var c = dset();
     return {
-      type: type, kind: T.kind0 || (T.kinds.indexOf(c.kind) >= 0 ? c.kind : T.kinds[0]), no: '', deliv: '', orig: { no: '', date: '' }, reason: 'ret', tr: { veh: '', tname: '', lr: '' },
+      type: type, kind: T.kind0 || (T.kinds.indexOf(c.kind) >= 0 ? c.kind : T.kinds[0]), no: '', deliv: '', orig: { no: '', date: '' }, reason: T.kind0 === 'debit' ? 'price' : 'ret', tr: { veh: '', tname: '', lr: '' },
       paper: c.paper || T.paper || 'a4', design: c.design || 'classic', copies: 1, date: NS.today(), due: '', pos: '', rc: !!T.rcFixed, recv: '', ref: '',
       seller: { name: '', addr: '', city: '', pin: '', state: '', gstin: '', phone: '', email: '', logo: '', sign: '', bankName: '', bankAcc: '', bankIfsc: '', bankBranch: '', upi: '' },
       buyer: { name: '', addr: '', city: '', pin: '', state: '', gstin: '', phone: '' }, ship: null, einv: null, irn: null,
@@ -217,7 +217,7 @@
         (T.deliv ? field('d-deliv', t('l.deliv'), { type: 'date' }) : '') +
         (T.recv ? field('d-recv', t('l.recv'), { type: 'date', hint: t('h.recv') }) : '') +
         (T.orig ? field('d-ono', t('l.ono'), { max: 16, ltr: 1, hint: t('h.ono') }) + field('d-odate', t('l.odate'), { type: 'date' }) + '<p class="hint wide b1-warn" id="cn-tcs" hidden></p>' +
-          '<div class="f wide"><label for="d-reason">' + esc(t('l.reason')) + '</label><select id="d-reason">' + REASONS.map(function (k) { return '<option value="' + k + '">' + esc(t('rs.' + k)) + '</option>'; }).join('') + '</select></div>' : '') +
+          '<div class="f wide"><label for="d-reason">' + esc(t('l.reason')) + '</label><select id="d-reason">' + (T.kind0 === 'debit' ? ['price', 'tax', 'other'] : REASONS).map(function (k) { return '<option value="' + k + '">' + esc(t('rs.' + k)) + '</option>'; }).join('') + '</select></div>' : '') +
         field('d-pos', t('l.pos'), { type: 'state', hint: t(T.buying ? 'h.pos2' : 'h.pos') }) +
         field('d-ref', t('l.' + (T.refLbl || 'ref')), {}) +
         (T.rc && !T.rcFixed ? '<div class="f"><label class="chk"><input id="d-rc" type="checkbox"> ' + esc(t('l.rc')) + '</label></div>' : '') +
@@ -792,6 +792,11 @@
     doc.seller = seller;
     fillForm(); suggestNumber(true); draw(); saveDraft(); setStatus();
   }
+  /* the address of a sibling document site (a split type's other kind) */
+  function kindSite(site) {
+    var x = ((window.NS_CFG && NS_CFG.tools) || []).filter(function (x) { return x[0] === site; })[0];
+    return /^(localhost|127\.0\.0\.1)$/.test(location.hostname) && x ? 'http://localhost:' + x[4] + '/' : 'https://' + site + '.niveshsahayak.in/';
+  }
   function openDoc(rec, asCopy) {
     doc = Object.assign(blank(), JSON.parse(JSON.stringify(rec)));
     delete doc.id; delete doc.created; delete doc.updated; delete doc.total;
@@ -808,7 +813,7 @@
     var list = $('[data-hist-list]', dlg), q = $('[data-hist-q]', dlg);
     NSStore.list('doc').then(function (all) {
       var v = key(q.value);
-      var rows = all.filter(function (d) { return d.type === doc.type; }).filter(function (d) {
+      var rows = all.filter(function (d) { return d.type === doc.type && (!T.split || T.kinds.indexOf(d.kind || T.kinds[0]) >= 0); }).filter(function (d) {
         return !v || [d.no, d.buyer && d.buyer.name, d.seller && d.seller.name].join(' ').toLowerCase().indexOf(v) >= 0;
       }).sort(function (a, b) { return (b.date || '').localeCompare(a.date || '') || (b.updated || 0) - (a.updated || 0); });
       /* money recorded in the App (part payments, receipts against bills) shows here too: "₹3,556.00 due" instead of "Not paid" */
@@ -929,6 +934,8 @@
     T = Object.assign({}, TYPES[type] || TYPES.invoice);
     /* one engine type can serve two sites: the estimate site opens the quotation type on its Estimate kind */
     var k0 = root.getAttribute('data-kind'); if (k0 && T.kinds.indexOf(k0) >= 0) T.kind0 = k0;
+    /* split types: each kind has its own site (credit-note. and debit-note.), so the page offers only its own kind */
+    if (T.split && T.kind0) T.kinds = [T.kind0];
     sheet = $('#sheet', root);
     dkey = 'ns-draft-' + type;
     var ed = $('#ed', root);
@@ -936,6 +943,7 @@
     ed.addEventListener('change', onInput);
     doc = blank();
     var dr = loadDraft();
+    if (dr && T.split && T.kinds.indexOf((dr.doc || {}).kind) < 0) dr = null;   /* a draft of the other kind (from before the split) */
     if (dr) { doc = Object.assign(blank(), dr.doc); delete doc.lang; editingId = dr.id || null; }
     function render() { buildEditor(); fillForm(); draw(); setStatus(); labelButtons(); if (histOpen) renderHistory(); series(); }
     /* "Change number series" under the number box: the prefix of this document (each kind for quotation and note) */
@@ -962,7 +970,7 @@
       /* ?open=<id>: the Nivesh Sahayak App opens a saved document here to edit, print or share */
       if (open) {
         history.replaceState(null, '', location.pathname + location.hash);
-        return NSStore.get('doc', open).then(function (rec) { if (rec && (rec.type || 'invoice') === type) { openDoc(rec, false); render(); } else NS.toast(t('conv.none'), 'bad'); }).catch(function () {});
+        return NSStore.get('doc', open).then(function (rec) { if (rec && (rec.type || 'invoice') === type && T.split && T.kinds.indexOf(rec.kind) < 0 && T.split[rec.kind]) { location.replace(kindSite(T.split[rec.kind]) + '?open=' + encodeURIComponent(open)); return; } if (rec && (rec.type || 'invoice') === type) { openDoc(rec, false); render(); } else NS.toast(t('conv.none'), 'bad'); }).catch(function () {});
       }
       if (from) {
         history.replaceState(null, '', location.pathname + location.hash);

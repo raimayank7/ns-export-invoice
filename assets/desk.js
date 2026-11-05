@@ -215,7 +215,7 @@
         out.push({ g: 'party', t: p.name, s: [p.gstin, p.phone, p.city].filter(Boolean).join(' · '), run: function () { if (app && app.biz) location.hash = 'st/' + encodeURIComponent(k); else location.href = appUrl('st/' + encodeURIComponent(k)); } });
       });
       C.doc.slice().sort(function (a, b) { return (b.updated || 0) - (a.updated || 0); }).slice(0, 400).forEach(function (d) {
-        var site = OWNSITE[d.type], appRec = d.app || /^(pbill|exp|ob|contra)$/.test(d.type);
+        var site = (d.type === 'note' && d.kind === 'debit' ? 'debit-note' : OWNSITE[d.type]), appRec = d.app || /^(pbill|exp|ob|contra)$/.test(d.type);
         if (!site && !appRec) return;
         var who = (d.buyer && d.buyer.name) || '', name = app && app.docName ? app.docName(d) : NS.t(DOCWORD[d.type] || '') || d.type;
         out.push({ g: 'doc', t: name + (d.no ? ' ' + d.no : '') + (who ? ' · ' + who : ''), s: (d.date ? NS.fmtDate(d.date) : '') + (d.total ? ' · ' + NS.money(d.total) : ''),
@@ -240,7 +240,7 @@
   function palette() {
     if (!cmd) {
       cmd = NS.el('dialog', { id: 'desk-cmd', class: 'desk-cmd' });
-      cmd.innerHTML = '<div class="cmd-in">' + ic(SEARCH) + '<input type="search" role="combobox" aria-expanded="true" aria-controls="desk-cmd-l" aria-autocomplete="list" autocomplete="off" spellcheck="false" dir="auto"><kbd>Esc</kbd></div>' +
+      cmd.innerHTML = '<div class="cmd-in">' + ic(SEARCH) + '<input type="search" role="combobox" aria-label="' + esc(T('find')) + '" aria-expanded="true" aria-controls="desk-cmd-l" aria-autocomplete="list" autocomplete="off" spellcheck="false" dir="auto"><kbd>Esc</kbd></div>' +
         '<ul id="desk-cmd-l" role="listbox"></ul><p class="cmd-ft"></p>';
       document.body.appendChild(cmd);
       list = $('ul', cmd);

@@ -259,7 +259,7 @@
     's.v.lname': 'Type the landlord’s name.', 's.v.tname': 'Type the tenant’s name.', 's.v.ename': 'Type the employee’s name.', 's.h.next': 'Copy for next period',
 
     /* Phase 1: site menus, footers and the hub's tool list */
-    'nav.proforma': 'Proforma', 'nav.so': 'Sales order', 'nav.challan': 'Challan', 'nav.po': 'Purchase order', 'nav.note': 'Credit note',
+    'nav.proforma': 'Proforma', 'nav.so': 'Sales order', 'nav.challan': 'Challan', 'nav.po': 'Purchase order', 'nav.note': 'Credit note', 'nav.dnote': 'Debit note',
     'nav.receipt': 'Receipt', 'nav.voucher': 'Voucher', 'nav.cashmemo': 'Cash memo', 'nav.rent': 'Rent receipt', 'nav.salary': 'Salary slip', 'nav.petty': 'Petty cash', 'nav.guide': 'Guide', 'nav.all': 'All documents',
     'f.make2': 'Make it', 'f.guides2': 'Guides', 'f.alltools': 'All document makers',
     'f.proforma': 'Proforma invoice maker', 'f.so': 'Sales order maker', 'f.challan': 'Delivery challan maker', 'f.po': 'Purchase order maker', 'f.note': 'Credit and debit note maker',
@@ -1435,7 +1435,28 @@
     "fr.cashwarn": "A loan of ₹20,000 or more from a person or firm must be taken and repaid by bank transfer, cheque or UPI, not in cash (income-tax rule).",
     "fr.help1": "Capital is the money the owner puts into the business. Drawings are what the owner takes out for personal use, such as household bills or personal income tax. At the year end the profit is added to capital and drawings are taken off.",
     "fr.help2": "A loan taken shows under borrowings. Only the loan part of an EMI reduces it; the interest part is a finance cost. Ask the bank for a loan statement at the year end.",
-    "fr.help3": "A loan given to a person or firm is an asset under loans and advances. Interest received on it is other income."
+    "fr.help3": "A loan given to a person or firm is an asset under loans and advances. Interest received on it is other income.",
+    /* User test fixes 2 (stock warning, receipt bills, HSN words, CMP-08 late, GSTR-2B add, TDS twin box, profit notes) */
+    "c8.w.late": "This statement was due on {d}. If it is not filed yet, file it and pay now: interest at 18% a year is charged on tax paid late (section 50 of the CGST Act). Enter it in the box \"Interest, if paid late\".",
+    "hs.f.syn": "Also searched with the words the official list uses: \"{w}\".",
+    "hs.f.gst": "GST {r}",
+    "hs.f.gstmany": "GST {r}: open to pick",
+    "sw.only": "Only {n} {u} in stock. You can still save the bill; stock will show below zero.",
+    "sw.none": "None of this item is in stock. You can still save the bill; stock will show below zero.",
+    "rb.h": "Unpaid bills of {p}",
+    "rb.due": "{a} due",
+    "rb.none": "No unpaid bills of {p} in your saved data.",
+    "rb.hint": "Tick the bills this money is for. It is shared out from the first ticked bill, and the App shows those bills as paid or part paid.",
+    "gc.frombiz": "Filled in from your business {b}. If you file GSTR-1 and GSTR-3B every quarter (QRMP), choose that above.",
+    "uf.waupi": "\nPay {a} by UPI to: {u}",
+    "g1.w.r28": "{no}: a line has GST at 28%, but 28% is not a GST rate for supplies from 1 February 2026. Check the rate on this bill.",
+    "uf.add2b": "Add to my purchases",
+    "uf.add2bq": "Save bill {no} of {p} as a purchase bill (not paid yet), with the amounts from GSTR-2B? You can add the items and HSN codes later in the App.",
+    "uf.add2bok": "Purchase bill {no} saved. It is now in your books and matched here.",
+    "uf.tdsr": "or TDS rate (%)",
+    "uf.tdsa": "or TDS amount (₹)",
+    "uf.pfapp": "How cost is counted here: each item sold is costed at its average purchase cost, or at the purchase price saved with the item if it was never bought. The Profit and loss page works the other way (purchases minus closing stock), so the two can differ until every purchase bill is entered.",
+    "uf.pfpl": "How cost is counted here: purchases plus opening stock minus closing stock. The App's Profit report costs each sale at the item's average purchase cost (or its saved purchase price if it was never bought), so the two can differ until every purchase bill is entered."
   };
 
   var packs = { en: EN }, cur = 'en';

@@ -136,6 +136,7 @@ details.faq summary{font-weight:700;cursor:pointer;font-family:var(--font-head)}
 /* dialogs, toast, reminder */
 dialog{border:1px solid var(--line);border-radius:16px;background:var(--surface);color:var(--ink);padding:0;width:min(640px,calc(100vw - 24px));max-height:calc(100vh - 40px)}
 dialog::backdrop{background:rgba(5,12,20,.55)}
+.sw-hint{grid-column:1/-1;flex-basis:100%;margin:4px 0 0;font-size:.86rem;font-weight:600;color:var(--bad)}
 .dlg-h{display:flex;align-items:center;justify-content:space-between;padding:14px 16px;border-bottom:1px solid var(--line);position:sticky;top:0;background:var(--surface)}
 .dlg-h h2{margin:0;font-size:1.15rem}
 .dlg-b{padding:14px 16px 18px}
@@ -232,7 +233,7 @@ html.embed #main>#tool,html.embed #main>#my-app{margin-top:12px}
   .btn:active,.icon-btn:active{transform:scale(.96)}
   .btn.primary:hover{box-shadow:0 4px 14px color-mix(in srgb,var(--accent) 30%,transparent)}
   .cards a:hover{transform:translateY(-2px);box-shadow:0 8px 22px rgba(10,30,50,.10)}
-  html.ready #main>*{animation:ns-up .38s cubic-bezier(.2,.7,.3,1) backwards}
+  html.ready #main>*:not(dialog){animation:ns-up .38s cubic-bezier(.2,.7,.3,1) backwards}   /* a dialog in #main would slide up again every time it opens */
   html.ready #main>:nth-child(2){animation-delay:.04s}html.ready #main>:nth-child(3){animation-delay:.08s}
   html.ready #main>:nth-child(4){animation-delay:.12s}html.ready #main>:nth-child(n+5){animation-delay:.16s}
   dialog[open]{animation:ns-pop .22s cubic-bezier(.2,.8,.3,1.1)}
