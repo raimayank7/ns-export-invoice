@@ -440,6 +440,42 @@
     }
   });
 
+  /* the maker's button bar stays under the header on computers (doc.css): keep --hd-h = the header's height, and mark the
+     bar .stuck once it has reached the top so it gets a line under it */
+  (function () {
+    function hdH() {
+      var hd = document.querySelector('header.hd'), h = hd && hd.getClientRects().length && /sticky|fixed/.test(getComputedStyle(hd).position) ? hd.offsetHeight : 0;
+      document.documentElement.style.setProperty('--hd-h', h + 'px');
+    }
+    function stuck() {
+      var bar = document.querySelector('.tool-top');
+      if (!bar) return;
+      var top = parseFloat(getComputedStyle(bar).top) || 0, on = getComputedStyle(bar).position === 'sticky';
+      if (on) document.documentElement.style.setProperty('--bar-h', bar.offsetHeight + 'px');
+      bar.classList.toggle('stuck', on && window.scrollY > 0 && bar.getBoundingClientRect().top <= top + 16);
+    }
+    /* phones: the bottom bar (.actions) also gets New and Saved; a copy (.act-x) that presses the real button and follows its words */
+    function bottomBar() {
+      var acts = document.querySelector('#tool .actions'), top = document.querySelector('#tool .tool-top');
+      if (!acts || !top || acts.querySelector('.act-x')) return;
+      ['history', 'new'].forEach(function (k) {
+        var orig = top.querySelector('[data-do="' + k + '"]');
+        if (!orig) return;
+        var b = document.createElement('button');
+        b.type = 'button'; b.className = 'btn act-x'; b.setAttribute('data-noic', '');
+        var copy = function () { b.innerHTML = orig.innerHTML; };
+        copy(); new MutationObserver(copy).observe(orig, { childList: true, subtree: true, characterData: true });
+        b.addEventListener('click', function () { orig.click(); });
+        acts.insertBefore(b, acts.firstChild);
+      });
+    }
+    function go() { hdH(); stuck(); bottomBar(); }
+    window.addEventListener('scroll', stuck, { passive: true });
+    window.addEventListener('resize', go);
+    if (window.ResizeObserver) document.addEventListener('DOMContentLoaded', function () { var hd = document.querySelector('header.hd'); if (hd) new ResizeObserver(go).observe(hd); });
+    if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', go); else go();
+  })();
+
   /* the business a new document starts with: the default chosen in Settings, or the only one saved (a first visitor who
      added one business should not have to pick it) */
   NS.defaultBiz = function (cfg) {

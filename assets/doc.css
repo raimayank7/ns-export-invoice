@@ -427,3 +427,25 @@ details.more .fg{margin-top:8px}
   background-position:8px 9px,8px 14px,34px 9px,8px 31px,8px 32px,34px 60px;background-size:14px 2.5px,10px 1.5px,12px 2px,38px 1px,38px 18px,12px 3px}
 @media (prefers-reduced-motion:no-preference){.dp{transition:border-color .15s,box-shadow .15s}}
 .rb-list{border:1px solid var(--line);border-radius:10px;padding:8px 12px 10px;margin:0;display:grid;gap:8px;min-width:0}.rb-list legend{font-weight:700;padding:0 4px}.rb-list .chk{align-items:flex-start;min-height:32px}.rb-list .chk span{overflow-wrap:anywhere}
+/* computers only (owner): the New / Saved / Save / Print / Share bar stays in view under the header while the form scrolls (core.js sets --hd-h and .stuck) */
+@media (min-width:961px) and (hover:hover) and (pointer:fine){
+.tool-top{position:sticky;top:var(--hd-h,0px);z-index:15;background:var(--bg);margin:0 -12px 12px;padding:8px 12px;border-bottom:1px solid transparent;transition:border-color .15s,box-shadow .15s}
+.tool-top.stuck{border-bottom-color:var(--line);box-shadow:0 8px 14px -12px rgba(15,27,42,.45)}
+.pv-col{top:calc(var(--hd-h,0px) + var(--bar-h,56px) + 10px)}   /* the preview keeps clear of the pinned bar */
+}
+@media print{.tool-top{position:static}}
+/* phones and tablets (owner): every button of the maker in ONE bar fixed at the bottom of the screen, like an app's tab bar:
+   New and Saved (copies made by core.js, .act-x) + Save, Print, Share and any extra (Make invoice); the top row then keeps only the status line */
+@media (max-width:960px){
+.tool-top .row:has(>[data-do=new]){display:none}
+#tool .actions{position:fixed;left:0;right:0;bottom:0;z-index:30;margin:0;display:flex;flex-wrap:nowrap;gap:2px;padding:4px 4px calc(4px + env(safe-area-inset-bottom,0px));background:var(--surface);border-top:1px solid var(--line);box-shadow:0 -8px 16px -12px rgba(15,27,42,.45)}
+#tool .actions .btn{flex:1 1 0;min-width:0;flex-direction:column;gap:3px;min-height:54px;padding:4px 2px;border-radius:10px;font-size:.7rem;line-height:1.1;white-space:normal;text-align:center;overflow-wrap:anywhere}
+#tool .actions .btn:not(.primary){border-color:transparent;background:none}
+#tool .actions .btn>svg.bi{width:20px;height:20px}
+html:has(#tool .actions) body{padding-bottom:calc(66px + env(safe-area-inset-bottom,0px))}
+}
+/* the page's slide-up entrance (base.css) moves #tool with a transform, and a transform holds the fixed bar inside it: fade only */
+@keyframes ns-fadein{from{opacity:0}}
+@media (max-width:960px) and (prefers-reduced-motion:no-preference){html.ready #main>#tool{animation-name:ns-fadein}}
+@media (min-width:961px){.act-x{display:none}}
+@media print{#tool .actions{display:none}html:has(#tool .actions) body{padding-bottom:0}}
