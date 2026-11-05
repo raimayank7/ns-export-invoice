@@ -3413,3 +3413,31 @@ NS.addLang("mni", {
   "uf.pfapp": "ꯃꯐꯝ ꯑꯁꯤꯗꯥ ꯃꯃꯜ ꯀꯔꯝꯅ ꯊꯤꯕꯒꯦ: ꯌꯣꯜꯂꯛꯈꯤꯕ ꯑꯥꯏꯇꯦꯝ ꯈꯨꯗꯤꯡꯃꯛꯀꯤ ꯃꯃꯜ ꯃꯗꯨꯒꯤ ꯑꯦꯚꯔꯦꯖ ꯂꯧꯕꯒꯤ ꯃꯃꯂꯅ, ꯑꯃꯁꯨꯡ ꯀꯩꯗꯧꯉꯩꯗ ꯂꯧꯈꯤꯗ꯭ꯔꯕꯗꯤ ꯑꯥꯏꯇꯦꯝꯒ ꯂꯣꯌꯅꯅ ꯁꯦꯚ ꯇꯧꯔꯕ ꯂꯧꯕꯒꯤ ꯃꯃꯂꯅ। ꯄ꯭ꯔꯣꯐꯤꯠ ꯑꯦꯟꯗ ꯂꯣꯁ ꯄꯦꯖꯅ ꯑꯇꯣꯞꯄ ꯃꯑꯣꯡꯗꯥ ꯊꯤ (ꯂꯧꯕꯗꯒꯤ ꯀ꯭ꯂꯣꯖꯤꯡ ꯁ꯭ꯇꯣꯛ ꯂꯧꯊꯣꯛꯇꯨꯅ), ꯃꯔꯝ ꯑꯗꯨꯅ ꯂꯧꯕꯒꯤ ꯕꯤꯜ ꯈꯨꯗꯤꯡꯃꯛ ꯍꯥꯄꯆꯤꯟꯗ꯭ꯔꯤꯐꯥꯑꯣꯕ ꯑꯅꯤꯃꯛꯇꯥ ꯈꯦꯠꯅꯕ ꯂꯩꯕ ꯌꯥꯏ।",
   "uf.pfpl": "ꯃꯐꯝ ꯑꯁꯤꯗꯥ ꯃꯃꯜ ꯀꯔꯝꯅ ꯊꯤꯕꯒꯦ: ꯂꯧꯕ + ꯑꯣꯄꯅꯤꯡ ꯁ꯭ꯇꯣꯛ − ꯀ꯭ꯂꯣꯖꯤꯡ ꯁ꯭ꯇꯣꯛ। ꯑꯦꯞꯀꯤ ꯄ꯭ꯔꯣꯐꯤꯠ ꯔꯤꯄꯣꯔꯠꯅ ꯌꯣꯟꯕ ꯈꯨꯗꯤꯡꯃꯛꯀꯤ ꯃꯃꯜ ꯑꯥꯏꯇꯦꯃꯒꯤ ꯑꯦꯚꯔꯦꯖ ꯂꯧꯕꯒꯤ ꯃꯃꯂꯅ (ꯅꯠꯇ꯭ꯔꯒꯥ ꯀꯩꯗꯧꯉꯩꯗ ꯂꯧꯈꯤꯗꯕ ꯑꯥꯏꯇꯦꯃꯒꯤ ꯁꯦꯚ ꯇꯧꯔꯕ ꯃꯃꯂꯅ) ꯊꯤ, ꯃꯔꯝ ꯑꯗꯨꯅ ꯂꯧꯕꯒꯤ ꯕꯤꯜ ꯈꯨꯗꯤꯡꯃꯛ ꯍꯥꯄꯆꯤꯟꯗ꯭ꯔꯤꯐꯥꯑꯣꯕ ꯑꯅꯤꯃꯛꯇꯥ ꯈꯦꯠꯅꯕ ꯂꯩꯕ ꯌꯥꯏ।"
 });
+
+/* Terms audit */
+NS.addLang("mni", {
+  "doc.credit": "ꯀ꯭ꯔꯦꯗꯤꯠ ꯅꯣꯠ",
+  "docs.credit": "ꯀ꯭ꯔꯦꯗꯤꯠ ꯅꯣꯠ",
+  "doc.debit": "ꯗꯦꯕꯤꯠ ꯅꯣꯠ",
+  "docs.debit": "ꯗꯦꯕꯤꯠ ꯅꯣꯠ",
+  "qs.nrecv": "ꯐꯪꯂꯕ ꯁꯦꯜ",
+  "rs.price_c": "ꯃꯃꯜ ꯍꯟꯊꯍꯜꯂꯦ",
+  "rs.price_d": "ꯃꯃꯜ ꯍꯦꯅꯒꯠꯍꯜꯂꯦ (ꯔꯦꯠꯀꯤ ꯈꯦꯠꯅꯕ)",
+  "rs.tax_c": "ꯇꯦꯛꯁ ꯍꯦꯟꯅ ꯂꯧꯈꯤ",
+  "rs.tax_d": "ꯇꯦꯛꯁ ꯍꯟꯅ ꯂꯧꯈꯤ"
+});
+/* Notes against purchases */
+NS.addLang("mni", {
+  "k.creditp": "ꯀ꯭ꯔꯦꯗꯤꯠ ꯅꯣꯠ (ꯂꯩꯕ)",
+  "k.debitp": "ꯗꯦꯕꯤꯠ ꯅꯣꯠ (ꯂꯩꯕ)",
+  "qs.npaid": "ꯄꯤꯔꯦ",
+  "cp.ocopy": "ꯑꯣꯐꯤꯁ ꯀꯣꯄꯤ",
+  "ns.o.sale": "ꯌꯣꯟꯕ (ꯀꯁ꯭ꯇꯃꯔ)",
+  "ns.o.purchase": "ꯂꯩꯕ (ꯁꯞꯂꯥꯌꯔ)",
+  "ns.l.side": "This note is against",
+  "ns.h.credit.s": "Customer owes less: goods returned, price cut or discount.",
+  "ns.h.credit.p": "You owe the supplier more: price or tax charged short. Also use it to record a debit note from your supplier.",
+  "ns.h.debit.s": "Customer owes more: price or tax charged short, or extra goods.",
+  "ns.h.debit.p": "You owe the supplier less: goods returned, price or tax charged too high, or short supply. Also use it to record a credit note from your supplier.",
+  "rs.disc_p": "Discount after purchase"
+});

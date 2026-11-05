@@ -3544,3 +3544,31 @@ NS.addLang("sat", {
   "uf.pfapp": "ᱱᱚᱸᱰᱮ ᱠᱷᱚᱨᱚᱪ ᱫᱚ ᱪᱮᱫ ᱞᱮᱠᱟ ᱞᱮᱠᱷᱟ ᱦᱩᱭᱩᱜ ᱠᱟᱱᱟ: ᱟᱠᱷᱨᱤᱧ ᱟᱠᱟᱱ ᱡᱚᱛᱚ ᱟᱭᱴᱮᱢ ᱨᱮᱭᱟᱜ ᱠᱷᱚᱨᱚᱪ ᱩᱱᱤᱭᱟᱜ ᱮᱵᱷᱨᱮᱡᱽ ᱠᱤᱨᱤᱧ ᱜᱚᱱᱚᱝ ᱛᱮ, ᱟᱨ ᱡᱚᱫᱤ ᱚᱱᱟ ᱪᱮᱫ ᱦᱚᱸ ᱵᱟᱝ ᱠᱤᱨᱤᱧ ᱟᱠᱟᱱ ᱛᱚᱵᱮ ᱟᱭᱴᱮᱢ ᱥᱟᱶ ᱥᱮᱣ ᱟᱠᱟᱱ ᱠᱤᱨᱤᱧ ᱜᱚᱱᱚᱝ ᱛᱮ᱾ ᱯᱨᱚᱯᱷᱤᱴ ᱮᱱᱰ ᱞᱚᱥ ᱥᱟᱦᱴᱟ ᱮᱴᱟᱜ ᱞᱮᱠᱟ ᱞᱮᱠᱷᱟᱭᱟ (ᱠᱤᱨᱤᱧ ᱠᱷᱚᱱ ᱠᱞᱳᱡᱤᱝ ᱥᱴᱚᱠ ᱠᱚᱢ ᱠᱟᱛᱮ), ᱚᱱᱟᱛᱮ ᱡᱚᱛᱚ ᱠᱤᱨᱤᱧ ᱵᱤᱞ ᱥᱮᱞᱮᱫ ᱦᱟᱹᱵᱤᱡ ᱵᱟᱨᱭᱟ ᱨᱮ ᱯᱷᱟᱨᱟᱠ ᱛᱟᱦᱮᱸ ᱫᱟᱲᱮᱭᱟᱜᱼᱟ᱾",
   "uf.pfpl": "ᱱᱚᱸᱰᱮ ᱠᱷᱚᱨᱚᱪ ᱫᱚ ᱪᱮᱫ ᱞᱮᱠᱟ ᱞᱮᱠᱷᱟ ᱦᱩᱭᱩᱜ ᱠᱟᱱᱟ: ᱠᱤᱨᱤᱧ + ᱚᱯᱮᱱᱤᱝ ᱥᱴᱚᱠ − ᱠᱞᱳᱡᱤᱝ ᱥᱴᱚᱠ᱾ ᱮᱯ ᱨᱮᱭᱟᱜ ᱯᱨᱚᱯᱷᱤᱴ ᱨᱤᱯᱚᱴ ᱡᱚᱛᱚ ᱟᱠᱷᱨᱤᱧ ᱨᱮᱭᱟᱜ ᱠᱷᱚᱨᱚᱪ ᱟᱭᱴᱮᱢ ᱨᱮᱭᱟᱜ ᱮᱵᱷᱨᱮᱡᱽ ᱠᱤᱨᱤᱧ ᱜᱚᱱᱚᱝ ᱛᱮ (ᱥᱮ ᱪᱮᱫ ᱦᱚᱸ ᱵᱟᱝ ᱠᱤᱨᱤᱧ ᱟᱠᱟᱱ ᱟᱭᱴᱮᱢ ᱨᱮᱭᱟᱜ ᱥᱮᱣ ᱜᱚᱱᱚᱝ ᱛᱮ) ᱞᱮᱠᱷᱟᱭᱟ, ᱚᱱᱟᱛᱮ ᱡᱚᱛᱚ ᱠᱤᱨᱤᱧ ᱵᱤᱞ ᱥᱮᱞᱮᱫ ᱦᱟᱹᱵᱤᱡ ᱵᱟᱨᱭᱟ ᱨᱮ ᱯᱷᱟᱨᱟᱠ ᱛᱟᱦᱮᱸ ᱫᱟᱲᱮᱭᱟᱜᱼᱟ᱾"
 });
+
+/* Terms audit */
+NS.addLang("sat", {
+  "doc.credit": "ᱠᱨᱮᱰᱤᱴ ᱱᱚᱴ",
+  "docs.credit": "ᱠᱨᱮᱰᱤᱴ ᱱᱚᱴ",
+  "doc.debit": "ᱰᱮᱵᱤᱴ ᱱᱚᱴ",
+  "docs.debit": "ᱰᱮᱵᱤᱴ ᱱᱚᱴ",
+  "qs.nrecv": "ᱧᱟᱢ ᱟᱠᱟᱱ ᱴᱟᱠᱟ",
+  "rs.price_c": "ᱫᱟᱢ ᱠᱚᱢ ᱮᱱᱟ",
+  "rs.price_d": "ᱫᱟᱢ ᱵᱟᱲᱦᱟᱣ ᱮᱱᱟ (ᱨᱮᱴ ᱨᱮᱭᱟᱜ ᱯᱷᱟᱨᱟᱠ)",
+  "rs.tax_c": "ᱴᱮᱠᱥ ᱵᱮᱥᱤ ᱞᱟᱜᱟᱣ ᱟᱠᱟᱱ ᱛᱟᱦᱮᱸᱠᱟᱱᱟ",
+  "rs.tax_d": "ᱴᱮᱠᱥ ᱠᱚᱢ ᱞᱟᱜᱟᱣ ᱟᱠᱟᱱ ᱛᱟᱦᱮᱸᱠᱟᱱᱟ"
+});
+/* Notes against purchases */
+NS.addLang("sat", {
+  "k.creditp": "ᱠᱨᱮᱰᱤᱴ ᱱᱚᱴ (ᱠᱤᱨᱤᱧ)",
+  "k.debitp": "ᱰᱮᱵᱤᱴ ᱱᱚᱴ (ᱠᱤᱨᱤᱧ)",
+  "qs.npaid": "ᱮᱢ ᱮᱱᱟ",
+  "cp.ocopy": "ᱚᱯᱷᱤᱥ ᱠᱚᱯᱤ",
+  "ns.o.sale": "ᱟᱠᱷᱨᱤᱧ (ᱜᱨᱟᱦᱚᱠ)",
+  "ns.o.purchase": "ᱠᱤᱨᱤᱧ (ᱥᱟᱯᱞᱟᱭᱟᱨ)",
+  "ns.l.side": "This note is against",
+  "ns.h.credit.s": "Customer owes less: goods returned, price cut or discount.",
+  "ns.h.credit.p": "You owe the supplier more: price or tax charged short. Also use it to record a debit note from your supplier.",
+  "ns.h.debit.s": "Customer owes more: price or tax charged short, or extra goods.",
+  "ns.h.debit.p": "You owe the supplier less: goods returned, price or tax charged too high, or short supply. Also use it to record a credit note from your supplier.",
+  "rs.disc_p": "Discount after purchase"
+});

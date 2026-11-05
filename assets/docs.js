@@ -19,7 +19,7 @@
     challan: { prefix: 'DC', kinds: ['job', 'approval', 'sale', 'transfer', 'other'], title: 'challan', purpose: true, transport: true, gstFlag: true, gstOff: true, copy: 'dc',
       status: ['dsent', 'dret', 'inv'], toInvoice: true, noLbl: 'dcno', party: 'consignee', note: { job: 'dcjob', approval: 'dcnote', sale: 'dcnote', transfer: 'dcnote', other: 'dcnote' }, refLbl: 'ref' },
     po: { prefix: 'PO', kinds: ['po'], deliv: true, gstFlag: true, status: ['popen', 'prec', 'scan'], noLbl: 'pono', party: 'vendor', shipLbl: 'deliverto', refLbl: 'vqref', buying: true },
-    note: { prefix: 'CN', prefixes: { credit: 'CN', debit: 'DN' }, kinds: ['credit', 'debit'], split: { credit: 'credit-note', debit: 'debit-note' }, orig: true, gstFlag: true, copy: 'note', status: ['nissued', 'nadj', 'nref'],
+    note: { prefix: 'CN', prefixes: { credit: 'CN', debit: 'DN', creditp: 'PCN', debitp: 'PDN' }, kinds: ['credit', 'debit'], split: { credit: 'credit-note', debit: 'debit-note' }, orig: true, gstFlag: true, copy: 'note', status: ['nissued', 'nadj', 'nref'],
       noLbl: { credit: 'cnno', debit: 'dnno' }, party: 'issuedto', note: { credit: 'cnnote', debit: 'dnnote' }, refLbl: 'ref' },
     /* self invoice: a registered buyer bills itself for a purchase from an unregistered supplier under reverse charge (always GST, RC = Yes) */
     self: { prefix: 'SI', kinds: ['self'], alwaysTax: true, rc: true, rcFixed: true, recv: true, buying: true, status: ['siopen', 'sipaid'], noLbl: 'sino', party: 'supplier', note: 'sinote', refLbl: 'ref' },
@@ -27,7 +27,7 @@
     exp: { prefix: 'EXP', kinds: ['expwp', 'expwop', 'sezwp', 'sezwop'], title: 'tax', alwaysTax: true, igst: true, copy: 'inv', due: true, pay: true, noLbl: 'no', party: 'billto' },
     cashmemo: { prefix: 'CM', kinds: ['cashmemo'], gstFlag: true, gstOff: true, qr: true, pay: true, paidFirst: true, noLbl: 'cmno', party: 'custto', paper: 'th80' }
   };
-  var COPIES = { inv: ['orig', 'dup', 'trip'], invs: ['orig', 'dupsup'], dc: ['dcorig', 'dcdup', 'dctrip'], note: ['orig', 'dupsup'] };
+  var COPIES = { inv: ['orig', 'dup', 'trip'], invs: ['orig', 'dupsup'], dc: ['dcorig', 'dcdup', 'dctrip'], note: ['orig', 'dupsup'], pnote: ['orig', 'ocopy'] };
   var REASONS = ['ret', 'price', 'disc', 'short', 'tax', 'other'];
   var PAPERS = ['a4', 'a5', 'th80', 'th58'];
   /* Batch 1: extra charges on every item document; TCS (collected by the seller under the Income-tax Act) on sale bills; repeat on invoices */
@@ -54,7 +54,7 @@
   var cnSeen = '';
   function cnTcs() {
     var n = $('#cn-tcs', root); if (!n) return;
-    var no = String((doc.orig || {}).no || '').trim(), sg = doc.seller.gstin || '', want = doc.kind === 'credit' && no, seen = no + '|' + sg;
+    var no = String((doc.orig || {}).no || '').trim(), sg = doc.seller.gstin || '', want = doc.kind === 'credit' && !pur() && no, seen = no + '|' + sg;
     if (!want) { n.hidden = true; cnSeen = ''; return; }
     if (cnSeen === seen) return; cnSeen = seen;
     NSStore.list('doc').then(function (all) {
@@ -69,7 +69,7 @@
   var BILLING = /^(localhost|127\.0\.0\.1)$/.test(location.hostname) ? 'http://localhost:8861/' : 'https://billing.niveshsahayak.in/';
 
   /* words printed on the document (English only, readable by every buyer, bank and tax officer) */
-  var P = { tax: 'TAX INVOICE', supply: 'BILL OF SUPPLY', plain: 'INVOICE', no: 'Invoice No.', date: 'Date', due: 'Due date', pos: 'Place of supply', rc: 'Reverse charge', ref: 'Order ref.', billto: 'Bill to', shipto: 'Ship to', gstin: 'GSTIN', ph: 'Phone', item: 'Item / service', hsn: 'HSN/SAC', qty: 'Qty', rate: 'Rate', disc: 'Disc.', taxable: 'Taxable value', gst: 'GST', amount: 'Amount', subtotal: 'Taxable value', cgst: 'CGST', sgst: 'SGST', igst: 'IGST', round: 'Round off', total: 'Total', words: 'Amount in words', summary: 'Tax summary', bank: 'Bank details', acc: 'A/c no.', ifsc: 'IFSC', branch: 'Branch', upi: 'Scan to pay by UPI', notes: 'Notes', terms: 'Terms and conditions', for: 'For', sign: 'Authorised signatory', yes: 'Yes', no2: 'No', supplynote: 'Composition taxable person, not eligible to collect tax on supplies.', quote: 'QUOTATION', estimate: 'ESTIMATE', qno: 'Quotation No.', eno: 'Estimate No.', valid: 'Valid until', qref: 'Enquiry ref.', qfor: 'Quotation for', efor: 'Estimate for', price: 'Amount', qnote: 'This is a quotation, not a tax invoice.', enote: 'This is an estimate. The final bill may differ.', paid: 'PAID', orig: 'Original for recipient', dup: 'Duplicate for transporter', trip: 'Triplicate for supplier',
+  var P = { tax: 'TAX INVOICE', supply: 'BILL OF SUPPLY', plain: 'INVOICE', no: 'Invoice No.', date: 'Date', due: 'Due date', pos: 'Place of supply', rc: 'Reverse charge', ref: 'Order ref.', billto: 'Bill to', shipto: 'Ship to', gstin: 'GSTIN', ph: 'Phone', item: 'Item / service', hsn: 'HSN/SAC', qty: 'Qty', rate: 'Rate', disc: 'Disc.', taxable: 'Taxable value', gst: 'GST', amount: 'Amount', subtotal: 'Taxable value', cgst: 'CGST', sgst: 'SGST', igst: 'IGST', round: 'Round off', total: 'Total', words: 'Amount in words', summary: 'Tax summary', bank: 'Bank details', acc: 'A/c no.', ifsc: 'IFSC', branch: 'Branch', upi: 'Scan to pay by UPI', notes: 'Notes', terms: 'Terms and conditions', for: 'For', sign: 'Authorised signatory', yes: 'Yes', no2: 'No', supplynote: 'Composition taxable person, not eligible to collect tax on supplies.', quote: 'QUOTATION', estimate: 'ESTIMATE', qno: 'Quotation No.', eno: 'Estimate No.', valid: 'Valid until', qref: 'Enquiry ref.', qfor: 'Quotation for', efor: 'Estimate for', qnote: 'This is a quotation, not a tax invoice.', enote: 'This is an estimate. The final bill may differ.', paid: 'PAID', orig: 'Original for recipient', dup: 'Duplicate for transporter', trip: 'Triplicate for supplier',
     proforma: 'PROFORMA INVOICE', pno: 'Proforma No.', pnote: 'Not a tax invoice. No input tax credit can be claimed on it. A tax invoice will be issued on supply.',
     so: 'SALES ORDER', sono: 'Order No.', poref: 'Customer PO ref.', deliv: 'Delivery by',
     challan: 'DELIVERY CHALLAN', dcno: 'Challan No.', consignee: 'Consignee (deliver to)', purpose: 'Purpose', job: 'Job work', approval: 'Supply on approval', sale: 'Sale (invoice to follow)', transfer: 'Branch / stock transfer', other: 'Other',
@@ -78,7 +78,9 @@
     veh: 'Vehicle No.', tname: 'Transporter', lr: 'LR / docket No.', value: 'Value',
     po: 'PURCHASE ORDER', pono: 'PO No.', vendor: 'Vendor (order to)', deliverto: 'Deliver to', vqref: 'Vendor quotation ref.', buyer: 'Buyer',
     credit: 'CREDIT NOTE', debit: 'DEBIT NOTE', cnno: 'Credit Note No.', dnno: 'Debit Note No.', issuedto: 'Issued to', against: 'Against invoice', invdate: 'Invoice date', reason: 'Reason',
-    ret: 'Goods returned', price: 'Price changed', disc2: 'Discount after sale', short: 'Short or damaged supply', taxfix: 'Tax corrected',
+    ret: 'Goods returned', price: 'Price changed', price_c: 'Price reduced', price_d: 'Price increased (rate difference)', disc2: 'Discount after sale', disc2p: 'Discount after purchase', ocopy: 'Office copy',
+    pdnnote: 'We have debited your account for the goods returned or the amount claimed above. Please send us your credit note for it under section 34 of the CGST Act, so the GST can be adjusted on both sides.',
+    pcnnote: 'We have credited your account with the amount above against your invoice.', short: 'Short or damaged supply', taxfix: 'Tax corrected', taxfix_c: 'Tax charged in excess', taxfix_d: 'Tax charged short',
     dupsup: 'Duplicate for supplier', cashmemo: 'CASH MEMO', cmno: 'Memo No.', self: 'SELF INVOICE', sino: 'Self Invoice No.', supplier: 'Supplier (unregistered)', recv: 'Goods / services received on',
     sinote: 'Self invoice issued by the recipient under section 31(3)(f) of the CGST Act for a supply received from an unregistered supplier. Tax is payable by the recipient on reverse charge.', custto: 'Customer', cash: 'Cash', thanks: 'Thank you, visit again', recd: 'Goods received in good condition', recdsign: 'Receiver’s sign, name and date', items: 'Items', page: 'Page', tcs: 'TCS', tcsu: 'TCS u/s' };
   /* reason codes print through RP (P.tax is the invoice title, so the "tax corrected" reason has its own word) */
@@ -95,7 +97,7 @@
 
   var root, T, type, doc, editingId = null, sheet;
   /* settings made in the Configuration Hub (my.niveshsahayak.in), shared through the data home */
-  var CFG = {}, lastAuto = '';
+  var CFG = {}, lastAuto = '', redraw = null;
   function dset() {
     if (type === 'invoice') return CFG.invoice || {};
     /* the invoice defaults (GST rate, unit, colour, round off) also serve the other documents */
@@ -103,13 +105,29 @@
     return Object.assign(base, CFG[type] || {});
   }
   function taxOn(d) { return T.alwaysTax || (T.gstFlag ? d.withGst !== false : d.kind === 'tax'); }
-  function W() { return { doc: t('doc.' + type), docs: t('docs.' + type), Doc: t('Doc.' + type) }; }
+  function W() {
+    /* a note page makes one kind (credit-note. or debit-note.), so it names that kind, not "credit or debit note" */
+    var k = type === 'note' && T.kind0;
+    return k ? { doc: t('doc.' + k), docs: t('docs.' + k), Doc: t('k.' + k) } : { doc: t('doc.' + type), docs: t('docs.' + type), Doc: t('Doc.' + type) };
+  }
+  /* a note is against a sale (party = customer) or a purchase (side 'purchase', party = supplier).
+     less(): the party's balance goes down: a credit note on a sale (customer owes less), a debit note on a purchase (we owe the supplier less) */
+  function pur(d) { d = d || doc; return type === 'note' && !!d && d.side === 'purchase'; }
+  function buying() { return T.buying || pur(); }
+  function less(d) { d = d || doc; return d.kind === 'credit' ? !pur(d) : pur(d); }
+  /* number series key: CN/DN for sales, PCN/PDN for purchases */
+  function sk(d) { return (d.kind || T.kinds[0]) + (pur(d) ? 'p' : ''); }
+  function reasons() { return type === 'note' && !less() ? ['price', 'tax', 'other'] : REASONS; }
+  /* statuses: a note that lowers the balance is refunded (sale) or its amount received back (purchase); one that raises it is received (sale) or paid (purchase) */
+  function stList() { if (type !== 'note') return T.status; var k = less() ? (pur() ? 'nrecv' : 'nref') : (pur() ? 'npaid' : 'nrecv'); return T.status.map(function (x) { return x === 'nref' ? k : x; }); }
+  /* reasons whose words depend on the direction: price reduced / increased, tax charged in excess / short; discount after purchase */
+  function rsKey(k) { if (type === 'note' && (k === 'price' || k === 'tax')) return 'rs.' + k + '_' + (less() ? 'c' : 'd'); return k === 'disc' && pur() ? 'rs.disc_p' : 'rs.' + k; }
   function tw(k, v) { return t(k, Object.assign(W(), v || {})); }
 
   function blank() {
     var c = dset();
     return {
-      type: type, kind: T.kind0 || (T.kinds.indexOf(c.kind) >= 0 ? c.kind : T.kinds[0]), no: '', deliv: '', orig: { no: '', date: '' }, reason: T.kind0 === 'debit' ? 'price' : 'ret', tr: { veh: '', tname: '', lr: '' },
+      type: type, kind: T.kind0 || (T.kinds.indexOf(c.kind) >= 0 ? c.kind : T.kinds[0]), no: '', deliv: '', orig: { no: '', date: '' }, reason: T.kind0 === 'debit' ? 'price' : 'ret', side: type === 'note' ? 'sale' : undefined, tr: { veh: '', tname: '', lr: '' },
       paper: c.paper || T.paper || 'a4', design: c.design || 'classic', copies: 1, date: NS.today(), due: '', pos: '', rc: !!T.rcFixed, recv: '', ref: '',
       seller: { name: '', addr: '', city: '', pin: '', state: '', gstin: '', phone: '', email: '', logo: '', sign: '', bankName: '', bankAcc: '', bankIfsc: '', bankBranch: '', upi: '' },
       buyer: { name: '', addr: '', city: '', pin: '', state: '', gstin: '', phone: '' }, ship: null, einv: null, irn: null,
@@ -208,6 +226,7 @@
 
       '<fieldset class="card"><legend>' + esc(tw('lg.details')) + '</legend><div class="fg">' +
         '<div class="f wide"' + (T.kinds.length < 2 ? ' hidden' : '') + '><label for="d-kind">' + esc(t(T.purpose ? 'l.purpose' : 'l.type')) + '</label><select id="d-kind">' + T.kinds.map(function (k) { return '<option value="' + k + '">' + esc(t('k.' + k)) + '</option>'; }).join('') + '</select><small class="hint" id="kind-hint"></small></div>' +
+        (type === 'note' ? '<div class="f wide"><label for="d-side">' + esc(t('ns.l.side')) + '</label><select id="d-side"><option value="sale">' + esc(t('ns.o.sale')) + '</option><option value="purchase">' + esc(t('ns.o.purchase')) + '</option></select><small class="hint" id="side-hint"></small></div>' : '') +
         (T.gstFlag ? '<div class="f wide"><label class="chk"><input id="d-gst" type="checkbox"> ' + esc(t('l.withgst')) + '</label><small class="hint">' + esc(t('h.withgst')) + '</small></div>' : '') +
         '<div class="f wide" id="comp-box" hidden><label class="chk"><input id="d-comp" type="checkbox"> ' + esc(t('comp')) + '</label></div>' +
         field('d-no', tw('l.no'), { max: 16, hint: type === 'quote' ? t('h.qno') : type === 'invoice' ? t('h.no') : T.prefixes ? t('h.no3') : t('h.no2'), ltr: 1 }) +
@@ -217,15 +236,15 @@
         (T.deliv ? field('d-deliv', t('l.deliv'), { type: 'date' }) : '') +
         (T.recv ? field('d-recv', t('l.recv'), { type: 'date', hint: t('h.recv') }) : '') +
         (T.orig ? field('d-ono', t('l.ono'), { max: 16, ltr: 1, hint: t('h.ono') }) + field('d-odate', t('l.odate'), { type: 'date' }) + '<p class="hint wide b1-warn" id="cn-tcs" hidden></p>' +
-          '<div class="f wide"><label for="d-reason">' + esc(t('l.reason')) + '</label><select id="d-reason">' + (T.kind0 === 'debit' ? ['price', 'tax', 'other'] : REASONS).map(function (k) { return '<option value="' + k + '">' + esc(t('rs.' + k)) + '</option>'; }).join('') + '</select></div>' : '') +
-        field('d-pos', t('l.pos'), { type: 'state', hint: t(T.buying ? 'h.pos2' : 'h.pos') }) +
+          '<div class="f wide"><label for="d-reason">' + esc(t('l.reason')) + '</label><select id="d-reason">' + reasons().map(function (k) { return '<option value="' + k + '">' + esc(t(rsKey(k))) + '</option>'; }).join('') + '</select></div>' : '') +
+        field('d-pos', t('l.pos'), { type: 'state', hint: t(buying() ? 'h.pos2' : 'h.pos') }) +
         field('d-ref', t('l.' + (T.refLbl || 'ref')), {}) +
         (T.rc && !T.rcFixed ? '<div class="f"><label class="chk"><input id="d-rc" type="checkbox"> ' + esc(t('l.rc')) + '</label></div>' : '') +
         (T.transport ? field('tr-veh', t('l.veh'), { ltr: 1, ph: 'PB10AB1234' }) + field('tr-tname', t('l.tname')) + field('tr-lr', t('l.lr'), { ltr: 1 }) : '') +
       '</div></fieldset>' +
 
       '<fieldset class="card"><legend>' + esc(t(type === 'quote' ? 'lg.qto' : 'lg.' + (pk(T.party, T.kinds[0]) || 'billto'))) + '</legend><div class="fg">' +
-        field('b-name', t(T.buying ? 'l.vname' : 'l.cname'), { ph: t(T.buying ? 'ph.vname' : 'ph.cname'), wide: true, hint: t(T.buying ? 'h.vname' : 'h.cname') }) +
+        field('b-name', t(pur() ? 'app.supp' : buying() ? 'l.vname' : 'l.cname'), { ph: t(buying() ? 'ph.vname' : 'ph.cname'), wide: true, hint: t(buying() ? 'h.vname' : 'h.cname') }) +
         field('b-addr', t('l.addr'), { type: 'textarea', wide: true }) +
         field('b-city', t('l.city'), {}) + field('b-pin', t('l.pin'), { mode: 'numeric', max: 6, ltr: 1, hint: type === 'invoice' ? t('h.pin') : '' }) +
         field('b-state', t('l.state'), { type: 'state' }) +
@@ -261,7 +280,7 @@
         '<div class="f"><label for="d-paper">' + esc(t('l.paper')) + '</label><select id="d-paper">' + PAPERS.map(function (k) { return '<option value="' + k + '">' + esc(t('pp.' + k)) + '</option>'; }).join('') + '</select></div>' +
         NS.designField('d-design') +
         (T.pay ? '<div class="f"><label for="d-status">' + esc(t('l.pay')) + '</label><select id="d-status"><option value="unpaid">' + esc(t('pay.unpaid')) + '</option><option value="paid">' + esc(t('pay.paid')) + '</option></select></div>'
-          : '<div class="f"><label for="d-status">' + esc(t('l.qstat')) + '</label><select id="d-status">' + T.status.map(function (k) { return '<option value="' + k + '">' + esc(t('qs.' + k)) + '</option>'; }).join('') + '</select></div>') +
+          : '<div class="f"><label for="d-status">' + esc(t('l.qstat')) + '</label><select id="d-status">' + stList().map(function (k) { return '<option value="' + k + '">' + esc(t('qs.' + k)) + '</option>'; }).join('') + '</select></div>') +
         '<div class="f"><span class="lbl" id="acc-lbl">' + esc(t('l.colour')) + '</span><div class="swatches" role="radiogroup" aria-labelledby="acc-lbl">' + ACCENTS.map(function (c, i) { return '<button type="button" role="radio" class="sw" data-accent="' + c + '" style="--c:' + c + '" aria-label="' + esc(t('colour.n', { n: i + 1 })) + '"></button>'; }).join('') + '</div></div>' +
         '<div class="f"><label class="chk"><input id="d-round" type="checkbox"> ' + esc(t('l.round')) + '</label></div>' +
         (type === 'invoice' ? '<div class="f"><label for="d-rec">' + esc(t('b1.repeat')) + '</label><select id="d-rec"><option value="">' + esc(t('b1.rep_no')) + '</option><option value="month">' + esc(t('b1.rep_m')) + '</option><option value="quarter">' + esc(t('b1.rep_q')) + '</option></select><small class="hint">' + esc(t('b1.reph')) + '</small></div>' +
@@ -297,7 +316,7 @@
       doc.buyer = { name: d.name, addr: d.addr || b.addr || '', city: d.city || b.city || '', pin: d.pin || b.pin || '', state: d.state || b.state || '', gstin: d.gstin, phone: b.phone || '', legal: d.legal || '' };
       fillForm(); draw(); saveDraft();
       NSStore.list('party').then(function (all) {
-        var hit = all.filter(function (x) { return x.gstin === d.gstin; })[0] || all.filter(function (x) { return key(x.name) === key(d.name); })[0], want = T.buying ? 'supplier' : 'customer';
+        var hit = all.filter(function (x) { return x.gstin === d.gstin; })[0] || all.filter(function (x) { return key(x.name) === key(d.name); })[0], want = buying() ? 'supplier' : 'customer';
         var role = !hit || !hit.role ? want : hit.role === want || hit.role === 'both' ? hit.role : 'both';
         return NSStore.put('party', Object.assign(hit || {}, { name: d.name, addr: doc.buyer.addr, city: doc.buyer.city, pin: doc.buyer.pin, state: doc.buyer.state, gstin: d.gstin, role: role, reg: d.reg || '',
           gst: { legal: d.legal || '', trade: d.trade || '', status: d.status || '', type: d.type || '', since: d.since || '', checked: d.checked } }, hit && hit.phone ? {} : { phone: doc.buyer.phone }));
@@ -359,7 +378,7 @@
   var BMAP = { 'b-name': 'name', 'b-addr': 'addr', 'b-city': 'city', 'b-pin': 'pin', 'b-state': 'state', 'b-gstin': 'gstin', 'b-phone': 'phone' };
   var SHMAP = { 'sh-name': 'name', 'sh-addr': 'addr', 'sh-city': 'city', 'sh-pin': 'pin', 'sh-state': 'state' };
   var DMAP = { 'd-kind': 'kind', 'd-no': 'no', 'd-date': 'date', 'd-due': 'due', 'd-valid': 'valid', 'd-deliv': 'deliv', 'd-recv': 'recv', 'd-pos': 'pos', 'd-ref': 'ref', 'd-notes': 'notes', 'd-terms': 'terms', 'd-status': 'status', 'd-copy': 'copyLabel',
-    'd-reason': 'reason', 'd-paper': 'paper', 'd-design': 'design', 'd-copies': 'copies' };
+    'd-reason': 'reason', 'd-side': 'side', 'd-paper': 'paper', 'd-design': 'design', 'd-copies': 'copies' };
   var OMAP = { 'd-ono': 'no', 'd-odate': 'date' }, TRMAP = { 'tr-veh': 'veh', 'tr-tname': 'tname', 'tr-lr': 'lr' };
 
   function fillForm(onlyLook) {
@@ -387,6 +406,7 @@
     NS.designSync(ed, doc.design, doc.accent);
     $('[data-clear="logo"]', ed).hidden = !doc.seller.logo; $('[data-clear="sign"]', ed).hidden = !doc.seller.sign;
     $('#kind-hint', ed).textContent = T.kinds.length > 1 ? t('kh.' + doc.kind) : '';
+    if ($('#side-hint', ed)) $('#side-hint', ed).textContent = t('ns.h.' + doc.kind + (pur() ? '.p' : '.s'));
     $$('.it-gst', ed).forEach(function (f) { f.hidden = !taxOn(doc); });
     $('#comp-box', ed).hidden = doc.kind !== 'supply';
     if ($('#rec-until-f', ed)) $('#rec-until-f', ed).hidden = !(doc.rec && doc.rec.every);
@@ -433,6 +453,14 @@
       if (r.ok && r.state && !who.state && e.type === 'change') { who.state = r.state; $('#' + id[0] + '-state', root).value = r.state; }
     }
     if (id === 'd-kind') { fillForm(true); if (T.prefixes && !editingId) suggestNumber(false); }
+    /* sale or purchase: party words, reasons, statuses, copies and the number series all change */
+    if (id === 'd-side') {
+      if (reasons().indexOf(doc.reason) < 0) doc.reason = reasons()[0];
+      if (stList().indexOf(doc.status) < 0) doc.status = stList()[0];
+      if (COPIES[copyKey()].indexOf(doc.copyLabel) < 0) doc.copyLabel = COPIES[copyKey()][0];
+      if (redraw) redraw();
+      if (!editingId) suggestNumber(true);
+    }
     if (id === 'd-date' && e.type === 'change') suggestNumber(false);
     if (id === 'd-date' && doc.cdays && doc.due === autoDue && doc.date) { doc.due = autoDue = NSBooks.addDays(doc.date, doc.cdays); var du = $('#d-due', root); if (du) du.value = doc.due; }
     if (id === 'd-date') { var dl = $('#dl-rates', root); if (dl) dl.innerHTML = rateOpts(doc.date); }
@@ -444,14 +472,14 @@
   function suggestNumber(force) {
     if (editingId && !force) return Promise.resolve();
     var c = dset(), fy = NS.fy(doc.date), short = fy.slice(2, 4) + '-' + fy.slice(5);
-    var pre = String(T.prefixes ? (c.prefixes || {})[doc.kind] || T.prefixes[doc.kind] : c.prefix != null ? c.prefix : T.prefix).trim().replace(/[^A-Za-z0-9\/\-]/g, '');
+    var pre = String(T.prefixes ? (c.prefixes || {})[sk(doc)] || T.prefixes[sk(doc)] : c.prefix != null ? c.prefix : T.prefix).trim().replace(/[^A-Za-z0-9\/\-]/g, '');
     var prefix = (pre ? pre + '/' : '') + (c.fy === false ? '' : short + '/'), digits = Math.min(6, Math.max(1, +c.digits || 3));
     return NSStore.list('doc').then(function (all) {
       var key = (doc.seller.name || '').trim().toLowerCase(), max = 0;
       all.forEach(function (d) {
         if (d.type !== doc.type || d.id === editingId || NS.fy(d.date) !== fy) return;
         if (d.counter) return;   /* bills of the pos counter have their own POS/ series */
-        if (T.prefixes && (d.kind || T.kinds[0]) !== doc.kind) return;
+        if (T.prefixes && sk(d) !== sk(doc)) return;
         if ((d.seller && d.seller.name || '').trim().toLowerCase() !== key) return;
         var m = String(d.no || '').match(/(\d+)\s*$/);
         if (m) max = Math.max(max, +m[1]);
@@ -488,7 +516,7 @@
     if (T.deliv && d.deliv) x.push([P.deliv, NS.fmtDate(d.deliv)]);
     if (T.recv && d.recv) x.push([P.recv, NS.fmtDate(d.recv)]);
     if (T.purpose) x.push([P.purpose, P[d.kind]]);
-    if (T.orig) { x.push([P.against, '<span class="mono">' + esc(o.no) + '</span>'], [P.invdate, NS.fmtDate(o.date)]); x.push([P.reason, P[RP[d.reason] || 'other']]); }
+    if (T.orig) { x.push([P.against, '<span class="mono">' + esc(o.no) + '</span>'], [P.invdate, NS.fmtDate(o.date)]); var rp = RP[d.reason] || 'other'; if ((rp === 'price' || rp === 'taxfix') && (d.kind === 'credit' || d.kind === 'debit')) rp += less(d) ? '_c' : '_d'; if (rp === 'disc2' && pur(d)) rp = 'disc2p'; x.push([P.reason, P[rp]]); }
     x.push([P.pos, posCode ? esc(NS.stateName(posCode)) + ' (' + posCode + ')' : '']);
     if (T.rc && tax) x.push([P.rc, d.rc ? P.yes : P.no2]);
     if (d.ref || (type === 'invoice' && tax)) x.push([P[T.refLbl || 'ref'], esc(d.ref)]);
@@ -506,7 +534,7 @@
     return '<div class="bank"><h4>' + P.bank + '</h4><p>' + esc(s.bankName) + (s.bankAcc ? '<br>' + P.acc + ' <b class="mono">' + esc(s.bankAcc) + '</b>' : '') + (s.bankIfsc ? '<br>' + P.ifsc + ' <b class="mono">' + esc(s.bankIfsc) + '</b>' : '') + (s.bankBranch ? '<br>' + P.branch + ': ' + esc(s.bankBranch) : '') + '</p></div>';
   }
   function sheetHtml(d, copyLabel) {
-    var s = d.seller, tt = totals(d), tax = taxOn(d), SG = sgstName(d), note = pk(T.note, d.kind);
+    var s = d.seller, tt = totals(d), tax = taxOn(d), SG = sgstName(d), note = pur(d) ? (d.kind === 'debit' ? 'pdnnote' : 'pcnnote') : pk(T.note, d.kind);
     if (/^th/.test(d.paper)) return thermalHtml(d, tt, tax, SG, copyLabel);
     var cols = tax ? 9 : 7, pty = pk(T.party, d.kind) || 'billto';
     return '<div class="sh d-' + esc(d.design || 'classic') + (d.paper === 'a5' ? ' a5' : '') + '" style="--ac:' + esc(d.accent) + '" lang="en-IN" dir="ltr">' +
@@ -582,6 +610,7 @@
   }
   /* an invoice of services only (every HSN/SAC starts with 99) is made in duplicate: Original for recipient, Duplicate for supplier (Rule 48) */
   function copyKey() {
+    if (type === 'note' && doc && pur()) return 'pnote';
     if (T.copy !== 'inv' || !doc) return T.copy;
     var h = doc.items.map(function (it) { return String(it.hsn || '').replace(/\D/g, ''); }).filter(Boolean);
     return h.length && h.every(function (x) { return /^99/.test(x); }) ? 'invs' : 'inv';
@@ -686,7 +715,7 @@
     }
     if (type === 'note') {
       if (!String((doc.orig || {}).no || '').trim() || !(doc.orig || {}).date) probs.push(['d-ono', t('v.orig')]);
-      if (!String(doc.buyer.gstin || '').trim() && (!String(doc.buyer.addr || '').trim() || !doc.buyer.state)) probs.push([doc.buyer.addr ? 'b-state' : 'b-addr', t('v.naddr')]);
+      if (!pur() && !String(doc.buyer.gstin || '').trim() && (!String(doc.buyer.addr || '').trim() || !doc.buyer.state)) probs.push([doc.buyer.addr ? 'b-state' : 'b-addr', t('v.naddr')]);
     }
     if (type === 'self' && !doc.seller.gstin) probs.push(['s-gstin', t('v.sigst')]);
     if (T.igst && /wop$/.test(doc.kind) && tt.rows.some(function (r) { return r.g; })) probs.push(['it-gst-0', t('v.lut0')]);
@@ -728,7 +757,7 @@
     if (!probs.length && taxOn(doc) && doc.date >= '2026-02-01' && type !== 'note' && tt0.rows.some(function (r) { return r.g === 28; }) && !confirm(t('c.r28'))) return Promise.reject(new Error('cancel'));
     if (!probs.length && type === 'cashmemo' && tt0.grand >= 200000 && !confirm(t('c.cash2l'))) return Promise.reject(new Error('cancel'));
     if (!probs.length && type === 'self' && doc.recv && (new Date(doc.date) - new Date(doc.recv)) / 864e5 > 30 && !confirm(t('c.si30'))) return Promise.reject(new Error('cancel'));
-    if (!probs.length && type === 'note' && doc.kind === 'credit' && doc.orig && doc.orig.date && doc.date > (+NS.fy(doc.orig.date).slice(0, 4) + 1) + '-11-30' && !confirm(t('c.cn30'))) return Promise.reject(new Error('cancel'));
+    if (!probs.length && type === 'note' && doc.kind === 'credit' && !pur() && doc.orig && doc.orig.date && doc.date > (+NS.fy(doc.orig.date).slice(0, 4) + 1) + '-11-30' && !confirm(t('c.cn30'))) return Promise.reject(new Error('cancel'));
     var blk = ext('block', doc).filter(Boolean)[0];   /* e.g. a closed financial year (docmore.js) */
     if (!probs.length && blk) { NS.toast(blk, 'bad'); return Promise.reject(new Error(blk)); }
     if (probs.length) {
@@ -745,7 +774,7 @@
       jobs.push(upsert('biz', function (x) { return key(x.name) === key(s.name); }, JSON.parse(JSON.stringify(s))));
       if (b.name.trim()) jobs.push(NSStore.list('party').then(function (all) {
         /* a vendor on a purchase order is saved as a supplier; someone already saved as the other side becomes both */
-        var hit = all.filter(function (x) { return key(x.name) === key(b.name); })[0], want = T.buying ? 'supplier' : 'customer';
+        var hit = all.filter(function (x) { return key(x.name) === key(b.name); })[0], want = buying() ? 'supplier' : 'customer';
         var role = !hit || !hit.role ? want : hit.role === want || hit.role === 'both' ? hit.role : 'both';
         return NSStore.put('party', Object.assign(hit || {}, { name: b.name.trim(), addr: b.addr, city: b.city, pin: b.pin, state: b.state, gstin: b.gstin, phone: b.phone, role: role }));
       }));
@@ -946,9 +975,10 @@
     if (dr && T.split && T.kinds.indexOf((dr.doc || {}).kind) < 0) dr = null;   /* a draft of the other kind (from before the split) */
     if (dr) { doc = Object.assign(blank(), dr.doc); delete doc.lang; editingId = dr.id || null; }
     function render() { buildEditor(); fillForm(); draw(); setStatus(); labelButtons(); if (histOpen) renderHistory(); series(); }
+    redraw = render;
     /* "Change number series" under the number box: the prefix of this document (each kind for quotation and note) */
-    function series() { NS.seriesLink($('#d-no', root), { type: type, kind: function () { return T.prefixes ? doc.kind : ''; }, def: function () { return T.prefixes ? T.prefixes[doc.kind] : T.prefix; },
-      name: function () { return T.prefixes ? t('k.' + doc.kind) : t('Doc.' + type); }, apply: function (c) { CFG = c || {}; if (!editingId) suggestNumber(true); } }); }
+    function series() { NS.seriesLink($('#d-no', root), { type: type, kind: function () { return T.prefixes ? sk(doc) : ''; }, def: function () { return T.prefixes ? T.prefixes[sk(doc)] : T.prefix; },
+      name: function () { return T.prefixes ? t('k.' + sk(doc)) : t('Doc.' + type); }, apply: function (c) { CFG = c || {}; if (!editingId) suggestNumber(true); } }); }
     render();
     document.addEventListener('ns-lang', render);
     /* scripts load with defer, so this runs before docmore.js / einv.js / export.js have added their parts:

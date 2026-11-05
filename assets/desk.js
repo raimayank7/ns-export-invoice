@@ -217,7 +217,7 @@
       C.doc.slice().sort(function (a, b) { return (b.updated || 0) - (a.updated || 0); }).slice(0, 400).forEach(function (d) {
         var site = (d.type === 'note' && d.kind === 'debit' ? 'debit-note' : OWNSITE[d.type]), appRec = d.app || /^(pbill|exp|ob|contra)$/.test(d.type);
         if (!site && !appRec) return;
-        var who = (d.buyer && d.buyer.name) || '', name = app && app.docName ? app.docName(d) : NS.t(DOCWORD[d.type] || '') || d.type;
+        var who = (d.buyer && d.buyer.name) || '', name = app && app.docName ? app.docName(d) : NS.t(d.type === 'note' && (d.kind === 'credit' || d.kind === 'debit') ? 'k.' + d.kind : DOCWORD[d.type] || '') || d.type;
         out.push({ g: 'doc', t: name + (d.no ? ' ' + d.no : '') + (who ? ' · ' + who : ''), s: (d.date ? NS.fmtDate(d.date) : '') + (d.total ? ' · ' + NS.money(d.total) : ''),
           run: function () {
             if (appRec) { if (app && app.openForm) app.openForm(formOf(d), { rec: d }); else location.href = appUrl(''); return; }

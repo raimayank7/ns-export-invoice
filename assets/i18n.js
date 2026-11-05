@@ -260,6 +260,7 @@
 
     /* Phase 1: site menus, footers and the hub's tool list */
     'nav.proforma': 'Proforma', 'nav.so': 'Sales order', 'nav.challan': 'Challan', 'nav.po': 'Purchase order', 'nav.note': 'Credit note', 'nav.dnote': 'Debit note',
+    /* notes against purchases */ 'ns.l.side': "This note is against", 'ns.o.sale': "Sale (Customer)", 'ns.o.purchase': "Purchase (Supplier)", 'ns.h.credit.s': "Customer owes less: goods returned, price cut or discount.", 'ns.h.credit.p': "You owe the supplier more: price or tax charged short. Also use it to record a debit note from your supplier.", 'ns.h.debit.s': "Customer owes more: price or tax charged short, or extra goods.", 'ns.h.debit.p': "You owe the supplier less: goods returned, price or tax charged too high, or short supply. Also use it to record a credit note from your supplier.", 'k.creditp': "Credit note (Purchase)", 'k.debitp': "Debit note (Purchase)", 'qs.npaid': "Amount paid", 'rs.disc_p': "Discount after purchase", 'cp.ocopy': "Office copy",
     'nav.receipt': 'Receipt', 'nav.voucher': 'Voucher', 'nav.cashmemo': 'Cash memo', 'nav.rent': 'Rent receipt', 'nav.salary': 'Salary slip', 'nav.petty': 'Petty cash', 'nav.guide': 'Guide', 'nav.all': 'All documents',
     'f.make2': 'Make it', 'f.guides2': 'Guides', 'f.alltools': 'All document makers',
     'f.proforma': 'Proforma invoice maker', 'f.so': 'Sales order maker', 'f.challan': 'Delivery challan maker', 'f.po': 'Purchase order maker', 'f.note': 'Credit and debit note maker',
@@ -1456,7 +1457,10 @@
     "uf.tdsr": "or TDS rate (%)",
     "uf.tdsa": "or TDS amount (₹)",
     "uf.pfapp": "How cost is counted here: each item sold is costed at its average purchase cost, or at the purchase price saved with the item if it was never bought. The Profit and loss page works the other way (purchases minus closing stock), so the two can differ until every purchase bill is entered.",
-    "uf.pfpl": "How cost is counted here: purchases plus opening stock minus closing stock. The App's Profit report costs each sale at the item's average purchase cost (or its saved purchase price if it was never bought), so the two can differ until every purchase bill is entered."
+    "uf.pfpl": "How cost is counted here: purchases plus opening stock minus closing stock. The App's Profit report costs each sale at the item's average purchase cost (or its saved purchase price if it was never bought), so the two can differ until every purchase bill is entered.",
+
+    /* Terms audit (2026-11-05): words that follow the kind of note */
+    'doc.credit': 'credit note', 'docs.credit': 'credit notes', 'doc.debit': 'debit note', 'docs.debit': 'debit notes', 'qs.nrecv': 'Amount received', 'rs.price_c': 'Price reduced', 'rs.price_d': 'Price increased (rate difference)', 'rs.tax_c': 'Tax charged in excess', 'rs.tax_d': 'Tax charged short'
   };
 
   var packs = { en: EN }, cur = 'en';

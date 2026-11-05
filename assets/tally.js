@@ -67,7 +67,7 @@
       if (nm) parties[pk] = Object.assign(parties[pk] || {}, { name: nm.trim(), debtor: !!DEBTOR[R], from: d.buyer });
       if (lines.some(function (l) { return l.a === 'p:cash customer'; })) parties['p:cash customer'] = { name: 'Cash Customer', debtor: true };
       if (lines.some(function (l) { return l.a === 'p:unknown payee'; })) parties['p:unknown payee'] = { name: 'Unknown Payee', debtor: false };
-      var type = VT[R] || (R === 'exp' ? (d.mode === 'credit' ? 'Journal' : 'Payment') : 'Journal');
+      var type = d.type === 'note' ? (d.kind === 'debit' ? 'Debit Note' : 'Credit Note') : VT[R] || (R === 'exp' ? (d.mode === 'credit' ? 'Journal' : 'Payment') : 'Journal');
       out.push({ type: type, no: d.no || '', date: d.date, party: nm || '', lines: net(lines), bill: billInfo(d, R), narr: narration(d, R) });
     });
     return { vouchers: out, skipped: skipped };
@@ -78,7 +78,8 @@
     return order.filter(function (a) { return m[a]; }).map(function (a) { return { a: a, v: m[a] }; });
   }
   function billInfo(d, R) {
-    if (/^(sale|sdeb|buy)$/.test(R)) return [{ type: 'New Ref', name: d.no }];
+    if (/^(sale|sdeb|buy)$/.test(R) && d.type !== 'note' || R === 'sdeb') return [{ type: 'New Ref', name: d.no }];
+    if (d.type === 'note' && R === 'buy') return [{ type: (d.orig && d.orig.no) ? 'Agst Ref' : 'On Account', name: (d.orig && d.orig.no) || '' }];
     if (/^(sret|pret)$/.test(R)) return [{ type: (d.orig && d.orig.no) ? 'Agst Ref' : 'On Account', name: (d.orig && d.orig.no) || '' }];
     if (R === 'in' || R === 'out') return (d.alloc && d.alloc.length ? d.alloc.map(function (a) { return { type: 'Agst Ref', name: a.no, amt: num(a.amt) }; }) : []).concat([{ type: 'On Account', name: '', rest: true }]);
     return null;

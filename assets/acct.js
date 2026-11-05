@@ -12,7 +12,7 @@
   function T(k, v) { return NS.t(k, v); }
   var TYPE = { invoice: 'Tax invoice', cashmemo: 'Cash memo', pharma: 'Pharmacy bill', resto: 'Restaurant bill', lr: 'Bilty (LR)', fee: 'Fee receipt', job: 'Job card bill', rabill: 'RA bill',
     note: 'Credit note', receipt: 'Receipt', voucher: 'Payment voucher', self: 'Self invoice', pbill: 'Purchase bill', exp: 'Expense', contra: 'Contra' };
-  function tname(d) { var R = B.role(d); return R === 'sdeb' ? 'Debit note' : R === 'pret' ? 'Purchase return' : R === 'refund' ? 'Refund voucher' : TYPE[d.type || 'invoice'] || d.type; }
+  function tname(d) { var R = B.role(d); return d.type === 'note' ? (d.kind === 'debit' ? 'Debit note' : 'Credit note') : R === 'sdeb' ? 'Debit note' : R === 'pret' ? 'Purchase return' : R === 'refund' ? 'Refund voucher' : TYPE[d.type || 'invoice'] || d.type; }
   function n2(v) { return v ? r2(v).toFixed(2) : '0.00'; }
 
   /* ---------- zip (stored, no compression), text or bytes ---------- */
