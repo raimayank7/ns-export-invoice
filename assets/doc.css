@@ -255,3 +255,13 @@ details.more .fg{margin-top:8px}
 .xp table{border-collapse:collapse}
 .xp th{text-align:left;font-weight:600;color:#4B5563;padding:1px 10px 1px 0;white-space:nowrap}
 .xp td{padding:1px 0}
+
+/* device test fixes (5 Nov 2026): bottom action buttons may take two lines on small phones instead of spilling out */
+@media (max-width:380px){
+  .actions .btn{white-space:normal;line-height:1.15;font-size:.84rem;padding:6px 4px}
+}
+/* item lines on the narrowest screens: two fields a row, labels wrap */
+@media (max-width:300px){
+  .it-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+.it-grid .f label{overflow-wrap:anywhere}

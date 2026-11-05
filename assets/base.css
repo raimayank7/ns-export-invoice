@@ -196,3 +196,14 @@ html.embed #main>#tool,html.embed #main>#my-app{margin-top:12px}
 @media screen and (max-width:620px){
   #main table:not(#sheet *,.sh *,:is(.tbl-wrap,.gt-scroll,.tbl,.sb-sheet-wrap,.prose) table){display:block;overflow-x:auto;max-width:100%;-webkit-overflow-scrolling:touch}
 }
+/* device test fixes (5 Nov 2026, tested 240 px feature phones to 4K): */
+/* header: the site name keeps its room; when the buttons don't fit next to it they move to a second row instead of covering it */
+.hd .wrap{flex-wrap:wrap;row-gap:6px;padding-top:4px;padding-bottom:4px}
+.brand{flex:1 1 auto;min-width:min(158px,100%)}
+.brand>span{min-width:0}
+.brand b{overflow-wrap:anywhere}
+.hd nav{flex:0 1 auto;flex-wrap:wrap;justify-content:flex-end;min-width:0;row-gap:6px}
+/* guide pages: long numbers, links and words wrap; code samples scroll inside their own box */
+.prose{overflow-wrap:break-word}
+.prose :is(p,li,td,th,summary,figcaption){overflow-wrap:anywhere}
+.prose pre{max-width:100%;overflow-x:auto;-webkit-overflow-scrolling:touch}

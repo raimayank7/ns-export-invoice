@@ -804,7 +804,20 @@
     'hs.i.name': 'Item or service', 'hs.i.nohsn': 'No HSN/SAC', 'hs.i.svc': 'Marked as a service, but the code is not a SAC (99…)', 'hs.i.goods': 'Marked as goods, but the code is a SAC (99…)',
     'hs.i.rate': '{r}% is not a GST rate in use', 'hs.i.save': 'Save', 'hs.i.saved': '{n} saved.',
     /* links to the Nivesh Sahayak App from every site */
-    'nav.app': 'Nivesh Sahayak App', 'hub.app': 'Dues, money received and paid, purchases, expenses and party statements in one place'
+    'nav.app': 'Nivesh Sahayak App', 'hub.app': 'Dues, money received and paid, purchases, expenses and party statements in one place',
+    /* price-list.niveshsahayak.in: price list maker (pricelist.js) */
+    'nav.price': 'Price list maker', 'prl.h.set': 'Your price list', 'prl.biz': 'Business on the list', 'prl.nobiz': 'No business saved yet. Add yours in My data so its name, address and GSTIN print on top.',
+    'prl.ttl': 'Title', 'prl.from': 'Prices valid from', 'prl.cols': 'Columns to print', 'prl.c.code': 'Code', 'prl.c.hsn': 'HSN/SAC', 'prl.c.unit': 'Unit', 'prl.c.mrp': 'MRP',
+    'prl.c.prate': 'Purchase price', 'prl.c.wrate': 'Wholesale price', 'prl.c.rate': 'Retail price', 'prl.c.gst': 'GST %', 'prl.w.prate': 'The purchase price is on the list. Keep this copy for yourself; do not send it to customers.',
+    'prl.gst': 'GST note under the list', 'prl.g.incl': 'Prices include GST', 'prl.g.plus': 'GST extra as applicable', 'prl.g.none': 'No GST note', 'prl.sort': 'Order',
+    'prl.s.name': 'By name', 'prl.s.code': 'By code', 'prl.s.rate': 'By price, low to high', 'prl.group': 'Goods first, then services', 'prl.print': 'Print or save PDF',
+    'prl.wa': 'Share on WhatsApp', 'prl.csv': 'Download for Excel (CSV)', 'prl.preview': 'Price list preview', 'prl.h.items': 'Items and prices', 'prl.help': 'Every item and service you saved in Nivesh Sahayak. Type new prices and press Save prices; the next bill in any Nivesh Sahayak document maker uses them. Untick an item to leave it off this list.',
+    'prl.q': 'Search items', 'prl.none': 'No saved items yet. Add one below, or in any Nivesh Sahayak document maker.', 'prl.sum': 'Saved items: {n}. On this list: {on}. Needing a look: {bad}.',
+    'prl.in': 'On list', 'prl.margin': 'Margin', 'prl.e.norate': 'No retail price.', 'prl.e.overmrp': 'Retail price is above MRP.', 'prl.e.wovermrp': 'Wholesale price is above MRP.',
+    'prl.e.loss': 'Retail price is below the purchase price.', 'prl.save': 'Save prices', 'prl.saved': 'Prices saved for {n} items.', 'prl.cost': 'Fill empty purchase prices from purchase bills',
+    'prl.costed': 'Purchase price filled for {n} items. Check them and press Save prices.', 'prl.nocost': 'No matching purchase bills found. Purchase bills you save in the Nivesh Sahayak App are used here.',
+    'prl.all': 'Tick all', 'prl.nonesel': 'Untick all', 'prl.h.add': 'Add an item', 'prl.add': 'Add item', 'prl.added': '{n} added.', 'prl.e.name': 'Type the item name first.',
+    'prl.e.dup': 'An item with this name is already saved.'
   };
 
   var packs = { en: EN }, cur = 'en';

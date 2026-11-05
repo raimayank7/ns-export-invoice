@@ -407,7 +407,16 @@
     NS.sponsor();
     if ('serviceWorker' in navigator && location.protocol === 'https:') navigator.serviceWorker.register('/sw.js').catch(function () {});
     /* the loading screen stays until the screen text is in the reader's language (at most 1.2 s), so English never flashes first */
-    var show = function () { if (!NS.leaving) document.documentElement.classList.add('ready'); };
+    /* on the first page of a visit it also waits until the logo has drawn itself (NS_BOOT_T, set in the page head; at most 3 s more) */
+    var show = function () {
+      var add = function () { if (!NS.leaving) document.documentElement.classList.add('ready'); };
+      var boot = NS.$('.boot');
+      if (!window.NS_BOOT_T || !boot) return add();
+      if (!boot.getAnimations) return setTimeout(add, Math.max(0, NS_BOOT_T - performance.now()));
+      var done = boot.getAnimations({ subtree: true }).filter(function (a) { return a.effect && a.effect.getComputedTiming().iterations !== Infinity; })
+        .map(function (a) { return a.finished; });
+      Promise.race([Promise.all(done), new Promise(function (r) { setTimeout(r, 3000); })]).then(add, add);
+    };
     if (lang && lang.then) Promise.race([lang, new Promise(function (r) { setTimeout(r, 1200); })]).then(show, show);
     else show();
   };
