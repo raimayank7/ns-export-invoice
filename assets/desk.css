@@ -1,0 +1,167 @@
+/* The software window on every Nivesh Sahayak site (desk.js): slim title bar, side menu, status bar, command box.
+   Wide screens: fixed side menu (folds to icons) + status bar; phones: side menu slides in from the menu button, footer stays.
+   Inside the App's frame (html.embed) none of it shows. */
+:root{--tb:56px;--sw:252px;--sbh:30px}
+html.side-mini{--sw:64px}
+kbd{font:600 .72rem var(--mono);border:1px solid var(--line);border-bottom-width:2px;border-radius:5px;padding:1px 5px;background:var(--surface2);color:var(--soft);white-space:nowrap}
+
+/* title bar */
+.hd{z-index:30}
+.hd .wrap{max-width:none;min-height:var(--tb);padding-inline:12px 16px}
+.hd .brand small{display:none}
+.side-btn svg,.desk-cmdbtn svg,.side-mini svg,.cmd-in svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex:none}
+.side-btn{display:none}
+.desk-cmdbtn{gap:8px;color:var(--soft);font-weight:600;min-width:0;justify-content:flex-start}
+.desk-cmdbtn span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+@media (min-width:1100px){.desk-cmdbtn{min-width:240px;margin-inline-end:6px}}
+.desk-install{border-color:var(--accent);color:var(--accent)}
+:root[data-theme=dark] .desk-install{color:var(--accent)}
+
+/* side menu */
+.side{background:var(--surface);border-inline-end:1px solid var(--line);overflow-y:auto;overscroll-behavior:contain;scrollbar-width:thin;padding:8px 8px 24px;box-sizing:border-box;z-index:25}
+.side-g{margin:4px 0 10px}
+.side-h{font:700 .7rem/1.2 var(--font);letter-spacing:.06em;text-transform:uppercase;color:var(--soft);margin:12px 10px 6px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.side a{display:flex;align-items:center;gap:10px;min-height:38px;padding:6px 10px;border-radius:9px;color:var(--ink);text-decoration:none;font-weight:600;font-size:.9rem;line-height:1.25;box-sizing:border-box}
+.side a span{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.side a:hover{background:var(--surface2)}
+.side a[aria-current=page]{background:var(--accent);color:var(--accent-ink)}
+.side a::before{content:"";flex:none;width:18px;height:18px;background:currentColor;opacity:.85;-webkit-mask:var(--i) center/contain no-repeat;mask:var(--i) center/contain no-repeat}
+.side-about a{font-weight:500;font-size:.84rem;min-height:32px;color:var(--soft)}
+.side-mini{display:none;margin:0 0 4px auto;border:1px solid var(--line);background:var(--surface);color:var(--soft);border-radius:8px;width:34px;height:30px;place-items:center;cursor:pointer}
+[dir=rtl] .side-mini svg{transform:scaleX(-1)}
+html.side-mini .side-mini svg{transform:scaleX(-1)}
+[dir=rtl] html.side-mini .side-mini svg,html[dir=rtl].side-mini .side-mini svg{transform:none}
+/* the App's own screens, moved into the side menu */
+.side .hub-nav{position:static;display:flex;flex-direction:column;gap:0;background:none;border:0;padding:0;border-radius:0;overflow:visible}
+.side .hub-nav a{justify-content:flex-start}
+.side .hub-nav .n{margin-inline-start:auto;font:600 .74rem var(--mono);opacity:.75}
+html.has-hub .hub{display:block}
+html.has-hub .hub>.hub-nav{display:none}
+
+/* line icons (24px strokes as masks) */
+:where(.side a,.tabbar a){--i:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='12' cy='12' r='3'/%3E%3C/svg%3E")}
+[data-ic=home]{--i:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M3 11l9-7 9 7v9a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z'/%3E%3C/svg%3E")}
+[data-ic=guide]{--i:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M12 6c-2-1.5-5-2-8-2v14c3 0 6 .5 8 2 2-1.5 5-2 8-2V4c-3 0-6 .5-8 2zM12 6v14'/%3E%3C/svg%3E")}
+[data-ic=app]{--i:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect x='3' y='3' width='7' height='7' rx='1.5'/%3E%3Crect x='14' y='3' width='7' height='7' rx='1.5'/%3E%3Crect x='3' y='14' width='7' height='7' rx='1.5'/%3E%3Crect x='14' y='14' width='7' height='7' rx='1.5'/%3E%3C/svg%3E")}
+[data-ic=set]{--i:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M4 7h10M18 7h2M4 17h4M12 17h8'/%3E%3Ccircle cx='16' cy='7' r='2'/%3E%3Ccircle cx='10' cy='17' r='2'/%3E%3C/svg%3E")}
+[data-ic=doc]{--i:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 3h9l4 4v14H6zM14 3v5h5M9 12h7M9 16h7'/%3E%3C/svg%3E")}
+[data-ic=tool]{--i:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M14.7 6.3a4 4 0 0 0-5.4 5.4L3 18l3 3 6.3-6.3a4 4 0 0 0 5.4-5.4l-2.5 2.5-2.5-2.5z'/%3E%3C/svg%3E")}
+[data-ic=info]{--i:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='12' cy='12' r='9'/%3E%3Cpath d='M12 11v6M12 7.5v.5'/%3E%3C/svg%3E")}
+[data-ic=money]{--i:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect x='3' y='6' width='18' height='12' rx='2'/%3E%3Ccircle cx='12' cy='12' r='2.5'/%3E%3Cpath d='M6 10v4M18 10v4'/%3E%3C/svg%3E")}
+[data-ic=clock]{--i:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='12' cy='12' r='9'/%3E%3Cpath d='M12 7v5l3 2'/%3E%3C/svg%3E")}
+[data-ic=cart]{--i:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M4 5h2l2 10h10l2-7H7'/%3E%3Ccircle cx='9' cy='19' r='1'/%3E%3Ccircle cx='17' cy='19' r='1'/%3E%3C/svg%3E")}
+[data-ic=people]{--i:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='9' cy='8' r='4'/%3E%3Cpath d='M2 21a7 7 0 0 1 14 0M16 4a4 4 0 0 1 0 8M18 14a6 6 0 0 1 4 7'/%3E%3C/svg%3E")}
+[data-ic=bank]{--i:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M3 10l9-6 9 6M5 10v8M9 10v8M15 10v8M19 10v8M3 21h18'/%3E%3C/svg%3E")}
+[data-ic=cheque]{--i:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect x='2' y='6' width='20' height='12' rx='2'/%3E%3Cpath d='M6 14h6M15 14h3M6 10h3'/%3E%3C/svg%3E")}
+[data-ic=book]{--i:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M4 4h6a2 2 0 0 1 2 2v14a2 2 0 0 0-2-2H4zM20 4h-6a2 2 0 0 0-2 2v14a2 2 0 0 1 2-2h6z'/%3E%3C/svg%3E")}
+
+/* status bar */
+.sbar{display:none;align-items:center;gap:4px 16px;font-size:.78rem;color:var(--soft);background:var(--surface);border-top:1px solid var(--line);padding:0 12px;box-sizing:border-box;white-space:nowrap;overflow:hidden}
+.sbar>span:empty{display:none}
+.sbar .grow{flex:1}
+.sbar [data-s-biz]{color:var(--ink);font-weight:700;overflow:hidden;text-overflow:ellipsis;max-width:22ch}
+.sbar [data-s-net]::before{content:"";display:inline-block;width:8px;height:8px;border-radius:50%;margin-inline-end:6px;background:var(--ok);vertical-align:middle}
+.sbar [data-s-net].off::before{background:var(--bad)}
+.sbar .linkish{background:none;border:0;padding:0;font:inherit;color:inherit;cursor:pointer;text-decoration:underline dotted;text-underline-offset:3px}
+.sbar .linkish.warn{color:var(--bad);font-weight:700}
+.sbar a{color:inherit}
+.sbar .s-credit{overflow:hidden;text-overflow:ellipsis}
+
+/* wide screens: fixed side menu + status bar, the page scrolls beside them */
+@media (min-width:861px){
+  .side{position:fixed;inset-block:var(--tb) var(--sbh);inset-inline-start:0;width:var(--sw);transition:width .18s}
+  .side-mini{display:grid}
+  main#main{margin-inline-start:var(--sw);transition:margin .18s}
+  .hd nav>a{display:none}
+  .ft{display:none}
+  .sbar{display:flex;position:fixed;inset-inline:0;bottom:0;height:var(--sbh);z-index:26}
+  body{padding-bottom:var(--sbh)}
+  html.side-mini .side{padding-inline:6px}
+  html.side-mini .side a{justify-content:center;padding:6px}
+  html.side-mini .side a span,html.side-mini .side a .n,html.side-mini .side-h{display:none}
+  html.side-mini .side-g{border-top:1px solid var(--line);padding-top:6px}
+  html.side-mini .side-mini{margin-inline:auto}
+}
+/* phones and small tablets: the side menu slides in */
+@media (max-width:860px){
+  .side-btn{display:grid;flex:none;order:-1}
+  .desk-cmdbtn span,.desk-cmdbtn kbd{display:none}
+  .desk-cmdbtn{width:40px;height:40px;min-height:40px;padding:0;justify-content:center}
+  .side{position:fixed;inset-block:0;inset-inline-start:0;width:min(310px,86vw);transform:translateX(-105%);transition:transform .2s;box-shadow:0 10px 40px rgba(0,0,0,.25);z-index:40;padding-top:12px}
+  [dir=rtl] .side{transform:translateX(105%)}
+  html.side-open .side{transform:none}
+  .side a{min-height:44px}
+  .side-shade{position:fixed;inset:0;background:rgba(5,15,25,.5);z-index:39}
+  html.has-hub .hub>.hub-nav{display:none}
+}
+@media (max-width:520px){.hd .brand b .soft{display:none}}
+@media (prefers-reduced-motion:reduce){.side,main#main{transition:none}}
+
+/* installed app with the window-controls overlay: the title bar is the window's own */
+@media (display-mode:window-controls-overlay){
+  .hd{-webkit-app-region:drag;app-region:drag}
+  .hd .wrap{min-height:max(var(--tb),env(titlebar-area-height,0px));padding-inline-end:calc(100vw - env(titlebar-area-x,0px) - env(titlebar-area-width,100vw) + 12px)}
+  .hd a,.hd button,.hd select,.hd input{-webkit-app-region:no-drag;app-region:no-drag}
+}
+
+/* command box */
+.desk-cmd{border:0;border-radius:14px;padding:0;width:min(640px,calc(100% - 24px));margin-top:10vh;background:var(--surface);color:var(--ink);box-shadow:0 24px 70px rgba(0,0,0,.4);overflow:hidden}
+.desk-cmd::backdrop,.desk-ask::backdrop,.desk-keys::backdrop{background:rgba(5,15,25,.5)}
+.cmd-in{display:flex;align-items:center;gap:10px;padding:10px 14px;border-bottom:1px solid var(--line)}
+.cmd-in input{flex:1;border:0;outline:0;background:none;font-size:1.05rem;min-height:40px;padding:0;color:var(--ink);box-shadow:none}
+.cmd-in input:focus{outline:0;border:0}
+.desk-cmd ul{list-style:none;margin:0;padding:6px;max-height:min(60vh,480px);overflow-y:auto}
+.desk-cmd li[role=option]{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:8px 10px;border-radius:9px;cursor:pointer;min-height:40px;box-sizing:border-box}
+.desk-cmd li[aria-selected=true]{background:var(--accent);color:var(--accent-ink)}
+.desk-cmd li[aria-selected=true] kbd{background:transparent;color:inherit;border-color:currentColor}
+.desk-cmd li[aria-selected=true] small{color:inherit;opacity:.85}
+.desk-cmd .ct{min-width:0;display:flex;flex-direction:column}
+.desk-cmd .ct,.desk-cmd .ct small{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.desk-cmd small{color:var(--soft);font-size:.8rem}
+.cmd-g{font:700 .7rem var(--font);text-transform:uppercase;letter-spacing:.06em;color:var(--soft);padding:10px 10px 4px}
+.cmd-none{padding:18px 10px;color:var(--soft)}
+.cmd-ft{margin:0;padding:8px 14px;border-top:1px solid var(--line);font-size:.78rem;color:var(--soft)}
+@media (max-width:520px){.desk-cmd{width:100%;max-width:100%;margin:0;height:100dvh;max-height:100dvh;border-radius:0}.desk-cmd ul{max-height:calc(100dvh - 110px)}}
+
+/* confirm box and shortcut list */
+.desk-ask{border:0;border-radius:14px;padding:18px 18px 14px;width:min(440px,calc(100% - 24px));background:var(--surface);color:var(--ink);box-shadow:0 20px 60px rgba(0,0,0,.35)}
+.desk-ask p{margin:0 0 6px;font-size:1rem}
+.btn.danger{background:var(--bad);border-color:var(--bad);color:#fff}
+.desk-keys{border:0;border-radius:14px;padding:0 0 12px;width:min(520px,calc(100% - 24px));background:var(--surface);color:var(--ink);box-shadow:0 20px 60px rgba(0,0,0,.35)}
+.dk-hd{display:flex;justify-content:space-between;align-items:center;padding:12px 16px;border-bottom:1px solid var(--line)}
+.dk-hd h2{margin:0;font-size:1.1rem}
+.dk-t{border-collapse:collapse;width:calc(100% - 32px);margin:8px 16px}
+.dk-t th,.dk-t td{text-align:start;padding:6px 4px;border-bottom:1px solid var(--line);font-size:.9rem;font-weight:500}
+.dk-t th{width:38%}
+.dk-note{color:var(--soft);font-size:.82rem;margin:8px 16px 0}
+
+/* inside the App's frame: the App is the window */
+html.embed .side,html.embed .sbar,html.embed .side-shade,html.embed .desk-cmdbtn,html.embed .side-btn{display:none!important}
+html.embed main#main{margin-inline-start:0!important}
+html.embed body{padding-bottom:0}
+@media print{.side,.sbar,.side-shade{display:none!important}main#main{margin:0!important}body{padding:0!important}}
+
+/* money tiles: whole amounts on one line beside the side menu */
+.hub-main .tiles{grid-template-columns:repeat(auto-fill,minmax(min(176px,100%),1fr))}
+.hub-main .tile b{white-space:nowrap;font-size:clamp(1rem,1.5vw,1.3rem)}
+
+/* phones: bottom tab bar for the App's first screens, a compact title bar, two money tiles a row */
+.tabbar{display:none}
+@media (max-width:860px){
+  html.has-hub .tabbar{display:flex;position:fixed;inset-inline:0;bottom:0;z-index:35;background:var(--surface);border-top:1px solid var(--line);padding:4px 4px calc(4px + env(safe-area-inset-bottom,0px))}
+  html.has-hub body{padding-bottom:calc(64px + env(safe-area-inset-bottom,0px))}
+  .tabbar a,.tabbar button{flex:1 1 0;min-width:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;min-height:52px;padding:4px 2px;border:0;border-radius:10px;background:none;color:var(--soft);text-decoration:none;font:600 .7rem/1.15 var(--font);cursor:pointer}
+  .tabbar a span,.tabbar button span{max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .tabbar .n{display:none}
+  .tabbar a[aria-current=page]{color:var(--accent)}
+  .tabbar a::before,.tabbar button::before{content:"";width:22px;height:22px;background:currentColor;-webkit-mask:var(--i) center/contain no-repeat;mask:var(--i) center/contain no-repeat}
+  .tabbar [data-ic=more]{--i:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='round'%3E%3Cpath d='M4 6h16M4 12h16M4 18h16'/%3E%3C/svg%3E")}
+  html.embed .tabbar{display:none!important}
+}
+@media (max-width:520px){
+  .desk-install{display:none!important}
+  .hd .brand>span{display:none}
+  .hub-main .tiles{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .hub-main .tile b{font-size:1rem}
+}
+@media print{.tabbar{display:none!important}}

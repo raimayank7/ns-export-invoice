@@ -6,9 +6,30 @@
  "start_url": "/",
  "scope": "/",
  "display": "standalone",
+ "display_override": [
+  "window-controls-overlay",
+  "standalone"
+ ],
+ "launch_handler": {
+  "client_mode": "focus-existing"
+ },
  "background_color": "#F6F8FB",
  "theme_color": "#0B3B5B",
  "lang": "en-IN",
+ "shortcuts": [
+  {
+   "name": "New invoice",
+   "url": "https://billing.niveshsahayak.in/"
+  },
+  {
+   "name": "Nivesh Sahayak App",
+   "url": "https://app.niveshsahayak.in/"
+  },
+  {
+   "name": "Settings and saved data",
+   "url": "https://my.niveshsahayak.in/"
+  }
+ ],
  "icons": [
   {
    "src": "/icons/icon-192.png",

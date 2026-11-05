@@ -1,5 +1,5 @@
-const CACHE = 'ns-export-invoice-6d8831a739';
-const SHELL = ["/", "/assets/base.css?v=4939645edb", "/assets/doc.css?v=0adb150aec", "/assets/i18n.js?v=ef518606b1", "/assets/store.js?v=eb98e624a1", "/assets/core.js?v=c74e588f6d", "/assets/gstfetch.js?v=77942f1a8e", "/assets/docs.js?v=67b29ce60c", "/assets/export.js?v=93f6432d81", "/assets/einv.js?v=f578dc539a"];
+const CACHE = 'ns-export-invoice-12c54fdf57';
+const SHELL = ["/", "/assets/base.css?v=95be4dce42", "/assets/doc.css?v=757271abe2", "/assets/i18n.js?v=75d64c1681", "/assets/store.js?v=425a88f908", "/assets/core.js?v=81e1330a72", "/assets/safe.js?v=2dfed74206", "/assets/help.js?v=ddaed68b26", "/assets/books.js?v=c16d2ce560", "/assets/extras.js?v=857c723793", "/assets/gstfetch.js?v=77942f1a8e", "/assets/docs.js?v=8a00a35059", "/assets/docmore.js?v=9de01ddeb6", "/assets/export.js?v=93f6432d81", "/assets/einv.js?v=cd7ddf3c80", "/assets/safe.css?v=f3b3edd6eb", "/assets/desk.js?v=9a150c505b", "/assets/desk.css?v=30fabdd14c", "/assets/xlsx.js?v=9c9abd01b6", "/assets/tally.js?v=7b3f6fd707", "/assets/acct.js?v=78527f0909"];
 self.addEventListener('install', e => { e.waitUntil(caches.open(CACHE).then(c => c.addAll(SHELL)).then(() => self.skipWaiting())); });
 self.addEventListener('activate', e => { e.waitUntil(caches.keys().then(k => Promise.all(k.filter(n => n.startsWith('ns-') && n !== CACHE).map(n => caches.delete(n)))).then(() => self.clients.claim())); });
 self.addEventListener('fetch', e => {

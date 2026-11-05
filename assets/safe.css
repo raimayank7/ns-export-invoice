@@ -1,0 +1,37 @@
+/* Batch 3 on every site: "?" tips (help.js), password box, Drive sync card, send to accountant (safe.js, acct.js) */
+.hp-q{display:inline-flex;align-items:center;justify-content:center;width:26px;height:26px;margin-inline-start:8px;border-radius:50%;border:1px solid var(--line);background:var(--surface2);color:var(--link);font:700 .85rem var(--font);cursor:pointer;vertical-align:middle;padding:0;line-height:1}
+.hp-q:hover,.hp-q[aria-expanded=true]{border-color:var(--accent);background:var(--accent);color:var(--accent-ink)}
+.hp-q:focus-visible{outline:3px solid var(--focus);outline-offset:2px}
+legend .hp-q{width:24px;height:24px}
+.hp-tip{font-size:.92rem;line-height:1.5;color:var(--ink);background:var(--surface2);border-inline-start:4px solid var(--accent);border-radius:8px;padding:8px 12px;margin:4px 0 12px;max-width:72ch}
+@media print{.hp-q,.hp-tip,.b3-extra,.gd-card{display:none!important}}
+
+.pw-dlg{width:min(460px,calc(100vw - 24px))}
+.pw-f{padding:16px 18px 18px;display:flex;flex-direction:column;gap:6px}
+.pw-f h2{margin:0 0 4px;font-size:1.15rem}
+.pw-f label{font-weight:600;font-size:.92rem}
+.pw-f label.chk{font-weight:400}
+.pw-f input[type=password],.pw-f input[type=text]{min-height:44px;font-size:1rem;width:100%;box-sizing:border-box}
+.pw-f .btns{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px}
+.pw-f .note{font-size:.9rem;margin:6px 0}
+.note.bad{color:var(--bad)}
+
+.b3-extra h3{font-size:1rem;margin:18px 0 4px}
+.b3-extra.card{margin-top:14px}
+.gd-card{margin-top:14px}
+.dlg-b .gd-card{background:var(--surface2);border-radius:12px;padding:10px 12px}
+.gd-card h3{margin:0 0 4px;font-size:1rem}
+.gd-cl ul{list-style:none;padding:0;margin:8px 0}
+.gd-cl li{display:flex;flex-wrap:wrap;gap:6px;align-items:center;border-bottom:1px solid var(--line);padding:6px 0}
+.gd-cl li span{flex:1 1 180px;min-width:0;overflow-wrap:anywhere}
+
+.ac-b label{display:block;font-weight:600;font-size:.92rem;margin:10px 0 4px}
+.ac-b label.chk{font-weight:400;margin:6px 0}
+.ac-b select,.ac-b input[type=date]{min-height:44px;width:100%;box-sizing:border-box}
+.ac-dates{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+@media (max-width:380px){.ac-dates{grid-template-columns:1fr}}
+.ac-w{border:1px solid var(--line);border-radius:10px;margin:12px 0;padding:6px 12px 10px}
+.ac-w legend{font-weight:600;font-size:.92rem;padding:0 4px}
+.ok-note{color:var(--ok)}
+.pw-f label.chk,.ac-b label.chk,.gc-chk label.chk{display:flex;align-items:center;gap:8px;min-height:40px}
+.pw-f .chk input,.ac-b .chk input,.gc-chk .chk input{width:20px;height:20px;flex:none;margin:0}

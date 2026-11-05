@@ -45,8 +45,13 @@
 
   /* item lines with the portal's arithmetic: CGST = SGST per line, totals summed from lines */
   function itemRows(d, tt, export_) {
-    var igst = export_ || !tt.intra;
-    return tt.rows.map(function (r, i) {
+    var igst = export_ || !tt.intra, main = tt.rows.slice().sort(function (a, b) { return b.taxable - a.taxable; })[0];
+    /* extra charges (freight, packing...) go in as their own lines: taxable, with the main item's HSN unless they have their own */
+    var chg = (tt.charges || []).map(function (c) {
+      var own = !(c.c.gst === '' || c.c.gst == null || c.c.gst === 'main');
+      return { it: { desc: c.c.name || 'Charges', hsn: own && c.c.hsn || (main ? main.it.hsn : ''), qty: 1, unit: main ? main.it.unit : 'OTH', rate: c.amt }, taxable: c.amt, g: c.g, tax: c.tax };
+    });
+    return tt.rows.concat(chg).map(function (r, i) {
       var q = num(r.it.qty), rate = num(r.it.rate), tot = r2(q * rate), disc = r2(tot - r.taxable);
       var c = igst ? 0 : r2(r.tax / 2), ig = igst ? r.tax : 0;
       return { i: i, it: r.it, qty: r3(q), price: r3(rate), tot: tot, disc: disc, ass: r.taxable, g: r.g, cgst: c, sgst: c, igst: ig, val: r2(r.taxable + 2 * c + ig) };
@@ -138,7 +143,7 @@
       return it;
     });
     var items = r2(sum.val), grand = tt.grand;
-    out.ValDtls = { AssVal: r2(sum.ass), CgstVal: r2(sum.c), SgstVal: r2(sum.s), IgstVal: r2(sum.i), CesVal: 0, StCesVal: 0, Discount: 0, OthChrg: 0, RndOffAmt: r2(grand - items), TotInvVal: grand };
+    out.ValDtls = { AssVal: r2(sum.ass), CgstVal: r2(sum.c), SgstVal: r2(sum.s), IgstVal: r2(sum.i), CesVal: 0, StCesVal: 0, Discount: 0, OthChrg: r2(tt.tcs || 0), RndOffAmt: r2(grand - items - (tt.tcs || 0)), TotInvVal: grand };   /* TCS (income tax) is an other charge, not GST */
     if (s.bankAcc) out.PayDtls = put(put({ Nm: clip(s.name, 100), AccDet: clip(s.bankAcc, 18) }, 'FinInsBr', clip(s.bankIfsc, 11)), 'Mode', '');
     /* export details (export-invoice site, d.exp from export.js): shipping bill, port, currency, country */
     var x = d.exp;
@@ -172,7 +177,7 @@
       toGstin: b.gstin && NS.gstinCheck(b.gstin).ok ? b.gstin : 'URP', toTrdName: clip(b.name, 100), toAddr1: ta[0], toAddr2: ta[1],
       toPlace: clip((to || b).city, 50), toPincode: +digits((to || b).pin), actualToStateCode: ewbState((to && to.state) || b.state), toStateCode: ewbState(d.pos || b.state),
       transType: to ? 2 : 1,
-      OthValue: tt.roundOff, totalValue: r2(tt.taxable), cgstValue: r2(rows.reduce(function (a, r) { return a + r.cgst; }, 0)), sgstValue: r2(rows.reduce(function (a, r) { return a + r.sgst; }, 0)),
+      OthValue: r2(tt.roundOff + (tt.tcs || 0)), totalValue: r2(tt.taxable), cgstValue: r2(rows.reduce(function (a, r) { return a + r.cgst; }, 0)), sgstValue: r2(rows.reduce(function (a, r) { return a + r.sgst; }, 0)),
       igstValue: r2(rows.reduce(function (a, r) { return a + r.igst; }, 0)), cessValue: 0, TotNonAdvolVal: 0, totInvValue: tt.grand
     };
     Object.assign(bill, ewbPart(e, false));

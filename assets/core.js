@@ -250,6 +250,7 @@
           : E(T('md.autooff'))) + '</p>' +
           '<div class="btns">' + (f.on ? (f.allowed ? '' : '<button type="button" class="btn primary" data-act="folder-allow">' + E(T('md.allow')) + '</button>') + '<button type="button" class="btn" data-act="folder-off">' + E(T('md.turnoff')) + '</button>' : '<button type="button" class="btn" data-act="folder-pick">' + E(T('md.choose')) + '</button>') + '</div>' : '') +
         '<p class="note">' + T('md.seeall', { link: '<a href="https://my.niveshsahayak.in/" target="_blank" rel="noopener">my.niveshsahayak.in</a>' }) + '</p>';
+      (NS.mdExt || []).forEach(function (f) { try { f(body); } catch (e) {} });   /* extra parts from other files (safe.js) */
     }).catch(function () { body.innerHTML = '<p class="note bad">' + NS.esc(NS.t('md.err')) + '</p>'; });
   };
   document.addEventListener('click', function (e) {

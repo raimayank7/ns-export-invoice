@@ -8,6 +8,8 @@
 .pv-col{position:sticky;top:76px}
 .pv{background:var(--surface2);border:1px solid var(--line);border-radius:var(--r);overflow:hidden;position:relative}
 .pv-scale{width:794px;transform-origin:0 0}
+/* thermal roll preview: the narrow receipt sits in the middle of the preview panel, not against its left edge */
+.pv-scale:has(>#sheet>.sh.th){width:max-content;margin-inline:auto}
 
 /* skeleton until the tool is ready */
 .tool:not(.live) #ed{opacity:.0}
@@ -207,7 +209,9 @@ details.more .fg{margin-top:8px}
 .ln-grid{display:grid;gap:8px}
 .ln-grid.c2{grid-template-columns:minmax(0,3fr) minmax(0,1fr)}
 .ln-grid.c3{grid-template-columns:minmax(0,3fr) minmax(0,2fr) minmax(0,1fr)}
-.ln-grid.c6{grid-template-columns:repeat(6,minmax(0,1fr))}.ln-grid.c6 .ln-wide{grid-column:span 2}
+/* petty cash entry: two tidy rows (date, voucher no., particulars / account head, received, paid), never a lone box on a third row */
+.ln-grid.c6{grid-template-columns:minmax(150px,1.25fr) repeat(3,minmax(0,1fr))}.ln-grid.c6 .ln-wide,.ln-grid.c6>.f:nth-child(4){grid-column:span 2}
+.ln-grid>.f{display:flex;flex-direction:column;justify-content:flex-end}.ln-grid input{min-width:0}
 @media (max-width:520px){.ln-grid.c3,.ln-grid.c6{grid-template-columns:repeat(2,minmax(0,1fr))}.ln-grid .ln-wide{grid-column:1/-1}}
 .sums .warn{color:#B45309;font-weight:600}
 .sh.slip .rtext{font-size:14px;line-height:1.9;margin:18px 0}
@@ -265,3 +269,7 @@ details.more .fg{margin-top:8px}
   .it-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
 }
 .it-grid .f label{overflow-wrap:anywhere}
+/* Batch 2 (docmore.js): batch, expiry and serial fields on item lines, printed under the item; custom fields */
+.it-grid .it-x input{font-family:var(--mono)}
+.sh .ln-x{font-size:.82em;color:#475467}
+.sh .cf-meta{margin-top:-4px}

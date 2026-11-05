@@ -1,10 +1,17 @@
 /* NSStore: the one place every Nivesh Sahayak document site keeps its data.
    It talks to the shared data home (my.niveshsahayak.in) in a hidden frame, so masters are shared across sites.
    If that frame can't load (first visit while offline, blocked), it keeps data in this site's own browser storage
-   and moves it into the data home the next time the frame works. */
+   and moves it into the data home the next time the frame works.
+   Batch 1 safety, here so every site gets it:
+     recycle bin   a deleted business, party, item or document is kept 30 days in store 'bin' ({id: '<store>:<id>', store, rec, at, who}); restore() puts it back
+     edit history  every add, change, delete and restore of those records is added to store 'log' ({id, at, who, site, store, rid, act, no, type, name, ch: [[field, from, to]]});
+                   nothing here edits or removes a log entry (Companies (Accounts) Rules 2014, rule 3(1) proviso: audit trail from 1 April 2023)
+     period lock   settings.lockBefore 'YYYY-MM-DD': documents dated before it can't be added, changed or deleted (only payment status may change)
+   Sample records (sample: true, getting-started wizard) are left out of the history and skip the bin when removed. */
 (function () {
   'use strict';
-  var STORES = ['biz', 'party', 'item', 'doc', 'meta'];
+  var STORES = ['biz', 'party', 'item', 'doc', 'meta', 'bin', 'log'];
+  var KEPT = { biz: 1, party: 1, item: 1, doc: 1 }, BIN_DAYS = 30;
   var cfg = window.NS_CFG || {};
   var VAULT = cfg.vault || 'https://my.niveshsahayak.in/vault.html';
   var VAULT_ORIGIN = new URL(VAULT, location.href).origin;
@@ -15,7 +22,7 @@
   function ldb() {
     if (ldbp) return ldbp;
     ldbp = new Promise(function (res, rej) {
-      var r = indexedDB.open('ns-local', 1);
+      var r = indexedDB.open('ns-local', 2);
       r.onupgradeneeded = function () { STORES.forEach(function (s) { if (!r.result.objectStoreNames.contains(s)) r.result.createObjectStore(s, { keyPath: 'id' }); }); };
       r.onsuccess = function () { res(r.result); };
       r.onerror = function () { rej(r.error); };
@@ -115,24 +122,135 @@
 
   function uid() { return Date.now().toString(36) + Math.random().toString(36).slice(2, 8); }
 
-  window.NSStore = {
-    ready: ready,
-    mode: function () { return mode; },
-    list: function (store) { return call('list', { store: store }).then(function (r) { return r || []; }); },
-    get: function (store, id) { return call('get', { store: store, id: id }); },
-    put: function (store, obj) {
-      if (!obj.id) obj.id = uid();
+  /* ---------- edit history ---------- */
+  var who = null;
+  function whoName() {
+    if (who != null) return Promise.resolve(who);
+    return call('get', { store: 'meta', id: 'who' }).then(function (r) { who = r && r.v || ''; return who; }, function () { return ''; });
+  }
+  /* field-by-field changes; pictures and long text are shortened so the history stays small */
+  function flat(o, pre, out) {
+    out = out || {};
+    if (o == null || typeof o !== 'object') { out[pre] = o; return out; }
+    Object.keys(o).forEach(function (k) {
+      if (!pre && (k === 'id' || k === 'created' || k === 'updated')) return;
+      var v = o[k], p = pre ? pre + '.' + k : k;
+      if (v && typeof v === 'object') flat(v, p, out); else out[p] = v;
+    });
+    return out;
+  }
+  function short(v) {
+    if (v == null || v === '') return '';
+    v = String(v);
+    return /^data:/.test(v) ? '[picture]' : v.length > 120 ? v.slice(0, 117) + '...' : v;
+  }
+  function diff(a, b) {
+    var A = flat(a || {}, ''), B = flat(b || {}, ''), ch = [];
+    Object.keys(Object.assign({}, A, B)).forEach(function (k) { var x = short(A[k]), y = short(B[k]); if (x !== y) ch.push([k, x, y]); });
+    return ch;
+  }
+  function addLog(store, act, rec, ch, extra) {
+    if (!KEPT[store] || rec && rec.sample) return Promise.resolve();
+    return whoName().then(function (w) {
+      var e = Object.assign({ id: uid(), at: Date.now(), who: w, site: location.hostname, store: store, rid: rec && rec.id, act: act,
+        no: rec && (rec.no || rec.billNo) || '', type: rec && rec.type || '', name: rec && (rec.name || rec.desc || rec.buyer && rec.buyer.name) || '', ch: (ch || []).slice(0, 60) }, extra || {});
+      return call('put', { store: 'log', value: e });
+    }).catch(function () {});   /* an older data home without the log store: the record itself is still saved */
+  }
+
+  /* ---------- period lock ---------- */
+  var LOCK_FREE = { status: 1, paidBy: 1, invNo: 1, nextNo: 1, nextType: 1, chq: 1, rec: 1 };   /* payment status (and stopping a repeat) may still change on a locked document */
+  function lockDate() { return call('get', { store: 'meta', id: 'settings' }).then(function (r) { return r && r.v && r.v.lockBefore || ''; }, function () { return ''; }); }
+  function lockErr(d) {
+    var e = new Error(NS.t ? NS.t('b1.locked', { d: NS.fmtDate ? NS.fmtDate(d) : d }) : 'Locked: documents dated before ' + d + ' cannot be changed');
+    e.locked = true; return e;
+  }
+  function checkLock(store, old, obj) {
+    if (store !== 'doc') return Promise.resolve();
+    return lockDate().then(function (lk) {
+      if (!lk) return;
+      var oldIn = old && old.date && old.date < lk, newIn = obj && obj.date && obj.date < lk;
+      if (!oldIn && !newIn) return;
+      if (old && obj && oldIn && newIn && diff(old, obj).every(function (c) { return LOCK_FREE[c[0].split('.')[0]]; })) return;
+      throw lockErr(lk);
+    });
+  }
+
+  /* ---------- recycle bin ---------- */
+  var purged = false;
+  function purgeBin() {
+    return call('list', { store: 'bin' }).then(function (rows) {
+      var old = (rows || []).filter(function (r) { return Date.now() - (r.at || 0) > BIN_DAYS * 864e5; });
+      return Promise.all(old.map(function (r) { return call('del', { store: 'bin', id: r.id }); }));
+    }).catch(function () {});
+  }
+
+  function put(store, obj) {
+    if (!obj.id) obj.id = uid();
+    var old;
+    return (KEPT[store] ? call('get', { store: store, id: obj.id }) : Promise.resolve()).then(function (o) {
+      old = o;
+      return checkLock(store, old, obj);
+    }).then(function () {
       if (!obj.created) obj.created = Date.now();
       obj.updated = Date.now();
-      return call('put', { store: store, value: obj }).then(function () { return obj; });
-    },
-    del: function (store, id) { return call('del', { store: store, id: id }); },
+      return call('put', { store: store, value: obj });
+    }).then(function () {
+      if (KEPT[store]) { var ch = diff(old, obj); if (!old || ch.length) addLog(store, old ? 'edit' : 'add', obj, old ? ch : []); }
+      return obj;
+    });
+  }
+  /* opts.hard: no bin and no history (removing sample records) */
+  function del(store, id, opts) {
+    if (!KEPT[store]) return call('del', { store: store, id: id });
+    var hard = opts && opts.hard, rec;
+    return call('get', { store: store, id: id }).then(function (r) {
+      rec = r;
+      if (!rec) return;
+      return checkLock(store, rec, null).then(function () {
+        if (hard || rec.sample) return;
+        return whoName().then(function (w) { return call('put', { store: 'bin', value: { id: store + ':' + id, store: store, rec: rec, at: Date.now(), who: w } }); }).catch(function () {});
+      });
+    }).then(function () {
+      return call('del', { store: store, id: id });
+    }).then(function () { if (rec && !hard) addLog(store, 'del', rec, []); });
+  }
+  function restore(binId) {
+    return call('get', { store: 'bin', id: binId }).then(function (b) {
+      if (!b || !b.rec) throw new Error('gone');
+      var rec = b.rec;
+      return checkLock(b.store, null, rec).then(function () {
+        rec.updated = Date.now();
+        return call('put', { store: b.store, value: rec });
+      }).then(function () {
+        addLog(b.store, 'restore', rec, []);
+        return call('del', { store: 'bin', id: binId });
+      }).then(function () { return b; });
+    });
+  }
+
+  window.NSStore = {
+    ready: function () { return ready().then(function (m) { if (!purged) { purged = true; purgeBin(); } return m; }); },
+    mode: function () { return mode; },
+    list: function (store) { return call('list', { store: store }).then(function (r) { return r || []; }, function (e) { if (store === 'bin' || store === 'log') return []; throw e; }); },
+    get: function (store, id) { return call('get', { store: store, id: id }); },
+    put: put,
+    del: del,
+    restore: restore,
+    binDays: BIN_DAYS,
+    lockDate: lockDate,
     exportAll: function () { return call('exportAll'); },
-    importAll: function (data, replace) { return call('importAll', { data: data, replace: !!replace }); },
+    importAll: function (data, replace) {
+      return call('importAll', { data: data, replace: !!replace }).then(function (n) {
+        if (n) whoName().then(function (w) { return call('put', { store: 'log', value: { id: uid(), at: Date.now(), who: w, site: location.hostname, act: 'import', n: n, ch: [] } }); }).catch(function () {});
+        return n;
+      });
+    },
     persist: function () { return call('persist'); },
     estimate: function () { return call('estimate'); },
     meta: function (key, val) {
       if (arguments.length < 2) return call('get', { store: 'meta', id: key }).then(function (r) { return r ? r.v : undefined; });
+      if (key === 'who') who = val || '';
       return call('put', { store: 'meta', value: { id: key, v: val, updated: Date.now() } });
     },
     uid: uid
