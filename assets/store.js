@@ -90,6 +90,8 @@
   window.addEventListener('message', function (e) {
     if (e.origin !== VAULT_ORIGIN || !e.data || e.data.ns !== 'vault') return;
     if (e.data.blocked) blockedNote(); else if ('ready' in e.data) unblocked();
+    /* the one auto save (vault.js) wrote the backup file ('ok') or needs the browser's OK again ('ask') */
+    if (e.data.af) document.dispatchEvent(new CustomEvent('ns-autosave', { detail: e.data.af }));
   });
 
   /* ---------- the shared data home ---------- */
@@ -283,6 +285,8 @@
     },
     persist: function () { return call('persist'); },
     estimate: function () { return call('estimate'); },
+    /* one auto save for every site (vault.js afStatus / afWrite / afOff); null when the data home is not reachable */
+    autosave: function (op, args) { return ready().then(function (m) { return m === 'vault' ? send(op, args) : null; }); },
     meta: function (key, val) {
       if (arguments.length < 2) return call('get', { store: 'meta', id: key }).then(function (r) { return r ? r.v : undefined; });
       if (key === 'who') who = val || '';

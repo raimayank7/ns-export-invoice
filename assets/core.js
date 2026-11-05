@@ -177,7 +177,11 @@
     }).catch(function () {});
   };
 
-  /* desktop Chrome/Edge: write the backup file into a folder the user picked once */
+  /* ---------- one auto save for all tools (desktop Chrome/Edge) ----------
+     The folder is chosen once, on my.niveshsahayak.in (the data home's own site): the handle is kept in that origin's 'ns-folder'
+     database, and the data home (vault.js, open in a hidden frame on every site) writes the full backup file there after any change
+     on any site. Other sites (and my. shown inside the App) open my.niveshsahayak.in in a new tab to choose or allow the folder,
+     because the browser asks only the site that holds the folder, and only in a top-level page. */
   var FOLDER_DB = 'ns-folder';
   function folderDb() {
     return new Promise(function (res, rej) {
@@ -192,38 +196,80 @@
   function folderSet(h) {
     return folderDb().then(function (d) { return new Promise(function (res) { var t = d.transaction('h', 'readwrite'); h ? t.objectStore('h').put(h, 'dir') : t.objectStore('h').delete('dir'); t.oncomplete = res; }); });
   }
+  var HOME = new URL('/', (window.NS_CFG || {}).vault || 'https://my.niveshsahayak.in/vault.html', location.href);
+  /* this page may choose and allow the folder itself: it is the data home's site, open as a page of its own */
+  NS.folderHere = function () { return location.origin === HOME.origin && window.top === window; };
   NS.folderSupported = function () { return 'showDirectoryPicker' in window; };
+  var AF_OPEN = /[?&]autosave=1/.test(location.search);   /* read now: the My data page tidies its address later */
+  NS.folderHome = function () { window.open(HOME.href + '?autosave=1', '_blank', 'noopener'); };
+  function folderOn(name) { NS.toast(NS.t('oa.done', { name: name })); hideReminder(); afBar(null); }
   NS.folderPick = function () {
+    if (!NS.folderHere()) { NS.folderHome(); return Promise.reject(new Error('elsewhere')); }
     return window.showDirectoryPicker({ id: 'ns-backup', mode: 'readwrite', startIn: 'documents' }).then(function (h) {
-      return folderSet(h).then(function () { return NS.folderWrite(true); }).then(function () { NS.toast(NS.t('af.on', { name: h.name })); return h.name; });
+      return folderSet(h).then(function () { return NSStore.autosave('afWrite', { now: 1 }); }).then(function () { folderOn(h.name); return h.name; });
     });
   };
-  NS.folderOff = function () { return folderSet(null).then(function () { NS.toast(NS.t('af.off')); }); };
-  NS.folderStatus = function () {
-    if (!NS.folderSupported()) return Promise.resolve({ supported: false });
-    return folderGet().then(function (h) {
-      if (!h) return { supported: true, on: false };
-      return h.queryPermission({ mode: 'readwrite' }).then(function (p) { return { supported: true, on: true, name: h.name, allowed: p === 'granted' }; });
-    });
-  };
-  /* ask = true only inside a click, because the browser asks for permission again after a restart */
-  NS.folderWrite = function (ask) {
-    if (!NS.folderSupported()) return Promise.resolve(false);
+  NS.folderAllow = function () {
+    if (!NS.folderHere()) { NS.folderHome(); return Promise.resolve(false); }
     return folderGet().then(function (h) {
       if (!h) return false;
-      return h.queryPermission({ mode: 'readwrite' }).then(function (p) {
-        if (p === 'granted') return true;
-        return ask ? h.requestPermission({ mode: 'readwrite' }).then(function (q) { return q === 'granted'; }) : false;
-      }).then(function (ok) {
-        if (!ok) return false;
-        return NS.backupData().then(function (b) {
-          return h.getFileHandle(BACKUP_NAME + '.json', { create: true }).then(function (fh) { return fh.createWritable(); })
-            .then(function (w) { return w.write(JSON.stringify(b, null, 1)).then(function () { return w.close(); }); })
-            .then(function () { return NSStore.meta('lastBackup', Date.now()); }).then(function () { hideReminder(); return true; });
-        });
+      return h.requestPermission({ mode: 'readwrite' }).then(function (q) {
+        if (q !== 'granted') return false;
+        return NSStore.autosave('afWrite', { now: 1 }).then(function () { folderOn(h.name); return true; });
       });
     }).catch(function () { return false; });
   };
+  NS.folderOff = function () {
+    return NSStore.autosave('afOff').then(function () { NS.toast(NS.t('oa.offt')); afBar(null); });
+  };
+  /* {supported, on, name, file, allowed, waiting, last}; home: false when the data home could not be reached */
+  NS.folderStatus = function () {
+    if (!NS.folderSupported()) return Promise.resolve({ supported: false });
+    return NSStore.autosave('afStatus').then(function (st) { return st || { supported: true, on: false, home: false }; },
+      function () { return { supported: true, on: false, home: false }; });
+  };
+  /* after a save: the data home writes the file a moment later (it also notices changes by itself; this only hurries it) */
+  NS.folderWrite = function () {
+    if (!NS.folderSupported()) return Promise.resolve(false);
+    return NSStore.autosave('afWrite').catch(function () { return false; });
+  };
+
+  /* "Auto save paused" (the browser wants its OK again) and "choose your folder once more" (a folder chosen on one site
+     before auto save became one for all): one slim bar on every site */
+  function afBar(key) {
+    var bar = NS.$('#ns-afbar');
+    if (!key) { if (bar) bar.remove(); return; }
+    if (bar || !document.body || afBar.later) return;
+    bar = NS.el('div', { id: 'ns-afbar', class: 'remind', role: 'status' });
+    bar.innerHTML = '<div class="wrap"><span></span><button type="button" class="btn" data-act="' + (key === 'oa.moved' ? 'folder-pick' : 'folder-allow') + '"></button><button type="button" class="btn" data-act="af-later"></button></div>';
+    NS.$('span', bar).textContent = NS.t(key);
+    NS.$('[data-act^="folder"]', bar).textContent = NS.t(key === 'oa.moved' ? 'md.choose' : 'oa.resume');
+    NS.$('[data-act="af-later"]', bar).textContent = NS.t('later');
+    var at = NS.$('#main') || document.body;
+    at.insertBefore(bar, at.firstChild);
+  }
+  document.addEventListener('ns-autosave', function (e) {
+    if (e.detail === 'ok') { afBar(null); hideReminder(); }
+    else if (e.detail === 'ask' && NS.folderSupported()) afBar('oa.paused');
+  });
+  /* back from my.niveshsahayak.in (folder allowed there): the bar goes */
+  window.addEventListener('focus', function () {
+    if (!NS.$('#ns-afbar')) return;
+    NS.folderStatus().then(function (st) { if (!st.on || st.allowed) { afBar(null); if (st.on) NS.folderWrite(); } });
+  });
+  /* start: an older version kept the folder per site; that choice can't be moved, so ask once to choose it on My data */
+  function folderStart() {
+    if (!NS.folderSupported() || window.top !== window) return;
+    var old = location.origin === HOME.origin ? Promise.resolve(null) : folderGet().catch(function () { return null; });
+    old.then(function (h) {
+      return NS.folderStatus().then(function (st) {
+        if (h) folderSet(null).catch(function () {});
+        if (h && st.home !== false && !st.on) afBar('oa.moved');
+        if (NS.folderHere() && AF_OPEN) { NS._mdTab = 'af'; NS.openMyData(); }
+      });
+    });
+  }
+  if (document.readyState === 'complete') setTimeout(folderStart, 1500); else window.addEventListener('load', function () { setTimeout(folderStart, 1500); });
 
   /* ---------- "My data" dialog (same on every site): a settings window with a side list of parts, each part = rows
      (name + one status line + "?" for the long help + small buttons on the right). Other files add rows/parts through NS.mdExt
@@ -254,7 +300,14 @@
       var T = NS.t, E = NS.esc, B = function (act, key, pri) { return '<button type="button" class="btn sm' + (pri ? ' primary' : '') + '" data-act="' + act + '">' + E(T(key)) + '</button>'; };
       var lastTxt = last ? new Date(last).toLocaleString('en-IN', { dateStyle: 'medium', timeStyle: 'short' }) : T('md.never');
       var on = '<i class="md-dot on"></i>', off = '<i class="md-dot"></i>', warn = '<i class="md-dot warn"></i>';
-      var fTxt = !f.supported ? '' : f.on ? (f.allowed ? on + E(T('md2.on')) : warn + E(T('md2.ask'))) + ' · <bdi class="mono">' + E(f.name) + '</bdi>' : off + E(T('md2.off'));
+      var fTxt = !f.supported ? '' : f.home === false ? warn + E(T('oa.nohome')) : f.on ? (f.allowed ? on + E(T('md2.on')) : warn + E(T('md2.ask'))) + ' · <bdi class="mono">' + E(f.name) + '</bdi>' : off + E(T('md2.off'));
+      /* the one auto save: chosen and allowed on my.niveshsahayak.in; elsewhere the buttons open it in a new tab (↗) */
+      var here = NS.folderHere(), away = here ? '' : ' ↗';
+      var FB = function (act, key, pri) { return '<button type="button" class="btn sm' + (pri ? ' primary' : '') + '" data-act="' + act + '">' + E(T(key)) + away + '</button>'; };
+      var afPane = !f.supported ? '' : NS.mdRow(T('oa.t'), fTxt + (f.on && f.last ? '<br>' + E(T('md.last')) + ' ' + E(new Date(f.last).toLocaleString('en-IN', { dateStyle: 'medium', timeStyle: 'short' })) : ''),
+          (f.on ? T('oa.on', { file: f.file || BACKUP_NAME + '.json', name: f.name }) + (f.allowed ? '' : ' ' + T('oa.ask')) : T('oa.off')),
+          f.home === false ? '' : f.on ? (f.allowed ? '' : FB('folder-allow', 'md.allow', 1)) + B('folder-off', 'md.turnoff') : FB('folder-pick', 'md.choose', 1)) +
+        '<p class="soft">' + E(T('oa.all')) + (here ? '' : ' ' + E(T('oa.away'))) + '</p>';
       var restore = '<label class="btn sm">' + E(T('md.restore')) + '<input type="file" accept=".json,application/json" data-act="restore" hidden></label>';
       var hub = '<a class="btn sm" href="https://my.niveshsahayak.in/" target="_blank" rel="noopener">' + E(T('md2.open')) + ' ↗</a>';
       var tabs = [['ov', 'md2.ov'], ['bk', 'md2.bk']].concat(f.supported ? [['af', 'md2.folder']] : []).concat([['ac', 'b3.ac.t']]);
@@ -275,8 +328,7 @@
           '<p class="hp-tip" id="md-tip-w" hidden>' + E(T(shared ? 'md.shared' : 'md.local')) + '</p>' +
           '<div class="md-bar">' + B('backup', 'md.save', 1) + restore + hub + '</div>') +
         pane('bk', NS.mdRow(T('md2.file'), (last ? on : warn) + E(T('md.last')) + ' ' + E(lastTxt), T('md.move'), B('backup', 'md.save', 1) + restore)) +
-        (f.supported ? pane('af', NS.mdRow(T('md.autot'), fTxt, f.on ? T('md.auton', { file: BACKUP_NAME + '.json', name: f.name }) + (f.allowed ? '' : ' ' + T('md.autoask')) : T('md.autooff'),
-          f.on ? (f.allowed ? '' : B('folder-allow', 'md.allow', 1)) + B('folder-off', 'md.turnoff') : B('folder-pick', 'md.choose', 1))) : '') +
+        (f.supported ? pane('af', afPane) : '') +
         pane('ac', '') +
         '</div></div>';
       (NS.mdExt || []).forEach(function (f) { try { f(body); } catch (e) {} });   /* extra parts from other files (safe.js) */
@@ -306,12 +358,14 @@
     var a = t.getAttribute('data-act');
     /* on the My data page itself, redraw it ("Last backup" changes); elsewhere open the My data box */
     if (a === 'backup') NS.downloadBackup().then(function () { if (document.getElementById('my-app')) document.dispatchEvent(new CustomEvent('ns-data')); else NS.openMyData(); });
-    else if (a === 'folder-pick') NS.folderPick().then(NS.openMyData, function () {});
-    else if (a === 'folder-allow') NS.folderWrite(true).then(NS.openMyData);
-    else if (a === 'folder-off') NS.folderOff().then(NS.openMyData);
+    else if (a === 'folder-pick') NS.folderPick().then(mdAgain, function () {});
+    else if (a === 'folder-allow') NS.folderAllow().then(mdAgain);
+    else if (a === 'folder-off') NS.folderOff().then(mdAgain);
+    else if (a === 'af-later') { afBar.later = true; afBar(null); }
     else if (a === 'my-data') { NS._mdTab = 'ov'; NS.openMyData(); }
     else if (a === 'remind-later') { var r = NS.$('#ns-remind'); if (r) r.hidden = true; NSStore.meta('lastBackup', Date.now() - 4 * 864e5); }
   });
+  function mdAgain() { if (NS.$('#ns-mydata[open]')) NS.openMyData(); }
   document.addEventListener('change', function (e) {
     var t = e.target;
     if (t.getAttribute && t.getAttribute('data-act') === 'restore' && t.files && t.files[0]) {

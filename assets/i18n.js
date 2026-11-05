@@ -1201,6 +1201,19 @@
     /* My data window as a settings panel (core.js openMyData) */
     'md2.ov': 'Overview', 'md2.bk': 'Backup and restore', 'md2.folder': 'Auto-save folder', 'md2.where': 'Data kept',
     'md2.on': 'On', 'md2.off': 'Off', 'md2.ask': 'On, needs your OK', 'md2.file': 'Backup file', 'md2.open': 'Open full data manager',
+    /* One auto save (core.js folder*, vault.js afWrite): one folder for every Nivesh Sahayak site and the App */
+    'oa.t': 'One auto save for all tools (computer only)',
+    'oa.on': 'On: every save, on any Nivesh Sahayak site or in the App, updates {file} in the folder {name}.',
+    'oa.off': 'Choose a folder once (a OneDrive or Google Drive folder is best). Then every save, on every Nivesh Sahayak site and in the App, keeps one full backup file there.',
+    'oa.all': 'One setting covers every Nivesh Sahayak tool: the file holds all businesses, customers and suppliers, items, every document, money entries, stock, accounts and settings.',
+    'oa.away': 'The folder is chosen on My data (my.niveshsahayak.in): the button opens it in a new tab. Choose it once there and it works everywhere.',
+    'oa.ask': 'The browser needs your OK again, for example after a restart. Tap “Allow auto-save again” and choose “Allow on every visit” so it keeps working.',
+    'oa.done': 'Auto-save is on for all Nivesh Sahayak tools: every save updates the backup file in “{name}”.',
+    'oa.offt': 'Auto-save is off for all Nivesh Sahayak tools.',
+    'oa.paused': 'Auto-save is paused: the browser needs your OK again. Your work is saved in this browser.',
+    'oa.resume': 'Resume auto-save',
+    'oa.moved': 'Auto-save now works once for all Nivesh Sahayak tools. Please choose your backup folder once more, on My data.',
+    'oa.nohome': 'My data (my.niveshsahayak.in) could not be reached just now, so auto-save waits. Reload the page to try again.',
     'app.stmt': 'Statement',
     /* Party and stock groups (my.js Groups screens, party and item forms, Tally masters) */
     'grp.debtors': "Customers",
