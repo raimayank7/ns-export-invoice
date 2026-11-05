@@ -17,7 +17,11 @@
   var SEARCH = 'M11 4a7 7 0 1 0 0 14 7 7 0 0 0 0-14M20 20l-4-4';
   function ic(d) { return '<svg class="ic" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="' + d + '"/></svg>'; }
   /* icons for the App's own screens (the other side-menu icons are CSS masks in desk.css, by data-ic) */
-  var SECIC = { home: 'home', sales: 'doc', money: 'money', dues: 'clock', buy: 'cart', parties: 'people', cash: 'bank', chq: 'cheque', books: 'book', khata: 'book', preg: 'cart', ebook: 'cart' };
+  var SECIC = { home: 'home', sales: 'doc', money: 'money', dues: 'clock', buy: 'cart', parties: 'people', cash: 'bank', chq: 'cheque', books: 'book', khata: 'book', preg: 'cart', ebook: 'cart',
+    repeat: 'repeat', reports: 'chart', b2jv: 'journal', b2fa: 'asset', b2gd: 'box', b2make: 'factory', b2profit: 'trend', b2sman: 'badge', b2year: 'calendar',
+    entries: 'list', low: 'alert', biz: 'shop', party: 'people', item: 'box', doc: 'doc', settings: 'set', backup: 'data', bin: 'trash', log: 'clock' };
+  /* screen lists that stay inside the page (my., the stock site...) get the same icons */
+  function secIcons() { $$('.hub-nav a[data-sec]:not([data-ic])').forEach(function (a) { var k = SECIC[a.getAttribute('data-sec')]; if (k) a.setAttribute('data-ic', k); }); }
 
   /* ---------- in-app confirm box: NS.ask(message, {ok, no, danger}) -> Promise<boolean> ---------- */
   var askDlg;
@@ -59,6 +63,7 @@
   function toggleMenu() { if (wide()) mini(); else drawer(!root.classList.contains('side-open')); }
   /* the App (and the money door sites) keep their own screen list: it moves to the top of the side menu */
   function adoptHub() {
+    secIcons();
     var hub = $('#app .hub-nav'), own = $('.side-own', side) || null;
     if (!hub || hub.hasAttribute('data-desk')) return;
     hub.setAttribute('data-desk', '');
@@ -191,7 +196,7 @@
       $$('a', g).forEach(function (a) {
         var sec = a.getAttribute('data-sec'), i = sec ? $$('#ns-side a[data-sec]').indexOf(a) : -1;
         out.push({ g: g.getAttribute('data-g') === 'docs' || g.getAttribute('data-g') === 'more' ? 'new' : gk, t: (a.textContent || '').trim(),
-          k: a.getAttribute('data-ic') === 'doc' && /billing/.test(a.href) ? 'Alt+N' : i >= 0 && i < 9 ? 'Alt+' + (i + 1) : '', run: function () { a.click(); } });
+          k: a.getAttribute('data-ic') === 'd-billing' ? 'Alt+N' : i >= 0 && i < 9 ? 'Alt+' + (i + 1) : '', run: function () { a.click(); } });
       });
     });
     var app = A();
@@ -319,6 +324,7 @@
   window.addEventListener('online', net); window.addEventListener('offline', net);
   document.addEventListener('ns-lang', status);
   window.addEventListener('focus', status);
+  document.addEventListener('ns-data', status);
   function init() { build(); }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init); else init();
 })();

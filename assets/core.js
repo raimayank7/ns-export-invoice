@@ -262,7 +262,7 @@
       var pane = function (k, html) { return '<section class="md-pane" role="tabpanel" id="md-p-' + k + '" aria-labelledby="md-t-' + k + '" data-md-pane="' + k + '"' + (k === cur ? '' : ' hidden') + '>' + html + '</section>'; };
       body.innerHTML =
         '<div class="md-wrap"><div class="md-nav" role="tablist" aria-orientation="vertical">' + tabs.map(function (t) {
-          return '<button type="button" role="tab" id="md-t-' + t[0] + '" aria-controls="md-p-' + t[0] + '" aria-selected="' + (t[0] === cur) + '" tabindex="' + (t[0] === cur ? 0 : -1) + '" data-md-tab="' + t[0] + '">' + E(T(t[1])) + '</button>';
+          return '<button type="button" role="tab" id="md-t-' + t[0] + '" aria-controls="md-p-' + t[0] + '" aria-selected="' + (t[0] === cur) + '" tabindex="' + (t[0] === cur ? 0 : -1) + '" data-md-tab="' + t[0] + '" data-ic="' + { ov: 'home', bk: 'data', af: 'save', ac: 'send' }[t[0]] + '">' + E(T(t[1])) + '</button>';
         }).join('') + '</div><div class="md-panes">' +
         pane('ov',
           '<table class="md-counts"><tr>' + [[r[0], 'md.biz'], [r[1], 'md.party'], [r[2], 'md.item'], [r[3], 'md.doc']].map(function (c) {
@@ -319,16 +319,23 @@
     }
   });
 
+  /* the business a new document starts with: the default chosen in Settings, or the only one saved (a first visitor who
+     added one business should not have to pick it) */
+  NS.defaultBiz = function (cfg) {
+    if (cfg && cfg.defBiz) return NSStore.get('biz', cfg.defBiz).catch(function () {});
+    return NSStore.list('biz').then(function (l) { return l && l.length === 1 ? l[0] : undefined; }, function () {});
+  };
+
   /* ---------- one sponsor card (only where the page has a slot) ---------- */
   var RIVAL = /invoice|billing|bill\s?book|accounting|gst\s?software|vyapar|khatabook|zoho|tally|busy|marg|quickbooks|refrens|swipe/i;
   /* own (Ko-fi) and family (GroupChatOn sites) cards are never shown here; under the card a short line invites businesses to
-     promote themselves (sponsor.niveshsahayak.in/promote/). data-sponsor="rotate" (bottom of the App) moves to the next card every 30 s */
+     promote themselves (promo.niveshsahayak.in). data-sponsor="rotate" (bottom of the App) moves to the next card every 30 s */
   NS.sponsor = function () {
     var slot = NS.$('[data-sponsor]');
     if (!slot || NS._sp) return;
     NS._sp = true;
     var india = /Calcutta|Kolkata/.test((Intl.DateTimeFormat().resolvedOptions() || {}).timeZone || '');
-    var promo = function () { return '<p class="sp-promo"><a href="https://sponsor.niveshsahayak.in/promote/" target="_blank" rel="noopener">' + NS.esc(NS.t('sp.promo')) + ' →</a></p>'; };
+    var promo = function () { return '<p class="sp-promo"><a href="https://promo.niveshsahayak.in/" target="_blank" rel="noopener">' + NS.esc(NS.t('sp.promo')) + ' →</a></p>'; };
     var card = function (p) {
       var img = p.imgs && p.imgs.length ? p.imgs[Math.floor(Math.random() * p.imgs.length)] : '';
       return '<a class="sponsor" href="' + NS.esc(p.href) + '" target="_blank" rel="sponsored noopener">' +
@@ -475,16 +482,23 @@
     check: 'M5 12l5 5 9-10', data: 'M5 6c0-1.7 3-3 7-3s7 1.3 7 3-3 3-7 3-7-1.3-7-3M5 6v12c0 1.7 3 3 7 3s7-1.3 7-3V6M5 12c0 1.7 3 3 7 3s7-1.3 7-3',
     ext: 'M14 4h6v6M20 4l-9 9M18 14v6H4V6h6', wa: 'M4 20l1.3-4A8 8 0 1 1 8 18.7zM9 9c0 3 3 6 6 6l1-1.5-2-1-1 1c-1-.5-2-1.5-2.5-2.5l1-1-1-2z',
     money: 'M3 7h18v10H3zM12 9.5a2.5 2.5 0 1 0 0 5 2.5 2.5 0 0 0 0-5M6 10v4M18 10v4', clock: 'M12 4a8 8 0 1 0 0 16 8 8 0 0 0 0-16M12 8v4l3 2',
+    home: 'M3 11l9-7 9 7v9h-6v-6H9v6H3z', people: 'M9 4a4 4 0 1 0 0 8 4 4 0 0 0 0-8M2 21a7 7 0 0 1 14 0M16 4a4 4 0 0 1 0 8M18 14a6 6 0 0 1 4 7', box: 'M3 7l9-4 9 4v10l-9 4-9-4zM3 7l9 4 9-4M12 11v10', shop: 'M4 10v10h16V10M3 10l2-6h14l2 6zM9 20v-6h6v6', book: 'M4 4h6a2 2 0 0 1 2 2v14a2 2 0 0 0-2-2H4zM20 4h-6a2 2 0 0 0-2 2v14a2 2 0 0 1 2-2h6z', bank: 'M3 10l9-6 9 6M5 10v8M9 10v8M15 10v8M19 10v8M3 21h18', filter: 'M3 5h18l-7 8v6l-4 2v-8z', chart: 'M4 4v16h16M8 16v-5M12 16V8M16 16v-3', keyboard: 'M3 6h18v12H3zM7 10h1M11 10h1M15 10h1M7 14h10', eye: 'M2 12s4-7 10-7 10 7 10 7-4 7-10 7S2 12 2 12M12 9a3 3 0 1 0 0 6 3 3 0 0 0 0-6', camera: 'M4 7h4l2-3h4l2 3h4v13H4zM12 10a3.5 3.5 0 1 0 0 7 3.5 3.5 0 0 0 0-7', calc: 'M6 3h12v18H6zM9 7h6M9 11h1M12 11h1M15 11h1M9 15h1M12 15h1M15 15h1', calendar: 'M4 6h16v15H4zM4 10h16M8 3v4M16 3v4', cart: 'M4 5h2l2 10h10l2-7H7M9 19h.01M17 19h.01',
+    folder: 'M3 6h6l2 2h10v11H3z',
     file: 'M6 3h9l4 4v14H6zM14 3v5h5', link: 'M10 14a4 4 0 0 0 6 0l3-3a4 4 0 0 0-6-6l-1 1M14 10a4 4 0 0 0-6 0l-3 3a4 4 0 0 0 6 6l1-1'
   };
   /* first match wins: [regular expression over "data names + key + English words", icon] */
-  var ICRULES = [[/whats\s?app|\bwa\b/, 'wa'], [/print/, 'print'], [/backup|download|export|excel|csv|install/, 'down'], [/restore|import|upload/, 'up'],
+  var ICRULES = [[/whats\s?app|\bwa\b/, 'wa'], [/print/, 'print'], [/s-backup/, 'data'], [/desk\.keys|keyboard|shortcut/, 'keyboard'],
+    [/preview/, 'eye'], [/scan|camera/, 'camera'], [/\bpf\b|work out|calculat/, 'calc'], [/filt|\bcf\b|post-dated|bounce|below zero/, 'filter'],
+    [/get name|gst portal/, 'search'], [/backup|download|export|excel|csv|install/, 'down'], [/restore|import|upload/, 'up'],
     [/\bpdf\b|share/, 'share'], [/delete|remove|\brm\b|bin|trash|clear|-off\b/, 'trash'], [/report|tell|mistake/, 'flag'], [/later/, 'clock'],
-    [/\bsend\b|reminder|remind/, 'send'], [/lock|\bpin\b/, 'lock'], [/reset|again|undo|refresh/, 'reset'],
+    [/\bsend\b|reminder|remind/, 'send'], [/lock|\bpin\b/, 'lock'], [/reset|again|undo|refresh|reload/, 'reset'],
     [/\bsave|submit|\bok\b|use these|apply|done/, 'save'], [/\bnew\b|\badd\b|create/, 'plus'], [/edit|change|rename|series/, 'edit'], [/copy|duplicate/, 'copy'],
     [/close|cancel|dismiss/, 'x'], [/\bback\b|fback/, 'back'], [/search|find|lookup|fetch|check gstin/, 'search'], [/history|saved|list|register/, 'list'],
     [/setting|configur/, 'gear'], [/my.?data|vault/, 'data'], [/new tab|external|portal/, 'ext'],
-    [/paid|payment|money|receiv|cash/, 'money'], [/later|ageing|due/, 'clock'], [/open|convert|toinv|make invoice|next|go\b/, 'go'], [/doc|bill|invoice|statement|receipt/, 'file']];
+    [/paid|payment|money|receiv|cash|\bpay\b/, 'money'], [/later|ageing|due/, 'clock'], [/open|convert|toinv|make invoice|next|go\b/, 'go'], [/doc|bill|invoice|statement|receipt|stmt/, 'file'],
+    [/\bbk\b|book/, 'book'], [/b2pv|by item|by party|month|\bday\b|today|sale/, 'chart'], [/financial year|\bfy\b|year/, 'calendar'],
+    [/salesm|customer|supplier|part(y|ies)|tenant|employee/, 'people'], [/count|stock|godown|item/, 'box'], [/bank/, 'bank'],
+    [/\bdef\b|default/, 'check'], [/purchase|order/, 'cart'], [/folder/, 'folder']];
   function icFor(b) {
     if (b.getAttribute('data-ic')) return b.getAttribute('data-ic');
     var said = (b.textContent || '').trim();
@@ -495,8 +509,10 @@
     for (var i = 0; i < ICRULES.length; i++) if (ICRULES[i][0].test(words)) return ICRULES[i][1];
     return '';
   }
+  /* besides .btn: text-link buttons, the status bar's buttons, Edit/Preview tabs and the My data window's part list */
+  var ICSEL = '.btn,button.link,.sbar .linkish,[data-tab-btn]';
   function iconize(b) {
-    if (!b.classList || !b.classList.contains('btn') || b.classList.contains('icon-btn') || b.querySelector('svg,img') || b.closest('[data-noic]')) return;
+    if (!b.matches || !b.matches(ICSEL) || b.classList.contains('icon-btn') || b.classList.contains('hp-q') || b.querySelector('svg,img') || b.closest('[data-noic]')) return;
     /* "+ Add salesman": the typed plus becomes the drawn one */
     var tn = b.firstChild && b.firstChild.nodeType === 3 ? b.firstChild : null;
     if (tn && /^\s*\+\s*(?=[\p{L}\p{N}])/u.test(tn.nodeValue)) { tn.nodeValue = tn.nodeValue.replace(/^\s*\+\s*/, ''); b.setAttribute('data-ic', 'plus'); }
@@ -506,12 +522,12 @@
   NS.btnIcons = function () {
     if (!document.body) return;
     var todo = new Set(), queued = false;
-    function run() { queued = false; todo.forEach(function (n) { if (n.isConnected) { iconize(n); if (n.querySelectorAll) [].forEach.call(n.querySelectorAll('.btn'), iconize); } }); todo.clear(); }
+    function run() { queued = false; todo.forEach(function (n) { if (n.isConnected) { iconize(n); if (n.querySelectorAll) [].forEach.call(n.querySelectorAll(ICSEL), iconize); } }); todo.clear(); }
     function add(n) { if (n.nodeType !== 1) return; todo.add(n); if (!queued) { queued = true; setTimeout(run, 16); } }   /* a timer, not a frame: background tabs draw no frames */
     add(document.body);
     new MutationObserver(function (ms) {
       ms.forEach(function (m) {
-        if (m.target.nodeType === 1 && m.target.classList.contains('btn')) add(m.target);   /* its words were replaced (language change) */
+        if (m.target.nodeType === 1 && m.target.matches(ICSEL)) add(m.target);   /* its words were replaced (language change) */
         [].forEach.call(m.addedNodes, add);
       });
     }).observe(document.body, { subtree: true, childList: true });

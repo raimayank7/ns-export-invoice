@@ -820,9 +820,19 @@
     'hs.s.same': 'Same as the goods', 'hs.s.or': 'or', 'hs.s.iv': 'What “credit of input tax not taken” means (Explanation (iv))',
     'hs.s.many': 'More than one rate. Pick the item whose description fits your service; a rate with a condition applies only if you meet the condition.',
     'hs.s.none': 'No item of the services Table names this heading.',
-    'hs.s.ex': 'Many services are exempt (nil) under Notification 12/2017-Central Tax (Rate), for example most health care and education. That list is not in this tool yet; check it before charging GST.',
     'hs.s.src': 'Service rates word for word from Notification 11/2017-Central Tax (Rate) with every amendment up to 06/2026 (in force from 1 Nov 2026). Checked on {d}. The rate shown is the total GST; the notification states the central tax, which is half.',
     'hs.s.found': 'Service rate items',
+    'hs.x.h': 'Exemptions that may apply (Notification 12/2017)',
+    'hs.x.lead': 'GST is nil (exempt) only when your supply fits the description of one of these entries, and its condition if it has one. Otherwise the rate above applies.',
+    'hs.x.none': 'No exemption entry names this heading. Entries written for any service may still apply (below).',
+    'hs.x.any': 'Exemptions written for any service, mostly by or to government bodies and charities ({n})',
+    'hs.x.nil': 'Exempt', 'hs.x.cond': 'Condition',
+    'hs.x.defs': 'Meaning of words used here (paragraph 2 of the notification)',
+    'hs.x.expl': 'Explanation (paragraph 3 of the notification)',
+    'hs.x.maybe': 'Rate {r} in the rate notification, but some services under this heading are exempt. Check the exemptions below before you charge GST.',
+    'hs.x.ind': 'The notification says its headings are only indicative (paragraph 3), so also search the exemptions by words in the search box.',
+    'hs.x.src': 'Exemptions word for word from Notification 12/2017-Central Tax (Rate) with every amendment up to 07/2026 (in force from 1 Nov 2026). Checked on {d}.',
+    'hs.x.found': 'Exemption entries',
     /* links to the Nivesh Sahayak App from every site */
     'nav.app': 'Nivesh Sahayak App', 'hub.app': 'Dues, money received and paid, purchases, expenses and party statements in one place',
     /* Batch 3: locked backup, Google Drive sync, send to accountant, help tips, GST calendar */
@@ -1173,7 +1183,8 @@
     'sr.more': 'Digits and the financial year are set in', 'sr.save': 'Save the series', 'sr.saved': 'Number series saved.', 'sr.fail': 'It could not be saved. Please try again.',
     /* My data window as a settings panel (core.js openMyData) */
     'md2.ov': 'Overview', 'md2.bk': 'Backup and restore', 'md2.folder': 'Auto-save folder', 'md2.where': 'Data kept',
-    'md2.on': 'On', 'md2.off': 'Off', 'md2.ask': 'On, needs your OK', 'md2.file': 'Backup file', 'md2.open': 'Open full data manager'
+    'md2.on': 'On', 'md2.off': 'Off', 'md2.ask': 'On, needs your OK', 'md2.file': 'Backup file', 'md2.open': 'Open full data manager',
+    'app.stmt': 'Statement'
   };
 
   var packs = { en: EN }, cur = 'en';

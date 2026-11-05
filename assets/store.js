@@ -25,13 +25,15 @@
       var r = indexedDB.open('ns-local', 2);
       r.onupgradeneeded = function () { STORES.forEach(function (s) { if (!r.result.objectStoreNames.contains(s)) r.result.createObjectStore(s, { keyPath: 'id' }); }); };
       r.onblocked = blockedNote;
+      var slow = setTimeout(blockedNote, 4000);   /* "blocked" reaches only the first waiting page; later ones just wait */
       r.onsuccess = function () {
+        clearTimeout(slow);
         var d = r.result;
         d.onversionchange = function () { d.close(); ldbp = null; };   /* a newer page needs to upgrade: let it */
         unblocked();
         res(d);
       };
-      r.onerror = function () { rej(r.error); };
+      r.onerror = function () { clearTimeout(slow); rej(r.error); };
     });
     return ldbp;
   }
@@ -77,8 +79,11 @@
     var t = window.NS && NS.t ? NS.t('db.blocked') : 'Close the other Nivesh Sahayak tabs, or reload them. This page then continues by itself.';
     var bar = document.createElement('div');
     bar.id = 'ns-blocked'; bar.className = 'remind'; bar.setAttribute('role', 'alert');
-    bar.innerHTML = '<div class="wrap"><span></span></div>';
+    bar.innerHTML = '<div class="wrap"><span></span> <button type="button" class="btn sm"></button></div>';
     bar.firstChild.firstChild.textContent = t;
+    /* once the old tab is closed the data opens, but a page that already fell back to its own storage needs one reload */
+    var rb = bar.querySelector('button'); rb.textContent = window.NS && NS.t ? NS.t('blk.reload') : 'Reload the page';
+    rb.onclick = function () { location.reload(); };
     document.body.insertBefore(bar, document.body.firstChild);
   }
   function unblocked() { var b = document.getElementById('ns-blocked'); if (b) b.remove(); }
@@ -121,7 +126,14 @@
       function onMsg(e) {
         if (e.origin !== VAULT_ORIGIN || !e.data || e.data.ns !== 'vault' || !('ready' in e.data)) return;
         window.removeEventListener('message', onMsg);
-        finish(e.data.ready ? 'vault' : 'local');
+        if (!done) return finish(e.data.ready ? 'vault' : 'local');
+        /* the data home answered after this page gave up waiting (slow first load on mobile data): switch to it now,
+           bring in anything saved here meanwhile, and let the page draw again ('ns-data') */
+        if (e.data.ready && mode === 'local') {
+          mode = 'vault';
+          var redraw = function () { document.dispatchEvent(new CustomEvent('ns-data')); };
+          moveLocalIntoVault().then(redraw, redraw);
+        }
       }
       window.addEventListener('message', onMsg);
       setTimeout(function () { finish('local'); }, 6000);

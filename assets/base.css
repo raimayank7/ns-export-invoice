@@ -1,4 +1,6 @@
 /* Nivesh Sahayak document sites: shared look. Fonts = the Nivesh Sahayak set (Plus Jakarta Sans, Public Sans, IBM Plex Mono). */
+/* anything the code marks hidden stays hidden, whatever display a class gives it (visitor walk: cheque fields showed for UPI) */
+[hidden]{display:none!important}
 :root{
   --navy:#0B3B5B;--amber:#F5A524;
   --bg:#F6F8FB;--surface:#FFFFFF;--surface2:#EEF3F8;--ink:#0F1B2A;--soft:#4A5B6E;--line:#D9E2EC;
@@ -47,9 +49,9 @@ h1,h2,h3,h4{font-family:var(--font-head);line-height:1.25;letter-spacing:-.01em}
 @media (max-width:720px){.hd nav a.hide-sm{display:none}.brand small{display:none}}
 @media (max-width:380px){.brand b{font-size:.9rem}.brand .mk{height:28px}.hd .wrap{gap:8px}}
 .lang-pick{width:auto;max-width:150px;min-height:40px;padding:6px 28px 6px 10px;font-size:.88rem;border-radius:10px}
-@media (max-width:400px){.lang-pick{max-width:86px!important;padding-right:22px}}
+@media (max-width:400px){.lang-pick{max-width:120px!important;padding-right:22px}}   /* the header has its own second row on phones now: room for the whole language name */
 /* smallest phones: brand name must not run under the language picker */
-@media (max-width:360px){.lang-pick{max-width:66px!important;padding-left:6px}.hd nav{gap:3px}.hd nav .btn.sm{padding-left:7px;padding-right:7px;font-size:.8rem}.hd .icon-btn{width:36px}}
+@media (max-width:360px){.lang-pick{max-width:100px!important;padding-left:6px}.hd nav{gap:3px}.hd nav .btn.sm{padding-left:7px;padding-right:7px;font-size:.8rem}.hd .icon-btn{width:36px}}
 @media (max-width:520px){.lang-pick{max-width:104px}.brand small{display:none}.brand b{font-size:.92rem}.brand b .soft{display:block;font-size:.78rem;font-weight:700}.hd nav{gap:4px}}
 .guide-en{background:var(--surface2);border-radius:10px;padding:8px 14px;margin-top:12px;font-size:.92rem;color:var(--soft)}
 /* right-to-left languages (Urdu, Kashmiri, Sindhi): the layout mirrors; codes, numbers and the printed sheet stay left-to-right */
@@ -321,6 +323,9 @@ html.embed .tell{display:none}
 /* line icons on text buttons (core.js NS.btnIcons) */
 .btn>svg.bi{width:1.1em;height:1.1em;flex:none;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
 .btn.sm>svg.bi{width:1em;height:1em}
+:is(.link,.linkish,[data-tab-btn])>svg.bi{width:1.05em;height:1.05em;flex:none;vertical-align:-.17em;margin-inline-end:5px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.md-nav button{display:flex;align-items:center;gap:2px}
+@media (max-width:620px){.md-nav button{justify-content:center}}
 /* number series: My data › Settings cards and the maker's "Change number series" */
 .dc-sub{font-size:.95rem;margin:16px 0 8px;color:var(--soft);text-transform:uppercase;letter-spacing:.04em}
 .dc-top{margin:0 0 4px}
@@ -331,3 +336,5 @@ html.embed .tell{display:none}
 .dc-row{display:grid;gap:4px}.dc-row label{font-size:.85rem;color:var(--soft)}
 .dc-next{font-size:.82rem;color:var(--soft)}
 .series-link{display:block;margin-top:4px;text-align:start;font-size:.82rem}
+/* touch screens: the small "?" tips and text-style buttons get a finger-sized tap area (visitor walk, 5 Nov 2026) */
+@media (pointer:coarse){.hp-q{min-width:32px;min-height:32px}button.link{min-height:36px}}

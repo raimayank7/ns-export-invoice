@@ -950,7 +950,7 @@
       /* a fresh start: the hub's defaults and the default business */
       var seller = doc.seller;
       doc = blank(); doc.seller = seller;
-      return (CFG.defBiz ? NSStore.get('biz', CFG.defBiz).catch(function () {}) : Promise.resolve()).then(function (b) {
+      return NS.defaultBiz(CFG).then(function (b) {
         if (b && !doc.seller.name) { doc.seller = Object.assign(blank().seller, b); delete doc.seller.id; delete doc.seller.created; delete doc.seller.updated; }
         render();
         return suggestNumber(true);
