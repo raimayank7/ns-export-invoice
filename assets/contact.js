@@ -1,7 +1,7 @@
 /* "Found a mistake? Report it" and the contact form, on every Nivesh Sahayak site (build.py adds this file to every site).
    build.py draws a slim notice above the footer ([data-tell], button [data-tell-open]); the Contact page has a [data-ns-contact]
-   box whose plain link (to the niveshsahayak.in contact page) stays as the fallback. The form posts to the owner's Google Apps
-   Script web app (apps-script/Contact.gs, URL in NS_CFG.contact), which emails it to the owner. No URL yet: the old link stays.
+   box whose plain link (to the niveshsahayak.in contact page) stays as the fallback. The form posts to the owner's Cloudflare
+   Worker (repo ns-contact, URL in NS_CFG.contact), which saves it in the owner's inbox. No URL: the old link stays.
    Sent along so a problem can be found: page address, language, screen size, browser. Screen words: NS.t('ct.<key>'). */
 (function () {
   'use strict';
