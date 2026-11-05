@@ -220,9 +220,14 @@ dialog.md-dlg{width:min(820px,calc(100vw - 24px))}
 .gf-btn{display:inline-block;margin-top:4px;font-weight:600}
 @media (max-width:520px){.gf-dlg .fg{grid-template-columns:1fr}}
 
-/* shown inside the Nivesh Sahayak App (html.embed, set at first paint when the page is in a frame): only the tool */
+/* shown inside the Nivesh Sahayak App (html.embed, set at first paint when the page is in a frame): only the tool;
+   a guide or any other page without a tool keeps its content (the App opens guides on its own screen too) */
 html.embed .hd,html.embed .ft,html.embed .remind,html.embed .skip,html.embed [data-guide-en],html.embed .sponsor-slot{display:none!important}
-html.embed #main>*:not(#tool):not(#my-app):not(dialog):not(script){display:none!important}
+html.embed #main:has(>#tool,>#my-app)>*:not(#tool):not(#my-app):not(dialog):not(script){display:none!important}
+/* the App's own copy of a maker (/do/<site>/): the App's screen already gives the side room */
+html.inapp body{background:transparent}
+html.inapp #main>#tool,html.inapp #main>#my-app{margin-top:0}
+@media (max-width:620px){html.inapp #main>.wrap{padding-inline:2px}}
 html.embed #main>#tool,html.embed #main>#my-app{margin-top:12px}
 
 /* motion: soft transitions everywhere (core.js NS.motion fades in panels, tabs and lists as they change); all off with "reduce motion" */

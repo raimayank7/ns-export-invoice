@@ -67,6 +67,8 @@
   function tcsNature(sec) { return TCS_NATURE.filter(function (n) { return n[0] === String(sec || '').trim(); })[0]; }
   function pk(v, kind) { return v && typeof v === 'object' ? v[kind] : v; }
   var BILLING = /^(localhost|127\.0\.0\.1)$/.test(location.hostname) ? 'http://localhost:8861/' : 'https://billing.niveshsahayak.in/';
+  /* to another maker: inside the Nivesh Sahayak App (inapp.js) the App opens it on its own screen */
+  function goTo(url) { if (!(NS.appGo && NS.appGo(url))) location.href = url; }
 
   /* words printed on the document (English only, readable by every buyer, bank and tax officer) */
   var P = { tax: 'TAX INVOICE', supply: 'BILL OF SUPPLY', plain: 'INVOICE', no: 'Invoice No.', date: 'Date', due: 'Due date', pos: 'Place of supply', rc: 'Reverse charge', ref: 'Order ref.', billto: 'Bill to', shipto: 'Ship to', gstin: 'GSTIN', ph: 'Phone', item: 'Item / service', hsn: 'HSN/SAC', qty: 'Qty', rate: 'Rate', disc: 'Disc.', taxable: 'Taxable value', gst: 'GST', amount: 'Amount', subtotal: 'Taxable value', cgst: 'CGST', sgst: 'SGST', igst: 'IGST', round: 'Round off', total: 'Total', words: 'Amount in words', summary: 'Tax summary', bank: 'Bank details', acc: 'A/c no.', ifsc: 'IFSC', branch: 'Branch', upi: 'Scan to pay by UPI', notes: 'Notes', terms: 'Terms and conditions', for: 'For', sign: 'Authorised signatory', yes: 'Yes', no2: 'No', supplynote: 'Composition taxable person, not eligible to collect tax on supplies.', quote: 'QUOTATION', estimate: 'ESTIMATE', qno: 'Quotation No.', eno: 'Estimate No.', valid: 'Valid until', qref: 'Enquiry ref.', qfor: 'Quotation for', efor: 'Estimate for', qnote: 'This is a quotation, not a tax invoice.', enote: 'This is an estimate. The final bill may differ.', paid: 'PAID', orig: 'Original for recipient', dup: 'Duplicate for transporter', trip: 'Triplicate for supplier',
@@ -878,7 +880,7 @@
         NSStore.get('doc', id).then(function (rec) {
           if (!rec) return;
           if (act === 'open' || act === 'copy') { dlg.close(); openDoc(rec, act === 'copy'); }
-          else if (act === 'inv') { location.href = BILLING + '?from=' + encodeURIComponent(id); }
+          else if (act === 'inv') { goTo(BILLING + '?from=' + encodeURIComponent(id)); }
           else if (act === 'paid') { rec.status = rec.status === 'paid' ? 'unpaid' : 'paid'; return NSStore.put('doc', rec).then(function () { if (editingId === id) { doc.status = rec.status; fillForm(); draw(); } renderHistory(); }); }
           else if (act === 'log') NS.showLog(id, t('b1.changesof', { no: rec.no }));
           else if (act === 'del' && NS.closedMsg && NS.closedMsg(rec.seller && rec.seller.name, rec.date)) NS.toast(NS.closedMsg(rec.seller && rec.seller.name, rec.date), 'bad');   /* closed year (docmore.js) */
@@ -920,7 +922,7 @@
   }
   /* ---------- quotation, proforma, sales order or challan -> invoice: saved first, then the billing site opens it by id from the shared data home ---------- */
   function toInvoice() {
-    save().then(function (rec) { location.href = BILLING + '?from=' + encodeURIComponent(rec.id); }).catch(function () {});
+    save().then(function (rec) { goTo(BILLING + '?from=' + encodeURIComponent(rec.id)); }).catch(function () {});
   }
   function fromQuote(id) {
     return NSStore.get('doc', id).then(function (q) {
@@ -972,6 +974,7 @@
     ed.addEventListener('change', onInput);
     doc = blank();
     var dr = loadDraft();
+    if (dr && dr.id && /[?&]new=1/.test(location.search)) dr = null;   /* the App's "New ..." (?new=1) starts a fresh document, not the saved one last opened */
     if (dr && T.split && T.kinds.indexOf((dr.doc || {}).kind) < 0) dr = null;   /* a draft of the other kind (from before the split) */
     if (dr) { doc = Object.assign(blank(), dr.doc); delete doc.lang; editingId = dr.id || null; }
     function render() { buildEditor(); fillForm(); draw(); setStatus(); labelButtons(); if (histOpen) renderHistory(); series(); }
@@ -1000,7 +1003,7 @@
       /* ?open=<id>: the Nivesh Sahayak App opens a saved document here to edit, print or share */
       if (open) {
         history.replaceState(null, '', location.pathname + location.hash);
-        return NSStore.get('doc', open).then(function (rec) { if (rec && (rec.type || 'invoice') === type && T.split && T.kinds.indexOf(rec.kind) < 0 && T.split[rec.kind]) { location.replace(kindSite(T.split[rec.kind]) + '?open=' + encodeURIComponent(open)); return; } if (rec && (rec.type || 'invoice') === type) { openDoc(rec, false); render(); } else NS.toast(t('conv.none'), 'bad'); }).catch(function () {});
+        return NSStore.get('doc', open).then(function (rec) { if (rec && (rec.type || 'invoice') === type && T.split && T.kinds.indexOf(rec.kind) < 0 && T.split[rec.kind]) { location.replace((NS.siteHref ? NS.siteHref(T.split[rec.kind]) : kindSite(T.split[rec.kind])) + '?open=' + encodeURIComponent(open)); return; } if (rec && (rec.type || 'invoice') === type) { openDoc(rec, false); render(); } else NS.toast(t('conv.none'), 'bad'); }).catch(function () {});
       }
       if (from) {
         history.replaceState(null, '', location.pathname + location.hash);

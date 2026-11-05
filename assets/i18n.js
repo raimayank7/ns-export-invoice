@@ -374,7 +374,7 @@
     'app.help': "How it works", 'app.helpp': "Bills you make on billing., cash-memo. and credit-note. show up here by themselves. Record money received and paid here; the app links it to bills, keeps advances and works out dues and cash in hand.", 'app.invfix': "Invoices settled here are marked Paid on the billing site too.", 'app.ex_rent': "Rent",
     'app.ex_power': "Electricity", 'app.ex_salary': "Salary and wages", 'app.ex_transport': "Transport and freight", 'app.ex_phone': "Phone and internet",
     'app.ex_repair': "Repairs and maintenance", 'app.ex_office': "Office expenses", 'app.ex_fuel': "Fuel", 'app.ex_bank': "Bank charges",
-    'app.ex_prof': "Professional fees", 'app.ex_ads': "Advertising", 'app.ex_misc': "Miscellaneous", 'app.back': "‹ Back", 'app.newdoc': "New document", 'app.newtab': "Open in a new tab",
+    'app.ex_prof': "Professional fees", 'app.ex_ads': "Advertising", 'app.ex_misc': "Miscellaneous", 'app.back': "‹ Back", 'app.newdoc': "New document", 'app.newtab': "Open in a new tab", 'app.fr_new': "New {doc}", 'app.fr_conv': "{doc} from a saved document",
     'app.sm_try': "Try it with sample data", 'app.sm_tryp': "See the app filled with a made-up hardware shop: bills of different ages, payments, dues, a quotation, a purchase bill and expenses. One tap removes it again.",
     'app.sm_on': "You are looking at sample data, made up to show what the app does.", 'app.sm_rm': "Remove sample data", 'app.sm_added': "Sample data added.",
     'app.qk_btn': "Search", 'app.qk_ph': "Search customers, bills, items or what you want to do…", 'app.qk_none': "Nothing found.",

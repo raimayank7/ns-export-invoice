@@ -221,7 +221,7 @@
         out.push({ g: 'doc', t: name + (d.no ? ' ' + d.no : '') + (who ? ' · ' + who : ''), s: (d.date ? NS.fmtDate(d.date) : '') + (d.total ? ' · ' + NS.money(d.total) : ''),
           run: function () {
             if (appRec) { if (app && app.openForm) app.openForm(formOf(d), { rec: d }); else location.href = appUrl(''); return; }
-            goUrl(siteUrl(site) + '?open=' + encodeURIComponent(d.id));
+            goUrl(app && app.docUrl && app.docUrl(d) || siteUrl(site) + '?open=' + encodeURIComponent(d.id));
           } });
       });
       return out;
