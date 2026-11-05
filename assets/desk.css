@@ -157,7 +157,8 @@ html.has-hub .hub>.hub-nav{display:none}
 /* confirm box and shortcut list */
 .desk-ask{border:0;border-radius:14px;padding:18px 18px 14px;width:min(440px,calc(100% - 24px));background:var(--surface);color:var(--ink);box-shadow:0 20px 60px rgba(0,0,0,.35)}
 .desk-ask p{margin:0 0 6px;font-size:1rem}
-.btn.danger{background:var(--bad);border-color:var(--bad);color:#fff}
+/* solid red button only in the confirm box; its text takes the page background colour, so it stays readable on the light pink red of dark mode */
+.desk-ask .btn.danger{background:var(--bad);border-color:var(--bad);color:var(--bg)}
 .desk-keys{border:0;border-radius:14px;padding:0 0 12px;width:min(520px,calc(100% - 24px));background:var(--surface);color:var(--ink);box-shadow:0 20px 60px rgba(0,0,0,.35)}
 .dk-hd{display:flex;justify-content:space-between;align-items:center;padding:12px 16px;border-bottom:1px solid var(--line)}
 .dk-hd h2{margin:0;font-size:1.1rem}

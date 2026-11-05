@@ -19,7 +19,7 @@
   /* icons for the App's own screens (the other side-menu icons are CSS masks in desk.css, by data-ic) */
   var SECIC = { home: 'home', sales: 'doc', money: 'money', dues: 'clock', buy: 'cart', parties: 'people', cash: 'bank', chq: 'cheque', books: 'book', khata: 'book', preg: 'cart', ebook: 'cart',
     repeat: 'repeat', reports: 'chart', b2jv: 'journal', b2fa: 'asset', b2gd: 'box', b2make: 'factory', b2profit: 'trend', b2sman: 'badge', b2year: 'calendar',
-    entries: 'list', low: 'alert', biz: 'shop', party: 'people', item: 'box', doc: 'doc', settings: 'set', backup: 'data', bin: 'trash', log: 'clock' };
+    entries: 'list', low: 'alert', biz: 'shop', party: 'people', pgroups: 'list', item: 'box', igroups: 'list', doc: 'doc', settings: 'set', backup: 'data', bin: 'trash', log: 'clock' };
   /* screen lists that stay inside the page (my., the stock site...) get the same icons */
   function secIcons() { $$('.hub-nav a[data-sec]:not([data-ic])').forEach(function (a) { var k = SECIC[a.getAttribute('data-sec')]; if (k) a.setAttribute('data-ic', k); }); }
 

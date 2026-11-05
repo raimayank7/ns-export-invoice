@@ -63,10 +63,12 @@
     var e = ex(d), bad = [], note = [], exp = /^EXP/.test(e.sup), s = d.seller, b = d.buyer;
     function need(ok, id, msg) { if (!ok) bad.push([id, msg]); }
     function place(who, pre) {
-      need(lines(who.addr)[0].length >= 1, pre + '-addr', t('ev.addr'));
-      need(clip(who.city, 50).length >= 3, pre + '-city', t('ev.city'));
-      need(/^[1-9]\d{5}$/.test(digits(who.pin)), pre + '-pin', t('ev.pin'));
-      need(!!who.state, pre + '-state', t('ev.state'));
+      /* say whose address it is: the same words ("Type the address") were shown for the business and the buyer */
+      var w = (pre === 's' ? t('lg.biz') : t('lg.billto')) + ': ';
+      need(lines(who.addr)[0].length >= 1, pre + '-addr', w + t('ev.addr'));
+      need(clip(who.city, 50).length >= 3, pre + '-city', w + t('ev.city'));
+      need(/^[1-9]\d{5}$/.test(digits(who.pin)), pre + '-pin', w + t('ev.pin'));
+      need(!!who.state, pre + '-state', w + t('ev.state'));
     }
     if (what === 'einv' && d.kind !== 'tax' && d.type !== 'exp') bad.push(['d-kind', t('ev.tax')]);
     need(NS.gstinCheck(s.gstin).ok && s.gstin.length === 15, 's-gstin', t(what === 'ewb' ? 'ev.ewbseller' : 'ev.sg'));

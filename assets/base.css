@@ -49,7 +49,9 @@ h1,h2,h3,h4{font-family:var(--font-head);line-height:1.25;letter-spacing:-.01em}
 .icon-btn{border:1px solid var(--line);background:var(--surface);color:var(--ink);border-radius:10px;width:40px;height:40px;display:grid;place-items:center;cursor:pointer;flex:none}
 .icon-btn svg{width:20px;height:20px}
 @media (max-width:1180px){.hd nav a.hide-md{display:none}}
-@media (max-width:720px){.hd nav a.hide-sm{display:none}.brand small{display:none}}
+/* header text links go to the side menu below laptop width: two long guide names pushed the header to 3 rows on tablets */
+@media (max-width:1023px){.hd nav a.hide-sm{display:none}}
+@media (max-width:720px){.brand small{display:none}}
 @media (max-width:380px){.brand b{font-size:.9rem}.brand .mk{height:28px}.hd .wrap{gap:8px}}
 .lang-pick{width:auto;max-width:150px;min-height:40px;padding:6px 28px 6px 10px;font-size:.88rem;border-radius:10px}
 @media (max-width:400px){.lang-pick{max-width:120px!important;padding-right:22px}}   /* the header has its own second row on phones now: room for the whole language name */
@@ -298,6 +300,17 @@ html.pin-wait #my-app,html.pin-wait #app,html.pin-wait .hero{visibility:hidden}
 .b1-due li{display:flex;flex-wrap:wrap;gap:6px 10px;align-items:center}
 .seg.cats{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0}
 .seg.cats [aria-pressed=true]{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+/* party and stock groups (my.js) */
+.seg.cats [aria-current=page]{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+.gfilter{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin:8px 0}
+.gfilter select{max-width:100%;min-width:0;flex:1 1 200px}
+.glist .glv1{margin-inline-start:22px}
+.glist .glv2{margin-inline-start:44px}
+.gnew{display:flex;gap:6px;margin-top:6px;flex-wrap:wrap}
+.gnew[hidden]{display:none}
+.gnew input{flex:1 1 140px;min-width:0}
+[data-gdel][aria-disabled=true]{opacity:.5}
+@media (max-width:420px){.glist .glv1{margin-inline-start:12px}.glist .glv2{margin-inline-start:24px}}
 /* Batch 2 (hubmore.js): rows of salesmen and custom fields in My data > Settings */
 .b2-row{display:grid;grid-template-columns:minmax(0,2fr) minmax(0,1fr) minmax(0,1.4fr) 44px;gap:8px;align-items:end;margin:0 0 10px;padding:10px;border:1px solid var(--line);border-radius:10px}
 .b2-row label{display:flex;flex-direction:column;gap:3px;font-size:.85rem;font-weight:600;min-width:0}

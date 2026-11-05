@@ -246,7 +246,7 @@
     function pk(d) { return key(partyName(d)); }
     function bill(d, side, amt) {
       if (amt <= 0) return;
-      var b = { id: d.id, no: d.no || d.billNo || '', date: d.date, due: d.due || '', side: side, total: r2(amt), left: r2(amt), type: d.type, kind: d.kind, party: partyName(d) };
+      var b = { id: d.id, no: d.no || d.billNo || '', date: d.date, due: d.due || '', side: side, total: r2(amt), left: r2(amt), type: d.type, kind: d.kind, party: partyName(d), by: [] };
       (open[pk(d)] = open[pk(d)] || []).push(b); byId[d.id] = b;
     }
     list.forEach(function (d) {
@@ -273,31 +273,37 @@
       else if (R === 'exp' && d.mode === 'credit') bill(d, 'pay', num(d.amount));
       else if (R === 'ob' && d.side !== 'cash' && d.side !== 'bank') bill(d, d.side === 'pay' ? 'pay' : 'recv', num(d.amount));
       else if (R === 'in') credits.push({ side: 'recv', amt: num(d.amount) + num(d.tds), alloc: d.alloc, d: d });
-      else if (R === 'sret') credits.push({ side: 'recv', amt: itemTotals(d).total, origNo: d.orig && d.orig.no, d: d });
       else if (R === 'refund') bill(d, 'recv', num(d.amount));   /* a refund paid out makes the customer "owe" it back against their advance */
+      else if (R === 'sret') credits.push({ side: 'recv', amt: itemTotals(d).total, origNo: d.orig && d.orig.no, d: d });
       else if (R === 'out') credits.push({ side: 'pay', amt: (d.lines || []).reduce(function (a, l) { return a + num(l.amt); }, 0), alloc: d.alloc, d: d });
       else if (R === 'pret') credits.push({ side: 'pay', amt: itemTotals(d).total, origNo: d.orig && d.orig.no, d: d });
     });
     /* apply credits in date order (list was sorted, credits keep that order) */
-    var adv = {};
+    var adv = {}, advBy = {};
     credits.forEach(function (c) {
-      var left = r2(c.amt), p = c.d ? pk(c.d) : null;
-      function take(b, max) { var x = r2(Math.min(b.left, max == null ? left : max, left)); if (x > 0) { b.left = r2(b.left - x); left = r2(left - x); } }
+      var left = r2(c.amt), p = c.d ? pk(c.d) : null, src = c.d ? { id: c.d.id, no: c.d.no || '', date: c.d.date, type: c.d.type, kind: c.d.kind } : { id: c.to, no: '', date: c.date, type: 'paid' };
+      function take(b, max) { var x = r2(Math.min(b.left, max == null ? left : max, left)); if (x > 0) { b.left = r2(b.left - x); left = r2(left - x); b.by.push(Object.assign({ amt: x }, src)); } }
       if (c.to && byId[c.to]) { take(byId[c.to]); return; }
       (c.alloc || []).forEach(function (a) { var b = byId[a.id]; if (b && b.side === c.side) take(b, num(a.amt)); });
       if (c.origNo) (open[p] || []).forEach(function (b) { if (b.side === c.side && key(b.no) === key(c.origNo)) take(b); });
       (open[p] || []).forEach(function (b) { if (left > 0 && b.side === c.side) take(b); });
-      if (left > 0 && p) { adv[p] = adv[p] || { recv: 0, pay: 0 }; adv[p][c.side] = r2(adv[p][c.side] + left); }
+      if (left > 0 && p) { adv[p] = adv[p] || { recv: 0, pay: 0 }; adv[p][c.side] = r2(adv[p][c.side] + left); ((advBy[p] = advBy[p] || { recv: [], pay: [] })[c.side]).push(Object.assign({ left: left }, src)); }
     });
     /* an advance on one side is used up by bills that come later on the same side */
     Object.keys(adv).forEach(function (p) {
       ['recv', 'pay'].forEach(function (s) {
-        (open[p] || []).forEach(function (b) { if (adv[p][s] > 0 && b.side === s && b.left > 0) { var x = Math.min(b.left, adv[p][s]); b.left = r2(b.left - x); adv[p][s] = r2(adv[p][s] - x); } });
+        (open[p] || []).forEach(function (b) {
+          if (!(adv[p][s] > 0 && b.side === s && b.left > 0)) return;
+          var x = Math.min(b.left, adv[p][s]); b.left = r2(b.left - x); adv[p][s] = r2(adv[p][s] - x);
+          /* name the advances that paid it, oldest first */
+          (advBy[p] && advBy[p][s] || []).forEach(function (a) { var y = r2(Math.min(a.left, x)); if (y > 0) { a.left = r2(a.left - y); x = r2(x - y); b.by.push({ id: a.id, no: a.no, date: a.date, type: a.type, kind: a.kind, amt: y, adv: 1 }); } });
+        });
       });
     });
-    var all = [];
-    Object.keys(open).forEach(function (p) { open[p].forEach(function (b) { if (b.left > 0.004) all.push(b); }); });
-    return { bills: all, advances: adv };
+    var all = [], every = [];
+    Object.keys(open).forEach(function (p) { open[p].forEach(function (b) { every.push(b); if (b.left > 0.004) all.push(b); }); });
+    /* every: all bills (settled ones too) with by = what paid each one: [{ id, no, date, type, kind, amt, adv }] */
+    return { bills: all, advances: adv, every: every };
   }
 
   function daysBetween(a, b) { return Math.round((new Date(b + 'T00:00:00') - new Date(a + 'T00:00:00')) / 864e5); }
@@ -352,7 +358,125 @@
     return { open: open, rows: rows, close: bal };
   }
 
+  /* ---------- party ledger and group reports (Party Ledger, Steps B and C) ---------- */
+  /* voucher type of a record for the ledger filter: sales, receipts, notes (credit and debit notes), purchases, payments, journal, opening */
+  function vtype(d) {
+    var R = role(d);
+    return ({ sale: 'sales', fasale: 'sales', sret: 'notes', sdeb: 'notes', 'in': 'receipts', refund: 'payments', out: 'payments', outexp: 'payments',
+      buy: 'purchases', pret: 'purchases', exp: 'purchases', fabuy: 'purchases', jv: 'journal', ob: 'opening', contra: 'journal' })[R] || 'other';
+  }
+  /* ledger of one party between two dates: the statement with a voucher type on every row.
+     types (optional): only these voucher types are listed; opening, closing and each row's balance stay the true ones,
+     so a filtered ledger never shows a made-up balance. dr / cr = totals of the rows listed. */
+  function ledger(docs, biz, partyKey, from, to, types) {
+    var S = statement(docs, biz, partyKey, from, to), want = types && types.length ? types : null;
+    S.rows.forEach(function (r) { r.vt = vtype(r.d); });
+    if (want) S.rows = S.rows.filter(function (r) { return want.indexOf(r.vt) >= 0; });
+    S.dr = r2(S.rows.reduce(function (a, r) { return a + r.dr; }, 0)); S.cr = r2(S.rows.reduce(function (a, r) { return a + r.cr; }, 0));
+    return S;
+  }
+  /* bill-wise view: every bill of a party (settled ones too) dated up to 'upto', with what paid it, and the advances not used yet */
+  function billwise(docs, biz, partyKey, upto) {
+    var list = upto ? docs.filter(function (d) { return !d.date || d.date <= upto; }) : docs, R = bills(list, biz, partyKey);
+    var ev = R.every.filter(function (b) { return key(b.party) === partyKey; }).sort(function (a, b) { return (a.date || '').localeCompare(b.date || ''); });
+    return { bills: ev, advances: R.advances[partyKey] || { recv: 0, pay: 0 },
+      due: { recv: r2(ev.reduce(function (a, b) { return b.side === 'recv' ? a + b.left : a; }, 0)), pay: r2(ev.reduce(function (a, b) { return b.side === 'pay' ? a + b.left : a; }, 0)) } };
+  }
+
+  /* party groups (data home meta 'groups' = { party: [{ id, name, under }], item: [...] }; under = 'debtors' | 'creditors' | a group id).
+     The two built-in groups: debtors = Customers, creditors = Suppliers (Tally's Sundry Debtors / Sundry Creditors). */
+  var BUILTIN = { debtors: 'Customers', creditors: 'Suppliers' };
+  function groupsOf(meta, kind) { var g = meta && meta[kind || 'party']; return Array.isArray(g) ? g : []; }
+  function findGroup(meta, id) { return groupsOf(meta, 'party').filter(function (g) { return g.id === id; })[0]; }
+  /* the group and its parents up to Customers or Suppliers: [id, parent, ..., 'debtors' | 'creditors']; [] if the group is not there */
+  function groupChain(id, meta) {
+    var out = [], seen = {};
+    while (id && !BUILTIN[id] && !seen[id]) { seen[id] = 1; var g = findGroup(meta, id); if (!g) return out.length ? out.concat(['debtors']) : []; out.push(id); id = g.under; }
+    return BUILTIN[id] ? out.concat([id]) : out.concat(['debtors']);
+  }
+  /* group of a party record ({ name, role, group }): its own group, else Customers (customer / both) or Suppliers (supplier) */
+  function partyGroup(party, meta) {
+    party = party || {};
+    var id = party.group, ch = id ? groupChain(id, meta) : [];
+    if (!ch.length) { id = party.role === 'supplier' ? 'creditors' : 'debtors'; ch = [id]; }
+    var g = findGroup(meta, id);
+    return { id: id, name: g ? g.name : BUILTIN[id], top: ch[ch.length - 1] };
+  }
+  /* is group id inside target (the same group, or one of its parents is target)? */
+  function inGroup(id, target, meta) { return !target || id === target || groupChain(id, meta).indexOf(target) >= 0; }
+  /* every group in tree order: Customers, its groups and their sub-groups, then Suppliers and its groups. [{ id, name, under, depth, builtin }] */
+  function groupTree(meta) {
+    var G = groupsOf(meta, 'party'), out = [];
+    function kids(pid, depth) {
+      G.filter(function (g) { return g.under === pid; }).sort(function (a, b) { return String(a.name).localeCompare(String(b.name)); })
+        .forEach(function (g) { out.push({ id: g.id, name: g.name, under: g.under, depth: depth }); if (depth < 3) kids(g.id, depth + 1); });
+    }
+    ['debtors', 'creditors'].forEach(function (b) { out.push({ id: b, name: BUILTIN[b], under: '', depth: 0, builtin: 1 }); kids(b, 1); });
+    /* a group whose parent is missing goes under Customers, so no party is ever lost */
+    G.forEach(function (g) { if (!out.some(function (o) { return o.id === g.id; })) out.push({ id: g.id, name: g.name, under: 'debtors', depth: 1 }); });
+    return out;
+  }
+
+  /* every party's opening, debit, credit and closing between two dates, and what was sold to / bought from them in it.
+     { key: { key, name, open, dr, cr, close, sales, buys } } (open / close > 0 = they owe us) */
+  function partyMoves(docs, biz, from, to) {
+    var out = {};
+    inBooks(docs, biz).forEach(function (d) {
+      if (to && d.date > to) return;
+      var pp = partiesOf(d), L = postings(d), R = role(d), before = from && d.date < from;
+      Object.keys(pp).forEach(function (k) {
+        var mine = L.filter(function (l) { return l.a === 'p:' + k; });
+        if (!mine.length) return;
+        var p = out[k] || (out[k] = { key: k, name: pp[k], open: 0, dr: 0, cr: 0, close: 0, sales: 0, buys: 0 });
+        mine.forEach(function (l) { if (before) p.open = r2(p.open + l.dr - l.cr); else { p.dr = r2(p.dr + l.dr); p.cr = r2(p.cr + l.cr); } });
+        if (before) return;
+        if (R === 'sale' || R === 'sdeb') p.sales = r2(p.sales + itemTotals(d).total);
+        else if (R === 'sret') p.sales = r2(p.sales - itemTotals(d).total);
+        else if (R === 'buy') p.buys = r2(p.buys + (d.type === 'self' ? itemTotals(d).taxable : itemTotals(d).total));
+        else if (R === 'pret') p.buys = r2(p.buys - itemTotals(d).total);
+        else if (R === 'exp' && d.mode === 'credit') p.buys = r2(p.buys + num(d.amount));
+      });
+    });
+    Object.keys(out).forEach(function (k) { var p = out[k]; p.close = r2(p.open + p.dr - p.cr); });
+    return out;
+  }
+  function placed(g, T) { return T.some(function (t) { return t.id === g; }) ? g : 'debtors'; }
+  /* group summary: for every group in tree order, the parties directly in it and totals with its sub-groups.
+     moves = partyMoves(); gidOf(key) = group id of a party. [{ id, name, depth, builtin, rows: [moves], sum: { open, dr, cr, close, n } }] */
+  function groupSummary(moves, gidOf, meta) {
+    var T = groupTree(meta), by = {};
+    Object.keys(moves).forEach(function (k) { var g = placed(gidOf(k) || 'debtors', T); (by[g] = by[g] || []).push(moves[k]); });
+    return T.map(function (t) {
+      var rows = (by[t.id] || []).slice().sort(function (a, b) { return a.name.localeCompare(b.name); }), sum = { open: 0, dr: 0, cr: 0, close: 0, n: 0 };
+      Object.keys(by).forEach(function (g) {
+        if (!inGroup(g, t.id, meta)) return;
+        by[g].forEach(function (p) { sum.open = r2(sum.open + p.open); sum.dr = r2(sum.dr + p.dr); sum.cr = r2(sum.cr + p.cr); sum.close = r2(sum.close + p.close); sum.n++; });
+      });
+      return Object.assign({}, t, { rows: rows, sum: sum });
+    });
+  }
+  /* group-wise outstanding: open bills (bills().bills) added up per group and side with ageing (0-30, 31-60, 61-90, 90+).
+     Totals include sub-groups. [{ id, name, depth, builtin, recv: [4], pay: [4], rt, pt }] */
+  function groupDues(openBills, gidOf, meta, today, byDue) {
+    var T = groupTree(meta), by = {};
+    openBills.forEach(function (b) { var g = placed(gidOf(key(b.party)) || 'debtors', T); (by[g] = by[g] || []).push(b); });
+    return T.map(function (t) {
+      var recv = [], pay = [];
+      Object.keys(by).forEach(function (g) { if (inGroup(g, t.id, meta)) by[g].forEach(function (b) { (b.side === 'pay' ? pay : recv).push(b); }); });
+      var a = ageing(recv, today, byDue), p = ageing(pay, today, byDue);
+      return Object.assign({}, t, { recv: a, pay: p, rt: r2(a[0] + a[1] + a[2] + a[3]), pt: r2(p[0] + p[1] + p[2] + p[3]) });
+    });
+  }
+  /* top parties: by 'sales' (sold less returns), 'buys' (bought less returns), 'recv' (they owe us) or 'pay' (we owe them), biggest first */
+  function topParties(moves, by, n, keep) {
+    var v = function (p) { return by === 'recv' ? p.close : by === 'pay' ? -p.close : p[by] || 0; };
+    return Object.keys(moves).map(function (k) { return moves[k]; }).filter(function (p) { return v(p) > 0.004 && (!keep || keep(p.key)); })
+      .sort(function (a, b) { return v(b) - v(a); }).slice(0, n || 10).map(function (p) { return Object.assign({ value: r2(v(p)) }, p); });
+  }
+
   var API = { num: num, r2: r2, key: key, role: role, itemTotals: itemTotals, postings: postings, inBooks: inBooks, parties: parties, accounts: accounts,
-    bills: bills, ageing: ageing, overdue: overdue, chargeLines: chargeLines, tcsRate: tcsRate, tcsPan: tcsPan, panOk: panOk, addDays: addDays, mainRate: mainRate, statement: statement, book: book, daysBetween: daysBetween, moneyAcct: moneyAcct, payAcct: payAcct, bounced: bounced, partyName: partyName, partiesOf: partiesOf, jvAcct: jvAcct };
+    bills: bills, ageing: ageing, overdue: overdue, chargeLines: chargeLines, tcsRate: tcsRate, tcsPan: tcsPan, panOk: panOk, addDays: addDays, mainRate: mainRate, statement: statement, book: book, daysBetween: daysBetween, moneyAcct: moneyAcct, payAcct: payAcct, bounced: bounced, partyName: partyName, partiesOf: partiesOf, jvAcct: jvAcct,
+    vtype: vtype, ledger: ledger, billwise: billwise, groupsOf: groupsOf, groupChain: groupChain, partyGroup: partyGroup, inGroup: inGroup, groupTree: groupTree,
+    partyMoves: partyMoves, groupSummary: groupSummary, groupDues: groupDues, topParties: topParties, BUILTIN: BUILTIN };
   if (typeof module !== 'undefined' && module.exports) module.exports = API; else G.NSBooks = API;
 })(this);

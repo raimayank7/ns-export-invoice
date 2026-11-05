@@ -304,7 +304,8 @@
     else if (tb) { var tp = document.getElementById(tb.getAttribute('aria-controls')), sh = tp.hidden; tp.hidden = !sh; tb.setAttribute('aria-expanded', sh); }
     if (!t) return;
     var a = t.getAttribute('data-act');
-    if (a === 'backup') NS.downloadBackup().then(NS.openMyData);
+    /* on the My data page itself, redraw it ("Last backup" changes); elsewhere open the My data box */
+    if (a === 'backup') NS.downloadBackup().then(function () { if (document.getElementById('my-app')) document.dispatchEvent(new CustomEvent('ns-data')); else NS.openMyData(); });
     else if (a === 'folder-pick') NS.folderPick().then(NS.openMyData, function () {});
     else if (a === 'folder-allow') NS.folderWrite(true).then(NS.openMyData);
     else if (a === 'folder-off') NS.folderOff().then(NS.openMyData);
@@ -324,6 +325,35 @@
   NS.defaultBiz = function (cfg) {
     if (cfg && cfg.defBiz) return NSStore.get('biz', cfg.defBiz).catch(function () {});
     return NSStore.list('biz').then(function (l) { return l && l.length === 1 ? l[0] : undefined; }, function () {});
+  };
+
+  /* ---------- party and stock groups (data home meta 'groups' = { party: [{id, name, under}], item: [{id, name, under}] }) ----------
+     Party groups sit under the two built-ins 'debtors' (Customers) and 'creditors' (Suppliers), which are never stored; a stored
+     group's under is a built-in (top group) or a top group's id (sub-group, one level). Item groups: under '' (top) or a top group's id.
+     A party with no (or an unknown) group is in the built-in for its role; an item with no group is found by its cat text.
+     partyGroup / itemGroup return { id, name, top, under }: top = the built-in for a party ('debtors' | 'creditors'), the top item
+     group for an item ('' when the item has no group). */
+  var GB = { debtors: ['grp.debtors', 'Customers'], creditors: ['grp.creditors', 'Suppliers'] };
+  function gName(id) { var v = NS.t ? NS.t(GB[id][0]) : ''; return v && v !== GB[id][0] ? v : GB[id][1]; }
+  NS.groupsOf = function (meta, kind) {
+    var own = ((meta && meta[kind]) || []).filter(function (g) { return g && g.id && String(g.name || '').trim(); });
+    if (kind !== 'party') return own.slice();
+    return [{ id: 'debtors', name: gName('debtors'), under: '', builtin: true }, { id: 'creditors', name: gName('creditors'), under: '', builtin: true }].concat(own);
+  };
+  function gFind(list, id) { return list.filter(function (g) { return g.id === id; })[0]; }
+  function gOut(list, g, party) {
+    var up = g.under ? gFind(list, g.under) : null, top = party ? (g.builtin ? g.id : up && up.builtin ? up.id : up && up.under || 'debtors') : (up ? up.id : g.id);
+    return { id: g.id, name: g.name, top: top, under: g.under || '' };
+  }
+  NS.partyGroup = function (p, meta) {
+    var list = NS.groupsOf(meta, 'party'), g = p && p.group && gFind(list, p.group);
+    if (!g) g = gFind(list, p && p.role === 'supplier' ? 'creditors' : 'debtors');
+    return gOut(list, g, true);
+  };
+  NS.itemGroup = function (it, meta) {
+    var list = NS.groupsOf(meta, 'item'), g = it && it.group && gFind(list, it.group), c = String(it && it.cat || '').trim().toLowerCase();
+    if (!g && c) g = list.filter(function (x) { return String(x.name).trim().toLowerCase() === c; })[0];
+    return g ? gOut(list, g, false) : { id: '', name: '', top: '', under: '' };
   };
 
   /* ---------- one sponsor card (only where the page has a slot) ---------- */
@@ -377,6 +407,10 @@
       document.head.appendChild(s);
     }));
   };
+  /* grey on-screen prompts (class ph: "Address", "Customer name and address"…) never go into a PDF */
+  NS.dropHints = function (root) {
+    Array.prototype.forEach.call(root.querySelectorAll('.ph'), function (e) { if (e.tagName === 'P') e.remove(); else e.style.visibility = 'hidden'; });
+  };
   var PAGE = { a4: [210, 297], a5: [148, 210], th80: [80, 0], th58: [58, 0] };
   NS.makePdf = function (nodes, paper) {
     return Promise.all(LIBS.map(function (l) { return NS.loadJs(l[0], l[1]); })).then(function () {
@@ -384,7 +418,7 @@
       box.style.cssText = 'position:fixed;left:-12000px;top:0;background:#fff';
       document.body.appendChild(box);
       var pg = PAGE[paper] || PAGE.a4, pdf = null;
-      var shots = Array.prototype.map.call(nodes, function (n) { var c = n.cloneNode(true); c.classList.remove('a5'); box.appendChild(c); return c; });
+      var shots = Array.prototype.map.call(nodes, function (n) { var c = n.cloneNode(true); c.classList.remove('a5'); NS.dropHints(c); box.appendChild(c); return c; });
       return shots.reduce(function (p, c) {
         return p.then(function () { return window.html2canvas(c, { scale: 2, backgroundColor: '#ffffff', logging: false }); }).then(function (cv) {
           var w = pg[0], h = Math.max(pg[1], cv.height * w / cv.width), fmt = [w, h];
@@ -581,6 +615,44 @@
       });
     });
   };
+
+  /* ---------- printed designs: one list for docs.js, slip.js and kit.js (thermal rolls keep their own look). The record field is a
+     hidden <select> (so fill, save and drafts work as before); the reader taps small drawn pages. Every design is free. ---------- */
+  NS.DESIGNS = ['classic', 'modern', 'compact', 'band', 'elegant', 'grid', 'minimal'];
+  NS.designField = function (id, attrs) {
+    return '<div class="f wide dpick-f"><span class="lbl" id="' + id + '-lbl">' + NS.esc(NS.t('l.design')) + '</span>' +
+      '<select id="' + id + '"' + (attrs || '') + ' hidden tabindex="-1" aria-hidden="true">' + NS.DESIGNS.map(function (k) { return '<option value="' + k + '">' + NS.esc(NS.t('ds.' + k)) + '</option>'; }).join('') + '</select>' +
+      '<div class="dpick" role="radiogroup" aria-labelledby="' + id + '-lbl" data-for="' + id + '">' + NS.DESIGNS.map(function (k) {
+        return '<button type="button" role="radio" class="dp" data-dp="' + k + '" aria-checked="false" tabindex="-1"><i class="dp-mini dp-' + k + '" aria-hidden="true"></i><span>' + NS.esc(NS.t('ds.' + k)) + '</span></button>';
+      }).join('') + '</div><small class="hint">' + NS.esc(NS.t('h.design3')) + '</small></div>';
+  };
+  /* tick the chosen design and paint the little pages in the document's colour */
+  NS.designSync = function (scope, design, accent) {
+    NS.$$('.dpick', scope).forEach(function (g) {
+      var k = NS.DESIGNS.indexOf(design) < 0 ? 'classic' : design;
+      if (accent) g.style.setProperty('--c', accent);
+      NS.$$('.dp', g).forEach(function (b) { var on = b.getAttribute('data-dp') === k; b.setAttribute('aria-checked', String(on)); b.tabIndex = on ? 0 : -1; });
+    });
+  };
+  (function () {
+    function pick(b) {
+      var g = b.closest('.dpick'), sel = g && document.getElementById(g.getAttribute('data-for'));
+      if (!sel) return;
+      NS.designSync(g.parentNode, b.getAttribute('data-dp'));
+      if (sel.value === b.getAttribute('data-dp')) return;
+      sel.value = b.getAttribute('data-dp');
+      sel.dispatchEvent(new Event('change', { bubbles: true }));
+    }
+    document.addEventListener('click', function (e) { var b = e.target.closest && e.target.closest('.dpick .dp'); if (b) pick(b); });
+    /* arrow keys move along the row, like any group of radio buttons */
+    document.addEventListener('keydown', function (e) {
+      var b = e.target.closest && e.target.closest('.dpick .dp'), step = { ArrowRight: 1, ArrowDown: 1, ArrowLeft: -1, ArrowUp: -1 }[e.key];
+      if (!b || !step) return;
+      var all = NS.$$('.dp', b.parentNode), rtl = getComputedStyle(b).direction === 'rtl' && /Left|Right/.test(e.key);
+      var n = all[(all.indexOf(b) + (rtl ? -step : step) + all.length) % all.length];
+      e.preventDefault(); n.focus(); pick(n);
+    });
+  })();
 
   /* ---------- page start ---------- */
   NS.start = function () {

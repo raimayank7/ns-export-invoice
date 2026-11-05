@@ -6,7 +6,11 @@
    COUNTRYNAME, LEDSTATENAME, EMAIL, LEDGERPHONE; VOUCHER VCHTYPE ACTION OBJVIEW, DATE yyyymmdd, VOUCHERTYPENAME, VOUCHERNUMBER,
    PERSISTEDVIEW, ISINVOICE, NARRATION, ALLLEDGERENTRIES.LIST (LEDGERNAME, ISDEEMEDPOSITIVE, ISPARTYLEDGER, AMOUNT,
    BILLALLOCATIONS.LIST NAME / BILLTYPE / AMOUNT). Debit = ISDEEMEDPOSITIVE Yes with a minus amount, credit = No and plus.
-   GST registration tags of a ledger are not in that help page, so GSTINs are not sent: the guide says how to add them. */
+   GST registration tags of a ledger are not in that help page, so GSTINs are not sent: the guide says how to add them.
+   Groups (my.niveshsahayak.in › Groups): a party's own group becomes a Tally GROUP (PARENT Sundry Debtors / Sundry Creditors, or
+   its top group for a sub-group) and the party ledger goes under it; items become STOCKITEM masters (BASEUNITS, a UNIT master per
+   unit) under STOCKGROUP masters made from the item groups (empty PARENT = Primary). These master tags follow TallyPrime's
+   usual XML masters but have not been tried in a real TallyPrime yet. */
 (function () {
   'use strict';
   var $ = NS.$, $$ = NS.$$, esc = NS.esc, num = NS.num, r2 = NS.r2, t = NS.t, B = window.NSBooks;
@@ -17,7 +21,7 @@
   var GROUP = { sales: 'Sales Accounts', purchases: 'Purchase Accounts', 'round-off': 'Indirect Expenses', cash: 'Cash-in-Hand', bank: 'Bank Accounts', 'tds-receivable': 'Loans & Advances (Asset)' };
   var VT = { sale: 'Sales', sret: 'Credit Note', sdeb: 'Debit Note', buy: 'Purchase', pret: 'Debit Note', 'in': 'Receipt', refund: 'Payment', out: 'Payment', outexp: 'Payment' };
   var DEBTOR = { sale: 1, sret: 1, sdeb: 1, 'in': 1, refund: 1 };
-  var box, names = {}, src = 'saved', sheetRows = null, parties = {};
+  var box, names = {}, src = 'saved', sheetRows = null, parties = {}, M = { party: [], item: [], groups: null };
 
   function x(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&apos;' }[c]; }).replace(/[\u0000-\u0008\u000B\u000C\u000E-\u001F]/g, ''); }
   function amt(v) { return (v < 0 ? '-' : '') + Math.abs(v).toFixed(2); }
@@ -31,8 +35,12 @@
     var d = LED.filter(function (l) { return l[0] === a; })[0];
     return (names[a] || (d ? d[1] : a)).trim();
   }
+  /* the party's own group, when it has one (else the debtor/creditor side the documents show) */
+  function partyRec(a) { return M.party.filter(function (q) { return 'p:' + B.key(q.name) === a; })[0]; }
+  function ownGroup(a) { var q = partyRec(a), g = q && NS.partyGroup && NS.partyGroup(q, M.groups); return g && !/^(debtors|creditors)$/.test(g.id) ? g : null; }
+  function tallyTop(id) { return id === 'creditors' ? 'Sundry Creditors' : 'Sundry Debtors'; }
   function ledGroup(a) {
-    if (/^p:/.test(a)) return parties[a] && parties[a].debtor ? 'Sundry Debtors' : 'Sundry Creditors';
+    if (/^p:/.test(a)) { var og = ownGroup(a); return og ? og.name : parties[a] && parties[a].debtor ? 'Sundry Debtors' : 'Sundry Creditors'; }
     if (/^exp:/.test(a)) return 'Indirect Expenses';
     if (/^gst-|tds-payable/.test(a)) return 'Duties & Taxes';
     if (a === 'sales-return') return 'Sales Accounts';
@@ -137,11 +145,44 @@
     return '<ENVELOPE>\n<HEADER>\n <TALLYREQUEST>Import Data</TALLYREQUEST>\n</HEADER>\n<BODY>\n<IMPORTDATA>\n <REQUESTDESC>\n  <REPORTNAME>' + report + '</REPORTNAME>\n </REQUESTDESC>\n <REQUESTDATA>\n  <TALLYMESSAGE xmlns:UDF="TallyUDF">\n' +
       body + '  </TALLYMESSAGE>\n </REQUESTDATA>\n</IMPORTDATA>\n</BODY>\n</ENVELOPE>\n';
   }
+  /* GROUP masters for the party groups used, parents first */
+  function groupsXml(order) {
+    if (!NS.groupsOf) return '';
+    var all = NS.groupsOf(M.groups, 'party'), seen = {}, out = [];
+    var byId = function (id) { return all.filter(function (g) { return g.id === id; })[0]; };
+    function add(g) {
+      if (!g || g.builtin || seen[g.id]) return; seen[g.id] = 1;
+      var up = byId(g.under);
+      if (up && !up.builtin) add(up);
+      out.push('   <GROUP NAME="' + x(g.name) + '" ACTION="Create">\n    <NAME>' + x(g.name) + '</NAME>\n    <PARENT>' + x(up && !up.builtin ? up.name : tallyTop(NS.partyGroup({ group: g.id }, M.groups).top)) + '</PARENT>\n   </GROUP>\n');
+    }
+    order.forEach(function (a) { if (/^p:/.test(a)) { var og = ownGroup(a); if (og) add(byId(og.id)); } });
+    return out.join('');
+  }
+  /* stock groups, units and stock items (every saved item) */
+  function stockXml() {
+    if (!M.item.length || !NS.itemGroup) return '';
+    var all = NS.groupsOf(M.groups, 'item'), seen = {}, units = {}, out = [];
+    var byId = function (id) { return all.filter(function (g) { return g.id === id; })[0]; };
+    function grp(id) {
+      var g = byId(id); if (!g || seen[g.id]) return; seen[g.id] = 1;
+      var up = g.under && byId(g.under); if (up) grp(up.id);
+      out.push('   <STOCKGROUP NAME="' + x(g.name) + '" ACTION="Create">\n    <NAME>' + x(g.name) + '</NAME>\n    <PARENT>' + (up ? x(up.name) : '') + '</PARENT>\n   </STOCKGROUP>\n');
+    }
+    var unit = function (it) { return String(it.unit || 'Nos').trim() || 'Nos'; };
+    M.item.forEach(function (it) { var g = NS.itemGroup(it, M.groups); if (g.id) grp(g.id); units[unit(it)] = 1; });
+    Object.keys(units).forEach(function (u) { out.push('   <UNIT NAME="' + x(u) + '" ACTION="Create">\n    <NAME>' + x(u) + '</NAME>\n    <ISSIMPLEUNIT>Yes</ISSIMPLEUNIT>\n   </UNIT>\n'); });
+    M.item.forEach(function (it) {
+      var nm = String(it.desc || '').trim(), g = NS.itemGroup(it, M.groups); if (!nm) return;
+      out.push('   <STOCKITEM NAME="' + x(nm) + '" ACTION="Create">\n    <NAME>' + x(nm) + '</NAME>\n    <PARENT>' + x(g.name) + '</PARENT>\n    <BASEUNITS>' + x(unit(it)) + '</BASEUNITS>\n   </STOCKITEM>\n');
+    });
+    return out.join('');
+  }
   function mastersXml(vs) {
     var used = {}, order = [];
     vs.forEach(function (v) { v.lines.forEach(function (l) { if (!used[l.a]) { used[l.a] = 1; order.push(l.a); } }); });
-    var skipOwn = $('#ty-own', box) && $('#ty-own', box).checked;
-    return envelope('All Masters', order.filter(function (a) { return !(skipOwn && /^(cash|bank)$/.test(a)); }).map(function (a) {
+    var skipOwn = $('#ty-own', box) && $('#ty-own', box).checked, stock = $('#ty-stock', box) ? $('#ty-stock', box).checked : true;
+    return envelope('All Masters', groupsXml(order) + (stock ? stockXml() : '') + order.filter(function (a) { return !(skipOwn && /^(cash|bank)$/.test(a)); }).map(function (a) {
       var p = parties[a], f = p && p.from || {}, addr = String(f.addr || '').split(/\n/).map(function (s) { return s.trim(); }).filter(Boolean);
       if (f.city && addr.join(' ').toLowerCase().indexOf(String(f.city).toLowerCase()) < 0) addr.push(f.city);
       return '   <LEDGER NAME="' + x(ledName(a)) + '" ACTION="Create">\n    <NAME>' + x(ledName(a)) + '</NAME>\n    <PARENT>' + x(ledGroup(a)) + '</PARENT>\n' +
@@ -195,7 +236,8 @@
         LED.map(function (l) { return '<div class="f"><label for="ty-l-' + l[0] + '">' + esc(t('ty.l.' + l[0])) + '</label><input id="ty-l-' + l[0] + '" data-led="' + l[0] + '" dir="auto" placeholder="' + esc(l[1]) + '" value="' + esc(names[l[0]] || '') + '"></div>'; }).join('') +
       '</div></details>' +
       '<p><label class="chk"><input id="ty-bills" type="checkbox" checked> ' + esc(t('ty.bills')) + '</label></p>' +
-      '<p><label class="chk"><input id="ty-own" type="checkbox" checked> ' + esc(t('ty.own')) + '</label></p></div>' +
+      '<p><label class="chk"><input id="ty-own" type="checkbox" checked> ' + esc(t('ty.own')) + '</label></p>' +
+      '<p><label class="chk"><input id="ty-stock" type="checkbox" checked> ' + esc(t('grp.ty_stock')) + '</label></p></div>' +
       '<div class="card"><h3>3. ' + esc(t('ty.s3')) + '</h3><p class="row"><button type="button" class="btn primary" id="ty-go">' + esc(t('ty.go')) + '</button></p><div class="bk-out" id="ty-out" aria-live="polite"></div></div>' +
       '</div>';
     $$('[name="ty-src"]', box).forEach(function (r) { r.addEventListener('change', function () { src = r.value; showSrc(); }); });
@@ -236,7 +278,8 @@
       : NSStore.list('doc').then(function (docs) {
         var w = { sale: $('#ty-w-sale', box).checked, buy: $('#ty-w-buy', box).checked, money: $('#ty-w-money', box).checked };
         var from = $('#ty-from', box).value || '0000', to = $('#ty-to', box).value || '9999';
-        return NSStore.list('party').then(function (ps) {
+        return Promise.all([NSStore.list('party'), NSStore.list('item'), NSStore.meta('groups')]).then(function (L) {
+          var ps = L[0]; useMasters(ps, L[1], L[2]);
           var r = fromDocs(docs, $('#ty-biz', box).value, from, to, w);
           ps.forEach(function (q) { var k = 'p:' + B.key(q.name); if (parties[k]) parties[k].from = Object.assign({}, parties[k].from || {}, q); });
           return r;
@@ -267,12 +310,14 @@
     NS.toast(t('ty.saved', { file: name }));
   }
 
+  /* saved parties, items and groups for the masters file (the Tally page loads them; acct.js passes its own) */
+  function useMasters(ps, items, groups) { M = { party: ps || [], item: items || [], groups: groups || null }; }
   function init() {
     box = $('[data-tally]');
     if (!box || !B || !NS.xlsx) return;
     render();
     document.addEventListener('ns-lang', render);
   }
-  NS.tally = { fromDocs: fromDocs, fromSheet: fromSheet, mastersXml: function (v) { return mastersXml(v); }, vouchersXml: function (v) { return vouchersXml(v); } };
+  NS.tally = { useMasters: useMasters, fromDocs: fromDocs, fromSheet: fromSheet, mastersXml: function (v) { return mastersXml(v); }, vouchersXml: function (v) { return vouchersXml(v); } };
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init); else init();
 })();

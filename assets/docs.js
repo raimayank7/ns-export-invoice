@@ -29,7 +29,7 @@
   };
   var COPIES = { inv: ['orig', 'dup', 'trip'], invs: ['orig', 'dupsup'], dc: ['dcorig', 'dcdup', 'dctrip'], note: ['orig', 'dupsup'] };
   var REASONS = ['ret', 'price', 'disc', 'short', 'tax', 'other'];
-  var PAPERS = ['a4', 'a5', 'th80', 'th58'], DESIGNS = ['classic', 'modern', 'compact'];
+  var PAPERS = ['a4', 'a5', 'th80', 'th58'];
   /* Batch 1: extra charges on every item document; TCS (collected by the seller under the Income-tax Act) on sale bills; repeat on invoices */
   var TCS_TYPES = { invoice: 1, cashmemo: 1, proforma: 1, exp: 1 }, CHG_NAMES = ['Freight', 'Packing', 'Insurance', 'Loading', 'Delivery', 'Courier', 'Installation'];
   /* TCS rates: Income-tax Act 2025, section 394(1) Table, as amended by the Finance Act 2026 (official text, incometaxindia.gov.in, read 5 Nov 2026).
@@ -259,7 +259,7 @@
         (T.copy ? '<div class="f"><label for="d-copy">' + esc(t('l.copy')) + '</label><select id="d-copy">' + COPIES[copyKey()].map(function (k) { return '<option value="' + k + '">' + esc(t('cp.' + k)) + '</option>'; }).join('') + '<option value="">' + esc(t('cp.none')) + '</option></select></div>' +
           '<div class="f"><label for="d-copies">' + esc(t('l.copies')) + '</label><select id="d-copies">' + COPIES[copyKey()].map(function (k, i) { return '<option value="' + (i + 1) + '">' + esc(t(i ? 'cps.n' : 'cps.1', { n: i + 1 })) + '</option>'; }).join('') + '</select><small class="hint">' + esc(t('h.copies')) + '</small></div>' : '') +
         '<div class="f"><label for="d-paper">' + esc(t('l.paper')) + '</label><select id="d-paper">' + PAPERS.map(function (k) { return '<option value="' + k + '">' + esc(t('pp.' + k)) + '</option>'; }).join('') + '</select></div>' +
-        '<div class="f"><label for="d-design">' + esc(t('l.design')) + '</label><select id="d-design">' + DESIGNS.map(function (k, i) { return '<option value="' + k + '">' + esc(t('ds.' + k)) + '</option>'; }).join('') + '</select><small class="hint">' + esc(t('h.design2')) + '</small></div>' +
+        NS.designField('d-design') +
         (T.pay ? '<div class="f"><label for="d-status">' + esc(t('l.pay')) + '</label><select id="d-status"><option value="unpaid">' + esc(t('pay.unpaid')) + '</option><option value="paid">' + esc(t('pay.paid')) + '</option></select></div>'
           : '<div class="f"><label for="d-status">' + esc(t('l.qstat')) + '</label><select id="d-status">' + T.status.map(function (k) { return '<option value="' + k + '">' + esc(t('qs.' + k)) + '</option>'; }).join('') + '</select></div>') +
         '<div class="f"><span class="lbl" id="acc-lbl">' + esc(t('l.colour')) + '</span><div class="swatches" role="radiogroup" aria-labelledby="acc-lbl">' + ACCENTS.map(function (c, i) { return '<button type="button" role="radio" class="sw" data-accent="' + c + '" style="--c:' + c + '" aria-label="' + esc(t('colour.n', { n: i + 1 })) + '"></button>'; }).join('') + '</div></div>' +
@@ -384,6 +384,7 @@
       ext('fill', ed);
     }
     $$('[data-accent]', ed).forEach(function (b) { b.setAttribute('aria-checked', String(b.getAttribute('data-accent') === doc.accent)); });
+    NS.designSync(ed, doc.design, doc.accent);
     $('[data-clear="logo"]', ed).hidden = !doc.seller.logo; $('[data-clear="sign"]', ed).hidden = !doc.seller.sign;
     $('#kind-hint', ed).textContent = T.kinds.length > 1 ? t('kh.' + doc.kind) : '';
     $$('.it-gst', ed).forEach(function (f) { f.hidden = !taxOn(doc); });
@@ -408,7 +409,7 @@
     else if (OMAP[id]) { doc.orig = doc.orig || {}; doc.orig[OMAP[id]] = el.value; }
     else if (TRMAP[id]) { doc.tr = doc.tr || {}; doc.tr[TRMAP[id]] = id === 'tr-veh' ? el.value.toUpperCase().replace(/\s+/g, '') : el.value; }
     else if (id === 'd-rc') doc.rc = el.checked;
-    else if (id === 'd-gst') { doc.withGst = el.checked; fillForm(true); }
+    else if (id === 'd-gst') { doc.withGst = el.checked; doc.gstSet = true; fillForm(true); }
     else if (id === 'd-round') doc.round = el.checked;
     else if (id === 'd-comp') doc.comp = el.checked;
     else if (id === 'b-ship') { doc.ship = el.checked ? (doc.ship || { name: '', addr: '', city: '', pin: '', state: '' }) : null; $('#ship-box', root).hidden = !el.checked; }
@@ -464,9 +465,15 @@
   }
 
   /* ---------- preview (English, like the printout) ---------- */
+  /* city and PIN under the address, unless the address already has them typed in */
+  function cityPin(x) {
+    var a = String(x.addr || '').toLowerCase(), c = String(x.city || '').trim(), n = String(x.pin || '').trim();
+    var out = [c && a.indexOf(c.toLowerCase()) < 0 ? c : '', n && a.indexOf(n) < 0 ? n : ''].filter(Boolean).join(' ');
+    return out ? '<p>' + esc(out) + '</p>' : '';
+  }
   function party(p, title) {
     if (!p || !(p.name || p.addr)) return '<div class="pt"><h4>' + title + '</h4><p class="ph">Customer name and address</p></div>';
-    return '<div class="pt"><h4>' + title + '</h4><b>' + esc(p.name) + '</b>' + (p.addr ? '<p>' + esc(p.addr).replace(/\n/g, '<br>') + '</p>' : '') +
+    return '<div class="pt"><h4>' + title + '</h4><b>' + esc(p.name) + '</b>' + (p.addr ? '<p>' + esc(p.addr).replace(/\n/g, '<br>') + '</p>' : '') + cityPin(p) +
       (p.state ? '<p>' + esc(NS.stateName(p.state)) + ' (' + p.state + ')</p>' : '') +
       (p.gstin ? '<p>' + P.gstin + ': <b class="mono">' + esc(p.gstin) + '</b></p>' : '') +
       (p.phone ? '<p>' + P.ph + ': ' + esc(p.phone) + '</p>' : '') + '</div>';
@@ -493,7 +500,7 @@
     for (var i = 0; i < x.length; i += 2) h += '<tr><th>' + x[i][0] + '</th><td' + (x[i + 1] ? '' : ' colspan="3"') + '>' + x[i][1] + '</td>' + (x[i + 1] ? '<th>' + x[i + 1][0] + '</th><td>' + x[i + 1][1] + '</td>' : '') + '</tr>';
     return '<table class="meta">' + h + '</table>';
   }
-  function colLbl(tax) { return tax || type === 'invoice' ? P.taxable : T.priceCol ? P.price : T.purpose ? P.value : P.amount; }
+  function colLbl(tax) { return tax || type === 'invoice' ? P.taxable : T.purpose ? P.value : P.amount; }
   function made() { return '<p class="made">Made free at ' + esc(/^(localhost|127\.)/.test(location.hostname) ? (window.NS_CFG && NS_CFG.host || 'billing.niveshsahayak.in') : location.hostname.replace(/^www\./, '')) + '</p>'; }
   function bankHtml(s) {
     return '<div class="bank"><h4>' + P.bank + '</h4><p>' + esc(s.bankName) + (s.bankAcc ? '<br>' + P.acc + ' <b class="mono">' + esc(s.bankAcc) + '</b>' : '') + (s.bankIfsc ? '<br>' + P.ifsc + ' <b class="mono">' + esc(s.bankIfsc) + '</b>' : '') + (s.bankBranch ? '<br>' + P.branch + ': ' + esc(s.bankBranch) : '') + '</p></div>';
@@ -506,7 +513,7 @@
       (T.pay && d.status === 'paid' ? '<div class="stamp">' + P.paid + '</div>' : '') +
       '<header class="sh-top"><div class="sh-from">' + (s.logo ? '<img class="logo" src="' + s.logo + '" alt="">' : '') +
         '<div>' + (T.buying ? '<p class="role">' + P.buyer + '</p>' : '') + '<h2>' + (s.name ? esc(s.name) : '<span class="ph">Your business name</span>') + '</h2>' +
-        (s.addr ? '<p>' + esc(s.addr).replace(/\n/g, '<br>') + '</p>' : '<p class="ph">Address</p>') +
+        (s.addr ? '<p>' + esc(s.addr).replace(/\n/g, '<br>') + '</p>' : '<p class="ph">Address</p>') + cityPin(s) +
         (s.state ? '<p>' + esc(NS.stateName(s.state)) + ' (' + s.state + ')</p>' : '') +
         (s.gstin ? '<p>' + P.gstin + ': <b class="mono">' + esc(s.gstin) + '</b></p>' : '') +
         ((s.phone || s.email) ? '<p>' + [s.phone ? P.ph + ': ' + esc(s.phone) : '', esc(s.email)].filter(Boolean).join(' · ') + '</p>' : '') +
@@ -553,7 +560,7 @@
     return '<div class="sh th ' + esc(d.paper) + '" lang="en-IN" dir="ltr">' +
       (s.logo ? '<img class="logo" src="' + s.logo + '" alt="">' : '') +
       '<h2>' + (s.name ? esc(s.name) : '<span class="ph">Your business name</span>') + '</h2>' +
-      (s.addr ? '<p>' + esc(s.addr).replace(/\n/g, '<br>') + '</p>' : '') +
+      (s.addr ? '<p>' + esc(s.addr).replace(/\n/g, '<br>') + '</p>' : '') + cityPin(s) +
       (s.gstin ? '<p>' + P.gstin + ': <b class="mono">' + esc(s.gstin) + '</b></p>' : '') + (s.phone ? '<p>' + P.ph + ': ' + esc(s.phone) + '</p>' : '') +
       '<p class="dt">' + title(d) + '</p>' + (T.copy && copyLabel ? '<p class="copy">' + P[copyLabel] + '</p>' : '') +
       '<table class="kv">' + metaPairs(d, tax).filter(function (p) { return p[1] && p[1] !== '<span class="mono"></span>'; }).map(function (p) { return line(p[0], p[1]); }).join('') +
@@ -661,6 +668,10 @@
     });
   }
   function regKind() {
+    /* the business's own registration decides the composition tick (an old draft's tick must not stay on a regular business) */
+    if (doc.seller.reg) doc.comp = doc.seller.reg === 'comp';
+    /* a cash memo of a GST-registered (regular) business carries GST: otherwise the tax never reaches GSTR-1 or the books */
+    if (type === 'cashmemo' && !doc.gstSet && doc.seller.gstin && doc.seller.reg !== 'comp' && doc.seller.reg !== 'unreg') doc.withGst = true;
     if (T.kinds.indexOf('supply') < 0) return;
     if (doc.seller.reg === 'comp') { doc.kind = 'supply'; doc.comp = true; }
     else if (doc.seller.reg === 'unreg') doc.kind = 'plain';
@@ -800,8 +811,15 @@
       var rows = all.filter(function (d) { return d.type === doc.type; }).filter(function (d) {
         return !v || [d.no, d.buyer && d.buyer.name, d.seller && d.seller.name].join(' ').toLowerCase().indexOf(v) >= 0;
       }).sort(function (a, b) { return (b.date || '').localeCompare(a.date || '') || (b.updated || 0) - (a.updated || 0); });
+      /* money recorded in the App (part payments, receipts against bills) shows here too: "₹3,556.00 due" instead of "Not paid" */
+      var left = {};
+      if (T.pay && window.NSBooks) rows.forEach(function (d) {
+        var sn = d.seller && d.seller.name || ''; if (left['@' + sn]) return; left['@' + sn] = 1;
+        try { NSBooks.bills(all, sn).bills.forEach(function (b) { left[b.id] = b; }); } catch (e) {}
+      });
       list.innerHTML = rows.length ? rows.map(function (d) {
-        var st = T.pay ? '<span class="pill ' + (d.status === 'paid' ? 'ok' : '') + '">' + esc(t(d.status === 'paid' ? 'h.paidp' : 'h.unpaidp')) + '</span>'
+        var lb = left[d.id], part = d.status !== 'paid' && lb && lb.left > 0.004 && lb.left < lb.total - 0.004;
+        var st = T.pay ? '<span class="pill ' + (d.status === 'paid' ? 'ok' : '') + '">' + esc(part ? NS.t('app.left', { a: NS.money(lb.left) }) : t(d.status === 'paid' ? 'h.paidp' : 'h.unpaidp')) + '</span>'
           : '<span class="pill ' + (d.status === 'acc' || d.status === 'inv' ? 'ok' : '') + '">' + esc(t('qs.' + (d.status || 'open'))) + (d.invNo ? ' ' + esc(d.invNo) : '') + '</span>';
         if (d.sample) st += ' <span class="b1-pill">' + esc(t('b1.sample')) + '</span>';
         if (d.rec && d.rec.every) st += ' <span class="pill">' + esc(t(d.rec.every === 'quarter' ? 'b1.rep_q' : 'b1.rep_m')) + '</span>';
@@ -925,6 +943,12 @@
       name: function () { return T.prefixes ? t('k.' + doc.kind) : t('Doc.' + type); }, apply: function (c) { CFG = c || {}; if (!editingId) suggestNumber(true); } }); }
     render();
     document.addEventListener('ns-lang', render);
+    /* scripts load with defer, so this runs before docmore.js / einv.js / export.js have added their parts:
+       draw the form again once every script has run (English pages get no ns-lang event that would do it) */
+    var extN = (NS.docExt || []).length;
+    function extLate() { var n = (NS.docExt || []).length; if (n !== extN) { extN = n; render(); } }
+    if (document.readyState === 'complete') setTimeout(extLate, 0);
+    else { document.addEventListener('DOMContentLoaded', extLate); window.addEventListener('load', extLate); }
     var typed = false;
     ed.addEventListener('input', function () { typed = true; });
     /* the form shows at once (it used to wait for the data home, up to 6 s on a first visit, while the preview already showed);
@@ -945,13 +969,21 @@
         return fromQuote(from).then(function (ok) { if (ok) { render(); saveDraft(); return suggestNumber(true); } });
       }
       /* an unfinished draft keeps everything, but still gets the next number when its number box is empty or still automatic */
-      if (dr) return suggestNumber(false);
-      if (typed) return suggestNumber(false);
+      /* a draft with no buyer and no items is not real work: start fresh (today's date, default business, hub defaults) */
+      if (dr && !typed && !String(doc.buyer.name || '').trim() && !totals(doc).rows.length) dr = null;
+      if (dr || typed) {
+        /* a kept draft without a business still gets the default business */
+        if (doc.seller.name) return suggestNumber(false);
+        return NS.defaultBiz(CFG).then(function (b) {
+          if (b && !doc.seller.name) { doc.seller = Object.assign(blank().seller, b); delete doc.seller.id; delete doc.seller.created; delete doc.seller.updated; regKind(); render(); }
+          return suggestNumber(false);
+        });
+      }
       /* a fresh start: the hub's defaults and the default business */
       var seller = doc.seller;
       doc = blank(); doc.seller = seller;
       return NS.defaultBiz(CFG).then(function (b) {
-        if (b && !doc.seller.name) { doc.seller = Object.assign(blank().seller, b); delete doc.seller.id; delete doc.seller.created; delete doc.seller.updated; }
+        if (b && !doc.seller.name) { doc.seller = Object.assign(blank().seller, b); delete doc.seller.id; delete doc.seller.created; delete doc.seller.updated; regKind(); }
         render();
         return suggestNumber(true);
       });

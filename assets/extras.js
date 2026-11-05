@@ -152,6 +152,17 @@
         return Promise.all(['doc', 'party', 'item', 'biz'].map(function (s) {
           return NSStore.list(s).then(function (rows) { return Promise.all(rows.filter(function (r) { return r.sample || / \(sample\)$/.test(r.name || r.desc || ''); }).map(function (r) { n++; return NSStore.del(s, r.id, { hard: true }); })); });
         }));
+      }).then(function () {
+        /* sample party and item groups (sample: 1) go too, unless something left in them is the user's own */
+        return Promise.all([NSStore.list('party'), NSStore.list('item'), NSStore.meta('groups')]).then(function (L) {
+          var m = L[2]; if (!m || typeof m !== 'object') return;
+          var used = L[0].concat(L[1]).map(function (r) { return r.group; }), cut = false;
+          ['party', 'item'].forEach(function (k) {
+            var list = Array.isArray(m[k]) ? m[k] : [];
+            m[k] = list.filter(function (g) { var drop = g.sample && used.indexOf(g.id) < 0 && !list.some(function (x) { return x.under === g.id && !x.sample; }); if (drop) cut = true; return !drop; });
+          });
+          if (cut) return NSStore.meta('groups', m);
+        });
       }).then(function () { return NSStore.list('biz'); }).then(function (biz) {
         return NSStore.meta('settings').then(function (s) {
           if (s && s.defBiz && !biz.some(function (b) { return b.id === s.defBiz; })) { s.defBiz = biz[0] ? biz[0].id : ''; return NSStore.meta('settings', s); }
