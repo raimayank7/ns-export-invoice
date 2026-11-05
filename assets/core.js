@@ -414,11 +414,116 @@
     }).observe(document.body, { subtree: true, childList: true, attributes: true, attributeFilter: ['hidden'], attributeOldValue: true });
   };
 
+  /* ---------- line icons on text buttons: every .btn with words gets a small drawn (SVG) icon in front, on every tool, with no change
+     to the tools. The meaning comes from data-ic, the button's data-* names (data-do="save", data-act="backup", data-close…), its
+     data-i18n key, or the key whose text it shows in the current language (NS.meaning). A button whose words start with a sign
+     (+, ✓, ×…) or that already has a picture is left as it is. ---------- */
+  var IC = {
+    save: 'M5 4h11l3 3v13H5zM8 4v5h7V4M8 20v-6h8v6', print: 'M7 9V4h10v5M7 17H5v-7h14v7h-2M7 14h10v6H7z', share: 'M12 15V3M8 7l4-4 4 4M5 12v8h14v-8',
+    down: 'M12 4v11M7 10l5 5 5-5M5 20h14', up: 'M12 16V5M7 10l5-5 5 5M5 20h14', trash: 'M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3',
+    plus: 'M12 5v14M5 12h14', edit: 'M4 20h4L19 9l-4-4L4 16zM13 7l4 4', copy: 'M9 9h11v11H9zM5 15H4V4h11v1', x: 'M6 6l12 12M18 6L6 18',
+    back: 'M19 12H5M11 6l-6 6 6 6', go: 'M5 12h14M13 6l6 6-6 6', search: 'M11 4a7 7 0 1 0 0 14 7 7 0 0 0 0-14M20 20l-4-4',
+    list: 'M9 6h11M9 12h11M9 18h11M4 6h1M4 12h1M4 18h1', gear: 'M12 8a4 4 0 1 0 0 8 4 4 0 0 0 0-8M12 2v3M12 19v3M2 12h3M19 12h3M4.9 4.9L7 7M17 17l2.1 2.1M4.9 19.1L7 17M17 7l2.1-2.1',
+    lock: 'M6 11h12v9H6zM8 11V8a4 4 0 0 1 8 0v3', send: 'M4 12l16-8-6 16-3-7z', flag: 'M5 21V4M5 4h11l-2 4 2 4H5', reset: 'M4 12a8 8 0 1 0 3-6.2M4 4v5h5',
+    check: 'M5 12l5 5 9-10', data: 'M5 6c0-1.7 3-3 7-3s7 1.3 7 3-3 3-7 3-7-1.3-7-3M5 6v12c0 1.7 3 3 7 3s7-1.3 7-3V6M5 12c0 1.7 3 3 7 3s7-1.3 7-3',
+    ext: 'M14 4h6v6M20 4l-9 9M18 14v6H4V6h6', wa: 'M4 20l1.3-4A8 8 0 1 1 8 18.7zM9 9c0 3 3 6 6 6l1-1.5-2-1-1 1c-1-.5-2-1.5-2.5-2.5l1-1-1-2z',
+    money: 'M3 7h18v10H3zM12 9.5a2.5 2.5 0 1 0 0 5 2.5 2.5 0 0 0 0-5M6 10v4M18 10v4', clock: 'M12 4a8 8 0 1 0 0 16 8 8 0 0 0 0-16M12 8v4l3 2',
+    file: 'M6 3h9l4 4v14H6zM14 3v5h5', link: 'M10 14a4 4 0 0 0 6 0l3-3a4 4 0 0 0-6-6l-1 1M14 10a4 4 0 0 0-6 0l-3 3a4 4 0 0 0 6 6l1-1'
+  };
+  /* first match wins: [regular expression over "data names + key + English words", icon] */
+  var ICRULES = [[/whats\s?app|\bwa\b/, 'wa'], [/print/, 'print'], [/backup|download|export|excel|csv|install/, 'down'], [/restore|import|upload/, 'up'],
+    [/\bpdf\b|share/, 'share'], [/delete|remove|\brm\b|bin|trash|clear|-off\b/, 'trash'], [/report|tell|mistake/, 'flag'], [/later/, 'clock'],
+    [/\bsend\b|reminder|remind/, 'send'], [/lock|\bpin\b/, 'lock'], [/reset|again|undo|refresh/, 'reset'],
+    [/\bsave|submit|\bok\b|use these|apply|done/, 'save'], [/\bnew\b|\badd\b|create/, 'plus'], [/edit|change|rename|series/, 'edit'], [/copy|duplicate/, 'copy'],
+    [/close|cancel|dismiss/, 'x'], [/\bback\b|fback/, 'back'], [/search|find|lookup|fetch|check gstin/, 'search'], [/history|saved|list|register/, 'list'],
+    [/setting|configur/, 'gear'], [/my.?data|vault/, 'data'], [/new tab|external|portal/, 'ext'],
+    [/paid|payment|money|receiv|cash/, 'money'], [/later|ageing|due/, 'clock'], [/open|convert|toinv|make invoice|next|go\b/, 'go'], [/doc|bill|invoice|statement|receipt/, 'file']];
+  function icFor(b) {
+    if (b.getAttribute('data-ic')) return b.getAttribute('data-ic');
+    var said = (b.textContent || '').trim();
+    if (!said || !/^[\p{L}\p{N}]/u.test(said)) return '';
+    var words = [].map.call(b.attributes, function (a) { return /^data-/.test(a.name) ? a.name.slice(5) + ' ' + a.value : a.name === 'type' && a.value === 'submit' ? 'submit' : ''; }).join(' ');
+    words += ' ' + (b.getAttribute('data-i18n') || '') + ' ' + (NS.meaning ? NS.meaning(said) : '') + ' ' + said;
+    words = words.toLowerCase();
+    for (var i = 0; i < ICRULES.length; i++) if (ICRULES[i][0].test(words)) return ICRULES[i][1];
+    return '';
+  }
+  function iconize(b) {
+    if (!b.classList || !b.classList.contains('btn') || b.classList.contains('icon-btn') || b.querySelector('svg,img') || b.closest('[data-noic]')) return;
+    /* "+ Add salesman": the typed plus becomes the drawn one */
+    var tn = b.firstChild && b.firstChild.nodeType === 3 ? b.firstChild : null;
+    if (tn && /^\s*\+\s*(?=[\p{L}\p{N}])/u.test(tn.nodeValue)) { tn.nodeValue = tn.nodeValue.replace(/^\s*\+\s*/, ''); b.setAttribute('data-ic', 'plus'); }
+    var k = icFor(b); if (!k || !IC[k]) return;
+    b.insertAdjacentHTML('afterbegin', '<svg class="bi" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="' + IC[k] + '"/></svg>');
+  }
+  NS.btnIcons = function () {
+    if (!document.body) return;
+    var todo = new Set(), queued = false;
+    function run() { queued = false; todo.forEach(function (n) { if (n.isConnected) { iconize(n); if (n.querySelectorAll) [].forEach.call(n.querySelectorAll('.btn'), iconize); } }); todo.clear(); }
+    function add(n) { if (n.nodeType !== 1) return; todo.add(n); if (!queued) { queued = true; setTimeout(run, 16); } }   /* a timer, not a frame: background tabs draw no frames */
+    add(document.body);
+    new MutationObserver(function (ms) {
+      ms.forEach(function (m) {
+        if (m.target.nodeType === 1 && m.target.classList.contains('btn')) add(m.target);   /* its words were replaced (language change) */
+        [].forEach.call(m.addedNodes, add);
+      });
+    }).observe(document.body, { subtree: true, childList: true });
+  };
+
+  /* ---------- number series of one document, changed inside its maker: NS.seriesLink(numberInput, {type, kind(), def(), name(), digits, fy, apply(settings)})
+     adds "Change number series" under the number box; the window saves the prefix in My data › Settings (meta 'settings'), the same place
+     the hub's document cards use, so every tool and the App read it. ---------- */
+  var serDlg;
+  function val(v) { return typeof v === 'function' ? v() : v; }
+  NS.seriesLink = function (inp, o) {
+    if (!inp || !window.NSStore) return;
+    var f = inp.closest('.f') || inp.parentNode;
+    if (!f || f.querySelector('[data-series]')) return;
+    var b = NS.el('button', { type: 'button', 'class': 'link series-link', 'data-series': '' }, NS.esc(NS.t('sr.btn')));
+    f.appendChild(b);
+    b.addEventListener('click', function () {
+      NSStore.meta('settings').then(function (S) {
+        S = S || {};
+        var type = val(o.type), kind = val(o.kind) || '', c = S[type] || {}, inv = S.invoice || {};
+        var cur = kind ? (c.prefixes || {})[kind] : c.prefix;
+        if (type === 'invoice' && cur == null) cur = inv.prefix;
+        if (cur == null) cur = val(o.def) || '';
+        var digits = o.digits || +inv.digits || 3, fy = o.fy != null ? o.fy : inv.fy !== false;
+        var fyS = NS.fy(NS.today()), short = fyS.slice(2, 4) + '-' + fyS.slice(5);
+        if (!serDlg) { serDlg = NS.el('dialog', { id: 'ns-series', 'aria-labelledby': 'ns-series-h' }); document.body.appendChild(serDlg); }
+        serDlg.innerHTML = '<div class="dlg-h"><h2 id="ns-series-h">' + NS.esc(NS.t('sr.title', { doc: val(o.name) })) + '</h2><form method="dialog"><button class="btn sm">' + NS.esc(NS.t('close')) + '</button></form></div>' +
+          '<form class="dlg-b" data-ser novalidate><p class="soft">' + NS.esc(NS.t('sr.p')) + '</p><div class="f"><label for="ser-pre">' + NS.esc(NS.t('hub.pfx')) + '</label>' +
+          '<input id="ser-pre" dir="ltr" maxlength="8" autocapitalize="characters" value="' + NS.esc(cur) + '"></div>' +
+          '<p>' + NS.esc(NS.t('hub.nextno')) + ' <b class="mono" data-ser-pv></b></p><p class="soft">' + NS.esc(NS.t('sr.more')) + ' <a href="' + (/^(localhost|127\.0\.0\.1)$/.test(location.hostname) ? 'http://localhost:8862/' : 'https://my.niveshsahayak.in/') + '#settings" target="_blank" rel="noopener">' + NS.esc(NS.t('mydata')) + ' ›</a></p>' +
+          '<div class="btns"><button type="submit" class="btn primary">' + NS.esc(NS.t('sr.save')) + '</button></div></form>';
+        var form = NS.$('[data-ser]', serDlg), p = NS.$('#ser-pre', serDlg);
+        function clean() { return p.value.trim().toUpperCase().replace(/[^A-Z0-9\/\-]/g, ''); }
+        function pv() { var x = clean(); NS.$('[data-ser-pv]', serDlg).textContent = (x ? x + '/' : '') + (fy ? short + '/' : '') + String(1).padStart(digits, '0'); }
+        p.addEventListener('input', pv); pv();
+        form.addEventListener('submit', function (e) {
+          e.preventDefault();
+          NSStore.meta('settings').then(function (F) {
+            F = F || {};
+            var x = clean(), c2 = F[type] = F[type] || {};
+            if (kind) { c2.prefixes = c2.prefixes || {}; c2.prefixes[kind] = x; } else c2.prefix = x;
+            return NSStore.meta('settings', F).then(function () { return F; });
+          }).then(function (F) {
+            serDlg.close(); NS.toast(NS.t('sr.saved'));
+            if (o.apply) o.apply(F);
+          }).catch(function () { NS.toast(NS.t('sr.fail'), 'bad'); });
+        });
+        if (serDlg.showModal) serDlg.showModal(); else serDlg.setAttribute('open', '');
+        p.focus(); p.select();
+      });
+    });
+  };
+
   /* ---------- page start ---------- */
   NS.start = function () {
     var lang = NS.initLang ? NS.initLang() : null;
     NS.initTheme();
     NS.motion();
+    NS.btnIcons();
     var y = NS.$('[data-year]'); if (y) y.textContent = new Date().getFullYear();
     NS.sponsor();
     if ('serviceWorker' in navigator && location.protocol === 'https:') navigator.serviceWorker.register('/sw.js').catch(function () {});

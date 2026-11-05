@@ -269,3 +269,17 @@ html.embed .tell{display:none}
 .ct-out{margin:0;font-weight:600}.ct-out:empty{display:none}.ct-out.ok{color:var(--ok)}.ct-out.bad{color:var(--bad)}
 .ct-btns{display:flex;gap:8px}
 @media print{.tell{display:none}}
+
+/* line icons on text buttons (core.js NS.btnIcons) */
+.btn>svg.bi{width:1.1em;height:1.1em;flex:none;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.btn.sm>svg.bi{width:1em;height:1em}
+/* number series: My data › Settings cards and the maker's "Change number series" */
+.dc-sub{font-size:.95rem;margin:16px 0 8px;color:var(--soft);text-transform:uppercase;letter-spacing:.04em}
+.dc-top{margin:0 0 4px}
+.dcards{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(230px,100%),1fr));gap:10px}
+.dcard{border:1px solid var(--line);border-radius:12px;padding:10px 12px;background:var(--surface);display:grid;gap:8px;align-content:start}
+.dc-h{display:flex;justify-content:space-between;align-items:baseline;gap:8px}.dc-h b{font-family:var(--font-head)}
+.dc-open{font-size:.85rem;white-space:nowrap}
+.dc-row{display:grid;gap:4px}.dc-row label{font-size:.85rem;color:var(--soft)}
+.dc-next{font-size:.82rem;color:var(--soft)}
+.series-link{display:block;margin-top:4px;text-align:start;font-size:.82rem}

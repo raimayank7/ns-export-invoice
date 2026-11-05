@@ -1147,6 +1147,7 @@
     /* line under the promotion card (core.js NS.sponsor) */
     'sp.promo': "Want your business on this card? Promote it here",
     'blk.msg': "Part of this page did not load, so some boxes may stay empty or buttons may not work.", 'blk.tip': "An ad blocker or an old saved copy of the page can cause this. Reload the page. If it happens again, turn the ad blocker off for niveshsahayak.in: this site shows no Google ads and keeps your data on your own device.", 'blk.reload': "Reload the page", 'blk.close': "Close",
+    'db.blocked': 'Your saved data is still open in another Nivesh Sahayak tab from before an update. Close the other Nivesh Sahayak tabs, or reload them. This page then continues by itself.',
     /* Report it + contact form (contact.js) */
     'ct.note': 'Found a mistake or something not working? Please tell us. It helps everyone.', 'ct.btn': 'Report it', 'ct.title': 'Report a mistake',
     'ct.topic': 'What is it about?', 'ct.t_err': 'A mistake (rule, amount or word)', 'ct.t_bug': 'Something is not working', 'ct.t_q': 'A question',
@@ -1156,12 +1157,29 @@
     'ct.send': 'Send', 'ct.sending': 'Sending…', 'ct.ok': 'Thank you! Your message has reached us.', 'ct.fail': 'It could not be sent. Please try again, or use the other contact form.',
     'ct.other': 'Open the other contact form', 'ct.short': 'Please write a few more words.', 'ct.wait': 'Please wait a minute before sending again.',
     /* free forever promise and the Support us link (footer, status bar, sponsor.niveshsahayak.in) */
-    'f.support': 'Support us', 'free.forever': 'Free forever: every Nivesh Sahayak tool is free to use, and always will be.', 'h.design2': 'All three designs are free to use.'
+    'f.support': 'Support us', 'free.forever': 'Free forever: every Nivesh Sahayak tool is free to use, and always will be.', 'h.design2': 'All three designs are free to use.',
+    /* number series per document: My data › Settings cards and "Change number series" in each maker */
+    'hub.g.inv': 'Invoice (Billing)', 'hub.g.docs': 'Number series of each document', 'hub.openmk': 'Open the maker', 'hub.pfx': 'Prefix', 'hub.nextno': 'Next number:',
+    'hub.h.docs': 'Each document keeps its own number series. Digits and the financial year follow the invoice settings above (shop and trade sites always add the year). Leave a prefix empty for numbers without one. You can also change a prefix inside each maker, under its number box.',
+    'hub.grp.sell': 'Selling', 'hub.grp.buy': 'Buying', 'hub.grp.money': 'Money, rent and salary', 'hub.grp.trade': 'Shops and trades',
+    'sr.btn': 'Change number series', 'sr.title': 'Number series: {doc}', 'sr.p': 'This prefix starts every new number of this document. It is saved in My data › Settings, so every tool and the App use it.',
+    'sr.more': 'Digits and the financial year are set in', 'sr.save': 'Save the series', 'sr.saved': 'Number series saved.', 'sr.fail': 'It could not be saved. Please try again.'
   };
 
   var packs = { en: EN }, cur = 'en';
   NS.addLang = function (code, table) { packs[code] = Object.assign(packs[code] || {}, table); };   /* a pack may come in several blocks */
   NS.lang = function () { return cur; };
+  /* what a piece of screen text means: its key + the English words, e.g. 'Speichern'-like text -> 'md.save Save a backup file' (used to pick button icons) */
+  var rev = {};
+  NS.meaning = function (txt) {
+    var c = cur;
+    if (!rev[c]) {
+      rev[c] = {};
+      [EN, packs[c] || {}].forEach(function (p) { for (var k in p) if (typeof p[k] === 'string' && p[k].length < 70) rev[c][p[k].trim().toLowerCase()] = k; });
+    }
+    var k = rev[c][String(txt).trim().toLowerCase()];
+    return k ? k + ' ' + (EN[k] || '') : '';
+  };
   /* NS.t('saved', {doc:'invoice', no:'INV/1'}) ; {Doc} = doc word with a capital (English only) */
   NS.t = function (key, v) {
     var p = packs[cur] || EN, s = p[key] != null ? p[key] : EN[key] != null ? EN[key] : key;

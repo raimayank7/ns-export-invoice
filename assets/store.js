@@ -24,7 +24,13 @@
     ldbp = new Promise(function (res, rej) {
       var r = indexedDB.open('ns-local', 2);
       r.onupgradeneeded = function () { STORES.forEach(function (s) { if (!r.result.objectStoreNames.contains(s)) r.result.createObjectStore(s, { keyPath: 'id' }); }); };
-      r.onsuccess = function () { res(r.result); };
+      r.onblocked = blockedNote;
+      r.onsuccess = function () {
+        var d = r.result;
+        d.onversionchange = function () { d.close(); ldbp = null; };   /* a newer page needs to upgrade: let it */
+        unblocked();
+        res(d);
+      };
       r.onerror = function () { rej(r.error); };
     });
     return ldbp;
@@ -63,6 +69,23 @@
     persist: function () { return navigator.storage && navigator.storage.persist ? navigator.storage.persist() : Promise.resolve(false); },
     estimate: function () { return navigator.storage && navigator.storage.estimate ? navigator.storage.estimate() : Promise.resolve(null); }
   };
+
+  /* an older tab of a Nivesh Sahayak site (opened before an update) still holds the data: nothing can load until it closes */
+  /* a bar that stays until the data opens (it goes away by itself once the other tab is closed or reloaded) */
+  function blockedNote() {
+    if (document.getElementById('ns-blocked') || !document.body) return;
+    var t = window.NS && NS.t ? NS.t('db.blocked') : 'Close the other Nivesh Sahayak tabs, or reload them. This page then continues by itself.';
+    var bar = document.createElement('div');
+    bar.id = 'ns-blocked'; bar.className = 'remind'; bar.setAttribute('role', 'alert');
+    bar.innerHTML = '<div class="wrap"><span></span></div>';
+    bar.firstChild.firstChild.textContent = t;
+    document.body.insertBefore(bar, document.body.firstChild);
+  }
+  function unblocked() { var b = document.getElementById('ns-blocked'); if (b) b.remove(); }
+  window.addEventListener('message', function (e) {
+    if (e.origin !== VAULT_ORIGIN || !e.data || e.data.ns !== 'vault') return;
+    if (e.data.blocked) blockedNote(); else if ('ready' in e.data) unblocked();
+  });
 
   /* ---------- the shared data home ---------- */
   function send(op, args) {

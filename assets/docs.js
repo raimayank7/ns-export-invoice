@@ -919,7 +919,10 @@
     doc = blank();
     var dr = loadDraft();
     if (dr) { doc = Object.assign(blank(), dr.doc); delete doc.lang; editingId = dr.id || null; }
-    function render() { buildEditor(); fillForm(); draw(); setStatus(); labelButtons(); if (histOpen) renderHistory(); }
+    function render() { buildEditor(); fillForm(); draw(); setStatus(); labelButtons(); if (histOpen) renderHistory(); series(); }
+    /* "Change number series" under the number box: the prefix of this document (each kind for quotation and note) */
+    function series() { NS.seriesLink($('#d-no', root), { type: type, kind: function () { return T.prefixes ? doc.kind : ''; }, def: function () { return T.prefixes ? T.prefixes[doc.kind] : T.prefix; },
+      name: function () { return T.prefixes ? t('k.' + doc.kind) : t('Doc.' + type); }, apply: function (c) { CFG = c || {}; if (!editingId) suggestNumber(true); } }); }
     render();
     document.addEventListener('ns-lang', render);
     var typed = false;
@@ -941,7 +944,8 @@
         history.replaceState(null, '', location.pathname + location.hash);
         return fromQuote(from).then(function (ok) { if (ok) { render(); saveDraft(); return suggestNumber(true); } });
       }
-      if (dr) return;
+      /* an unfinished draft keeps everything, but still gets the next number when its number box is empty or still automatic */
+      if (dr) return suggestNumber(false);
       if (typed) return suggestNumber(false);
       /* a fresh start: the hub's defaults and the default business */
       var seller = doc.seller;
