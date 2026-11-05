@@ -225,43 +225,90 @@
     }).catch(function () { return false; });
   };
 
-  /* ---------- "My data" dialog (same on every site) ---------- */
+  /* ---------- "My data" dialog (same on every site): a settings window with a side list of parts, each part = rows
+     (name + one status line + "?" for the long help + small buttons on the right). Other files add rows/parts through NS.mdExt
+     (safe.js: password backup, send to accountant, Drive sync), using NS.mdRow and the panes [data-md-pane=ov|bk|af|ac]. ---------- */
+  var mdTip = 0;
+  NS.mdRow = function (label, status, tip, btns) {
+    var E = NS.esc, id = tip ? 'md-tip-' + (++mdTip) : '';
+    return '<div class="md-row"><div class="md-rl"><b>' + E(label) + '</b>' +
+      (tip ? '<button type="button" class="hp-q" data-md-tip aria-expanded="false" aria-controls="' + id + '" aria-label="' + E(NS.t('hp.btn', { what: label })) + '" title="' + E(NS.t('hp.btn', { what: label })) + '">?</button>' : '') +
+      (status ? '<span class="md-st">' + status + '</span>' : '') +
+      (tip ? '<p class="hp-tip" id="' + id + '" hidden>' + E(tip) + '</p>' : '') + '</div>' +
+      (btns ? '<div class="md-rb">' + btns + '</div>' : '') + '</div>';
+  };
   NS.openMyData = function () {
     var dlg = NS.$('#ns-mydata');
     if (!dlg) return;
     var body = NS.$('[data-mydata-body]', dlg);
-    body.innerHTML = '<p class="soft">' + NS.esc(NS.t('md.loading')) + '</p>';
-    if (dlg.showModal) dlg.showModal(); else dlg.setAttribute('open', '');
+    dlg.classList.add('md-dlg');
+    if (!dlg.open) {
+      body.innerHTML = '<p class="soft">' + NS.esc(NS.t('md.loading')) + '</p>';
+      if (dlg.showModal) dlg.showModal(); else dlg.setAttribute('open', '');
+    }
     Promise.all(['biz', 'party', 'item', 'doc'].map(function (s) { return NSStore.list(s); })).then(function (r) {
       return Promise.all([NS.folderStatus(), NSStore.meta('lastBackup')]).then(function (x) { return [r, x[0], x[1]]; });
     }).then(function (all) {
       var r = all[0], f = all[1], last = all[2];
       var shared = NSStore.mode() === 'vault';
-      var T = NS.t, E = NS.esc;
+      var T = NS.t, E = NS.esc, B = function (act, key, pri) { return '<button type="button" class="btn sm' + (pri ? ' primary' : '') + '" data-act="' + act + '">' + E(T(key)) + '</button>'; };
+      var lastTxt = last ? new Date(last).toLocaleString('en-IN', { dateStyle: 'medium', timeStyle: 'short' }) : T('md.never');
+      var on = '<i class="md-dot on"></i>', off = '<i class="md-dot"></i>', warn = '<i class="md-dot warn"></i>';
+      var fTxt = !f.supported ? '' : f.on ? (f.allowed ? on + E(T('md2.on')) : warn + E(T('md2.ask'))) + ' · <bdi class="mono">' + E(f.name) + '</bdi>' : off + E(T('md2.off'));
+      var restore = '<label class="btn sm">' + E(T('md.restore')) + '<input type="file" accept=".json,application/json" data-act="restore" hidden></label>';
+      var hub = '<a class="btn sm" href="https://my.niveshsahayak.in/" target="_blank" rel="noopener">' + E(T('md2.open')) + ' ↗</a>';
+      var tabs = [['ov', 'md2.ov'], ['bk', 'md2.bk']].concat(f.supported ? [['af', 'md2.folder']] : []).concat([['ac', 'b3.ac.t']]);
+      var cur = NS._mdTab && tabs.some(function (t) { return t[0] === NS._mdTab; }) ? NS._mdTab : 'ov';
+      var pane = function (k, html) { return '<section class="md-pane" role="tabpanel" id="md-p-' + k + '" aria-labelledby="md-t-' + k + '" data-md-pane="' + k + '"' + (k === cur ? '' : ' hidden') + '>' + html + '</section>'; };
       body.innerHTML =
-        '<ul class="counts"><li><b>' + r[0].length + '</b> ' + E(T('md.biz')) + '</li><li><b>' + r[1].length + '</b> ' + E(T('md.party')) + '</li><li><b>' + r[2].length + '</b> ' + E(T('md.item')) + '</li><li><b>' + r[3].length + '</b> ' + E(T('md.doc')) + '</li></ul>' +
-        '<p class="note">' + E(T(shared ? 'md.shared' : 'md.local')) + '</p>' +
-        '<p class="note">' + E(T('md.last')) + ' <b>' + (last ? new Date(last).toLocaleString('en-IN') : E(T('md.never'))) + '</b></p>' +
-        '<div class="btns"><button type="button" class="btn primary" data-act="backup">' + E(T('md.save')) + '</button>' +
-        '<label class="btn">' + E(T('md.restore')) + '<input type="file" accept=".json,application/json" data-act="restore" hidden></label></div>' +
-        '<p class="note">' + E(T('md.move')) + '</p>' +
-        (f.supported ? '<h3>' + E(T('md.autot')) + '</h3><p class="note">' + (f.on
-          ? T('md.auton', { file: '<b>' + E(BACKUP_NAME) + '.json</b>', name: '<b>' + E(f.name) + '</b>' }) + (f.allowed ? '' : ' ' + E(T('md.autoask')))
-          : E(T('md.autooff'))) + '</p>' +
-          '<div class="btns">' + (f.on ? (f.allowed ? '' : '<button type="button" class="btn primary" data-act="folder-allow">' + E(T('md.allow')) + '</button>') + '<button type="button" class="btn" data-act="folder-off">' + E(T('md.turnoff')) + '</button>' : '<button type="button" class="btn" data-act="folder-pick">' + E(T('md.choose')) + '</button>') + '</div>' : '') +
-        '<p class="note">' + T('md.seeall', { link: '<a href="https://my.niveshsahayak.in/" target="_blank" rel="noopener">my.niveshsahayak.in</a>' }) + '</p>';
+        '<div class="md-wrap"><div class="md-nav" role="tablist" aria-orientation="vertical">' + tabs.map(function (t) {
+          return '<button type="button" role="tab" id="md-t-' + t[0] + '" aria-controls="md-p-' + t[0] + '" aria-selected="' + (t[0] === cur) + '" tabindex="' + (t[0] === cur ? 0 : -1) + '" data-md-tab="' + t[0] + '">' + E(T(t[1])) + '</button>';
+        }).join('') + '</div><div class="md-panes">' +
+        pane('ov',
+          '<table class="md-counts"><tr>' + [[r[0], 'md.biz'], [r[1], 'md.party'], [r[2], 'md.item'], [r[3], 'md.doc']].map(function (c) {
+            return '<td><b>' + c[0].length + '</b><span>' + E(T(c[1])) + '</span></td>';
+          }).join('') + '</tr></table>' +
+          '<dl class="md-stat"><div><dt>' + E(T('md2.where')) + '</dt><dd>' + (shared ? on : warn) + E(T(shared ? 'desk.shared' : 'desk.local')) +
+            '<button type="button" class="hp-q" data-md-tip aria-expanded="false" aria-controls="md-tip-w" aria-label="' + E(T('hp.btn', { what: T('md2.where') })) + '">?</button></dd></div>' +
+          '<div><dt>' + E(T('md.last').replace(/[:：]\s*$/, '')) + '</dt><dd>' + (last ? on : warn) + E(lastTxt) + '</dd></div>' +
+          (f.supported ? '<div><dt>' + E(T('md2.folder')) + '</dt><dd>' + fTxt + '</dd></div>' : '') + '</dl>' +
+          '<p class="hp-tip" id="md-tip-w" hidden>' + E(T(shared ? 'md.shared' : 'md.local')) + '</p>' +
+          '<div class="md-bar">' + B('backup', 'md.save', 1) + restore + hub + '</div>') +
+        pane('bk', NS.mdRow(T('md2.file'), (last ? on : warn) + E(T('md.last')) + ' ' + E(lastTxt), T('md.move'), B('backup', 'md.save', 1) + restore)) +
+        (f.supported ? pane('af', NS.mdRow(T('md.autot'), fTxt, f.on ? T('md.auton', { file: BACKUP_NAME + '.json', name: f.name }) + (f.allowed ? '' : ' ' + T('md.autoask')) : T('md.autooff'),
+          f.on ? (f.allowed ? '' : B('folder-allow', 'md.allow', 1)) + B('folder-off', 'md.turnoff') : B('folder-pick', 'md.choose', 1))) : '') +
+        pane('ac', '') +
+        '</div></div>';
       (NS.mdExt || []).forEach(function (f) { try { f(body); } catch (e) {} });   /* extra parts from other files (safe.js) */
     }).catch(function () { body.innerHTML = '<p class="note bad">' + NS.esc(NS.t('md.err')) + '</p>'; });
   };
+  function mdTab(b, focus) {
+    var box = b.closest('.md-wrap'), k = b.getAttribute('data-md-tab');
+    NS._mdTab = k;
+    NS.$$('[data-md-tab]', box).forEach(function (x) { var s = x === b; x.setAttribute('aria-selected', s); x.tabIndex = s ? 0 : -1; });
+    NS.$$('.md-pane', box).forEach(function (p) { p.hidden = p.getAttribute('data-md-pane') !== k; });
+    if (focus) b.focus();
+  }
+  document.addEventListener('keydown', function (e) {
+    var b = e.target.closest && e.target.closest('[data-md-tab]');
+    if (!b || !/^(Arrow(Up|Down|Left|Right)|Home|End)$/.test(e.key)) return;
+    var all = NS.$$('[data-md-tab]', b.parentNode), i = all.indexOf(b), n = all.length;
+    var back = e.key === 'ArrowUp' || e.key === (document.documentElement.dir === 'rtl' ? 'ArrowRight' : 'ArrowLeft');
+    i = e.key === 'Home' ? 0 : e.key === 'End' ? n - 1 : back ? (i - 1 + n) % n : (i + 1) % n;
+    e.preventDefault(); mdTab(all[i], true);
+  });
   document.addEventListener('click', function (e) {
     var t = e.target.closest && e.target.closest('[data-act]');
+    var tb = e.target.closest && e.target.closest('[data-md-tab],[data-md-tip]');
+    if (tb && tb.hasAttribute('data-md-tab')) mdTab(tb);
+    else if (tb) { var tp = document.getElementById(tb.getAttribute('aria-controls')), sh = tp.hidden; tp.hidden = !sh; tb.setAttribute('aria-expanded', sh); }
     if (!t) return;
     var a = t.getAttribute('data-act');
     if (a === 'backup') NS.downloadBackup().then(NS.openMyData);
     else if (a === 'folder-pick') NS.folderPick().then(NS.openMyData, function () {});
     else if (a === 'folder-allow') NS.folderWrite(true).then(NS.openMyData);
     else if (a === 'folder-off') NS.folderOff().then(NS.openMyData);
-    else if (a === 'my-data') NS.openMyData();
+    else if (a === 'my-data') { NS._mdTab = 'ov'; NS.openMyData(); }
     else if (a === 'remind-later') { var r = NS.$('#ns-remind'); if (r) r.hidden = true; NSStore.meta('lastBackup', Date.now() - 4 * 864e5); }
   });
   document.addEventListener('change', function (e) {

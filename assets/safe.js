@@ -329,7 +329,15 @@
     box.appendChild(w);
     NS.gdriveCard(box);
   }
-  NS.mdExt = (NS.mdExt || []).concat([function (body) { extras(body, false); }]);
+  /* in the My data window: rows in its parts (Backup and restore, Send to your accountant); Drive sync joins the auto-save part */
+  function mdParts(body) {
+    var bk = NS.$('[data-md-pane="bk"]', body), ac = NS.$('[data-md-pane="ac"]', body);
+    if (!bk || !ac || !NS.mdRow) { extras(body, false); return; }
+    bk.insertAdjacentHTML('beforeend', NS.mdRow(T('b3.pw.t'), '', T('b3.pw.p'), '<button type="button" class="btn sm" data-act="backup-lock">' + E(T('b3.pw.b')) + '</button>'));
+    ac.insertAdjacentHTML('beforeend', NS.mdRow(T('b3.ac.t'), '', T('b3.ac.p'), '<button type="button" class="btn sm primary" data-act="acct">' + E(T('b3.ac.b')) + '</button>'));
+    NS.gdriveCard(NS.$('[data-md-pane="af"]', body) || bk);
+  }
+  NS.mdExt = (NS.mdExt || []).concat([mdParts]);
   NS.hubBackupExt = (NS.hubBackupExt || []).concat([function (pane) { var x = NS.$('[data-backup-ext]', pane) || pane; extras(x, true); }]);
   document.addEventListener('click', function (e) {
     var b = e.target.closest && e.target.closest('[data-act]'); if (!b) return;

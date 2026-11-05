@@ -183,7 +183,7 @@
     box.innerHTML =
       '<div class="bk-steps">' +
       '<div class="card"><h3>1. ' + esc(t('ty.s1')) + '</h3><div class="fg">' +
-        '<div class="f wide" role="radiogroup" aria-label="' + esc(t('ty.s1')) + '"><label class="chk"><input type="radio" name="ty-src" value="saved"' + (src === 'saved' ? ' checked' : '') + '> ' + esc(t('ty.src1')) + '</label>' +
+        '<div class="f wide choice" role="radiogroup" aria-label="' + esc(t('ty.s1')) + '"><label class="chk"><input type="radio" name="ty-src" value="saved"' + (src === 'saved' ? ' checked' : '') + '> ' + esc(t('ty.src1')) + '</label>' +
         '<label class="chk"><input type="radio" name="ty-src" value="sheet"' + (src === 'sheet' ? ' checked' : '') + '> ' + esc(t('ty.src2')) + '</label></div>' +
         '<div class="f wide" data-src="saved"><label for="ty-biz">' + esc(t('bk.biz')) + '</label><select id="ty-biz"><option value="">' + esc(t('bk.loading')) + '</option></select></div>' +
         '<div class="f" data-src="saved"><label for="ty-from">' + esc(t('ty.from')) + '</label><input id="ty-from" type="date" value="' + fyStart() + '"></div>' +

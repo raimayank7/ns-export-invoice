@@ -816,6 +816,13 @@
     'hs.f.codes': 'Codes in the official list', 'hs.f.rates': 'Rate entries in the notifications', 'hs.f.more': 'Showing the first {n}. Type more to narrow it down.',
     'hs.f.next2': 'Tap a code to see its description and GST rate.',
     'hs.i.auto': 'Filled in from the notification: {r}%', 'hs.i.pick': 'Choose the rate', 'hs.i.notr': '{r}% is not among the rates in the notifications for this code ({list})',
+    /* hsn: service rates (11/2017-CT(Rate)) */
+    'hs.s.same': 'Same as the goods', 'hs.s.or': 'or', 'hs.s.iv': 'What “credit of input tax not taken” means (Explanation (iv))',
+    'hs.s.many': 'More than one rate. Pick the item whose description fits your service; a rate with a condition applies only if you meet the condition.',
+    'hs.s.none': 'No item of the services Table names this heading.',
+    'hs.s.ex': 'Many services are exempt (nil) under Notification 12/2017-Central Tax (Rate), for example most health care and education. That list is not in this tool yet; check it before charging GST.',
+    'hs.s.src': 'Service rates word for word from Notification 11/2017-Central Tax (Rate) with every amendment up to 06/2026 (in force from 1 Nov 2026). Checked on {d}. The rate shown is the total GST; the notification states the central tax, which is half.',
+    'hs.s.found': 'Service rate items',
     /* links to the Nivesh Sahayak App from every site */
     'nav.app': 'Nivesh Sahayak App', 'hub.app': 'Dues, money received and paid, purchases, expenses and party statements in one place',
     /* Batch 3: locked backup, Google Drive sync, send to accountant, help tips, GST calendar */
@@ -1163,7 +1170,10 @@
     'hub.h.docs': 'Each document keeps its own number series. Digits and the financial year follow the invoice settings above (shop and trade sites always add the year). Leave a prefix empty for numbers without one. You can also change a prefix inside each maker, under its number box.',
     'hub.grp.sell': 'Selling', 'hub.grp.buy': 'Buying', 'hub.grp.money': 'Money, rent and salary', 'hub.grp.trade': 'Shops and trades',
     'sr.btn': 'Change number series', 'sr.title': 'Number series: {doc}', 'sr.p': 'This prefix starts every new number of this document. It is saved in My data › Settings, so every tool and the App use it.',
-    'sr.more': 'Digits and the financial year are set in', 'sr.save': 'Save the series', 'sr.saved': 'Number series saved.', 'sr.fail': 'It could not be saved. Please try again.'
+    'sr.more': 'Digits and the financial year are set in', 'sr.save': 'Save the series', 'sr.saved': 'Number series saved.', 'sr.fail': 'It could not be saved. Please try again.',
+    /* My data window as a settings panel (core.js openMyData) */
+    'md2.ov': 'Overview', 'md2.bk': 'Backup and restore', 'md2.folder': 'Auto-save folder', 'md2.where': 'Data kept',
+    'md2.on': 'On', 'md2.off': 'Off', 'md2.ask': 'On, needs your OK', 'md2.file': 'Backup file', 'md2.open': 'Open full data manager'
   };
 
   var packs = { en: EN }, cur = 'en';
