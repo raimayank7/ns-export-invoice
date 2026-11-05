@@ -39,6 +39,9 @@ h1,h2,h3,h4{font-family:var(--font-head);line-height:1.25;letter-spacing:-.01em}
 @media (prefers-color-scheme:dark){:root:not([data-theme=light]) .brand .mk-l{display:none}:root:not([data-theme=light]) .brand .mk-d{display:block}}
 :root[data-theme=dark] .brand .mk-l{display:none}:root[data-theme=dark] .brand .mk-d{display:block}
 .brand b{font-family:var(--font-head);font-weight:800;font-size:1.05rem;line-height:1.1;display:block}
+.brand-ic{display:inline-flex;vertical-align:-.2em;margin-inline-start:.15em;color:var(--accent)}
+.brand-ic::before{content:"";width:1.2em;height:1.2em;background:currentColor;-webkit-mask:var(--i) center/contain no-repeat;mask:var(--i) center/contain no-repeat}
+.vh{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap}
 .brand small{display:block;color:var(--soft);font-size:.78rem;line-height:1.2}
 .hd nav{margin-left:auto;display:flex;align-items:center;gap:4px}
 .hd nav a{color:var(--ink);text-decoration:none;font-weight:600;font-size:.92rem;padding:8px 10px;border-radius:8px}

@@ -9,7 +9,7 @@ kbd{font:600 .72rem var(--mono);border:1px solid var(--line);border-bottom-width
 .hd{z-index:30}
 .hd .wrap{max-width:none;min-height:var(--tb);padding-inline:12px 16px}
 .hd .brand small{display:none}
-.side-btn svg,.desk-cmdbtn svg,.side-mini svg,.cmd-in svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex:none}
+.side-btn svg,.desk-cmdbtn svg,.side-fold svg,.cmd-in svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex:none}
 .side-btn{display:none}
 .desk-cmdbtn{gap:8px;color:var(--soft);font-weight:600;min-width:0;justify-content:flex-start}
 .desk-cmdbtn span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
@@ -27,10 +27,10 @@ kbd{font:600 .72rem var(--mono);border:1px solid var(--line);border-bottom-width
 .side a[aria-current=page]{background:var(--accent);color:var(--accent-ink)}
 .side a::before{content:"";flex:none;width:18px;height:18px;background:currentColor;opacity:.85;-webkit-mask:var(--i) center/contain no-repeat;mask:var(--i) center/contain no-repeat}
 .side-about a{font-weight:500;font-size:.84rem;min-height:32px;color:var(--soft)}
-.side-mini{display:none;margin:0 0 4px auto;border:1px solid var(--line);background:var(--surface);color:var(--soft);border-radius:8px;width:34px;height:30px;place-items:center;cursor:pointer}
-[dir=rtl] .side-mini svg{transform:scaleX(-1)}
-html.side-mini .side-mini svg{transform:scaleX(-1)}
-[dir=rtl] html.side-mini .side-mini svg,html[dir=rtl].side-mini .side-mini svg{transform:none}
+.side-fold{display:none;margin:0 0 4px auto;border:1px solid var(--line);background:var(--surface);color:var(--soft);border-radius:8px;width:34px;height:30px;place-items:center;cursor:pointer}
+[dir=rtl] .side-fold svg{transform:scaleX(-1)}
+html.side-mini .side-fold svg{transform:scaleX(-1)}
+[dir=rtl] html.side-mini .side-fold svg,html[dir=rtl].side-mini .side-fold svg{transform:none}
 /* the App's own screens, moved into the side menu */
 .side .hub-nav{position:static;display:flex;flex-direction:column;gap:0;background:none;border:0;padding:0;border-radius:0;overflow:visible}
 .side .hub-nav a{justify-content:flex-start}
@@ -101,7 +101,7 @@ html.has-hub .hub>.hub-nav{display:none}
 /* wide screens: fixed side menu + status bar, the page scrolls beside them */
 @media (min-width:861px){
   .side{position:fixed;inset-block:var(--tb) var(--sbh);inset-inline-start:0;width:var(--sw);transition:width .18s}
-  .side-mini{display:grid}
+  .side-fold{display:grid}
   main#main{margin-inline-start:var(--sw);transition:margin .18s}
   .hd nav>a{display:none}
   .ft{display:none}
@@ -111,7 +111,7 @@ html.has-hub .hub>.hub-nav{display:none}
   html.side-mini .side a{justify-content:center;padding:6px}
   html.side-mini .side a span,html.side-mini .side a .n,html.side-mini .side-h{display:none}
   html.side-mini .side-g{border-top:1px solid var(--line);padding-top:6px}
-  html.side-mini .side-mini{margin-inline:auto}
+  html.side-mini .side-fold{margin-inline:auto}
 }
 /* phones and small tablets: the side menu slides in */
 @media (max-width:860px){
@@ -245,6 +245,7 @@ html.embed body{padding-bottom:0}
 [data-ic=t-purchase]{--i:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M4 5h2l2 10h10l2-7H7M9 19h.01M17 19h.01'/%3E%3C/svg%3E")}
 [data-ic=t-restaurant]{--i:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M7 3v8M5 3v5a2 2 0 0 0 4 0V3M7 11v10M17 3c-2 2-2 6 0 8v10'/%3E%3C/svg%3E")}
 [data-ic=t-sponsor]{--i:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M12 20s-8-5-8-11a4.5 4.5 0 0 1 8-3 4.5 4.5 0 0 1 8 3c0 6-8 11-8 11z'/%3E%3C/svg%3E")}
+[data-ic=t-promo]{--i:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M3 10v4h3l7 4V6l-7 4zM16 9a3 3 0 0 1 0 6M19 7a6 6 0 0 1 0 10'/%3E%3C/svg%3E")}
 [data-ic=t-stock]{--i:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M3 13h8v8H3zM13 13h8v8h-8zM8 3h8v8H8z'/%3E%3C/svg%3E")}
 [data-ic=t-tally]{--i:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M4 4h10v16H4zM7 8h4M7 12h4M14 12h7M18 9l3 3-3 3'/%3E%3C/svg%3E")}
 [data-ic=t-tds]{--i:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M5 19L19 5M7 5a2 2 0 1 0 0 4 2 2 0 0 0 0-4M17 15a2 2 0 1 0 0 4 2 2 0 0 0 0-4'/%3E%3C/svg%3E")}
