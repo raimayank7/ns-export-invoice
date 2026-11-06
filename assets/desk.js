@@ -194,13 +194,14 @@
     $$('#ns-side .side-g').forEach(function (g) {
       var gk = g.getAttribute('data-g') === 'about' ? 'act' : 'go';
       $$('a', g).forEach(function (a) {
+        if (NS.featHidden && NS.featHidden(a)) return;   /* a feature switched off in the installed App (firstrun.js) */
         var sec = a.getAttribute('data-sec'), i = sec ? $$('#ns-side a[data-sec]').indexOf(a) : -1;
         out.push({ g: g.getAttribute('data-g') === 'docs' || g.getAttribute('data-g') === 'more' ? 'new' : gk, t: (a.textContent || '').trim(),
           k: a.getAttribute('data-ic') === 'd-billing' ? 'Alt+N' : i >= 0 && i < 9 ? 'Alt+' + (i + 1) : '', run: function () { a.click(); } });
       });
     });
     var app = A();
-    if (app && app.biz && app.biz()) FORMS.forEach(function (f) { out.push({ g: 'rec', t: app.T(f[0]), k: f[1], run: function () { app.openForm(f[0]); } }); });
+    if (app && app.biz && app.biz()) FORMS.forEach(function (f) { if (NS.featHidden && NS.featHidden(f[0])) return; out.push({ g: 'rec', t: app.T(f[0]), k: f[1], run: function () { app.openForm(f[0]); } }); });
     return out.concat(actions());
   }
   /* parties and saved documents are read when the box opens (from the App if it is here, else from the data home) */
