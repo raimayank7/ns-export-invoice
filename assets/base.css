@@ -361,3 +361,8 @@ html.embed,html.embed body{overscroll-behavior-y:contain}   /* the end of the do
 .series-link{display:block;margin-top:4px;text-align:start;font-size:.82rem}
 /* touch screens: the small "?" tips and text-style buttons get a finger-sized tap area (visitor walk, 5 Nov 2026) */
 @media (pointer:coarse){.hp-q{min-width:32px;min-height:32px}button.link{min-height:36px}}
+/* Help articles (/help/ on every site) */
+.help-shot{margin:16px 0;padding:0}.help-shot img{display:block;max-width:100%;height:auto;border:1px solid var(--line);border-radius:10px;background:#fff}.help-shot figcaption{font-size:.85rem;color:var(--soft);margin-top:6px}
+.prose ol.help-steps{padding-left:1.4em}.prose ol.help-steps>li{margin:.45em 0}.prose .help-fix>li{margin:.5em 0}
+.help-toc ul{display:flex;flex-wrap:wrap;gap:8px;list-style:none;padding:0;margin:12px 0}.help-toc a{display:inline-block;padding:6px 12px;min-height:36px;box-sizing:border-box;border:1px solid var(--line);border-radius:999px;background:var(--surface);text-decoration:none}
+.help-back{margin-top:28px;font-size:.95rem}.prose kbd{font:600 .85em var(--mono);border:1px solid var(--line);border-bottom-width:2px;border-radius:5px;padding:1px 5px;background:var(--surface)}

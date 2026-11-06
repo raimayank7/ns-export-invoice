@@ -1845,7 +1845,9 @@
     "pb.usedbyh": "Leave it for all businesses, or keep it for one business so it is offered only there.",
     "pb.allbiz": "All businesses",
     "pb.only": "Only {b}",
-    "fx.as2": "Finished goods made here are valued at full cost (AS 2): factory expenses {oh} spread over production of {m} ({p}%), so {u} is added to the goods in stock."
+    "fx.as2": "Finished goods made here are valued at full cost (AS 2): factory expenses {oh} spread over production of {m} ({p}%), so {u} is added to the goods in stock.",
+    /* Help */
+    "f.help": "Help", "f.helpall": "All help articles"
   };
 
   var packs = { en: EN }, cur = 'en';
