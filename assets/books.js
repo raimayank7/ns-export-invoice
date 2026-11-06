@@ -28,6 +28,16 @@
      advadj (made here)          not stored: when a later bill or a refund uses a GST advance, inBooks() adds an 'advadj' record
                                  (Dr output GST, Cr 'gst-adv' for the tax inside the part used), so the tax is not paid twice; see advAdjust()
      pdd                         provision for doubtful debts (WP-3): change = new figure - provision before; Dr / Cr exp:provision for doubtful debts
+     salary (acct)               salary slip ticked "Add to my accounts" (WP-5): Dr salary + employer PF/ESI, Cr PF / ESI / professional tax /
+                                 TDS payable, the staff advance recovered, other deductions, net pay to 'sal-payable'; see salSplit().
+                                 pay { date, mode } (or payDate / payMode, as the slip maker saves it) = net pay paid: inBooks0() adds a 'salpay' record (Dr sal-payable, Cr cash/bank)
+     rent (acct)                 rent receipt we issued as landlord: Dr cash/bank, Cr inc:rent received (rent x months)
+     petty (acct)                petty cash book: every line with an amount paid becomes a 'pettyl' record dated that line (Dr the head,
+                                 Cr cash); money received into the petty cash is cash moving inside the business and is not posted
+     sadv                        advance to an employee (kind 'give') or paid back in cash (kind 'back'): account 'sadv:<employee>'
+     loan (recv)                 loan master: lender, amount, rate, months, emi, first (first EMI date), lt 'loan' | 'od'; with recv the money
+                                 received is posted (Dr cash/bank, Cr loan:<lender>), else the loan is already in the books (capital and loans form)
+     emi                         loan instalment paid: Dr loan:<lender> principal + exp:interest on loan, Cr cash/bank; schedule() suggests the split
      fa kind 'buy' / 'sale'      fixed asset bought (Dr fa:<asset>, GST credit if itc) / sold (Cr the book value bv saved on the record,
                                  the difference is profit or loss on sale); mode 'credit' = the party (buyer field) is owed / owes
    chq: { date, bank, st, on } on a receipt or voucher paid by cheque: st 'hand' (received, not deposited), 'dep' (deposited),
@@ -139,6 +149,13 @@
       case 'wo': return 'wo';   /* balance of a bill written off (WP-3) */
       case 'pdd': return 'pdd';   /* provision for doubtful debts (WP-3) */
       case 'advadj': return 'advadj';   /* GST of an advance used by a bill or refunded (made by advAdjust, never stored) */
+      case 'salary': return d.acct ? 'sal' : '';   /* WP-5: only slips ticked "Add to my accounts" (older slips stay out until ticked) */
+      case 'salpay': return 'salpay';   /* net salary paid (made by inBooks0 from the slip's pay date, never stored) */
+      case 'rent': return d.acct ? 'rentin' : '';
+      case 'pettyl': return 'pettyl';   /* one paid line of a petty cash book (made by inBooks0, never stored) */
+      case 'sadv': return 'sadv';
+      case 'loan': return d.recv ? 'loan' : '';
+      case 'emi': return 'emi';
     }
     return '';
   }
@@ -186,7 +203,7 @@
     } else if (R === 'out' || R === 'outexp') {
       var gross = (d.lines || []).reduce(function (a, l) { return a + num(l.amt); }, 0), tdsOut = r2(gross * num(d.tdsRate) / 100);
       if (R === 'out') { dr(P, gross + num(d.disc)); cr(DISC_R, num(d.disc)); }   /* disc: cash discount received from the supplier (WP-3) */
-      else (d.lines || []).forEach(function (l) { dr('exp:' + key(l.head || 'Miscellaneous'), num(l.amt)); });
+      else (d.lines || []).forEach(function (l) { dr(expAcct(l.head), num(l.amt)); });
       cr(payAcct(d, true), gross - tdsOut); cr('tds-payable', tdsOut);
     } else if (R === 'buy' || R === 'pret') {
       t = itemTotals(d);
@@ -225,6 +242,25 @@
       if (sg) { if (d.inter) cr('gst-out-igst', sg); else { cr('gst-out-cgst', r2(sg / 2)); cr('gst-out-sgst', sg - r2(sg / 2)); } }
       cr(sk, bv);
       if (amt > bv) cr('inc:profit on sale of assets', amt - bv); else dr('exp:loss on sale of assets', bv - amt);
+    } else if (R === 'sal') {   /* salary slip (WP-5) */
+      var s = salSplit(d);
+      dr(SALX, s.gross); dr(ERX, s.erPf + s.erEsi);
+      cr('pf-payable', s.pf + s.erPf); cr('esi-payable', s.esi + s.erEsi); cr('pt-payable', s.pt); cr('tds-payable', s.tds);
+      if (s.adv) cr(SADV + key(partyName(d) || 'staff'), s.adv);
+      cr(ODED, s.other); cr(SALP, s.net);
+    } else if (R === 'salpay') {
+      dr(SALP, num(d.amount)); cr(payAcct(d, true), num(d.amount));
+    } else if (R === 'rentin') {
+      amt = rentTotal(d); dr(moneyAcct(d.mode), amt); cr('inc:rent received', amt);
+    } else if (R === 'pettyl') {
+      dr(expAcct(d.head), num(d.amount)); cr('cash', num(d.amount));
+    } else if (R === 'sadv') {
+      amt = num(d.amount); var sa = SADV + key(d.emp || partyName(d) || 'staff');
+      if (d.kind === 'back') { dr(payAcct(d), amt); cr(sa, amt); } else { dr(sa, amt); cr(payAcct(d, true), amt); }
+    } else if (R === 'loan') {
+      dr(payAcct(d), num(d.amount)); cr(loanAcct(d), num(d.amount));
+    } else if (R === 'emi') {
+      dr(loanAcct(d), num(d.principal)); dr(INTL, num(d.interest)); cr(payAcct(d, true), r2(num(d.principal) + num(d.interest)));
     } else if (R === 'ob') {
       amt = num(d.amount);
       if (d.side === 'cash' || d.side === 'bank') { dr(d.side, amt); cr('opening', amt); }   /* cash in hand / bank balance on the start date */
@@ -283,6 +319,76 @@
     return out;
   }
 
+  /* ---------- salary, rent receipts, petty cash, staff advances, loans (Accounts coverage WP-5) ---------- */
+  var SALX = 'exp:salary', ERX = 'exp:employer contribution to pf and esi', SALP = 'sal-payable', ODED = 'ocl:other deductions from salary',
+    SADV = 'sadv:', INTL = 'exp:interest on loan';
+  /* a voucher or petty cash head: an advance to staff is money still owed back, not an expense */
+  function expAcct(head) { var k = key(head || 'Miscellaneous'); return /^(advance to staff|staff advance|advance to employee)s?$/.test(k) ? SADV + 'staff' : 'exp:' + k; }
+  function loanAcct(d) { return (d.lt === 'od' ? 'od:' : 'loan:') + key(d.lender || partyName(d) || 'loan'); }
+  /* a salary slip in parts. Deduction lines are read by their name (the slip's own lines are English: PF, ESI, Professional tax, TDS);
+     a line naming an advance or loan recovers the employee's staff advance; any other line is kept as 'other deductions'.
+     erPf / erEsi = the employer's own PF and ESI (12% and 3.25%), costs of the business on top of the gross */
+  function dedKind(desc) {
+    var s = String(desc || '');
+    if (/provident|\bE?PF\b/i.test(s)) return 'pf';
+    if (/\bESIC?\b/i.test(s)) return 'esi';
+    if (/professional|\bPT\b/i.test(s)) return 'pt';
+    if (/\bTDS\b|income.?tax/i.test(s)) return 'tds';
+    if (/advance|loan/i.test(s)) return 'adv';
+    return 'other';
+  }
+  function salSplit(d) {
+    var o = { gross: 0, pf: 0, esi: 0, pt: 0, tds: 0, adv: 0, other: 0, ded: 0, erPf: r2(num(d.erPf)), erEsi: r2(num(d.erEsi)) };
+    (d.earn || []).forEach(function (l) { o.gross += num(l.amt); });
+    (d.ded || []).forEach(function (l) { var v = num(l.amt); if (!v) return; o[dedKind(l.desc)] += v; o.ded += v; });
+    ['gross', 'pf', 'esi', 'pt', 'tds', 'adv', 'other', 'ded'].forEach(function (k) { o[k] = r2(o[k]); });
+    o.net = r2(o.gross - o.ded); o.cost = r2(o.gross + o.erPf + o.erEsi);
+    return o;
+  }
+  function rentTotal(d) {
+    var f = String(d.from || ''), t = String(d.to || '') >= f ? String(d.to) : f, n = 0;
+    if (/^\d{4}-\d{2}$/.test(f)) for (var m = f; m <= t && n < 24; ) { n++; var y = +m.slice(0, 4), mo = +m.slice(5, 7) + 1; if (mo > 12) { mo = 1; y++; } m = y + '-' + String(mo).padStart(2, '0'); }
+    return r2(num(d.rent) * (n || 1));
+  }
+  /* the records a stored one stands for in the books: a petty cash book is one record per paid line; a paid salary slip adds its payment */
+  function expand(d) {
+    if (d.type === 'petty') {
+      if (!d.acct) return [];
+      return (d.lines || []).map(function (l, i) {
+        return num(l.paid) > 0 ? { type: 'pettyl', id: d.id + '#' + i, src: d.id, no: d.no || '', vno: l.vno || '', date: l.date || d.date, head: l.head || '', desc: l.desc || '', amount: r2(num(l.paid)), seller: d.seller, created: d.created || 0 } : null;
+      }).filter(Boolean);
+    }
+    var pay = d.pay || (d.payDate ? { date: d.payDate, mode: d.payMode } : null);   /* the slip maker keeps payDate / payMode */
+    if (d.type === 'salary' && d.acct && pay && pay.date) {
+      var p = { type: 'salpay', id: d.id + '#pay', src: d.id, no: d.no || '', date: pay.date, mode: pay.mode || 'bank', chq: pay.chq, amount: salSplit(d).net, seller: d.seller, buyer: d.buyer, created: d.created || 0 };
+      return p.amount > 0 ? [d, p] : [d];
+    }
+    return [d];
+  }
+  /* loan schedule (reducing balance, monthly): [{ n, date, emi, interest, principal, bal, paid (the emi record of that instalment) }].
+     emi = the loan's own EMI, else worked out; the last line clears what is left. Paid instalments use their own split, so a rate
+     change typed on a payment carries on to the later lines. */
+  function addMonths(iso, k) {
+    var y = +iso.slice(0, 4), m = +iso.slice(5, 7) - 1 + k, day = +iso.slice(8, 10);
+    y += Math.floor(m / 12); m = ((m % 12) + 12) % 12;
+    var last = new Date(Date.UTC(y, m + 1, 0)).getUTCDate();
+    return y + '-' + String(m + 1).padStart(2, '0') + '-' + String(Math.min(day, last)).padStart(2, '0');
+  }
+  function emiOf(P, rate, n) { var r = num(rate) / 1200; P = num(P); n = Math.round(num(n)); if (!(P > 0) || !(n > 0)) return 0; return r ? r2(P * r * Math.pow(1 + r, n) / (Math.pow(1 + r, n) - 1)) : r2(P / n); }
+  function schedule(loan, docs) {
+    var P = num(loan.amount), n = Math.round(num(loan.months)), r = num(loan.rate) / 1200, emi = num(loan.emi) || emiOf(P, loan.rate, n), out = [], bal = P;
+    var first = /^\d{4}-\d{2}-\d{2}$/.test(String(loan.first || '')) ? loan.first : loan.date ? addMonths(loan.date, 1) : '';
+    var paid = {}; (docs || []).forEach(function (d) { if (d && d.type === 'emi' && d.loanId === loan.id) paid[num(d.n)] = d; });
+    for (var k = 1; k <= Math.min(n, 600) && bal > 0.004; k++) {
+      var p = paid[k], it = p ? r2(num(p.interest)) : r2(bal * r), pr = p ? r2(num(p.principal)) : k === n ? r2(bal) : r2(Math.min(bal, emi - it));
+      bal = r2(bal - pr);
+      out.push({ n: k, date: p ? p.date : first ? addMonths(first, k - 1) : '', emi: r2(it + pr), interest: it, principal: pr, bal: bal, paid: p || null });
+    }
+    return out;
+  }
+  /* what is still owed on a loan: amount less the principal of every EMI paid */
+  function loanLeft(loan, docs) { var v = num(loan.amount); (docs || []).forEach(function (d) { if (d && d.type === 'emi' && d.loanId === loan.id) v -= num(d.principal); }); return r2(v); }
+
   /* ---------- discounts, write-offs, provision for doubtful debts (Accounts coverage WP-3) ---------- */
   var DISC_A = 'exp:discount allowed', DISC_R = 'inc:discount received', BADD = 'exp:bad debts', WBACK = 'inc:balances written back', PDDX = 'exp:provision for doubtful debts';
   /* the provision for doubtful debts on a day (the 'pdd' account balance, a credit), leaving out one record (the one being changed) */
@@ -337,12 +443,17 @@
   }
 
   /* the business's records in date order (same date: sales and bills before money, so a same-day payment settles them) */
-  var ORDER = { ob: 0, sale: 1, sdeb: 1, buy: 1, exp: 1, fabuy: 1, sret: 2, pret: 2, 'in': 3, out: 3, outexp: 3, refund: 3, fasale: 3, oinc: 3, taxpay: 3, advadj: 4, wo: 4, contra: 4, jv: 5, gstset: 6, pdd: 7 };
+  var ORDER = { ob: 0, sale: 1, sdeb: 1, buy: 1, exp: 1, fabuy: 1, sret: 2, pret: 2, 'in': 3, out: 3, outexp: 3, refund: 3, fasale: 3, oinc: 3, taxpay: 3, sal: 1, rentin: 3, salpay: 3, pettyl: 3, sadv: 3, loan: 3, emi: 3, advadj: 4, wo: 4, contra: 4, jv: 5, gstset: 6, pdd: 7 };
   function byOrder(x, y) { return (x.date || '').localeCompare(y.date || '') || ORDER[role(x)] - ORDER[role(y)] || (x.created || 0) - (y.created || 0); }
   /* the stored records only ('advadj' records are made by advAdjust, never read back from the documents) */
   function inBooks0(docs, biz) {
     var b = key(biz);
-    return (docs || []).filter(function (d) { return d && d.type !== 'advadj' && role(d) && (!b || bizOf(d) === b); }).sort(byOrder);
+    var out = [];
+    (docs || []).forEach(function (d) {
+      if (!d || d.type === 'advadj' || d.type === 'salpay' || d.type === 'pettyl' || b && bizOf(d) !== b) return;
+      expand(d).forEach(function (x) { if (role(x)) out.push(x); });
+    });
+    return out.sort(byOrder);
   }
   /* the records in the books: stored ones plus the GST adjustments of advances used (round C) */
   function inBooks(docs, biz) {
@@ -616,7 +727,7 @@
   }
 
   var API = { num: num, r2: r2, key: key, role: role, itemTotals: itemTotals, postings: postings, inBooks: inBooks, parties: parties, accounts: accounts,
-    taxPay: taxPay, gstSet: gstSet, provision: provision, advTax: advTax, advAdjust: advAdjust, inBooks0: inBooks0, GADV: GADV, bills: bills, ageing: ageing, overdue: overdue, chargeLines: chargeLines, tcsRate: tcsRate, tcsPan: tcsPan, panOk: panOk, addDays: addDays, mainRate: mainRate, statement: statement, book: book, daysBetween: daysBetween, moneyAcct: moneyAcct, payAcct: payAcct, bounced: bounced, partyName: partyName, partiesOf: partiesOf, jvAcct: jvAcct,
+    taxPay: taxPay, gstSet: gstSet, provision: provision, salSplit: salSplit, dedKind: dedKind, rentTotal: rentTotal, expAcct: expAcct, loanAcct: loanAcct, schedule: schedule, emiOf: emiOf, loanLeft: loanLeft, addMonths: addMonths, SADV: SADV, advTax: advTax, advAdjust: advAdjust, inBooks0: inBooks0, GADV: GADV, bills: bills, ageing: ageing, overdue: overdue, chargeLines: chargeLines, tcsRate: tcsRate, tcsPan: tcsPan, panOk: panOk, addDays: addDays, mainRate: mainRate, statement: statement, book: book, daysBetween: daysBetween, moneyAcct: moneyAcct, payAcct: payAcct, bounced: bounced, partyName: partyName, partiesOf: partiesOf, jvAcct: jvAcct,
     vtype: vtype, ledger: ledger, billwise: billwise, groupsOf: groupsOf, groupChain: groupChain, partyGroup: partyGroup, inGroup: inGroup, groupTree: groupTree,
     partyMoves: partyMoves, groupSummary: groupSummary, groupDues: groupDues, topParties: topParties, BUILTIN: BUILTIN };
   if (typeof module !== 'undefined' && module.exports) module.exports = API; else G.NSBooks = API;

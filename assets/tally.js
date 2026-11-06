@@ -24,10 +24,11 @@
   /* accounts of journal entries, capital and loan forms and the fixed assets register (cap:ramesh, od:hdfc loan, fa:machine...):
      Tally's own group and a clean ledger name (the name as typed, from typedNames). Drawings sit under Capital Account, as Tally users keep them. */
   var PFX = { 'cap:': 'Capital Account', 'drw:': 'Capital Account', 'loan:': 'Loans (Liability)', 'od:': 'Loans (Liability)', 'given:': 'Loans & Advances (Asset)',
-    'fa:': 'Fixed Assets', 'inc:': 'Indirect Incomes', 'exp:': 'Indirect Expenses', 'ocl:': 'Provisions', 'oca:': 'Loans & Advances (Asset)' };
+    'fa:': 'Fixed Assets', 'inc:': 'Indirect Incomes', 'exp:': 'Indirect Expenses', 'ocl:': 'Provisions', 'oca:': 'Loans & Advances (Asset)', 'sadv:': 'Loans & Advances (Asset)' };
   var OTHER = { 'tcs-payable': ['TCS Payable', 'Duties & Taxes'], 'tcs-receivable': ['TCS Receivable', 'Loans & Advances (Asset)'], 'chq-in': ['Cheques in Hand', 'Current Assets'],
     'chq-out': ['Cheques Issued, Not Cleared', 'Current Liabilities'], 'gst-out-utgst': ['Output UTGST', 'Duties & Taxes'],
     pdd: ['Provision for Doubtful Debts', 'Sundry Debtors'],   /* WP-3: nets with the debtors */
+    'sal-payable': ['Salary Payable', 'Current Liabilities'], 'pf-payable': ['PF Payable', 'Duties & Taxes'], 'esi-payable': ['ESI Payable', 'Duties & Taxes'], 'pt-payable': ['Professional Tax Payable', 'Duties & Taxes'],   /* WP-5 */
     'gstcash-igst': ['GST Cash Ledger IGST', 'Current Assets'], 'gstcash-cgst': ['GST Cash Ledger CGST', 'Current Assets'], 'gstcash-sgst': ['GST Cash Ledger SGST', 'Current Assets'], 'gstcash-cess': ['GST Cash Ledger Cess', 'Current Assets'] };
   var box, names = {}, src = 'saved', sheetRows = null, parties = {}, M = { party: [], item: [], groups: null }, typed = {}, DX = null;
   /* expense heads marked Direct (My data › Settings › Final accounts, settings.tf.dx of the business; else tfcore.js defaults)
@@ -54,6 +55,7 @@
       if (px === 'cap:') return /^capital$/i.test(nm) ? 'Capital Account' : nm + ' Capital A/c';
       if (px === 'drw:') return /^drawings?$/i.test(nm) ? 'Drawings' : nm + ' Drawings A/c';
       if (px === 'given:') return 'Loan to ' + nm;
+      if (px === 'sadv:') return /^staff$/i.test(nm) ? 'Advance to Staff' : 'Advance to ' + nm;   /* WP-5: one ledger per employee */
       return nm;
     }
     if (OTHER[a] && !names[a]) return OTHER[a][0];
@@ -72,6 +74,12 @@
       if (d.type === 'oinc' && d.head) put('inc:' + B.key(d.head), d.head);   /* other income received (Accounts coverage WP-2) */
       if (d.type === 'pdd') put('exp:provision for doubtful debts', 'Provision for Doubtful Debts (P&L)');   /* WP-3: Tally names are not case-sensitive, so the charge needs its own name next to the provision ledger */
       if (d.type === 'wo' || d.type === 'pdd' || d.disc) { put('exp:discount allowed', 'Discount Allowed'); put('inc:discount received', 'Discount Received'); put('exp:bad debts', 'Bad Debts'); put('inc:balances written back', 'Balances Written Back'); }
+      /* WP-5: salary slips, rent receipts, petty cash, loans */
+      if (d.type === 'salary' && d.acct) { put('exp:salary', 'Salary and Wages'); put('exp:employer contribution to pf and esi', 'Employer Contribution to PF and ESI'); put('ocl:other deductions from salary', 'Other Deductions from Salary'); if (B.partyName(d)) put(B.SADV + B.key(B.partyName(d)), B.partyName(d)); }
+      if (d.type === 'sadv' && d.emp) put(B.SADV + B.key(d.emp), d.emp);
+      if (d.type === 'rent' && d.acct) put('inc:rent received', 'Rent Received');
+      if (d.type === 'petty') (d.lines || []).forEach(function (l) { if (l && l.head && B.expAcct(l.head).indexOf('exp:') === 0) put('exp:' + B.key(l.head), l.head); });
+      if ((d.type === 'loan' || d.type === 'emi') && d.lender) { put(B.loanAcct(d), d.lender); put('exp:interest on loan', 'Interest on Loan'); }
       if (d.type === 'taxpay' || d.type === 'gstset') { put('exp:interest on late payment of tax', 'Interest on late payment of tax'); put('exp:late fee and penalty', 'Late fee and penalty'); put('oca:advance income tax', 'Advance income tax'); }   /* WP-4 */
     });
     return o;
@@ -200,6 +208,13 @@
     if (d.narr) bits.push(d.narr);
     if (d.gstAdv && d.type === 'receipt' && d.kind === 'adv') bits.push('Advance with GST ' + num(d.rate) + '% (receipt voucher)');
     if (d.type === 'fa') bits.push((d.kind === 'sale' ? 'Fixed asset sold: ' : 'Fixed asset bought: ') + (d.name || ''));
+    if (R === 'sal') bits.push('Salary for ' + (d.month || '') + ' of ' + B.partyName(d));
+    if (R === 'salpay') bits.push('Salary paid to ' + B.partyName(d) + ' (slip ' + (d.no || '') + ')');
+    if (R === 'rentin') bits.push('Rent received from ' + B.partyName(d) + ' for ' + (d.from || '') + (d.to && d.to !== d.from ? ' to ' + d.to : ''));
+    if (R === 'pettyl') bits.push('Petty cash: ' + [d.desc, d.vno ? 'voucher ' + d.vno : ''].filter(Boolean).join(', '));
+    if (R === 'sadv') bits.push((d.kind === 'back' ? 'Advance paid back by ' : 'Advance given to ') + (d.emp || ''));
+    if (R === 'loan') bits.push('Loan received from ' + (d.lender || ''));
+    if (R === 'emi') bits.push('EMI ' + (d.n || '') + ' to ' + (d.lender || '') + ': principal ' + num(d.principal).toFixed(2) + ', interest ' + num(d.interest).toFixed(2));
     if (R === 'exp' || R === 'outexp') bits.push((d.lines || []).map(function (l) { return l.head || l.desc; }).filter(Boolean).join(', ') || d.cat || '');
     return bits.filter(Boolean).join('; ').slice(0, 500);
   }
