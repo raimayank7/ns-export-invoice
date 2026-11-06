@@ -78,7 +78,7 @@
     'lg.billto': 'Bill to', 'l.cname': 'Customer name', 'ph.cname': 'Type the customer’s name', 'h.cname': 'Saved customers appear as you type.', 'l.cgstin': 'GSTIN (if registered)',
     'l.ship': 'Ship to a different address', 'l.shname': 'Ship to name', 'l.shaddr': 'Ship to address', 'l.shstate': 'Ship to state',
     'lg.items': 'Items', 'it.n': 'Item {n}', 'it.rm': 'Remove', 'l.desc': 'Description', 'ph.desc': 'Item or service', 'l.hsn': 'HSN/SAC', 'l.qty': 'Qty', 'l.unit': 'Unit', 'l.rate': 'Rate (₹)', 'l.disc': 'Disc. %', 'l.gst': 'GST %', 'add.item': '+ Add item',
-    'sum.items': '{n} items', 'sum.taxable': 'Taxable {v}', 'sum.gst': 'GST {v}', 'sum.total': 'Total {v}',
+    'sum.items': '{n} item(s)', 'sum.taxable': 'Taxable {v}', 'sum.gst': 'GST {v}', 'sum.total': 'Total {v}',
     'lg.notes': 'Notes and look', 'l.notes': 'Notes', 'ph.notes': 'For example: Thank you for your business.', 'l.terms': 'Terms and conditions', 'ph.terms': 'For example: Payment within 15 days. Interest at 18% a year after the due date.',
     'l.copy': 'Copy label', 'cp.orig': 'Original for recipient', 'cp.dup': 'Duplicate for transporter', 'cp.trip': 'Triplicate for supplier', 'cp.none': 'No label',
     'l.colour': 'Colour', 'colour.n': 'Colour {n}', 'l.round': 'Round off the total', 'l.pay': 'Payment', 'pay.unpaid': 'Not paid yet', 'pay.paid': 'Paid',
@@ -1398,7 +1398,7 @@
     "mf.norecent": "No job work entries yet.",
     "mf.hasback": "Goods have been received against this entry. Delete the received entries first.",
     "mf.itc": "ITC-04 (job work return)",
-    "mf.itch": "Rule 45(3), in force from 1 Oct 2021 (checked 5 Nov 2026): if last year's turnover was above ₹5 crore, file twice a year (April to September by 25 October, October to March by 25 April); otherwise once a year by 25 April. Check the ITC-04 format on the GST portal before filing.",
+    "mf.itch": "Rule 45(3), in force from 1 Oct 2021: if last year's turnover was above ₹5 crore, file twice a year (April to September by 25 October, October to March by 25 April); otherwise once a year by 25 April. Check the ITC-04 format on the GST portal before filing.",
     "mf.half": "Turnover last year above ₹5 crore",
     "mf.period": "Period",
     "mf.p_h1": "April to September",
@@ -1847,12 +1847,252 @@
     "pb.only": "Only {b}",
     "fx.as2": "Finished goods made here are valued at full cost (AS 2): factory expenses {oh} spread over production of {m} ({p}%), so {u} is added to the goods in stock.",
     /* Help */
-    "f.help": "Help", "f.helpall": "All help articles"
+    "f.help": "Help", "f.helpall": "All help articles",
+    /* Accounts coverage WP-1/2/4 (heads.js, acctx.js, hubheads.js) */
+    "hd.wages": "Wages",
+    "hd.freight_in": "Freight and cartage inward",
+    "hd.power_f": "Power and fuel (factory)",
+    "hd.jobwork": "Job work charges",
+    "hd.loading": "Loading and unloading",
+    "hd.packing": "Packing material",
+    "hd.consum": "Consumable stores",
+    "hd.customs": "Customs duty on imports",
+    "hd.bonus": "Bonus",
+    "hd.pfesi": "Employer's PF and ESI",
+    "hd.welfare": "Staff welfare",
+    "hd.print": "Printing and stationery",
+    "hd.postage": "Postage and courier",
+    "hd.travel": "Travelling and conveyance",
+    "hd.vehicle": "Vehicle running and repairs",
+    "hd.interest": "Interest on loans",
+    "hd.int_tax": "Interest on late payment of tax",
+    "hd.penalty": "Late fee and penalty",
+    "hd.legal": "Legal fees (advocate)",
+    "hd.audit": "Audit fees",
+    "hd.comm": "Commission and brokerage paid",
+    "hd.disc_all": "Discount allowed",
+    "hd.bad_debt": "Bad debts",
+    "hd.insure": "Insurance",
+    "hd.rates": "Rates, taxes and licence fees",
+    "hd.software": "Software and subscriptions",
+    "hd.gifts": "Gifts to customers",
+    "hd.donation": "Donations",
+    "hd.dep": "Depreciation",
+    "hd.loss_fa": "Loss on sale of assets",
+    "hd.int_recd": "Interest received",
+    "hd.rent_recd": "Rent received",
+    "hd.comm_recd": "Commission received",
+    "hd.div": "Dividend received",
+    "hd.disc_recd": "Discount received",
+    "hd.scrap": "Sale of scrap",
+    "hd.claim": "Insurance claim received",
+    "hd.bd_recd": "Bad debts recovered",
+    "hd.grant": "Subsidy and grants",
+    "hd.job_inc": "Job work income",
+    "hd.profit_fa": "Profit on sale of assets",
+    "hd.misc_inc": "Miscellaneous income",
+    "hd.set": "Income and expense heads",
+    "hd.seth": "Ready heads for every kind of income and expense, with the Tally group each one goes to. Expense forms, journal entries and other income suggest them.",
+    "hd.own": "Your own heads",
+    "hd.ownh": "Add a head the list does not have and say what kind it is. A new name typed on the expense form is added here by itself.",
+    "hd.add": "+ Add a head",
+    "hd.save": "Save heads",
+    "hd.head": "Head",
+    "hd.type": "Type",
+    "hd.gst": "GST input credit",
+    "hd.fahint": "(something that lasts for years is a fixed asset)",
+    "hd.t_dexp": "Direct expense",
+    "hd.t_iexp": "Indirect expense",
+    "hd.t_oinc": "Other income",
+    "hd.t_dinc": "Direct income",
+    "hd.g_ok": "Can be claimed",
+    "hd.g_blocked": "Blocked (section 17(5))",
+    "hd.g_none": "Usually no GST",
+    "hd.g_rcm": "Often reverse charge",
+    "hd.g_inv": "Make a tax invoice for it",
+    "hd.rm": "Remove {h}",
+    "hd.noown": "No own heads yet.",
+    "hd.isready": "{h} is already in the ready list, so it was not added again.",
+    "hd.newq": "New head. What kind is it?",
+    "hd.info": "{t} · Tally group: {g}.",
+    "hd.blockw": "GST on this cannot be claimed (CGST Act section 17(5)). Untick the input tax credit box.",
+    "hd.rcmw": "Often under reverse charge: if the supplier is a goods transport agency or an advocate, make a self invoice and pay the GST yourself.",
+    "hd.tdsw": "TDS may apply: section {s}.",
+    "hd.faw": "Bought something that lasts for years? Add it under Fixed assets instead.",
+    "app.acx": "Other income and taxes",
+    "app.d_oinc": "Other income",
+    "ax.h": "Money that does not come from a customer, and tax paid to the government. Both go into your accounts like any other entry.",
+    "ax.oinch": "For income that is not a sale: interest, rent, commission, dividend, scrap sold, an insurance claim. Money from a customer goes in Money received.",
+    "ax.head": "Income head",
+    "ax.headh": "Pick one from the list or type a new one.",
+    "ax.amt": "Amount received",
+    "ax.tds": "TDS cut by the payer",
+    "ax.tdsh": "Shown in your Form 26AS and AIS; you claim it in your income-tax return.",
+    "ax.payer": "Received from",
+    "ax.notinc": "This is an expense head. Choose an income head.",
+    "ax.invw": "Charged with GST? Then make a tax invoice on Billing and record the money with Money received instead.",
+    "ax.tdsis": "The payer may cut TDS: section {s}.",
+    "ax.total": "Income {a} = received {r} + TDS {t}",
+    "ax.none": "Nothing recorded here yet.",
+    "app.d_taxpay": "Pay tax",
+    "app.d_gstset": "GST set-off",
+    "ax.kind": "What are you paying?",
+    "ax.k_gst": "GST deposit (challan PMT-06)",
+    "ax.k_tds": "TDS paid",
+    "ax.k_tcs": "TCS paid",
+    "ax.k_adv": "Advance tax or self-assessment tax",
+    "ax.k_gstref": "GST refund received",
+    "ax.k_itref": "Income-tax refund received",
+    "ax.kh_gst": "Money paid with a GST challan goes into your electronic cash ledger, head by head. The GSTR-3B set-off then uses it.",
+    "ax.kh_tds": "TDS cut from payments is paid by the 7th of the next month (for March, by 30 April).",
+    "ax.kh_tcs": "TCS collected on sales is paid by the 7th of the next month (for March, by 30 April).",
+    "ax.kh_adv": "Advance tax is paid by 15 June, 15 September, 15 December and 15 March; self-assessment tax before filing the return.",
+    "ax.kh_gstref": "A refund the GST portal paid back from your cash ledger to your bank.",
+    "ax.kh_itref": "An income-tax refund received in the bank.",
+    "ax.todrw": "For a proprietor this is the owner's own tax, so it goes to drawings.",
+    "ax.tooca": "It is kept as tax paid in advance until the tax for the year is worked out.",
+    "ax.per": "For the month of",
+    "ax.perh": "The tax period this payment is for.",
+    "ax.cin": "Challan or CIN number",
+    "ax.gstl": "Amount by GST head",
+    "ax.m_tax": "Tax",
+    "ax.m_int": "Interest",
+    "ax.m_pen": "Penalty",
+    "ax.m_fee": "Late fee",
+    "ax.m_oth": "Other",
+    "ax.refamt": "Amount",
+    "ax.sec": "TDS / TCS section",
+    "ax.taxamt": "Tax",
+    "ax.int": "Interest",
+    "ax.fee": "Late fee",
+    "ax.paid": "Paid {a}",
+    "ax.gotback": "Received back {a}",
+    "ax.post": "Post set-off to my accounts",
+    "ax.postq": "Post the GSTR-3B set-off of {p} to your accounts, dated {d}? Output tax settled {o}: by input credit {c}, in cash {k}. Reverse charge {r}, interest and late fee {f}. Do this after filing the return; posting again replaces it.",
+    "ax.postnone": "Nothing to set off for this period.",
+    "ax.postok": "Set-off posted to your accounts.",
+    "ax.posted": "The set-off of {p} is in your accounts (dated {d}).",
+    "ax.nocess": "Cess is not kept in the books, so it is left out.",
+    "ax.setfor": "GSTR-3B set-off for {p}",
+    "ax.seth3": "GSTR-3B set-off",
+    "ax.seth": "After you file GSTR-3B, open the GSTR-3B working and tap Post set-off to my accounts. It clears the month's GST from the output and input ledgers and the cash ledger, so the balances show only what is still due.",
+    "ax.open3b": "Open the GSTR-3B working",
+    /* Accounts coverage WP-3: discounts, write-offs, provision for doubtful debts (books.js, acctx.js, app.js) */
+    "wo.btn": "Write off",
+    "app.d_wo": "Write-off",
+    "app.d_pdd": "Provision for doubtful debts",
+    "hd.pdd_x": "Provision for doubtful debts",
+    "hd.wback": "Balances written back",
+    "tf.debtpdd": "Sundry debtors {g} less provision for doubtful debts {d}",
+    "wo.disca": "Cash discount allowed",
+    "wo.discah": "Discount the customer took when paying. It settles the bill and goes to Discount allowed. GST does not change: to lower GST too, issue a credit note and the buyer reverses that input credit.",
+    "wo.discr": "Cash discount received",
+    "wo.discrh": "Discount the supplier gave when you paid. It settles the bill and goes to Discount received. GST does not change unless the supplier issues a credit note.",
+    "wo.t_recv": "Write off a customer's balance",
+    "wo.t_pay": "Write off a supplier's balance",
+    "wo.bill": "Bill {b} of {p}: {a} left.",
+    "wo.why": "Why",
+    "wo.r_recv_bad": "Bad debt (will not be paid)",
+    "wo.r_recv_small": "Small balance written off",
+    "wo.r_recv_disc": "Discount allowed",
+    "wo.r_pay_disc": "Discount received",
+    "wo.r_pay_small": "Small balance written back",
+    "wo.h_recv_bad": "Goes to Bad debts. If the customer pays later, record it in Other income as Bad debts recovered.",
+    "wo.h_recv_small": "Goes to Discount allowed: for a few rupees left after rounding.",
+    "wo.h_recv_disc": "Goes to Discount allowed.",
+    "wo.h_pay_disc": "Goes to Discount received (other income).",
+    "wo.h_pay_small": "Goes to Balances written back (other income): for a few rupees left after rounding.",
+    "wo.gstnote": "GST already paid on this bill does not come back with a write-off; only a credit note lowers GST.",
+    "wo.toomuch": "Write off more than zero and not more than {a}.",
+    "wo.nobill": "That bill is already settled.",
+    "wo.pddh": "The part of what customers owe that may never come. Work it out at year end, usually as a percentage of debtors; the balance sheet shows debtors less this provision.",
+    "wo.asat": "As at",
+    "wo.pct": "Percentage of debtors",
+    "wo.target": "Provision",
+    "wo.targeth": "Worked out from the percentage; type over it if you work it out bill by bill.",
+    "wo.pddsum": "Debtors {d} · provision before {p} · new provision {t} · change {c}",
+    "wo.nochange": "The provision is already this much.",
+    "wo.pddrow": "{p}% of debtors · provision {t}",
+    "wo.l_pdd": "Less: provision for doubtful debts",
+    "wo.l_gross": "Trade receivables before provision",
+    /* User test round C fixes (fix-round-c) */
+    "v.badgst": "Line {n}: GST % \"{v}\" is not a GST rate. Type a rate such as 5, 18 or 40.",
+    "n.copied": "Copied the lines of {no}. Remove or change what does not apply.",
+    "l.sbno": "Supplier's bill no.",
+    "l.sbdate": "Supplier's bill date",
+    "b2.m_pick": "Choose",
+    "b2.m_own": "Already owned (no payment now)",
+    "b2.m_ownh": "Typing in an asset the business already had? Choose \"Already owned\": no cash or bank payment is made.",
+    "fx.as2cap": "Capped at the selling price (lower of cost and net realisable value): {c} of factory expenses not added to stock.",
+    "fx.as2high": "Factory expenses are more than the value of production entered so far. Check that every production is entered: until then the stock value is only a rough figure.",
+    "s.h.advbooks": "The App's books and GSTR-3B working do not add this GST yet: pay it in GSTR-3B Table 3.1(a) for this month and adjust it when the invoice is made (GSTR-1 table 11B).",
+    "app.convagain": "{x} was already made from this document. Make another one?",
+    "b1.cdelp": "\"{x}\" has {n} saved documents. The documents stay; the party details go to the recycle bin for 30 days. Delete?",
+    "hub.rg.toreg": "A valid GSTIN: GST registration set to Regular.",
+    "c8.notcomp": "{n} is saved as a regular GST business. CMP-08 is only for composition dealers: check My data › business › GST registration.",
+    "pl.stockh2": "Fixed assets, depreciation, capital and loans already entered in the App are included: type only what is not there.",
+    /* User test round C fixes, part 2 (fix-round-c) */
+    "d.bizchg": "Change",
+    "app.mmore": "TDS, discount and note",
+    "app.negcash": "Cash in hand is below zero: money went out that never came in. Add your opening cash, or the receipts that are missing.",
+    "app.paidhow": "How you paid",
+    "v.sireg": "This supplier has a GSTIN: a registered supplier gives you their own tax invoice. A self invoice is only for purchases from unregistered suppliers.",
+    "ev.partA": "No vehicle or transporter given: the file makes Part A only. Add the vehicle number or transporter ID before the goods move.",
+    "fe.s.adv": "Advance (extra received) {v}",
+    "fe.toh": "The fee lines are for the whole period, not per month.",
+    "gi.pickh": "Details ready: save them as a customer or a supplier below.",
+    "sl.vt_job": "Job work",
+    "stk.r_jwloss": "Loss and waste at the job worker",
+    "stk.how2": "Production adds the goods made and takes out the materials used.",
+    "fr.k_capinp": "Partner puts money in",
+    "fr.k_drwp": "Partner takes money out",
+    "pl.g_purm": "Purchases (raw materials and goods)",
+    "hub.imp.ask": "{a} new and {u} changed records will be saved. Save them?",
+    "print.ens": "The printed salary slip is always in English, so your employee, bank and tax officer can all read it. Names print exactly as you type them.",
+    "st.01": "Jammu and Kashmir",
+    "st.02": "Himachal Pradesh",
+    "st.03": "Punjab",
+    "st.04": "Chandigarh",
+    "st.05": "Uttarakhand",
+    "st.06": "Haryana",
+    "st.07": "Delhi",
+    "st.08": "Rajasthan",
+    "st.09": "Uttar Pradesh",
+    "st.10": "Bihar",
+    "st.11": "Sikkim",
+    "st.12": "Arunachal Pradesh",
+    "st.13": "Nagaland",
+    "st.14": "Manipur",
+    "st.15": "Mizoram",
+    "st.16": "Tripura",
+    "st.17": "Meghalaya",
+    "st.18": "Assam",
+    "st.19": "West Bengal",
+    "st.20": "Jharkhand",
+    "st.21": "Odisha",
+    "st.22": "Chhattisgarh",
+    "st.23": "Madhya Pradesh",
+    "st.24": "Gujarat",
+    "st.26": "Dadra and Nagar Haveli and Daman and Diu",
+    "st.27": "Maharashtra",
+    "st.29": "Karnataka",
+    "st.30": "Goa",
+    "st.31": "Lakshadweep",
+    "st.32": "Kerala",
+    "st.33": "Tamil Nadu",
+    "st.34": "Puducherry",
+    "st.35": "Andaman and Nicobar Islands",
+    "st.36": "Telangana",
+    "st.37": "Andhra Pradesh",
+    "st.38": "Ladakh",
+    "st.97": "Other Territory",
+    "st.96": "Outside India (export)"
   };
 
   var packs = { en: EN }, cur = 'en';
   NS.addLang = function (code, table) { packs[code] = Object.assign(packs[code] || {}, table); };   /* a pack may come in several blocks */
   NS.lang = function () { return cur; };
+  NS.tEn = function (key) { return EN[key] != null ? EN[key] : key; };   /* the English words, for the printed (English) sheets */
   /* what a piece of screen text means: its key + the English words, e.g. 'Speichern'-like text -> 'md.save Save a backup file' (used to pick button icons) */
   var rev = {};
   NS.meaning = function (txt) {
@@ -1868,7 +2108,12 @@
   NS.t = function (key, v) {
     var p = packs[cur] || EN, s = p[key] != null ? p[key] : EN[key] != null ? EN[key] : key;
     if (p[key] == null && part[cur] && EN[key] != null && !part[cur][key]) needFull(cur, key);
-    if (v) s = s.replace(/\{(\w+)\}/g, function (m, k) { return v[k] != null ? v[k] : m; });
+    /* right-to-left screens: a money amount or a code put into a sentence keeps its own order (round C: "5,000.00₹") */
+    var iso = v && dirOf(cur) === 'rtl';
+    /* the brand name stays one left-to-right piece inside a right-to-left sentence, never split over two lines (round C) */
+    if (dirOf(cur) === 'rtl' && s.indexOf('Nivesh Sahayak') >= 0) s = s.replace(/Nivesh Sahayak/g, '\u2066Nivesh\u00a0Sahayak\u2069');
+    if (v && cur === 'en' && +v.n === 1) s = s.replace('{n} item(s)', '1 item').replace('{n} items', '1 item');   /* "1 item", not "1 items" (round C) */
+    if (v) s = s.replace(/\{(\w+)\}/g, function (m, k) { return v[k] != null ? (iso && /[0-9₹]/.test(String(v[k])) ? '\u2066' + v[k] + '\u2069' : v[k]) : m; });
     return s;
   };
   /* speed (2026-11-06): a page loads only the words its screens use (/assets/lang/<code>.<group>.js, made by build.py; the packs
@@ -1904,7 +2149,7 @@
   function font(fam) {
     if (!fam || fontDone[fam]) return;
     fontDone[fam] = true;
-    document.head.appendChild(Object.assign(document.createElement('link'), { rel: 'stylesheet', href: 'https://fonts.googleapis.com/css2?family=' + fam.replace(/ /g, '+') + ':wght@400;600;700&display=swap' }));
+    document.head.appendChild(Object.assign(document.createElement('link'), { rel: 'stylesheet', href: 'https://fonts.googleapis.com/css2?family=' + fam.replace(/ /g, '+') + (/Nastaliq/.test(fam) ? ':wght@400;700' : ':wght@400;600;700') + '&display=swap' }));   /* Nastaliq files are large: two weights load faster on slow networks (round C) */
   }
   function load(code) {
     if (packs[code]) return Promise.resolve();
@@ -1925,6 +2170,8 @@
     });
   };
   function info(code) { return NS.LANGS.filter(function (l) { return l[0] === code; })[0]; }
+  var DIRC = {};
+  function dirOf(code) { if (!DIRC[code]) { var l = info(code); DIRC[code] = l && l[4] ? 'rtl' : 'ltr'; } return DIRC[code]; }
   NS.setLang = function (code, quiet) {
     var L = info(code) || NS.LANGS[0];
     code = L[0];
@@ -1937,11 +2184,13 @@
       font(L[3]);
       /* only a real choice is remembered: opening one /hi/ page from a link must not switch every later visit to Hindi */
       try { if (!quiet || !localStorage.getItem('ns-lang')) localStorage.setItem('ns-lang', cur); } catch (e) {}
-      if (!quiet && window.NSStore) NSStore.meta('lang', cur).catch(function () {});
+      /* a real choice waits (max 1.5 s) until the data home has it, so the next page does not read the old language */
+      var w = !quiet && window.NSStore ? Promise.race([NSStore.meta('lang', cur).catch(function () {}), new Promise(function (r) { setTimeout(r, 1500); })]) : null;
       NS.applyLang();
       Array.prototype.forEach.call(document.querySelectorAll('[data-lang-pick]'), function (s) { s.value = cur; });
       Array.prototype.forEach.call(document.querySelectorAll('[data-guide-en]'), function (n) { n.hidden = cur === 'en'; });
       document.dispatchEvent(new CustomEvent('ns-lang', { detail: cur }));
+      return w;
     });
   };
   function guess() {
@@ -1963,8 +2212,23 @@
     var saved; try { saved = localStorage.getItem('ns-lang'); } catch (e) {}
     if (pageLang === 'en' && saved && saved !== 'en' && ALT[saved] && ALT[saved] !== location.pathname) { NS.leaving = true; location.replace(ALT[saved] + EXTRA); return Promise.resolve(); }
     var first = NS.setLang(pageLang !== 'en' ? pageLang : (saved || guess()), true);
-    /* the language chosen on any Nivesh Sahayak tool is shared through the data home */
-    if (!saved && window.NSStore) NSStore.ready().then(function () { return NSStore.meta('lang'); }).then(function (l) { if (l && l !== cur) NS.setLang(l, true); }).catch(function () {});
+    /* the language chosen on any Nivesh Sahayak tool is shared through the data home, and the data home always holds the
+       latest real choice (every choice is written there). An English page whose site has that language's page moves there,
+       so the heading and guide match the tool (round C: Hindi tool under an English H1); otherwise the screen switches. */
+    if (window.NSStore) NSStore.ready().then(function () { return NSStore.meta('lang'); }).then(function (l) {
+      if (!l || !info(l) || NS.leaving) return;
+      if (pageLang !== 'en') {
+        /* a translated page opened because this site remembered an older choice: follow the newer one from the data home */
+        if (l === pageLang || saved !== pageLang) return;
+        try { localStorage.setItem('ns-lang', l); } catch (e) {}
+        var to = ALT[l] || (l === 'en' ? null : ALT.en);
+        if (to && to !== location.pathname) { NS.leaving = true; location.replace(to + location.search + location.hash); }
+        return;
+      }
+      try { localStorage.setItem('ns-lang', l); } catch (e) {}
+      if (l !== 'en' && ALT[l] && ALT[l] !== location.pathname) { NS.leaving = true; location.replace(ALT[l] + location.search + location.hash); return; }
+      if (l !== cur) NS.setLang(l, true);
+    }).catch(function () {});
     return first;
   };
 })();

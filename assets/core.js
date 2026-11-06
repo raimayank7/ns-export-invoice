@@ -25,6 +25,8 @@
     ['36', 'Telangana'], ['37', 'Andhra Pradesh'], ['38', 'Ladakh'], ['97', 'Other Territory'], ['96', 'Outside India (export)']
   ];
   NS.stateName = function (code) { var s = NS.STATES.filter(function (x) { return x[0] === code; })[0]; return s ? s[1] : ''; };
+  /* the state's name in the screen language (pickers and messages); printed documents keep NS.stateName, in English (round C) */
+  NS.stateLoc = function (code) { var k = 'st.' + code, v = NS.t ? NS.t(k) : k; return v && v !== k ? v : NS.stateName(code); };
 
   /* GSTIN: 15 characters, last one is a check character (mod 36) */
   NS.gstinCheck = function (g) {
@@ -45,7 +47,7 @@
   /* ---------- numbers and money ---------- */
   NS.num = function (v) { var n = parseFloat(String(v == null ? '' : v).replace(/,/g, '')); return isFinite(n) ? n : 0; };
   NS.r2 = function (n) { return Math.round((n + Number.EPSILON) * 100) / 100; };
-  NS.money = function (n, sym) { return (sym === false ? '' : '₹') + NS.r2(n).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 }); };
+  NS.money = function (n, sym) { var v = NS.r2(n); return (v < 0 ? '-' : '') + (sym === false ? '' : '₹') + Math.abs(v).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 }); };   /* -₹1,500.00, never ₹-1,500.00 (round C) */
   NS.qty = function (n) { return NS.r2(n).toLocaleString('en-IN', { maximumFractionDigits: 3 }); };
 
   var ONES = ['', 'One', 'Two', 'Three', 'Four', 'Five', 'Six', 'Seven', 'Eight', 'Nine', 'Ten', 'Eleven', 'Twelve', 'Thirteen', 'Fourteen', 'Fifteen', 'Sixteen', 'Seventeen', 'Eighteen', 'Nineteen'];
@@ -84,8 +86,12 @@
   NS.toast = function (msg, kind) {
     var t = NS.$('#ns-toast');
     if (!t) { t = NS.el('div', { id: 'ns-toast', role: 'status', 'aria-live': 'polite' }); document.body.appendChild(t); }
+    /* over an open form (a modal dialog sits in the top layer) the message must show above it, not hide behind it (round C:
+       "Save did nothing"): it goes to the top layer too, as a popover */
+    var top = !!document.querySelector('dialog[open]') && !!t.showPopover;
+    try { if (top) { t.setAttribute('popover', 'manual'); if (!t.matches(':popover-open')) t.showPopover(); } else if (t.hasAttribute('popover')) t.removeAttribute('popover'); } catch (e) {}
     t.textContent = msg; t.className = 'show' + (kind ? ' ' + kind : '');
-    clearTimeout(t._h); t._h = setTimeout(function () { t.className = ''; }, 3200);
+    clearTimeout(t._h); t._h = setTimeout(function () { t.className = ''; setTimeout(function () { try { if (!t.className && t.matches(':popover-open')) t.hidePopover(); } catch (e) {} }, 300); }, 3200);
   };
 
   /* ---------- theme: system / light / dark ---------- */
@@ -100,6 +106,8 @@
   NS.initTheme = function () {
     var v; try { v = localStorage.getItem('ns-theme'); } catch (e) {}
     applyTheme(v);
+    /* the button's name follows the language, which arrives after the first paint (round C: "Colour theme" in English) */
+    document.addEventListener('ns-lang', function () { var w; try { w = localStorage.getItem('ns-theme'); } catch (e) {} applyTheme(w); });
     NS.$$('[data-theme-btn]').forEach(function (b) {
       b.addEventListener('click', function () {
         var cur; try { cur = localStorage.getItem('ns-theme'); } catch (e) {}
@@ -436,7 +444,8 @@
   document.addEventListener('change', function (e) {
     var t = e.target;
     if (t.getAttribute && t.getAttribute('data-act') === 'restore' && t.files && t.files[0]) {
-      NS.restoreFromFile(t.files[0]).then(function () { if (NS.onRestore) NS.onRestore(); NS.openMyData(); }, function () {});
+      /* on the My data page itself the page shows the result; the My data box opens only on other pages (round C) */
+      NS.restoreFromFile(t.files[0]).then(function () { if (NS.onRestore) NS.onRestore(); if (!document.getElementById('my-app')) NS.openMyData(); }, function () {});
       t.value = '';
     }
   });
@@ -684,10 +693,30 @@
       var shots = Array.prototype.map.call(nodes, function (n) { var c = n.cloneNode(true); c.classList.remove('a5'); NS.dropHints(c); box.appendChild(c); return c; });
       return shots.reduce(function (p, c) {
         return p.then(function () { return window.html2canvas(c, { scale: 2, backgroundColor: '#ffffff', logging: false }); }).then(function (cv) {
-          var w = pg[0], h = Math.max(pg[1], cv.height * w / cv.width), fmt = [w, h];
-          if (!pdf) pdf = new window.jspdf.jsPDF({ unit: 'mm', format: fmt, orientation: 'portrait', compress: true });
-          else pdf.addPage(fmt, 'portrait');
-          pdf.addImage(cv.toDataURL('image/jpeg', 0.92), 'JPEG', 0, 0, w, cv.height * w / cv.width);
+          var w = pg[0];
+          /* A4 / A5: a long sheet is cut into real pages of that size (round C: one tall page that printed shrunk or cut);
+             a thermal roll stays one long strip */
+          var pieces = [cv];
+          if (pg[1]) {
+            var ph = Math.floor(cv.width * pg[1] / pg[0]);
+            if (cv.height > ph + 4) {
+              pieces = [];
+              for (var y = 0; y < cv.height; y += ph) {
+                var pc = document.createElement('canvas'); pc.width = cv.width; pc.height = Math.min(ph, cv.height - y);
+                var cx = pc.getContext('2d'); cx.fillStyle = '#fff'; cx.fillRect(0, 0, pc.width, pc.height); cx.drawImage(cv, 0, y, cv.width, pc.height, 0, 0, cv.width, pc.height);
+                pieces.push(pc);
+              }
+            }
+          }
+          pieces.forEach(function (pcv, i) {
+            var fmt = [w, pg[1] || pcv.height * w / pcv.width];
+            if (!pdf) pdf = new window.jspdf.jsPDF({ unit: 'mm', format: fmt, orientation: 'portrait', compress: true });
+            else pdf.addPage(fmt, 'portrait');
+            pdf.addImage(pcv.toDataURL('image/jpeg', 0.92), 'JPEG', 0, 0, w, pcv.height * w / pcv.width);
+            /* the sheet's plain (English) words as an invisible layer on its first page: the PDF can be searched and the bill
+               number copied */
+            if (!i) try { var tx = String(c.innerText || '').replace(/[^\x20-\x7E\n₹]/g, ' ').replace(/₹/g, 'Rs ').replace(/[ \t]+/g, ' ').trim(); pdf.setFontSize(6); pdf.text(pdf.splitTextToSize(tx, w - 10).slice(0, 400), 5, 5, { renderingMode: 'invisible' }); } catch (e) {}
+          });
         });
       }, Promise.resolve()).then(function () { box.remove(); return pdf.output('blob'); }, function (e) { box.remove(); throw e; });
     });
@@ -787,10 +816,10 @@
   /* first match wins: [regular expression over "data names + key + English words", icon] */
   var ICRULES = [[/whats\s?app|\bwa\b/, 'wa'], [/print/, 'print'], [/s-backup/, 'data'], [/desk\.keys|keyboard|shortcut/, 'keyboard'],
     [/preview/, 'eye'], [/scan|camera/, 'camera'], [/\bpf\b|work out|calculat/, 'calc'], [/filt|\bcf\b|post-dated|bounce|below zero/, 'filter'],
-    [/get name|gst portal/, 'search'], [/backup|download|export|excel|csv|install/, 'down'], [/restore|import|upload/, 'up'],
+    [/get name|gst portal/, 'search'], [/restore|import|upload/, 'up'], [/backup|download|export|excel|csv|install/, 'down'],   /* "Restore from backup" is an upload (round C) */
     [/\bpdf\b|share/, 'share'], [/delete|remove|\brm\b|bin|trash|clear|-off\b/, 'trash'], [/report|tell|mistake/, 'flag'], [/later/, 'clock'],
     [/\bsend\b|reminder|remind/, 'send'], [/lock|\bpin\b/, 'lock'], [/reset|again|undo|refresh|reload/, 'reset'],
-    [/\bsave|submit|\bok\b|use these|apply|done/, 'save'], [/\bnew\b|\badd\b|create/, 'plus'], [/edit|change|rename|series/, 'edit'], [/copy|duplicate/, 'copy'],
+    [/\bnext\b|continue/, 'go'], [/setting|configur/, 'gear'], [/\bsave\b|submit|\bok\b|use these|apply|done/, 'save'],   /* "Next" and "Settings and saved data" are not a floppy disk (round C) */ [/\bnew\b|\badd\b|create/, 'plus'], [/edit|change|rename|series/, 'edit'], [/copy|duplicate/, 'copy'],
     [/close|cancel|dismiss/, 'x'], [/\bback\b|fback/, 'back'], [/search|find|lookup|fetch|check gstin/, 'search'], [/history|saved|list|register/, 'list'],
     [/setting|configur/, 'gear'], [/my.?data|vault/, 'data'], [/new tab|external|portal/, 'ext'],
     [/paid|payment|money|receiv|cash|\bpay\b/, 'money'], [/later|ageing|due/, 'clock'], [/open|convert|toinv|make invoice|next|go\b/, 'go'], [/doc|bill|invoice|statement|receipt|stmt/, 'file'],

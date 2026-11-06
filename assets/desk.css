@@ -255,3 +255,13 @@ html.embed body{padding-bottom:0}
 [data-ic=t-stock]{--i:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M3 13h8v8H3zM13 13h8v8h-8zM8 3h8v8H8z'/%3E%3C/svg%3E")}
 [data-ic=t-tally]{--i:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M4 4h10v16H4zM7 8h4M7 12h4M14 12h7M18 9l3 3-3 3'/%3E%3C/svg%3E")}
 [data-ic=t-tds]{--i:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M5 19L19 5M7 5a2 2 0 1 0 0 4 2 2 0 0 0 0-4M17 15a2 2 0 1 0 0 4 2 2 0 0 0 0-4'/%3E%3C/svg%3E")}
+/* round C: the installed window needs no Install button; touch phones get no keyboard hints in the search box */
+@media (display-mode:standalone),(display-mode:window-controls-overlay){.desk-install,.qk-install{display:none!important}}
+@media (pointer:coarse) and (hover:none){.desk-cmd .cmd-in kbd,.desk-cmd .cmd-ft,.desk-cmd li kbd{display:none}}
+/* round C (D1-05): the status bar keeps the business name and the backup line whole; low-value items step aside first */
+.sbar .s-l{flex:1 1 auto}
+.sbar [data-s-biz]{flex:0 0 auto;max-width:24ch;white-space:nowrap}
+.sbar [data-s-backup]{flex:0 0 auto}
+@media (max-width:1600px){.sbar .ns-want,.sbar [data-s-store],.sbar .s-copy{display:none}}
+@media (max-width:1300px){.sbar [data-s-fy],.sbar [data-s-keys]{display:none}}
+.tabbar a span,.tabbar button span{overflow-wrap:break-word;word-break:normal;font-size:11.5px;letter-spacing:-.01em}   /* a word breaks only when it cannot fit (round C: Tamil Dashboard split in two) */

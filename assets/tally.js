@@ -26,7 +26,9 @@
   var PFX = { 'cap:': 'Capital Account', 'drw:': 'Capital Account', 'loan:': 'Loans (Liability)', 'od:': 'Loans (Liability)', 'given:': 'Loans & Advances (Asset)',
     'fa:': 'Fixed Assets', 'inc:': 'Indirect Incomes', 'exp:': 'Indirect Expenses', 'ocl:': 'Provisions', 'oca:': 'Loans & Advances (Asset)' };
   var OTHER = { 'tcs-payable': ['TCS Payable', 'Duties & Taxes'], 'tcs-receivable': ['TCS Receivable', 'Loans & Advances (Asset)'], 'chq-in': ['Cheques in Hand', 'Current Assets'],
-    'chq-out': ['Cheques Issued, Not Cleared', 'Current Liabilities'], 'gst-out-utgst': ['Output UTGST', 'Duties & Taxes'] };
+    'chq-out': ['Cheques Issued, Not Cleared', 'Current Liabilities'], 'gst-out-utgst': ['Output UTGST', 'Duties & Taxes'],
+    pdd: ['Provision for Doubtful Debts', 'Sundry Debtors'],   /* WP-3: nets with the debtors */
+    'gstcash-igst': ['GST Cash Ledger IGST', 'Current Assets'], 'gstcash-cgst': ['GST Cash Ledger CGST', 'Current Assets'], 'gstcash-sgst': ['GST Cash Ledger SGST', 'Current Assets'], 'gstcash-cess': ['GST Cash Ledger Cess', 'Current Assets'] };
   var box, names = {}, src = 'saved', sheetRows = null, parties = {}, M = { party: [], item: [], groups: null }, typed = {}, DX = null;
   /* expense heads marked Direct (My data › Settings › Final accounts, settings.tf.dx of the business; else tfcore.js defaults)
      go to Tally's own group Direct Expenses, which TallyPrime shows in the Trading Account; the rest stay Indirect Expenses */
@@ -65,8 +67,12 @@
     (docs || []).forEach(function (d) {
       if (d.type === 'jv') (d.lines || []).forEach(function (l) { if (l && l.a && l.a !== 'party') put(l.a, l.nm); });
       if (d.type === 'fa' && d.name) put('fa:' + B.key(d.name), d.name);
-      if (d.type === 'exp' && d.cat) put('exp:' + B.key(d.cat), d.cat);
+      if (d.type === 'exp' && d.cat) { var eh = typeof NSHeads !== 'undefined' && NSHeads.find(d.cat); put('exp:' + B.key(d.cat), eh && !eh.custom ? eh.en : d.cat); }   /* English ledger name, never a code or another language */
       if (d.type === 'voucher') (d.lines || []).forEach(function (l) { if (l && l.head) put('exp:' + B.key(l.head), l.head); });
+      if (d.type === 'oinc' && d.head) put('inc:' + B.key(d.head), d.head);   /* other income received (Accounts coverage WP-2) */
+      if (d.type === 'pdd') put('exp:provision for doubtful debts', 'Provision for Doubtful Debts (P&L)');   /* WP-3: Tally names are not case-sensitive, so the charge needs its own name next to the provision ledger */
+      if (d.type === 'wo' || d.type === 'pdd' || d.disc) { put('exp:discount allowed', 'Discount Allowed'); put('inc:discount received', 'Discount Received'); put('exp:bad debts', 'Bad Debts'); put('inc:balances written back', 'Balances Written Back'); }
+      if (d.type === 'taxpay' || d.type === 'gstset') { put('exp:interest on late payment of tax', 'Interest on late payment of tax'); put('exp:late fee and penalty', 'Late fee and penalty'); put('oca:advance income tax', 'Advance income tax'); }   /* WP-4 */
     });
     return o;
   }
@@ -78,6 +84,7 @@
     if (/^p:/.test(a)) { var og = ownGroup(a); return og ? og.name : parties[a] && parties[a].debtor ? 'Sundry Debtors' : 'Sundry Creditors'; }
     var px = pfx(a);
     if (px === 'exp:' && direct(a)) return 'Direct Expenses';
+    if (px === 'inc:' && window.NSHeads) { var hh = NSHeads.find(typed[a] || a); if (hh && hh.t === 'dinc') return 'Direct Incomes'; }   /* heads list (heads.js) */
     if (px === 'od:' && /\b(od|o\/d|overdraft|cc|cash credit)\b/i.test(typed[a] || a.slice(3))) return 'Bank OD A/c';
     if (px) return PFX[px];
     if (OTHER[a]) return OTHER[a][1];
@@ -116,7 +123,9 @@
       if (lines.some(function (l) { return l.a === 'p:unknown payee'; })) parties['p:unknown payee'] = { name: 'Unknown Payee', debtor: false };
       var nl = net(lines);
       var type = d.type === 'note' ? (d.kind === 'debit' ? 'Debit Note' : 'Credit Note') : VT[R] || moneyType(nl);
-      out.push({ type: type, no: d.no || '', date: d.date, party: nm || '', lines: nl, bill: billInfo(d, R), narr: narration(d, R) });
+      /* a fixed asset's number is the SUPPLIER's bill no.: it goes in the narration, Tally numbers the payment itself (round C) */
+      var isFa = d.type === 'fa' && d.kind !== 'sale';
+      out.push({ type: type, no: isFa ? '' : d.no || '', date: d.date, party: nm || '', lines: nl, bill: billInfo(d, R), narr: isFa && d.no ? (narration(d, R) + '; supplier bill ' + d.no).slice(0, 500) : narration(d, R) });
     });
     var r = { vouchers: out, skipped: skipped };
     if (want.stk) {   /* in date order with the other vouchers (production on a day before the sale of what it made) */
@@ -162,7 +171,10 @@
       var w = d.worker && d.worker.name ? String(d.worker.name).trim() : '';
       var nar = d.kind === 'make' ? 'Production' : d.kind === 'jobout' ? 'Sent for job work' + (w ? ' to ' + w : '') + (d.dc ? ', challan ' + d.dc : '')
         : d.kind === 'jobin' ? 'Received back from job work' + (w ? ' (' + w + ')' : '') + (d.wdc ? ', challan ' + d.wdc : '') : 'Stock transfer';
-      out.push({ type: 'Stock Journal', no: d.no || '', date: d.date, party: '', lines: [], inv: inv, narr: [nar, d.narr || d.note || ''].filter(Boolean).join('; ').slice(0, 500) });
+      /* the extra cost typed on a production entry is inside the made goods' value: the narration says so, so the difference
+         Tally shows between goods used and goods made is explained (round C) */
+      var ext = d.kind === 'make' && num(d.extra) ? 'additional cost Rs ' + r2(num(d.extra)) + ' (labour, power and other costs typed on the production entry) included in the value of goods made' : '';
+      out.push({ type: 'Stock Journal', no: d.no || '', date: d.date, party: '', lines: [], inv: inv, narr: [nar, ext, d.narr || d.note || ''].filter(Boolean).join('; ').slice(0, 500) });
     });
     return { vouchers: out, none: false };
   }
@@ -175,6 +187,7 @@
     if (/^(sale|sdeb|buy)$/.test(R) && d.type !== 'note' || R === 'sdeb') return [{ type: 'New Ref', name: d.no }];
     if (d.type === 'note' && R === 'buy') return [{ type: (d.orig && d.orig.no) ? 'Agst Ref' : 'On Account', name: (d.orig && d.orig.no) || '' }];
     if (/^(sret|pret)$/.test(R)) return [{ type: (d.orig && d.orig.no) ? 'Agst Ref' : 'On Account', name: (d.orig && d.orig.no) || '' }];
+    if (R === 'wo') return (d.alloc || []).map(function (a) { return { type: 'Agst Ref', name: a.no, amt: num(a.amt) }; });   /* write-off of a bill (WP-3) */
     if (R === 'in' || R === 'out') return (d.alloc && d.alloc.length ? d.alloc.map(function (a) { return { type: 'Agst Ref', name: a.no, amt: num(a.amt) }; }) : []).concat([{ type: 'On Account', name: '', rest: true }]);
     return null;
   }
@@ -281,7 +294,7 @@
     var skipOwn = $('#ty-own', box) && $('#ty-own', box).checked, stock = $('#ty-stock', box) ? $('#ty-stock', box).checked : true;
     var gds = {}; vs.forEach(function (v) { (v.inv || []).forEach(function (e) { if (e.gd !== MAINGD) gds[e.gd] = 1; }); });
     var gdXml = Object.keys(gds).map(function (g) { return '   <GODOWN NAME="' + x(g) + '" ACTION="Create">\n    <NAME>' + x(g) + '</NAME>\n    <PARENT></PARENT>\n   </GODOWN>\n'; }).join('');
-    return envelope('All Masters', groupsXml(order) + (stock || gdXml ? stockXml() : '') + gdXml + order.filter(function (a) { return !(skipOwn && /^(cash|bank)$/.test(a)); }).map(function (a) {
+    return envelope('All Masters', groupsXml(order) + (stock || gdXml ? stockXml() : '') + gdXml + order.filter(function (a) { return !(skipOwn && (a === 'cash' || a === 'bank' && String(names.bank || '').trim() && String(names.bank).trim() !== 'Bank')); })   /* a new Tally company has Cash but no Bank: Bank is made unless it is mapped to the user's own bank ledger (round C) */.map(function (a) {
       var p = parties[a], f = p && p.from || {}, addr = String(f.addr || '').split(/\n/).map(function (s) { return s.trim(); }).filter(Boolean);
       if (f.city && addr.join(' ').toLowerCase().indexOf(String(f.city).toLowerCase()) < 0) addr.push(f.city);
       return '   <LEDGER NAME="' + x(ledName(a)) + '" ACTION="Create">\n    <NAME>' + x(ledName(a)) + '</NAME>\n    <PARENT>' + x(ledGroup(a)) + '</PARENT>\n' +

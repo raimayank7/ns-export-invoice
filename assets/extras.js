@@ -237,6 +237,15 @@
       var X = window.XLSX, wb = X.utils.book_new(), used = {};
       sheets.forEach(function (s) {
         var ws = X.utils.aoa_to_sheet(s.rows.length ? s.rows : [[tt('xl_none')]]);
+        /* real Excel dates and amounts (round C: dates were text, so they could not be sorted or filtered; amounts had no commas) */
+        var MON = { Jan: 0, Feb: 1, Mar: 2, Apr: 3, May: 4, Jun: 5, Jul: 6, Aug: 7, Sep: 8, Oct: 9, Nov: 10, Dec: 11 };
+        Object.keys(ws).forEach(function (a) {
+          if (a.charAt(0) === '!' || /^[A-Z]+1$/.test(a)) return;
+          var c = ws[a], m = typeof c.v === 'string' && /^(\d{2})-([A-Z][a-z]{2})-(\d{4})$/.exec(c.v);
+          if (m && MON[m[2]] != null) { c.t = 'n'; c.v = Math.round((Date.UTC(+m[3], MON[m[2]], +m[1]) - Date.UTC(1899, 11, 30)) / 864e5); c.z = 'dd-mmm-yyyy'; }
+          else if (c.t === 'n' && Math.round(c.v * 100) !== Math.round(c.v) * 100) c.z = '#,##0.00';
+          else if (c.t === 'n' && Math.abs(c.v) >= 1000) c.z = '#,##0';
+        });
         ws['!cols'] = (s.rows[0] || []).map(function (h, i) { return { wch: Math.min(48, Math.max(8, s.rows.reduce(function (a, r) { return Math.max(a, String(r[i] == null ? '' : r[i]).length); }, 0) + 2)) }; });
         X.utils.book_append_sheet(wb, ws, sheetName(s.name, used));
       });

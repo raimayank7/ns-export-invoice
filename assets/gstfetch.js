@@ -91,7 +91,7 @@
     D.innerHTML = '<div class="gf-hd"><h2 id="gf-t">' + esc(t('gf.title')) + '</h2><button type="button" class="icon-btn" data-gf-x aria-label="' + esc(t('close')) + '">✕</button></div>' +
       '<div class="gf-bd">' +
       '<p class="gf-g mono" dir="ltr">' + esc(f.gstin) + '</p>' +
-      '<ul class="gf-facts"><li>' + esc(t('gf.state')) + ': <b>' + esc(f.state + ' · ' + (NS.stateName(f.state) || '—')) + '</b></li><li>PAN: <b class="mono">' + esc(f.pan) + '</b></li>' +
+      '<ul class="gf-facts"><li>' + esc(t('gf.state')) + ': <b>' + esc(f.state + ' · ' + (NS.stateLoc(f.state) || '—')) + '</b></li><li>PAN: <b class="mono">' + esc(f.pan) + '</b></li>' +
       (f.holder ? '<li>' + esc(t('gf.holder')) + ': <b>' + esc(f.holder) + '</b></li>' : '') + '</ul>' +
       '<ol class="gf-steps"><li>' + esc(t('gf.s1')) + '<br><button type="button" class="btn primary" data-gf-open>' + esc(t('gf.open')) + ' ↗</button></li>' +
       '<li>' + esc(t('gf.s2')) + '</li><li>' + esc(t('gf.s3')) + '</li></ol>' +

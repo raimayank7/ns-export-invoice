@@ -57,7 +57,7 @@ h1,h2,h3,h4{font-family:var(--font-head);line-height:1.25;letter-spacing:-.01em}
 @media (max-width:400px){.lang-pick{max-width:120px!important;padding-right:22px}}   /* the header has its own second row on phones now: room for the whole language name */
 /* smallest phones: brand name must not run under the language picker */
 @media (max-width:360px){.lang-pick{max-width:100px!important;padding-left:6px}.hd nav{gap:3px}.hd nav .btn.sm{padding-left:7px;padding-right:7px;font-size:.8rem}.hd .icon-btn{width:36px}}
-@media (max-width:520px){.lang-pick{max-width:104px}.brand small{display:none}.brand b{font-size:.92rem}.brand b .soft{display:block;font-size:.78rem;font-weight:700}.hd nav{gap:4px}}
+@media (max-width:520px){.lang-pick{max-width:124px}.brand small{display:none}.brand b{font-size:.92rem}.brand b .soft{display:block;font-size:.78rem;font-weight:700}.hd nav{gap:4px}}
 .guide-en{background:var(--surface2);border-radius:10px;padding:8px 14px;margin-top:12px;font-size:.92rem;color:var(--soft)}
 /* right-to-left languages (Urdu, Kashmiri, Sindhi): the layout mirrors; codes, numbers and the printed sheet stay left-to-right */
 [dir=rtl] .hd nav{margin-left:0;margin-right:auto}
@@ -366,3 +366,20 @@ html.embed,html.embed body{overscroll-behavior-y:contain}   /* the end of the do
 .prose ol.help-steps{padding-left:1.4em}.prose ol.help-steps>li{margin:.45em 0}.prose .help-fix>li{margin:.5em 0}
 .help-toc ul{display:flex;flex-wrap:wrap;gap:8px;list-style:none;padding:0;margin:12px 0}.help-toc a{display:inline-block;padding:6px 12px;min-height:36px;box-sizing:border-box;border:1px solid var(--line);border-radius:999px;background:var(--surface);text-decoration:none}
 .help-back{margin-top:28px;font-size:.95rem}.prose kbd{font:600 .85em var(--mono);border:1px solid var(--line);border-bottom-width:2px;border-radius:5px;padding:1px 5px;background:var(--surface)}
+/* round C (Urdu/Kashmiri Nastaliq, all right-to-left screens): letters reach far above and below the line, so short
+   line-heights clip their dots (tab labels, headings); letter-spacing pulls joined Arabic-script letters apart.
+   Printed sheets (.sh, .stsheet) are English and keep their own look. */
+:lang(ur) :is(h1,h2,h3,h4,.tile span,th,caption),:lang(ks) :is(h1,h2,h3,h4,.tile span,th,caption){line-height:1.9}
+:lang(ur) :is(.tabbar span,.actions .btn,.actions button),:lang(ks) :is(.tabbar span,.actions .btn,.actions button){line-height:1.75!important;overflow:visible!important;-webkit-line-clamp:unset!important;display:block!important}
+html[dir=rtl] :not(.sh):not(.sh *):not(.stsheet):not(.stsheet *){letter-spacing:0!important}
+/* a left-to-right sheet in a right-to-left screen: its scroll box starts at the sheet's own start (left), not cut in half */
+html[dir=rtl] :is(.tbl-wrap,.gt-scroll,.sb-sheet-wrap):has(>[dir=ltr],>[lang=en-IN],>.stsheet,>.sh,>.lg-print>.stsheet){direction:ltr}
+#ns-toast[popover]{inset:auto;left:50%;bottom:90px;margin:0;border:0;overflow:visible;width:max-content}
+.nw{white-space:nowrap}   /* a date never breaks at its hyphen (round C: "06-" / "Nov-2026") */
+/* round C (t-01): on touch screens small buttons get a 40 px reach without growing on screen; tab labels a little larger */
+@media (pointer:coarse){
+  .hp-q{position:relative}.hp-q::after{content:"";position:absolute;inset:-5px}
+  .btn.sm{min-height:40px}
+  .tabbar a span,.tabbar button span{font-size:12px}
+}
+:lang(ur) :is(select,input),:lang(ks) :is(select,input){padding-inline-start:14px;line-height:1.8;min-height:48px}   /* Nastaliq in fields: the first letter is not cut (round C) */

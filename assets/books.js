@@ -16,6 +16,14 @@
      contra                      cash deposited in the bank (from 'cash', to 'bank') or withdrawn (from 'bank', to 'cash')
      jv                          journal entry (Batch 2): lines [{ a, party, side, dr, cr }] typed by the user, each line goes to account a
                                  (a 'party' = the party's account; side 'recv' customer / 'pay' supplier decides how bill-wise dues read it)
+     oinc                        other income received (interest, rent, commission, dividend, scrap, claims ...; Accounts coverage WP-2):
+                                 head, amount received, tds (cut by the payer); Dr cash/bank + TDS receivable, Cr inc:<head>; payer kept apart
+     taxpay                      tax paid to the government or a refund (WP-4), kind gst | tds | tcs | adv | gstref | itref: see taxPay()
+     gstset                      GSTR-3B set-off of one tax period (WP-4): output tax settled by input credit and the cash ledger, see gstSet()
+     receipt / voucher disc      cash discount at settlement (WP-3): receipt Dr discount allowed, voucher (app-made) Cr discount received; settles that much more
+     wo                          write-off of a bill's balance (WP-3): side recv (reason bad -> bad debts, small / disc -> discount allowed) or
+                                 side pay (disc -> discount received, small -> balances written back); alloc [{ id, no, amt }] = the bill
+     pdd                         provision for doubtful debts (WP-3): change = new figure - provision before; Dr / Cr exp:provision for doubtful debts
      fa kind 'buy' / 'sale'      fixed asset bought (Dr fa:<asset>, GST credit if itc) / sold (Cr the book value bv saved on the record,
                                  the difference is profit or loss on sale); mode 'credit' = the party (buyer field) is owed / owes
    chq: { date, bank, st, on } on a receipt or voucher paid by cheque: st 'hand' (received, not deposited), 'dep' (deposited),
@@ -121,6 +129,11 @@
       case 'contra': return 'contra';
       case 'jv': return 'jv';
       case 'fa': return d.kind === 'sale' ? 'fasale' : 'fabuy';
+      case 'oinc': return 'oinc';   /* other income received (Accounts coverage WP-2) */
+      case 'taxpay': return 'taxpay';   /* tax paid to the government or a tax refund (WP-4) */
+      case 'gstset': return 'gstset';   /* GSTR-3B set-off of a tax period (WP-4) */
+      case 'wo': return 'wo';   /* balance of a bill written off (WP-3) */
+      case 'pdd': return 'pdd';   /* provision for doubtful debts (WP-3) */
     }
     return '';
   }
@@ -142,18 +155,35 @@
       /* marked paid on the bill itself (no payment entry linked): money came in on the bill date */
       if (R === 'sale' && d.status === 'paid' && !d.paidBy) { dr(moneyAcct(d.payMode || 'cash'), t.total); cr(partyName(d) ? P : 'p:cash-customer', t.total); }
     } else if (R === 'in') {
-      amt = num(d.amount); var tds = num(d.tds);
-      dr(payAcct(d), amt); dr('tds-receivable', tds); cr(P, amt + tds);
+      amt = num(d.amount); var tds = num(d.tds), dsc = num(d.disc);   /* disc: cash discount allowed when the customer paid (WP-3) */
+      dr(payAcct(d), amt); dr('tds-receivable', tds); dr(DISC_A, dsc); cr(P, amt + tds + dsc);
+    } else if (R === 'oinc') {   /* other income: money in + TDS the payer cut = the income */
+      amt = num(d.amount); var tdsI = num(d.tds);
+      dr(payAcct(d), amt); dr('tds-receivable', tdsI); cr('inc:' + key(d.head || 'Miscellaneous income'), amt + tdsI);
+    } else if (R === 'taxpay') {
+      var tx = taxPay(d), back = d.kind === 'gstref' || d.kind === 'itref';
+      tx.lines.forEach(function (l) { (back ? cr : dr)(l[0], l[1]); });
+      if (back) dr(payAcct(d), tx.total); else cr(payAcct(d, true), tx.total);
+    } else if (R === 'gstset') {
+      gstSet(d).forEach(function (l) { dr(l[0], l[1]); cr(l[2], l[1]); });
+    } else if (R === 'wo') {   /* write-off: the customer's balance to bad debts / discount allowed, a supplier's to discount received / written back */
+      amt = num(d.amount);
+      if (d.side === 'pay') { dr(P, amt); cr(d.reason === 'small' ? WBACK : DISC_R, amt); } else { dr(d.reason === 'bad' ? BADD : DISC_A, amt); cr(P, amt); }
+    } else if (R === 'pdd') {   /* provision for doubtful debts: only the change to the new figure is posted */
+      amt = num(d.change);
+      if (amt > 0) { dr(PDDX, amt); cr('pdd', amt); } else if (amt < 0) { dr('pdd', -amt); cr(PDDX, -amt); }
     } else if (R === 'refund') {
       amt = num(d.amount); dr(P, amt); cr(payAcct(d, true), amt);
     } else if (R === 'out' || R === 'outexp') {
       var gross = (d.lines || []).reduce(function (a, l) { return a + num(l.amt); }, 0), tdsOut = r2(gross * num(d.tdsRate) / 100);
-      if (R === 'out') dr(P, gross);
+      if (R === 'out') { dr(P, gross + num(d.disc)); cr(DISC_R, num(d.disc)); }   /* disc: cash discount received from the supplier (WP-3) */
       else (d.lines || []).forEach(function (l) { dr('exp:' + key(l.head || 'Miscellaneous'), num(l.amt)); });
       cr(payAcct(d, true), gross - tdsOut); cr('tds-payable', tdsOut);
     } else if (R === 'buy' || R === 'pret') {
       t = itemTotals(d);
       var s2 = R === 'pret' ? cr : dr, o2 = R === 'pret' ? dr : cr, buys = R === 'pret' ? 'purchase-return' : 'purchases';
+      /* a self invoice for services only (every line a SAC, 99…) is an expense, not goods bought for resale (round C) */
+      if (d.type === 'self' && (d.items || []).length && d.items.every(function (it) { return !String(it.desc || '').trim() || /^99/.test(String(it.hsn || '')); })) buys = 'exp:prof';
       s2(buys, t.taxable);
       if (d.type === 'self') {   /* reverse charge: input tax credit and tax payable both, supplier gets the taxable value */
         s2('gst-in-cgst', t.cgst); s2('gst-in-sgst', t.sgst); s2('gst-in-igst', t.igst);
@@ -175,6 +205,8 @@
       (d.lines || []).forEach(function (l) { var a = jvAcct(l); if (!a) return; dr(a, num(l.dr)); cr(a, num(l.cr)); });
     } else if (R === 'fabuy') {
       amt = num(d.amount); var fg = d.itc ? num(d.gstAmt) : 0, fk = 'fa:' + key(d.name || 'Fixed asset');
+      /* an asset the business already owned when the books start: no payment, no GST now, against the opening balance (round C) */
+      if (d.mode === 'own') { dr(fk, amt); cr('opening', amt); return L; }
       dr(fk, amt + (d.itc ? 0 : num(d.gstAmt)));
       if (fg) { if (d.inter) dr('gst-in-igst', fg); else { dr('gst-in-cgst', r2(fg / 2)); dr('gst-in-sgst', fg - r2(fg / 2)); } }
       if (d.mode === 'credit') cr(partyName(d) ? P : 'p:unknown', amt + num(d.gstAmt)); else cr(moneyAcct(d.mode), amt + num(d.gstAmt));
@@ -192,6 +224,49 @@
     return L;
   }
 
+  /* ---------- discounts, write-offs, provision for doubtful debts (Accounts coverage WP-3) ---------- */
+  var DISC_A = 'exp:discount allowed', DISC_R = 'inc:discount received', BADD = 'exp:bad debts', WBACK = 'inc:balances written back', PDDX = 'exp:provision for doubtful debts';
+  /* the provision for doubtful debts on a day (the 'pdd' account balance, a credit), leaving out one record (the one being changed) */
+  function provision(docs, biz, upto, skipId) {
+    var v = 0;
+    inBooks(docs, biz).forEach(function (d) { if (role(d) === 'pdd' && d.id !== skipId && (!upto || d.date <= upto)) v = r2(v + num(d.change)); });
+    return v;
+  }
+
+  /* ---------- taxes (Accounts coverage WP-4) ---------- */
+  var GSTH = ['igst', 'cgst', 'sgst', 'cess'], MINOR = ['tax', 'int', 'pen', 'fee', 'oth'];
+  var INTX = 'exp:interest on late payment of tax', FEEX = 'exp:late fee and penalty';
+  /* what a tax payment debits (refunds: credits): [[account, amount]] and the total paid (received).
+     gst      challan PMT-06: the money goes into the electronic cash ledger of each major head (gst.<head>.<minor head>)
+     tds/tcs  challan of TDS or TCS deducted / collected: tax clears TDS (TCS) payable, interest and late fee are expenses
+     adv      advance tax or self-assessment tax: d.to 'drw' (a proprietor's own tax = drawings) or 'oca' (tax paid in advance)
+     gstref   GST refund received back from the cash ledger; itref income-tax refund (back to drawings or tax paid in advance) */
+  function taxPay(d) {
+    var L = [];
+    function add(a, v) { v = r2(num(v)); if (v) L.push([a, v]); }
+    if (d.kind === 'gst' || d.kind === 'gstref') GSTH.forEach(function (h) { var g = d.gst && d.gst[h] || {}; add('gstcash-' + h, MINOR.reduce(function (s, m) { return s + num(g[m]); }, 0)); });
+    else if (d.kind === 'tds' || d.kind === 'tcs') { add(d.kind + '-payable', d.tax); add(INTX, d['int']); add(FEEX, d.fee); }
+    else add(d.to === 'oca' ? 'oca:advance income tax' : 'drw:drawings', d.amount);
+    return { lines: L, total: r2(L.reduce(function (s, l) { return s + l[1]; }, 0)) };
+  }
+  /* the GSTR-3B set-off of a period as [debit account, amount, credit account] (gstr3b.js saves it after filing):
+     out = output tax settled per head, use[against][from] = input credit used, cash = tax paid from the cash ledger,
+     rcm = reverse charge tax paid in cash, int / fee = interest and late fee paid in cash. Cess is not in the books. */
+  function gstSet(d) {
+    var L = [], ut = !!d.ut;
+    function outAcct(h) { return 'gst-out-' + (h === 'sgst' && ut ? 'utgst' : h); }
+    function add(a, v, b) { v = r2(num(v)); if (v > 0) L.push([a, v, b]); }
+    ['igst', 'cgst', 'sgst'].forEach(function (h) {
+      var u = d.use && d.use[h] || {};
+      Object.keys(u).forEach(function (from) { if (from !== 'cess') add(outAcct(h), u[from], 'gst-in-' + from); });
+      add(outAcct(h), d.cash && d.cash[h], 'gstcash-' + h);
+      add('gst-rcm-payable', d.rcm && d.rcm[h], 'gstcash-' + h);
+      add(INTX, d['int'] && d['int'][h], 'gstcash-' + h);
+      add(FEEX, d.fee && d.fee[h], 'gstcash-' + h);
+    });
+    return L;
+  }
+
   /* account of one journal line: 'party' = the party's own account, else the account key typed in the line */
   function jvAcct(l) { if (!l) return ''; if (l.a === 'party') return l.party ? 'p:' + key(l.party) : ''; return String(l.a || '').trim(); }
   /* every party a record touches: { key: name } (a journal entry can name several) */
@@ -203,7 +278,7 @@
   }
 
   /* the business's records in date order (same date: sales and bills before money, so a same-day payment settles them) */
-  var ORDER = { ob: 0, sale: 1, sdeb: 1, buy: 1, exp: 1, fabuy: 1, sret: 2, pret: 2, 'in': 3, out: 3, outexp: 3, refund: 3, fasale: 3, contra: 4, jv: 5 };
+  var ORDER = { ob: 0, sale: 1, sdeb: 1, buy: 1, exp: 1, fabuy: 1, sret: 2, pret: 2, 'in': 3, out: 3, outexp: 3, refund: 3, fasale: 3, oinc: 3, taxpay: 3, wo: 4, contra: 4, jv: 5, gstset: 6, pdd: 7 };
   function inBooks(docs, biz) {
     var b = key(biz);
     return docs.filter(function (d) { return role(d) && (!b || bizOf(d) === b); }).sort(function (x, y) {
@@ -273,10 +348,11 @@
       }
       else if (R === 'exp' && d.mode === 'credit') bill(d, 'pay', num(d.amount));
       else if (R === 'ob' && d.side !== 'cash' && d.side !== 'bank') bill(d, d.side === 'pay' ? 'pay' : 'recv', num(d.amount));
-      else if (R === 'in') credits.push({ side: 'recv', amt: num(d.amount) + num(d.tds), alloc: d.alloc, d: d });
+      else if (R === 'in') credits.push({ side: 'recv', amt: num(d.amount) + num(d.tds) + num(d.disc), alloc: d.alloc, d: d });
+      else if (R === 'wo') credits.push({ side: d.side === 'pay' ? 'pay' : 'recv', amt: num(d.amount), alloc: d.alloc, d: d });
       else if (R === 'refund') bill(d, 'recv', num(d.amount));   /* a refund paid out makes the customer "owe" it back against their advance */
       else if (R === 'sret') credits.push({ side: 'recv', amt: itemTotals(d).total, origNo: d.orig && d.orig.no, d: d });
-      else if (R === 'out') credits.push({ side: 'pay', amt: (d.lines || []).reduce(function (a, l) { return a + num(l.amt); }, 0), alloc: d.alloc, d: d });
+      else if (R === 'out') credits.push({ side: 'pay', amt: (d.lines || []).reduce(function (a, l) { return a + num(l.amt); }, 0) + num(d.disc), alloc: d.alloc, d: d });
       else if (R === 'pret') credits.push({ side: 'pay', amt: itemTotals(d).total, origNo: d.orig && d.orig.no, d: d });
     });
     /* apply credits in date order (list was sorted, credits keep that order) */
@@ -364,7 +440,7 @@
   function vtype(d) {
     var R = role(d);
     return ({ sale: 'sales', fasale: 'sales', sret: 'notes', sdeb: 'notes', 'in': 'receipts', refund: 'payments', out: 'payments', outexp: 'payments',
-      buy: 'purchases', pret: 'purchases', exp: 'purchases', fabuy: 'purchases', jv: 'journal', ob: 'opening', contra: 'journal' })[R] || 'other';
+      buy: 'purchases', pret: 'purchases', exp: 'purchases', fabuy: 'purchases', jv: 'journal', ob: 'opening', contra: 'journal', oinc: 'receipts', taxpay: 'payments', gstset: 'journal', wo: 'journal', pdd: 'journal' })[R] || 'other';
   }
   /* ledger of one party between two dates: the statement with a voucher type on every row.
      types (optional): only these voucher types are listed; opening, closing and each row's balance stay the true ones,
@@ -476,7 +552,7 @@
   }
 
   var API = { num: num, r2: r2, key: key, role: role, itemTotals: itemTotals, postings: postings, inBooks: inBooks, parties: parties, accounts: accounts,
-    bills: bills, ageing: ageing, overdue: overdue, chargeLines: chargeLines, tcsRate: tcsRate, tcsPan: tcsPan, panOk: panOk, addDays: addDays, mainRate: mainRate, statement: statement, book: book, daysBetween: daysBetween, moneyAcct: moneyAcct, payAcct: payAcct, bounced: bounced, partyName: partyName, partiesOf: partiesOf, jvAcct: jvAcct,
+    taxPay: taxPay, gstSet: gstSet, provision: provision, bills: bills, ageing: ageing, overdue: overdue, chargeLines: chargeLines, tcsRate: tcsRate, tcsPan: tcsPan, panOk: panOk, addDays: addDays, mainRate: mainRate, statement: statement, book: book, daysBetween: daysBetween, moneyAcct: moneyAcct, payAcct: payAcct, bounced: bounced, partyName: partyName, partiesOf: partiesOf, jvAcct: jvAcct,
     vtype: vtype, ledger: ledger, billwise: billwise, groupsOf: groupsOf, groupChain: groupChain, partyGroup: partyGroup, inGroup: inGroup, groupTree: groupTree,
     partyMoves: partyMoves, groupSummary: groupSummary, groupDues: groupDues, topParties: topParties, BUILTIN: BUILTIN };
   if (typeof module !== 'undefined' && module.exports) module.exports = API; else G.NSBooks = API;

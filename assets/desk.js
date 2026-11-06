@@ -94,11 +94,14 @@
     /* the backup reminder sits inside the page, under the title bar, so the title bar is always at the top */
     var rem = $('#ns-remind'), main = $('#main'); if (rem && main) main.insertBefore(rem, main.firstChild);
     $$('a', side).forEach(function (a) { if (!a.title) a.title = (a.textContent || '').trim(); });
+    if (/Mac|iPhone|iPad/.test(navigator.platform || navigator.userAgent)) $$('.desk-cmdbtn kbd').forEach(function (k) { k.textContent = '⌘ K'; });
     if (LOCAL) $$('a[data-port]', side).forEach(function (a) { a.href = 'http://localhost:' + a.getAttribute('data-port') + '/'; });
     adoptHub();
     side.addEventListener('click', function (e) {
       if (e.target.closest('[data-side-mini]')) { mini(); return; }
       if (e.target.closest('a') && !wide()) drawer(false);
+      /* another screen opens at its top, not half-way down where the last one was scrolled (round C) */
+      if (e.target.closest('a[data-sec]')) setTimeout(function () { window.scrollTo(0, 0); }, 0);
     });
     document.addEventListener('click', function (e) {
       if (e.target.closest('[data-side-btn]')) toggleMenu();
@@ -109,6 +112,8 @@
       else if (e.target.closest('[data-s-backup]')) click('[data-act="my-data"]');
     });
     if (LS.get('ns-side-mini') === '1') mini(true);
+    /* a small laptop window (or 150% zoom): the menu starts folded to icons unless the user opened it on purpose (round C) */
+    else if (wide() && innerWidth < 1100 && LS.get('ns-side-mini') !== '0') mini(true);
     var cur = $('a[aria-current=page]', side); if (cur && cur.scrollIntoView && wide()) cur.scrollIntoView({ block: 'nearest' });
     status();
     var pane = $('[data-pane]');
@@ -196,15 +201,23 @@
       $$('a', g).forEach(function (a) {
         if (NS.featHidden && NS.featHidden(a)) return;   /* a feature switched off in the installed App (firstrun.js) */
         var sec = a.getAttribute('data-sec'), i = sec ? $$('#ns-side a[data-sec]').indexOf(a) : -1;
-        out.push({ g: g.getAttribute('data-g') === 'docs' || g.getAttribute('data-g') === 'more' ? 'new' : gk, t: (a.textContent || '').trim(),
+        var tx = (a.textContent || '').trim();
+        out.push({ g: g.getAttribute('data-g') === 'docs' || g.getAttribute('data-g') === 'more' ? 'new' : gk, t: tx, e: NS.meaning(tx) + ' ' + (SYN[sec] || ''),
           k: a.getAttribute('data-ic') === 'd-billing' ? 'Alt+N' : i >= 0 && i < 9 ? 'Alt+' + (i + 1) : '', run: function () { a.click(); } });
       });
     });
     var app = A();
-    if (app && app.biz && app.biz()) FORMS.forEach(function (f) { if (NS.featHidden && NS.featHidden(f[0])) return; out.push({ g: 'rec', t: app.T(f[0]), k: f[1], run: function () { app.openForm(f[0]); } }); });
+    if (app && app.biz && app.biz()) FORMS.forEach(function (f) { if (NS.featHidden && NS.featHidden(f[0])) return; out.push({ g: 'rec', t: app.T(f[0]), e: NS.meaning(app.T(f[0])), k: f[1], run: function () { app.openForm(f[0]); } }); });
+    /* screens inside a section (final accounts) are found by their own names too */
+    if (app && $('#ns-side a[data-sec="fin"]')) SUB.forEach(function (x) { out.push({ g: 'go', t: NS.t(x[1]), e: x[2], run: function () { location.hash = x[0]; } }); });
     return out.concat(actions());
   }
   /* parties and saved documents are read when the box opens (from the App if it is here, else from the data home) */
+  /* English words an accountant may type whatever the screen language (round C: 'trial', 'depreciation', 'bank book') */
+  var SYN = { fin: 'final accounts trial balance profit loss balance sheet', cash: 'cash book bank book', b2fa: 'fixed assets depreciation register', b2jv: 'journal entries',
+    dues: 'outstanding receivable payable ageing', capl: 'capital loans drawings', books: 'day book cash book bank book', st: 'ledger statement', fam: 'manufacturing account partners',
+    b2year: 'year end closing', reports: 'excel reports registers', acx: 'other income tax payment' };
+  var SUB = [['fin/tb', 'pl.t_tb', 'trial balance tb'], ['fin/pl', 'pl.t_pl', 'profit and loss p&l income statement'], ['fin/bs', 'pl.t_bs', 'balance sheet bs']];
   function dataItems() {
     var app = A();
     var getP = app && app.data ? Promise.resolve({ party: app.data().party, doc: app.mine ? app.mine() : app.data().doc }) :
@@ -238,7 +251,8 @@
       { g: 'act', t: T('lang'), run: function () { var s = $('[data-lang-pick]'); if (s) { s.focus(); if (s.showPicker) try { s.showPicker(); } catch (e) {} } } }
     ].concat(deferredInstall ? [{ g: 'act', t: T('install'), run: install }] : []);
   }
-  function palette() {
+  var back = null, picked = false;
+  function palette(from) {
     if (!cmd) {
       cmd = NS.el('dialog', { id: 'desk-cmd', class: 'desk-cmd' });
       cmd.innerHTML = '<div class="cmd-in">' + ic(SEARCH) + '<input type="search" role="combobox" aria-label="' + esc(T('find')) + '" aria-expanded="true" aria-controls="desk-cmd-l" aria-autocomplete="list" autocomplete="off" spellcheck="false" dir="auto"><kbd>Esc</kbd></div>' +
@@ -250,22 +264,30 @@
       inpt.addEventListener('keydown', function (e) {
         if (e.key === 'ArrowDown' || e.key === 'ArrowUp') { e.preventDefault(); if (shown.length) { at = (at + (e.key === 'ArrowDown' ? 1 : -1) + shown.length) % shown.length; mark(); } }
         else if (e.key === 'Enter') { e.preventDefault(); pick(at); }
+        else if (e.key === 'Escape') { e.preventDefault(); cmd.close(); }
       });
       list.addEventListener('click', function (e) { var li = e.target.closest('li[data-i]'); if (li) pick(+li.getAttribute('data-i')); });
       list.addEventListener('mousemove', function (e) { var li = e.target.closest('li[data-i]'); if (li && +li.getAttribute('data-i') !== at) { at = +li.getAttribute('data-i'); mark(true); } });
       cmd.addEventListener('click', function (e) { if (e.target === cmd) cmd.close(); });
+      cmd.addEventListener('close', function () {
+        var b = back; back = null;
+        /* after the dialog's own focus return: a field inside the App's document frame needs its window focused first */
+        if (b && b.isConnected && !picked) setTimeout(function () { try { var w = b.ownerDocument.defaultView; if (w && w !== window) w.focus(); b.focus(); } catch (er) {} }, 0);
+        picked = false;
+      });
     }
     var inp = $('input', cmd);
     cmd.setAttribute('aria-label', T('find'));
     inp.placeholder = T('ph'); inp.setAttribute('aria-label', T('ph')); $('.cmd-ft', cmd).textContent = T('cmdft');
     items = collect(); inp.value = ''; at = 0; draw('');
-    cmd.showModal(); inp.focus();
+    back = from || (document.activeElement !== document.body ? document.activeElement : null);
+    cmd.showModal(); inp.focus(); setTimeout(function () { if (cmd.open && document.activeElement !== inp) inp.focus(); }, 30);
     dataItems().then(function (more) { items = items.concat(more); if (cmd.open && inp.value) draw(inp.value); });
   }
   var GROUPS = ['go', 'rec', 'new', 'party', 'doc', 'act'];
   function draw(qs) {
     var words = qs.toLowerCase().split(/\s+/).filter(Boolean);
-    var hit = items.filter(function (x) { var h = (x.t + ' ' + (x.s || '')).toLowerCase(); return words.every(function (w) { return h.indexOf(w) >= 0; }); });
+    var hit = items.filter(function (x) { var h = (x.t + ' ' + (x.s || '') + ' ' + (x.e || '')).toLowerCase(); return words.every(function (w) { return h.indexOf(w) >= 0; }); });
     if (!words.length) hit = hit.filter(function (x) { return x.g !== 'doc' && x.g !== 'party' && x.g !== 'new'; });
     shown = []; var html = '';
     GROUPS.forEach(function (g) {
@@ -285,7 +307,9 @@
     var cur = $('#cmd-o' + at, list), inp = $('input', cmd);
     if (cur) { inp.setAttribute('aria-activedescendant', cur.id); if (!noScroll) cur.scrollIntoView({ block: 'nearest' }); } else inp.removeAttribute('aria-activedescendant');
   }
-  function pick(i) { var x = shown[i]; if (!x) return; cmd.close(); setTimeout(x.run, 0); }
+  function pick(i) { var x = shown[i]; if (!x) return; picked = true; cmd.close(); setTimeout(x.run, 0); }
+  /* a document inside the App's frame sends its Ctrl K here (inapp.js): the box opens, takes the cursor, and Esc gives it back to that field */
+  NS.deskPalette = function (from) { if (cmd && cmd.open) cmd.close(); else palette(from); };
 
   /* ---------- keyboard ---------- */
   var KEYS = [['Ctrl K', 'k_cmd'], ['Ctrl B', 'k_menu'], ['Alt 1 … 9', 'k_secs'], ['Alt N', 'k_inv'], ['Alt R', 'k_min'], ['Alt P', 'k_mout'], ['Alt B', 'k_pbill'], ['Alt X', 'k_exp'],

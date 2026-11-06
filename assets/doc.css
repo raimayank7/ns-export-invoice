@@ -163,7 +163,7 @@ details.more .fg{margin-top:8px}
 .signs .signbox:first-child p:first-child{font-size:11px;color:#4B5563}
 .pdf-again{position:fixed;left:50%;bottom:90px;transform:translateX(-50%);z-index:60;box-shadow:0 6px 24px rgba(0,0,0,.25)}
 /* thermal roll: 80 mm = 302px, 58 mm = 219px, at 96 dpi */
-.sh.th{width:302px;min-height:0;padding:10px 10px 30px;font:11px/1.35 var(--mono),ui-monospace,monospace;text-align:center}
+.sh.th{width:302px;min-height:0;padding:10px 10px 30px;font:11px/1.35 var(--mono),'Noto Sans Devanagari','Noto Sans Gurmukhi','Noto Sans Bengali','Noto Sans Gujarati','Noto Sans Tamil','Noto Sans Telugu','Noto Sans Kannada','Noto Sans Malayalam','Noto Sans Oriya',ui-monospace,monospace;text-align:center}   /* Indian-script names on a thermal memo use a proportional Noto font, not spaced-out monospace (round C) */
 .sh.th58{width:219px;padding:8px 6px 28px;font-size:10px}
 .sh.th h2{font-size:14px;margin:2px 0;color:#111827}
 .sh.th p{margin:1px 0}
@@ -449,3 +449,10 @@ html:has(#tool .actions) body{padding-bottom:calc(66px + env(safe-area-inset-bot
 @media (max-width:960px) and (prefers-reduced-motion:no-preference){html.ready #main>#tool{animation-name:ns-fadein}}
 @media (min-width:961px){.act-x{display:none}}
 @media print{#tool .actions{display:none}html:has(#tool .actions) body{padding-bottom:0}}
+/* round C: a saved business folds to one line; the Preview tab shows the running total; the Fill/Preview switch sticks under
+   the real header (none inside the App) */
+#biz-card.folded>.fg,#biz-card.folded>details{display:none}
+.biz-line{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:0;flex-wrap:wrap}
+.biz-line b{min-width:0;overflow-wrap:anywhere}
+.tab-sum{font-variant-numeric:tabular-nums;font-weight:600}
+@media (max-width:960px){.tabs{top:var(--hd-h,60px)}html.embed .tabs{top:0}.tool[data-tab=preview] .pv-col{scroll-margin-top:calc(var(--hd-h,60px) + 64px)}}

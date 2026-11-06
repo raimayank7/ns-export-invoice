@@ -107,6 +107,8 @@
       else if (e.tid && !NS.gstinCheck(String(e.tid).trim()).ok) note.push(t('ev.tidchk'));
       /* the portal refuses an e-way bill for a document more than 180 days old (since 1 Jan 2025) */
       if (days(d.date) > 180) bad.push(['d-date', t('ev.old180')]);
+      /* no vehicle and no transporter: the file is Part A only; say so (round C) */
+      if (!v && !String(e.tid || '').trim() && !String(e.tdoc || '').trim()) note.push(t('ev.partA'));
       if (what === 'ewb') {
         var dest = d.pos || b.state, inside = !dest || dest === s.state, lim = inside && EWB_LIMIT[s.state] || 50000;
         if (tt.grand <= lim) note.push(lim > 50000 ? t('ev.smallst', { st: NS.stateName(s.state), v: NS.money(lim, false).replace(/\.00$/, '') }) : t('ev.small'));
@@ -331,6 +333,7 @@
     if (!box || !document.contains(box)) return;
     var d = api.doc(), irn = d.irn || {};
     $('#ei-einv', box).hidden = d.kind !== 'tax';
+    box.hidden = !!(d.seller && d.seller.reg === 'unreg') && !irn.irn && !irn.ewb;   /* a seller not registered under GST makes neither file (round C) */
     var have = $('#ei-have', box), h = [];
     if (irn.irn) h.push(esc(t('ei.have', { irn: irn.irn.slice(0, 12) + '…', ack: irn.ack || '—' })));
     if (irn.ewb) h.push(esc(t('ei.haveewb', { no: irn.ewb })));
