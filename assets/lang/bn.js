@@ -4383,3 +4383,8 @@ NS.addLang("bn", {
   "hp.page": "পুরো পেজ খুলুন",
   "desk.g_help": "সাহায্য"
 });
+
+/* Installed App settings (2026-11-06) */
+NS.addLang("bn", {
+  "hub.h.lang2": "এখানে বেছে নেওয়া ভাষা Nivesh Sahayak-এর প্রতিটি টুলে চলে।"
+});

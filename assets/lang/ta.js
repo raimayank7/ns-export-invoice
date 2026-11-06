@@ -4385,3 +4385,8 @@ NS.addLang("ta", {
   "hp.page": "முழுப் பக்கத்தைத் திற",
   "desk.g_help": "உதவி"
 });
+
+/* Installed App settings (2026-11-06) */
+NS.addLang("ta", {
+  "hub.h.lang2": "இங்கே தேர்ந்தெடுக்கும் மொழி Nivesh Sahayak-இன் எல்லா டூல்களிலும் வரும்."
+});

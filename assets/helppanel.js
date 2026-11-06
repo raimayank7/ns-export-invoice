@@ -6,7 +6,8 @@
      topic; the search box looks through this site's articles (the App: every site's). An article opens inside the panel
      (its .help-art part, fetched; GitHub Pages lets other *.niveshsahayak.in sites read it), with a link to the full page.
      The command box (Ctrl K, desk.js) finds help articles too (NS.cmdMore).
-   Articles are English for now: other screen languages see a one-line note (hp.en). Screen words: NS.t('hp.*'). */
+   Translated help (scripts/help_tr.py): /help/index.<lang>.json (App: all.<lang>.json, English for sites not translated yet);
+   a screen language without it gets the English list and a one-line note (hp.en). Screen words: NS.t('hp.*'). */
 (function () {
   'use strict';
   var $ = NS.$, $$ = NS.$$, esc = NS.esc;
@@ -26,15 +27,19 @@
   function mySite() { return IN_APP || (IDX && IDX.site) || ''; }
   /* this site's articles (and on the App every site's, for the search); inside the App's document copy, that maker's articles */
   function load() {
-    if (IDX) return Promise.resolve(IDX);
-    if (loading) return loading;
-    var url = '/help/' + (IN_APP || isApp() ? 'all.json' : 'index.json');
-    loading = fetch(url, { cache: 'no-cache' }).then(function (r) { if (!r.ok) throw new Error(r.status); return r.json(); }).then(function (j) {
+    var L = NS.lang ? NS.lang() : 'en';
+    if (IDX && IDX.want === L) return Promise.resolve(IDX);
+    if (loading && loading.want === L) return loading;
+    /* the screen language's list when the help has been translated (help_tr.py), else English */
+    var name = '/help/' + (IN_APP || isApp() ? 'all' : 'index'), get = function (u) { return fetch(u, { cache: 'no-cache' }).then(function (r) { if (!r.ok) throw new Error(r.status); return r.json(); }); };
+    loading = (L === 'en' ? get(name + '.json') : get(name + '.' + L + '.json').catch(function () { return get(name + '.json'); })).then(function (j) {
       var all = (j.articles || []).map(function (a) { return Object.assign({ site: j.site, siteName: j.name }, a); });
-      IDX = { site: IN_APP || j.site || (isApp() ? 'app' : ''), name: j.name || '', topics: j.topics || [], all: all };
+      all.forEach(function (a) { a.lang = a.lang || j.lang || 'en'; });
+      IDX = { site: IN_APP || j.site || (isApp() ? 'app' : ''), name: j.name || '', topics: j.topics || [], all: all, lang: j.lang || 'en', want: L };
       if (isApp() && !IN_APP) IDX.site = 'app';
       return IDX;
     }).catch(function (e) { loading = null; throw e; });
+    loading.want = L;
     return loading;
   }
   function isApp() { return !!(window.NSApp && $('#app')); }
@@ -89,7 +94,7 @@
   function words2() { $('#ns-help-t', dlg).textContent = T('title'); $('[data-hp-x]', dlg).setAttribute('aria-label', NS.t('close')); $('[data-hp-x]', dlg).textContent = '✕';
     var bk = $('[data-hp-back]', dlg); bk.setAttribute('aria-label', T('back')); bk.textContent = document.documentElement.dir === 'rtl' ? '→' : '←';
     inp.placeholder = T('find'); inp.setAttribute('aria-label', T('find'));
-    var n = $('[data-hp-note]', dlg), l = NS.lang ? NS.lang() : 'en'; n.hidden = l === 'en'; n.textContent = T('en');
+    var n = $('[data-hp-note]', dlg), l = NS.lang ? NS.lang() : 'en'; n.hidden = l === 'en' || !!(IDX && IDX.lang === l); n.textContent = T('en');
     var all = $('[data-hp-all]', dlg); all.textContent = T('all') + ' ›'; all.href = IN_APP && IDX ? (mine()[0] || {}).url ? String((mine()[0] || {}).url).replace(/\/help\/.*$/, '/help/') : '/help/' : '/help/';
   }
   /* q: search words to start with; art: an article to show straight away (from the command box) */
@@ -139,7 +144,8 @@
       $$('a[href]', art).forEach(function (x) { x.setAttribute('href', new URL(x.getAttribute('href'), full).href); if (!/\/help\//.test(x.getAttribute('href'))) { x.target = '_blank'; x.rel = 'noopener'; } });
       $$('img[src]', art).forEach(function (x) { x.setAttribute('src', new URL(x.getAttribute('src'), full).href); x.loading = 'lazy'; });
       var h1 = $('h1', art); if (h1) { var h = document.createElement('h3'); h.className = 'hp-h1'; h.innerHTML = h1.innerHTML; h1.replaceWith(h); }
-      body.innerHTML = '<article class="hp-art" lang="en" dir="ltr">' + art.innerHTML + '</article><p class="hp-full"><a href="' + esc(full) + '" target="_blank" rel="noopener">' + esc(T('page')) + ' ↗</a></p>';
+      var al = a.lang || 'en', rtl = /^(ur|ks|sd)$/.test(al);
+      body.innerHTML = (al === 'en' && NS.lang && NS.lang() !== 'en' ? '<p class="hp-note">' + esc(T('en')) + '</p>' : '') + '<article class="hp-art" lang="' + esc(al) + '" dir="' + (rtl ? 'rtl' : 'ltr') + '">' + art.innerHTML + '</article><p class="hp-full"><a href="' + esc(full) + '" target="_blank" rel="noopener">' + esc(T('page')) + ' ↗</a></p>';
       body.scrollTop = 0;
       var t = $('.hp-h1', body); if (t) { t.tabIndex = -1; t.focus(); }
     }).catch(function () {

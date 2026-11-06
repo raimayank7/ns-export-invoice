@@ -127,7 +127,7 @@
     'hub.default': 'Default', 'hub.makedef': 'Make default',
     'hub.p.settings': 'These settings are used by every Nivesh Sahayak document tool in this browser when you start a new document.',
     'hub.g.gen': 'General', 'hub.defbiz': 'Default business', 'hub.nodef': 'None (start empty)', 'hub.h.defbiz': 'A new document starts with this business filled in.',
-    'hub.remind': 'Remind me to save a backup', 'hub.every': 'Every {n} days', 'hub.never': 'Never', 'hub.h.lang': 'Change it from the language menu at the top. Every tool follows it.',
+    'hub.remind': 'Remind me to save a backup', 'hub.every': 'Every {n} days', 'hub.never': 'Never', 'hub.h.lang': 'Change it from the language menu at the top. Every tool follows it.', 'hub.h.lang2': 'Every Nivesh Sahayak tool follows the language you pick here.',
     'hub.g.num': 'Invoice numbering', 'hub.prefix': 'Prefix', 'hub.digits': 'Digits in the serial number', 'hub.fy': 'Add the financial year (26-27)', 'hub.next': 'The first invoice of a year will be',
     'hub.h.num': 'Each business gets its own series, and the serial starts again from 1 every financial year (1 April). GST allows up to 16 characters: letters, numbers, / and -.',
     'hub.g.new': 'New invoice defaults', 'hub.defgst': 'GST rate for a new line', 'hub.defunit': 'Unit for a new line', 'hub.h.new': 'You can still change all of these on each document.',
@@ -2322,12 +2322,17 @@
       /* a real choice waits (max 1.5 s) until the data home has it, so the next page does not read the old language */
       var w = !quiet && window.NSStore ? Promise.race([NSStore.meta('lang', cur).catch(function () {}), new Promise(function (r) { setTimeout(r, 1500); })]) : null;
       NS.applyLang();
-      Array.prototype.forEach.call(document.querySelectorAll('[data-lang-pick]'), function (s) { s.value = cur; });
+      Array.prototype.forEach.call(document.querySelectorAll('[data-lang-pick], [data-lang-set]'), function (s) { s.value = cur; });
       Array.prototype.forEach.call(document.querySelectorAll('[data-guide-en]'), function (n) { n.hidden = cur === 'en'; });
       document.dispatchEvent(new CustomEvent('ns-lang', { detail: cur }));
       return w;
     });
   };
+  /* a language select inside a Settings screen (the installed App keeps the language out of its top bar): NS.langSelect(id) */
+  NS.langSelect = function (id) {
+    return '<select id="' + id + '" data-lang-set>' + NS.LANGS.map(function (l) { return '<option value="' + l[0] + '" lang="' + l[0] + '"' + (l[0] === cur ? ' selected' : '') + '>' + l[1] + '</option>'; }).join('') + '</select>';
+  };
+  document.addEventListener('change', function (e) { var s = e.target && e.target.closest && e.target.closest('[data-lang-set]'); if (s) NS.setLang(s.value); });
   function guess() {
     var ls = (navigator.languages || [navigator.language || 'en']).map(function (x) { return String(x).toLowerCase().split('-')[0]; });
     for (var i = 0; i < ls.length; i++) if (info(ls[i])) return ls[i];

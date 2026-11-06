@@ -18,7 +18,7 @@
   function ic(d) { return '<svg class="ic" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="' + d + '"/></svg>'; }
   /* icons for the App's own screens (the other side-menu icons are CSS masks in desk.css, by data-ic) */
   var SECIC = { home: 'home', sales: 'doc', money: 'money', dues: 'clock', buy: 'cart', parties: 'people', cash: 'bank', chq: 'cheque', books: 'book', khata: 'book', preg: 'cart', ebook: 'cart',
-    repeat: 'repeat', reports: 'chart', b2jv: 'journal', b2fa: 'asset', b2gd: 'box', b2make: 'factory', b2profit: 'trend', b2sman: 'badge', b2year: 'calendar', grp: 'layers', fin: 'scale', fam: 'factory', capl: 'coins', b2job: 'wrench', ledger: 'book', move: 'trend', st: 'list', stf: 'badge',
+    repeat: 'repeat', reports: 'chart', b2jv: 'journal', b2fa: 'asset', b2gd: 'box', b2make: 'factory', b2profit: 'trend', b2sman: 'badge', b2year: 'calendar', grp: 'layers', fin: 'scale', fam: 'factory', capl: 'coins', b2job: 'wrench', ledger: 'book', move: 'trend', st: 'list', stf: 'badge', acx: 'tax', features: 'toggle',
     entries: 'list', low: 'alert', biz: 'shop', party: 'people', pgroups: 'list', item: 'box', igroups: 'list', doc: 'doc', settings: 'set', backup: 'data', bin: 'trash', log: 'clock' };
   /* screen lists that stay inside the page (my., the stock site...) get the same icons */
   function secIcons() { $$('.hub-nav a[data-sec]:not([data-ic])').forEach(function (a) { var k = SECIC[a.getAttribute('data-sec')]; if (k) a.setAttribute('data-ic', k); }); }
@@ -46,7 +46,7 @@
   };
 
   /* ---------- side menu ---------- */
-  function standalone() { return matchMedia('(display-mode: standalone), (display-mode: window-controls-overlay)').matches || navigator.standalone === true; }
+  function standalone() { var t; try { t = sessionStorage.getItem('ns-fr-installed') === '1'; } catch (e) {} return t || matchMedia('(display-mode: standalone), (display-mode: window-controls-overlay)').matches || navigator.standalone === true; }   /* ?installed=1 (firstrun.js) = test flag */
   var side, sbar, deferredInstall = null;
   function wide() { return matchMedia('(min-width: 861px)').matches; }
   function mini(force) {
@@ -248,7 +248,7 @@
       { g: 'act', t: NS.t('md.save'), run: function () { var b = NS.el('button', { 'data-act': 'backup', hidden: '' }); document.body.appendChild(b); b.click(); b.remove(); } },
       { g: 'act', t: T('mini'), k: 'Ctrl+B', run: toggleMenu },
       { g: 'act', t: T('keys'), k: '?', run: keysSheet },
-      { g: 'act', t: T('lang'), run: function () { var s = $('[data-lang-pick]'); if (s) { s.focus(); if (s.showPicker) try { s.showPicker(); } catch (e) {} } } }
+      { g: 'act', t: T('lang'), run: function () { var s = $('[data-lang-pick]'); if (s && !s.offsetParent && A() && root.classList.contains('installed')) { location.hash = '#features'; return; } if (s) { s.focus(); if (s.showPicker) try { s.showPicker(); } catch (e) {} } } }
     ].concat(deferredInstall ? [{ g: 'act', t: T('install'), run: install }] : []);
   }
   var back = null, picked = false;

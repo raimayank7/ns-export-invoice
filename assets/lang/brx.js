@@ -4382,3 +4382,8 @@ NS.addLang("brx", {
   "hp.page": "आबुं बिलाइ खेव",
   "desk.g_help": "मदद"
 });
+
+/* Installed App settings (2026-11-06) */
+NS.addLang("brx", {
+  "hub.h.lang2": "बेयाव सायखनाय राव Nivesh Sahayak नि गासै टुलआव बाहायजायो।"
+});

@@ -4383,3 +4383,8 @@ NS.addLang("gu", {
   "hp.page": "આખું પેજ ખોલો",
   "desk.g_help": "મદદ"
 });
+
+/* Installed App settings (2026-11-06) */
+NS.addLang("gu", {
+  "hub.h.lang2": "અહીં પસંદ કરેલી ભાષા Nivesh Sahayak ના દરેક ટૂલમાં લાગુ થાય છે."
+});

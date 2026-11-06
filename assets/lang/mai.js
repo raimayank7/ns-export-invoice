@@ -4382,3 +4382,8 @@ NS.addLang("mai", {
   "hp.page": "पूरा पेज खोलू",
   "desk.g_help": "मदति"
 });
+
+/* Installed App settings (2026-11-06) */
+NS.addLang("mai", {
+  "hub.h.lang2": "एतय चुनल भाषा Nivesh Sahayak क हर टूल मे लागू होइत अछि।"
+});

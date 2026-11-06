@@ -4383,3 +4383,8 @@ NS.addLang("ks", {
   "hp.page": "پوٗرٕ صفحہٕ کھولِو",
   "desk.g_help": "مدد"
 });
+
+/* Installed App settings (2026-11-06) */
+NS.addLang("ks", {
+  "hub.h.lang2": "یتہِ ژارنہٕ آمٕژ زبان گژھِ Nivesh Sahayak کٮ۪ن ساریٖن ٹولن مَنٛز لاگوٗ۔"
+});

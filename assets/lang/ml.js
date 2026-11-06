@@ -4382,3 +4382,8 @@ NS.addLang("ml", {
   "hp.page": "മുഴുവൻ പേജ് തുറക്കുക",
   "desk.g_help": "സഹായം"
 });
+
+/* Installed App settings (2026-11-06) */
+NS.addLang("ml", {
+  "hub.h.lang2": "ഇവിടെ തിരഞ്ഞെടുക്കുന്ന ഭാഷ Nivesh Sahayak-ന്റെ എല്ലാ ടൂളുകളിലും വരും."
+});

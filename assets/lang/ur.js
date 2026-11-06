@@ -4383,3 +4383,8 @@ NS.addLang("ur", {
   "hp.page": "پورا صفحہ کھولیں",
   "desk.g_help": "مدد"
 });
+
+/* Installed App settings (2026-11-06) */
+NS.addLang("ur", {
+  "hub.h.lang2": "یہاں چنی گئی زبان Nivesh Sahayak کے ہر ٹول میں لگتی ہے۔"
+});

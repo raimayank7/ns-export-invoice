@@ -4382,3 +4382,8 @@ NS.addLang("sa", {
   "hp.page": "पूर्णं पृष्ठम् उद्घाटयतु",
   "desk.g_help": "साहाय्यम्"
 });
+
+/* Installed App settings (2026-11-06) */
+NS.addLang("sa", {
+  "hub.h.lang2": "अत्र चिता भाषा Nivesh Sahayak इत्यस्य सर्वेषु साधनेषु प्रवर्तते।"
+});

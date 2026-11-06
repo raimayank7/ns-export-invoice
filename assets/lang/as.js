@@ -4383,3 +4383,8 @@ NS.addLang("as", {
   "hp.page": "সম্পূৰ্ণ পেজ খোলক",
   "desk.g_help": "সহায়"
 });
+
+/* Installed App settings (2026-11-06) */
+NS.addLang("as", {
+  "hub.h.lang2": "ইয়াত বাছি লোৱা ভাষা Nivesh Sahayak ৰ প্ৰতিটো টুলত চলে।"
+});

@@ -4382,3 +4382,8 @@ NS.addLang("sat", {
   "hp.page": "ᱯᱩᱨᱟᱹ ᱥᱟᱦᱴᱟ ᱡᱷᱤᱡ ᱢᱮ",
   "desk.g_help": "ᱜᱚᱲᱚ"
 });
+
+/* Installed App settings (2026-11-06) */
+NS.addLang("sat", {
+  "hub.h.lang2": "ᱱᱚᱸᱰᱮ ᱵᱟᱪᱷᱟᱣ ᱟᱠᱟᱱ ᱯᱟᱹᱨᱥᱤ Nivesh Sahayak ᱨᱮᱭᱟᱜ ᱡᱚᱛᱚ ᱴᱩᱞ ᱨᱮ ᱞᱟᱹᱜᱩᱜ-ᱟ᱾"
+});

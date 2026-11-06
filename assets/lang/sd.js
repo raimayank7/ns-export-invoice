@@ -4382,3 +4382,8 @@ NS.addLang("sd", {
   "hp.page": "پورو صفحو کوليو",
   "desk.g_help": "مدد"
 });
+
+/* Installed App settings (2026-11-06) */
+NS.addLang("sd", {
+  "hub.h.lang2": "هتي چونڊيل ٻولي Nivesh Sahayak جي هر ٽول ۾ لاڳو ٿئي ٿي."
+});

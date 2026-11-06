@@ -4251,3 +4251,8 @@ NS.addLang("or", {
   "hp.page": "ପୂରା ପେଜ୍ ଖୋଲନ୍ତୁ",
   "desk.g_help": "ସାହାଯ୍ୟ"
 });
+
+/* Installed App settings (2026-11-06) */
+NS.addLang("or", {
+  "hub.h.lang2": "ଏଠାରେ ବାଛିଥିବା ଭାଷା Nivesh Sahayak ର ପ୍ରତ୍ୟେକ ଟୁଲରେ ଲାଗୁ ହୁଏ।"
+});

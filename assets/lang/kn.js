@@ -4382,3 +4382,8 @@ NS.addLang("kn", {
   "hp.page": "ಪೂರ್ಣ ಪುಟ ತೆರೆಯಿರಿ",
   "desk.g_help": "ಸಹಾಯ"
 });
+
+/* Installed App settings (2026-11-06) */
+NS.addLang("kn", {
+  "hub.h.lang2": "ಇಲ್ಲಿ ಆರಿಸಿದ ಭಾಷೆ Nivesh Sahayak ನ ಪ್ರತಿ ಟೂಲ್‌ನಲ್ಲೂ ಬರುತ್ತದೆ."
+});

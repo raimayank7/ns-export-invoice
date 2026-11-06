@@ -4382,3 +4382,8 @@ NS.addLang("ne", {
   "hp.page": "पूरा पेज खोल्नुहोस्",
   "desk.g_help": "मद्दत"
 });
+
+/* Installed App settings (2026-11-06) */
+NS.addLang("ne", {
+  "hub.h.lang2": "यहाँ छानेको भाषा Nivesh Sahayak का सबै टुलमा लागू हुन्छ।"
+});

@@ -4383,3 +4383,8 @@ NS.addLang("kok", {
   "hp.page": "पुराय पान उगडात",
   "desk.g_help": "मदत"
 });
+
+/* Installed App settings (2026-11-06) */
+NS.addLang("kok", {
+  "hub.h.lang2": "हांगा वेंचिल्ली भास Nivesh Sahayak च्या दर टूलांत लागू जाता."
+});

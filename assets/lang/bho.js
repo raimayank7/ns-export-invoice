@@ -4382,3 +4382,8 @@ NS.addLang("bho", {
   "hp.page": "पूरा पेज खोलीं",
   "desk.g_help": "मदद"
 });
+
+/* Installed App settings (2026-11-06) */
+NS.addLang("bho", {
+  "hub.h.lang2": "इहाँ चुनल भाषा Nivesh Sahayak के हर टूल में लागू होला।"
+});

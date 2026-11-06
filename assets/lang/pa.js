@@ -4383,3 +4383,8 @@ NS.addLang("pa", {
   "hp.page": "ਪੂਰਾ ਪੇਜ ਖੋਲ੍ਹੋ",
   "desk.g_help": "ਮਦਦ"
 });
+
+/* Installed App settings (2026-11-06) */
+NS.addLang("pa", {
+  "hub.h.lang2": "ਇੱਥੇ ਚੁਣੀ ਭਾਸ਼ਾ Nivesh Sahayak ਦੇ ਹਰ ਟੂਲ ਵਿੱਚ ਲੱਗਦੀ ਹੈ।"
+});

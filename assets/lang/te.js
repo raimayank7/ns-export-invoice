@@ -4385,3 +4385,8 @@ NS.addLang("te", {
   "hp.page": "పూర్తి పేజీ తెరవండి",
   "desk.g_help": "సహాయం"
 });
+
+/* Installed App settings (2026-11-06) */
+NS.addLang("te", {
+  "hub.h.lang2": "ఇక్కడ ఎంచుకున్న భాష Nivesh Sahayak లోని ప్రతి టూల్‌లో వస్తుంది."
+});

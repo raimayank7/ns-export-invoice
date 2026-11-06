@@ -4252,3 +4252,8 @@ NS.addLang("mni", {
   "hp.page": "ꯄꯦꯖ ꯃꯄꯨꯡ ꯍꯥꯡꯗꯣꯛꯄꯤꯌꯨ",
   "desk.g_help": "ꯃꯇꯦꯡ"
 });
+
+/* Installed App settings (2026-11-06) */
+NS.addLang("mni", {
+  "hub.h.lang2": "ꯃꯐꯝ ꯑꯁꯤꯗꯥ ꯈꯅꯕ ꯂꯣꯟ ꯑꯗꯨ Nivesh Sahayak ꯒꯤ ꯇꯨꯜ ꯈꯨꯗꯤꯡꯃꯛꯇꯥ ꯁꯤꯖꯤꯟꯅꯒꯅꯤ꯫"
+});

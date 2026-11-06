@@ -4384,3 +4384,8 @@ NS.addLang("doi", {
   "hp.page": "पूरा पेज खोल्लो",
   "desk.g_help": "मदद"
 });
+
+/* Installed App settings (2026-11-06) */
+NS.addLang("doi", {
+  "hub.h.lang2": "इत्थें चुनी दी भाशा Nivesh Sahayak दे हर टूल च लगदी ऐ।"
+});
