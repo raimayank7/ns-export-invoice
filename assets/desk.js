@@ -283,12 +283,14 @@
     back = from || (document.activeElement !== document.body ? document.activeElement : null);
     cmd.showModal(); inp.focus(); setTimeout(function () { if (cmd.open && document.activeElement !== inp) inp.focus(); }, 30);
     dataItems().then(function (more) { items = items.concat(more); if (cmd.open && inp.value) draw(inp.value); });
+    /* other files add their own results (helppanel.js: help articles), each a function giving items or a promise of them */
+    (NS.cmdMore || []).forEach(function (f) { Promise.resolve().then(f).then(function (more) { items = items.concat(more || []); if (cmd.open && inp.value) draw(inp.value); }).catch(function () {}); });
   }
-  var GROUPS = ['go', 'rec', 'new', 'party', 'doc', 'act'];
+  var GROUPS = ['go', 'rec', 'new', 'party', 'doc', 'help', 'act'];
   function draw(qs) {
     var words = qs.toLowerCase().split(/\s+/).filter(Boolean);
     var hit = items.filter(function (x) { var h = (x.t + ' ' + (x.s || '') + ' ' + (x.e || '')).toLowerCase(); return words.every(function (w) { return h.indexOf(w) >= 0; }); });
-    if (!words.length) hit = hit.filter(function (x) { return x.g !== 'doc' && x.g !== 'party' && x.g !== 'new'; });
+    if (!words.length) hit = hit.filter(function (x) { return x.g !== 'doc' && x.g !== 'party' && x.g !== 'new' && x.g !== 'help'; });
     shown = []; var html = '';
     GROUPS.forEach(function (g) {
       var part = hit.filter(function (x) { return x.g === g; }).slice(0, words.length ? 8 : 12);

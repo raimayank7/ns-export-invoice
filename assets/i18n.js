@@ -2205,7 +2205,23 @@
     "sf.manage": "Add or change in the App",
     "sf.biz": "Business",
     "sf.allbiz": "Every business",
-    "sf.working": "Working"
+    "sf.working": "Working",
+    /* Help panel (helppanel.js) */
+    "hp.btn": "Help",
+    "hp.open": "Help for this screen (F1)",
+    "hp.title": "Help",
+    "hp.back": "Back to the list",
+    "hp.find": "Search help, for example: payment, GST, stock",
+    "hp.en": "Help articles are in English for now.",
+    "hp.all": "All help on this site",
+    "hp.loading": "Loading help…",
+    "hp.offline": "Help could not be loaded. Check your internet connection and try again.",
+    "hp.found": "{n} articles found",
+    "hp.none": "Nothing found. Try other words.",
+    "hp.screen": "For this screen",
+    "hp.more": "More",
+    "hp.page": "Open the full page",
+    "desk.g_help": "Help"
   };
 
   var packs = { en: EN }, cur = 'en';
