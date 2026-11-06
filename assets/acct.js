@@ -141,13 +141,14 @@
     var pw = has.d && has.lock ? NS.askPassword('set') : Promise.resolve('');
     pw.then(function (pass) {
       if (pass === null) { out.innerHTML = ''; return; }
-      return Promise.all(['doc', 'biz', 'party', 'item'].map(function (s) { return NSStore.list(s); }).concat([NSStore.meta('groups')])).then(function (r) {
+      return Promise.all(['doc', 'biz', 'party', 'item'].map(function (s) { return NSStore.list(s); }).concat([NSStore.meta('groups'), NSStore.meta('settings')])).then(function (r) {
         var docs = r[0], R = registers(docs, biz, from, to), files = [], jobs = [];
         if (!R.docs.length) { out.innerHTML = '<p class="note bad">' + esc(T('b3.ac.empty')) + '</p>'; return; }
         files.push(['READ-ME.txt', readMe(biz, from, to, has)]);
         if (has.x) jobs.push(NS.xlsx.write(R.sheets).arrayBuffer().then(function (b) { files.push(['registers-' + from + '-' + to + '.xlsx', new Uint8Array(b)]); }));
         if (has.t) {
           if (NS.tally.useMasters) NS.tally.useMasters(r[2], r[3], r[4]);   /* party groups and stock items in the masters file */
+          if (NS.tally.useDx && NS.cfgFor) NS.tally.useDx((NS.cfgFor(r[5] || {}, { name: biz }, r[1]).tf || {}).dx);   /* Direct Expenses of this business */
           var tv = NS.tally.fromDocs(docs, biz, from, to, { sale: true, buy: true, money: true });
           if (tv.vouchers && tv.vouchers.length) { files.push(['tally-masters.xml', NS.tally.mastersXml(tv.vouchers)]); files.push(['tally-vouchers.xml', NS.tally.vouchersXml(tv.vouchers)]); }
         }

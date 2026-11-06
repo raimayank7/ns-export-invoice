@@ -370,13 +370,14 @@
       /* the one auto save: chosen and allowed on my.niveshsahayak.in; elsewhere the buttons open it in a new tab (↗) */
       var here = NS.folderHere(), away = here ? '' : ' ↗';
       var FB = function (act, key, pri) { return '<button type="button" class="btn sm' + (pri ? ' primary' : '') + '" data-act="' + act + '">' + E(T(key)) + away + '</button>'; };
-      var afPane = !f.supported ? '' : NS.mdRow(T('oa.t'), fTxt + (f.on && f.last ? '<br>' + E(T('md.last')) + ' ' + E(new Date(f.last).toLocaleString('en-IN', { dateStyle: 'medium', timeStyle: 'short' })) : ''),
+      /* phones and tablets: the part is still there, saying auto save is for computers (the button "Auto-save and storage" opens it) */
+      var afPane = !f.supported ? '<p>' + off + E(T('ux.af.pc')) + '</p><div class="md-bar">' + B('backup', 'md.save', 1) + '</div>' : NS.mdRow(T('oa.t'), fTxt + (f.on && f.last ? '<br>' + E(T('md.last')) + ' ' + E(new Date(f.last).toLocaleString('en-IN', { dateStyle: 'medium', timeStyle: 'short' })) : ''),
           (f.on ? T('oa.on', { file: f.file || BACKUP_NAME + '.json', name: f.name }) + (f.allowed ? '' : ' ' + T('oa.ask')) : T('oa.off')),
           f.home === false ? '' : f.on ? (f.allowed ? '' : FB('folder-allow', 'md.allow', 1)) + B('folder-off', 'md.turnoff') : FB('folder-pick', 'md.choose', 1)) +
         '<p class="soft">' + E(T('oa.all')) + (here ? '' : ' ' + E(T('oa.away'))) + '</p>';
       var restore = '<label class="btn sm">' + E(T('md.restore')) + '<input type="file" accept=".json,application/json" data-act="restore" hidden></label>';
-      var hub = '<a class="btn sm" href="https://my.niveshsahayak.in/" target="_blank" rel="noopener">' + E(T('md2.open')) + ' ↗</a>';
-      var tabs = [['ov', 'md2.ov'], ['bk', 'md2.bk']].concat(f.supported ? [['af', 'md2.folder']] : []).concat([['ac', 'b3.ac.t']]);
+      var hub = location.origin === HOME.origin ? '' : '<a class="btn sm" href="https://my.niveshsahayak.in/" target="_blank" rel="noopener">' + E(T('md2.open')) + ' ↗</a>';   /* not on the full data page itself */
+      var tabs = [['ov', 'md2.ov'], ['bk', 'md2.bk'], ['af', 'md2.folder'], ['ac', 'b3.ac.t']];
       var cur = NS._mdTab && tabs.some(function (t) { return t[0] === NS._mdTab; }) ? NS._mdTab : 'ov';
       var pane = function (k, html) { return '<section class="md-pane" role="tabpanel" id="md-p-' + k + '" aria-labelledby="md-t-' + k + '" data-md-pane="' + k + '"' + (k === cur ? '' : ' hidden') + '>' + html + '</section>'; };
       body.innerHTML =
@@ -394,7 +395,7 @@
           '<p class="hp-tip" id="md-tip-w" hidden>' + E(T(shared ? 'md.shared' : 'md.local')) + '</p>' +
           '<div class="md-bar">' + B('backup', 'md.save', 1) + restore + hub + '</div>') +
         pane('bk', NS.mdRow(T('md2.file'), (last ? on : warn) + E(T('md.last')) + ' ' + E(lastTxt), T('md.move'), B('backup', 'md.save', 1) + restore)) +
-        (f.supported ? pane('af', afPane) : '') +
+        pane('af', afPane) +
         pane('ac', '') +
         '</div></div>';
       (NS.mdExt || []).forEach(function (f) { try { f(body); } catch (e) {} });   /* extra parts from other files (safe.js) */
@@ -428,7 +429,7 @@
     else if (a === 'folder-allow') NS.folderAllow().then(mdAgain);
     else if (a === 'folder-off') NS.folderOff().then(mdAgain);
     else if (a === 'af-later') { afBar.later = true; afBar(null); }
-    else if (a === 'my-data') { NS._mdTab = 'ov'; NS.openMyData(); }
+    else if (a === 'my-data') { NS._mdTab = t.getAttribute('data-tab') || 'ov'; NS.openMyData(); }
     else if (a === 'remind-later') { var r = NS.$('#ns-remind'); if (r) r.hidden = true; NSStore.meta('lastBackup', Date.now() - 4 * 864e5); }
   });
   function mdAgain() { if (NS.$('#ns-mydata[open]')) NS.openMyData(); }
@@ -479,8 +480,114 @@
   /* the business a new document starts with: the default chosen in Settings, or the only one saved (a first visitor who
      added one business should not have to pick it) */
   NS.defaultBiz = function (cfg) {
-    if (cfg && cfg.defBiz) return NSStore.get('biz', cfg.defBiz).catch(function () {});
-    return NSStore.list('biz').then(function (l) { return l && l.length === 1 ? l[0] : undefined; }, function () {});
+    /* the App's copy of a maker (or a link with ?biz=<id>) starts with the business chosen in the App, not the default */
+    var want = new URLSearchParams(location.search).get('biz') || ((window.NS_CFG || {}).inApp ? NS.curBiz() : '');
+    var pick = want ? NSStore.get('biz', want).catch(function () {}) : Promise.resolve();
+    return pick.then(function (b) {
+      if (b) return b;
+      if (cfg && cfg.defBiz) return NSStore.get('biz', cfg.defBiz).catch(function () {});
+      return NSStore.list('biz').then(function (l) { return l && l.length === 1 ? l[0] : undefined; }, function () {});
+    });
+  };
+  /* the business the App works in, kept PER TAB (sessionStorage; frames of the App share it): switching business in one tab
+     must never move another tab's entries to that business. localStorage only gives a new tab its starting choice. */
+  NS.curBiz = function () {
+    var v = '';
+    try { v = sessionStorage.getItem('ns-app-biz') || ''; } catch (e) {}
+    if (!v) try { v = localStorage.getItem('ns-app-biz') || ''; if (v) sessionStorage.setItem('ns-app-biz', v); } catch (e) {}
+    return v;
+  };
+  NS.setCurBiz = function (id) {
+    try { if (id) { sessionStorage.setItem('ns-app-biz', id); localStorage.setItem('ns-app-biz', id); } else { sessionStorage.removeItem('ns-app-biz'); localStorage.removeItem('ns-app-biz'); } } catch (e) {}
+  };
+  /* a kept draft that points at a saved record which is gone (deleted, or removed with the sample data): null = start fresh */
+  NS.liveDraft = function (dr) {
+    if (!dr || !dr.id) return Promise.resolve(dr);
+    return NSStore.get('doc', dr.id).then(function (r) { return r ? dr : null; }, function () { return dr; });
+  };
+  /* a new document's business must be a saved one: a seller no longer saved (deleted) gives way to the default.
+     Resolves to the business to use instead, or null to keep the seller (nothing saved yet, or the seller is saved). */
+  /* isNew: a new document, which starts with the App's business (inside the App) or ?biz=<id> when there is one */
+  /* ---------- settings per business (owner, 2026-11-06): meta 'settings' keeps the shared values (the fallback, and what a new
+     business starts with) plus byBiz { <business id>: { invoice, <document type>, tf, stockValue, godowns, salesmen, lockBefore, ... } }.
+     Global keys stay shared: the default business, backup reminder, PIN, closed years (kept by business name), feature switches
+     (kept by business id). The first time settings are read with businesses saved, each business gets a copy of the shared values
+     (bizSplit), so nobody loses a number series. Read: NS.cfgFor(S, business id | seller | business) = one merged copy.
+     Write: NS.cfgSave(S, business id, view) puts a view's business keys back under byBiz; NS.cfgEdit(id, fn) reads, edits, saves. ---------- */
+  var CFG_GLOBAL = { defBiz: 1, remindDays: 1, features: 1, byBiz: 1, bizSplit: 1, pin: 1, closed: 1, prefs: 1 };
+  NS.CFG_GLOBAL = CFG_GLOBAL;
+  NS.bizCache = [];
+  function cfgCopy(o) { return o == null ? o : JSON.parse(JSON.stringify(o)); }
+  /* the business id of an id, a business record or a document's seller copy (by id when it is still saved, else by name) */
+  NS.bizIdOf = function (who, list) {
+    if (!who) return '';
+    list = list || NS.bizCache || [];
+    if (typeof who === 'string') return who;
+    if (who.id && list.some(function (b) { return b.id === who.id; })) return who.id;
+    var nm = String(who.name || '').trim().toLowerCase();
+    var b = nm && list.filter(function (x) { return String(x.name || '').trim().toLowerCase() === nm; })[0];
+    return b ? b.id : '';
+  };
+  NS.cfgFor = function (S, who, list) {
+    S = S || {};
+    var id = NS.bizIdOf(who, list), own = id && S.byBiz && S.byBiz[id] || {}, o = cfgCopy(S) || {};
+    Object.keys(own).forEach(function (k) { if (!CFG_GLOBAL[k]) o[k] = cfgCopy(own[k]); });
+    delete o.byBiz; delete o.bizSplit;
+    Object.defineProperty(o, '_biz', { value: id, enumerable: false });
+    return o;
+  };
+  NS.cfgSave = function (S, id, view) {
+    Object.keys(view || {}).forEach(function (k) {
+      if (k === 'byBiz' || k === 'bizSplit' || k.charAt(0) === '_') return;
+      if (CFG_GLOBAL[k] || !id) S[k] = cfgCopy(view[k]);
+      else { S.byBiz = S.byBiz || {}; (S.byBiz[id] = S.byBiz[id] || {})[k] = cfgCopy(view[k]); }
+    });
+    return S;
+  };
+  /* one-time copy of the shared values into every saved business (true when something changed) */
+  NS.cfgSplit = function (S, list) {
+    if (!S || S.bizSplit || !list || !list.length) return false;
+    S.byBiz = S.byBiz || {};
+    list.forEach(function (b) {
+      if (!b || !b.id) return;
+      var own = S.byBiz[b.id] = S.byBiz[b.id] || {};
+      Object.keys(S).forEach(function (k) { if (!CFG_GLOBAL[k] && k.charAt(0) !== '_' && !(k in own)) own[k] = cfgCopy(S[k]); });
+    });
+    S.bizSplit = 1;
+    return true;
+  };
+  /* settings for the pages: reads them with the saved businesses (kept in NS.bizCache), splits once, gives the stored record */
+  NS.loadCfg = function () {
+    return Promise.all([NSStore.meta('settings'), NSStore.list('biz')]).then(function (r) {
+      var S = r[0] || {}; NS.bizCache = r[1] || [];
+      if (NS.cfgSplit(S, NS.bizCache)) return NSStore.meta('settings', S).then(function () { return S; }, function () { return S; });
+      return S;
+    });
+  };
+  NS.cfgEdit = function (who, fn) {
+    return NS.loadCfg().then(function (S) {
+      var id = NS.bizIdOf(who), v = NS.cfgFor(S, id);
+      fn(v);
+      NS.cfgSave(S, id, v);
+      return NSStore.meta('settings', S).then(function () { return S; });
+    });
+  };
+  /* customers, suppliers and items are shared by every business unless My data marks one "only for" a business (record.biz = id) */
+  NS.forBiz = function (list, who) {
+    var id = NS.bizIdOf(who);
+    return (list || []).filter(function (x) { return !x || !x.biz || !id || x.biz === id; });
+  };
+  NS.liveSeller = function (seller, cfg, isNew) {
+    var nm = String(seller && seller.name || '').trim().toLowerCase();
+    function same(b) { return String(b.name || '').trim().toLowerCase() === nm; }
+    return NSStore.list('biz').then(function (l) {
+      if (!l || !l.length) return null;
+      var want = isNew && (new URLSearchParams(location.search).get('biz') || ((window.NS_CFG || {}).inApp ? NS.curBiz() : ''));
+      var w = want && l.filter(function (b) { return b.id === want; })[0];
+      if (w) return same(w) ? null : w;
+      if (nm && l.some(same)) return null;
+      return NS.defaultBiz(cfg).then(function (b) { return b || null; });
+    }, function () { return null; });
   };
 
   /* ---------- party and stock groups (data home meta 'groups' = { party: [{id, name, under}], item: [{id, name, under}] }) ----------
@@ -736,8 +843,8 @@
     var b = NS.el('button', { type: 'button', 'class': 'link series-link', 'data-series': '' }, NS.esc(NS.t('sr.btn')));
     f.appendChild(b);
     b.addEventListener('click', function () {
-      NSStore.meta('settings').then(function (S) {
-        S = S || {};
+      NS.loadCfg().then(function (S0) {
+        var who = val(o.biz), S = NS.cfgFor(S0, who);   /* the series of this document's business */
         var type = val(o.type), kind = val(o.kind) || '', c = S[type] || {}, inv = S.invoice || {};
         var cur = kind ? (c.prefixes || {})[kind] : c.prefix;
         if (type === 'invoice' && cur == null) cur = inv.prefix;
@@ -756,11 +863,9 @@
         p.addEventListener('input', pv); pv();
         form.addEventListener('submit', function (e) {
           e.preventDefault();
-          NSStore.meta('settings').then(function (F) {
-            F = F || {};
-            var x = clean(), c2 = F[type] = F[type] || {};
+          NS.cfgEdit(who, function (V) {
+            var x = clean(), c2 = V[type] = V[type] || {};
             if (kind) { c2.prefixes = c2.prefixes || {}; c2.prefixes[kind] = x; } else c2.prefix = x;
-            return NSStore.meta('settings', F).then(function () { return F; });
           }).then(function (F) {
             serDlg.close(); NS.toast(NS.t('sr.saved'));
             if (o.apply) o.apply(F);

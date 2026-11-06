@@ -1772,7 +1772,80 @@
     "fr.f_gstr": "GST returns (GSTR-1, 3B, 2B)",
     "fr.f_einv": "E-invoice and e-way bill",
     "fr.f_gsttools": "HSN, GSTIN and self invoice",
-    "fr.f_rabill": "RA bills (contractor bills)"
+    "fr.f_rabill": "RA bills (contractor bills)",
+    /* Fixes user test 2026-11-06 */
+    "ux.bizmoved": "The business changed to {b}. Nothing was saved: check the entry and save again.",
+    "ux.frlater": "Later: every feature stays on, and the App asks again the next time you open it.",
+    "ux.o.credit.s": "Sale: customer owes you less (goods returned, discount)",
+    "ux.o.credit.p": "Purchase: you owe the supplier more (price or tax charged short)",
+    "ux.o.debit.s": "Sale: customer owes you more (price or tax charged short)",
+    "ux.o.debit.p": "Purchase: you owe the supplier less (goods sent back, discount)",
+    "ux.n.gotcredit": "Got a credit note from your supplier (discount, goods sent back)? Record it as Debit note › Purchase.",
+    "ux.n.gotdebit": "Got a debit note from your supplier (price or tax charged short)? Record it as Credit note › Purchase.",
+    "ux.n.opendebit": "Open Debit note › Purchase",
+    "ux.n.opencredit": "Open Credit note › Purchase",
+    "ux.p.recv": "Owes you",
+    "ux.p.pay": "You owe",
+    "ux.p.nil": "Settled",
+    "rs.ret_p": "Goods sent back",
+    "ux.af.pc": "Auto-save to a folder works on a computer only (Chrome or Edge). On a phone or tablet, save a backup file now and then and keep it safe.",
+    /* App home: what the app does (legal and page update, 2026-11-06) */
+    "app.ab.8": "Stock and accounts: stock with godowns and batches, manufacturing, party and stock ledgers, trial balance and final accounts (T format or Schedule III).",
+    "app.ab.9": "GST work: GSTR-1 tables and the JSON file for the portal, GSTR-3B working, GSTR-2B matching, and e-invoice and e-way bill files.",
+    "app.ab.10": "Every document opens inside the App. Install it, and a short first-run setup switches on what your kind of business needs.",
+    /* Fixes user test 2026-11-06 (accounts) */
+    "fx.ty_stk": "Production and job work (Stock Journal)",
+    "fx.ty_sj": "Production, job work and godown transfers come as Stock Journal vouchers. In TallyPrime turn on multiple godowns (F11) first.",
+    "fx.g3_cg": "Capital goods {no}: the GST on this fixed asset is in 4(A)(5). Claim it only if GSTR-2B shows it.",
+    "fx.g3_carry": "Credit left after earlier periods (worked from {from}): {v}.",
+    "fx.g3_open1": "From the opening credit balance you typed below.",
+    "fx.g3_none": "No credit from earlier periods. Type an opening balance below if you had one.",
+    "fx.g3_open": "Opening credit balance (electronic credit ledger)",
+    "fx.g3_openh": "Credit in your electronic credit ledger at the start of a month. Later months carry it forward by themselves.",
+    "fx.g3_om": "At the start of",
+    "fx.g3_osave": "Save opening balance",
+    "fx.fm_cut": "Profit is less than the interest and salary due ({x}), so they are cut to {y}.",
+    "fx.fm_deed": "As per the deed, interest and salary are given even in a loss; the bigger loss is shared by the partners.",
+    "fx.fm_mode": "Interest and salary to partners",
+    "fx.fm_mprofit": "Only out of profit (usual)",
+    "fx.fm_mdeed": "As per the deed, even in a loss",
+    "fx.fm_modeh": "By law interest on capital comes only out of profit, unless the deed says otherwise. Pick the second only if your deed allows it.",
+    "tf.capint": "Add: Interest on capital",
+    "tf.capsal": "Add: Salary (remuneration)",
+    "tf.capsh": "Add: Share of profit",
+    "tf.capshl": "Less: Share of loss",
+    "tf.capo": "Other capital and profit of earlier periods",
+    "tf.npa": "To Net profit (to P&L appropriation account)",
+    "tf.nla": "By Net loss (to P&L appropriation account)",
+    "fx.gpnotel": "Gross loss {g} = sales − (opening stock + purchases + direct expenses − closing stock). Direct expenses this period: {d}.",
+    "fx.dep_upto": "Work out up to",
+    "fx.dep_h": "Worked out by days up to this day and dated that day. Post again at the year end for the rest.",
+    "fx.dep_out": "Choose a day inside FY {fy}.",
+    "fx.dep_none": "Depreciation up to {d} is already posted.",
+    "fx.dep_q": "Post depreciation of {a} for FY {fy} up to {d}, dated {d}?",
+    "fx.pybs": "Previous year: as at {b}, the last year end.",
+    "fx.pybsnone": "Previous year (as at {b}): no records, shown as —.",
+    "fx.hs_drop": "Not in the official list, left out of the search: {w}",
+    "fx.fm_dwages": "Add: direct wages",
+    "fx.fm_ovh": "Add: factory overheads",
+    "fx.cmc": "Cost of materials consumed",
+    "fx.chgfg": "Changes in inventories of finished goods, work in progress and stock-in-trade",
+    "fx.osfg": "Opening stock (finished goods, work in progress, stock-in-trade)",
+    "fx.csfg": "Less: closing stock (finished goods, work in progress, stock-in-trade)",
+    "fm.h_capi": "Capital introduced",
+    "fm.h_recvc": "Received from customers",
+    "b2.ac_ocl": "Outstanding expense or provision",
+    "b2.ac_oca": "Prepaid expense or accrued income",
+    "fx.l_opening": "Opening balances (difference to capital)",
+    "fx.cl_notp": "{n} is not a partner saved for this business ({p}). Save anyway?",
+    "fx.fm_loss": "No profit in this period, so no interest or salary to partners ({x} would be due). If your deed allows them even in a loss, change this in the business details.",
+    "pb.setfor": "Settings for",
+    "pb.setforh": "Each business keeps its own number series, new-document defaults, lock date and final accounts choices. The default business and backup reminder are shared.",
+    "pb.usedby": "Used by",
+    "pb.usedbyh": "Leave it for all businesses, or keep it for one business so it is offered only there.",
+    "pb.allbiz": "All businesses",
+    "pb.only": "Only {b}",
+    "fx.as2": "Finished goods made here are valued at full cost (AS 2): factory expenses {oh} spread over production of {m} ({p}%), so {u} is added to the goods in stock."
   };
 
   var packs = { en: EN }, cur = 'en';
@@ -1792,9 +1865,38 @@
   /* NS.t('saved', {doc:'invoice', no:'INV/1'}) ; {Doc} = doc word with a capital (English only) */
   NS.t = function (key, v) {
     var p = packs[cur] || EN, s = p[key] != null ? p[key] : EN[key] != null ? EN[key] : key;
+    if (p[key] == null && part[cur] && EN[key] != null && !part[cur][key]) needFull(cur, key);
     if (v) s = s.replace(/\{(\w+)\}/g, function (m, k) { return v[k] != null ? v[k] : m; });
     return s;
   };
+  /* speed (2026-11-06): a page loads only the words its screens use (/assets/lang/<code>.<group>.js, made by build.py; the packs
+     in engine/lang stay whole). That small pack calls NS.langPart with the keys the full pack has no words for either. Any other
+     key it lacks loads the full pack once and the page redraws, so no screen ever stays half in English. NS.langMiss = such keys. */
+  var part = {}, fullAsked = {};
+  NS.langMiss = [];
+  NS.langPart = function (code, untranslated) {
+    if (fullAsked[code] === 2) return;
+    var u = {};
+    (untranslated || []).forEach(function (k) { u[k] = 1; });
+    part[code] = u;
+  };
+  function needFull(code, key) {
+    NS.langMiss.push(key);
+    if (fullAsked[code]) return;
+    fullAsked[code] = 1;
+    var s = document.createElement('script');
+    s.src = '/assets/lang/' + code + '.js?v=' + (window.NS_CFG && NS_CFG.langv || '1');
+    s.onload = function () {
+      fullAsked[code] = 2;
+      delete part[code];
+      rev = {};
+      if (cur !== code) return;
+      NS.applyLang();
+      document.dispatchEvent(new CustomEvent('ns-lang', { detail: cur }));
+    };
+    s.onerror = function () { fullAsked[code] = 0; };   /* offline and never saved: English for those words, tried again later */
+    document.head.appendChild(s);
+  }
 
   var fontDone = {};
   function font(fam) {
@@ -1806,7 +1908,8 @@
     if (packs[code]) return Promise.resolve();
     return new Promise(function (res) {
       var s = document.createElement('script');
-      s.src = '/assets/lang/' + code + '.js?v=' + (window.NS_CFG && NS_CFG.langv || '1');
+      var g = window.NS_CFG && NS_CFG.lpack;   /* this page's own small pack (see NS.langPart) */
+      s.src = '/assets/lang/' + code + (g ? '.' + g + '.js' : '.js?v=' + (window.NS_CFG && NS_CFG.langv || '1'));
       s.onload = s.onerror = function () { res(); };
       document.head.appendChild(s);
     });

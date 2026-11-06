@@ -332,6 +332,7 @@ html.pin-wait #my-app,html.pin-wait #app,html.pin-wait .hero{visibility:hidden}
 .tell .wrap{display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:8px 14px;padding-top:10px;padding-bottom:10px;font-size:.92rem;color:var(--soft);text-align:center}
 .tell .btn{min-height:36px}
 html.embed .tell{display:none}
+html.embed,html.embed body{overscroll-behavior-y:contain}   /* the end of the document never scrolls the App page behind it */
 .ct-form{display:grid;gap:12px;max-width:640px}
 .ct-f{display:grid;gap:4px}.ct-f label{font-weight:600;font-size:.92rem}
 .ct-form textarea{min-height:120px;resize:vertical}

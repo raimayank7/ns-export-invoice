@@ -94,8 +94,19 @@
     if (e.data.af) document.dispatchEvent(new CustomEvent('ns-autosave', { detail: e.data.af }));
   });
 
+  /* ---------- the App's own copy of a maker (/do/<site>/, NS_CFG.inApp) uses the App's open data home ---------- */
+  /* (speed, 2026-11-06) the App page around it (same origin) already holds the data home frame: every call goes through the App's
+     NSStore, so a document opens without loading my.niveshsahayak.in a second time, and the records are the very same. Opened
+     on its own (no App around it), the page works as everywhere else. */
+  var host = null;
+  try { if (cfg.inApp && window.parent !== window && window.parent.NSStore && window.parent.NSStore._call) host = window.parent.NSStore; } catch (e) { host = null; }
+  if (host) {   /* the App switched to the data home late (slow first load): this page redraws too */
+    try { window.parent.document.addEventListener('ns-data', function () { document.dispatchEvent(new CustomEvent('ns-data')); }); } catch (e) {}
+  }
+
   /* ---------- the shared data home ---------- */
   function send(op, args) {
+    if (host) return host._send(op, args);
     return new Promise(function (res, rej) {
       var id = ++seq;
       waiting[id] = { res: res, rej: rej, t: setTimeout(function () { delete waiting[id]; rej(new Error('The data home did not answer')); }, 15000) };
@@ -103,6 +114,7 @@
     });
   }
   function call(op, args) {
+    if (host) return host._call(op, args);
     return ready().then(function () { return mode === 'local' ? LOCAL[op](args || {}) : send(op, args); });
   }
   window.addEventListener('message', function (e) {
@@ -115,6 +127,7 @@
 
   function ready() {
     if (readyP) return readyP;
+    if (host) return (readyP = host.ready().then(function (m) { mode = m; return m; }));
     readyP = new Promise(function (res) {
       var done = false;
       function finish(m) { if (done) return; done = true; mode = m; res(m); }
@@ -197,14 +210,21 @@
 
   /* ---------- period lock ---------- */
   var LOCK_FREE = { status: 1, paidBy: 1, invNo: 1, nextNo: 1, nextType: 1, chq: 1, rec: 1 };   /* payment status (and stopping a repeat) may still change on a locked document */
-  function lockDate() { return call('get', { store: 'meta', id: 'settings' }).then(function (r) { return r && r.v && r.v.lockBefore || ''; }, function () { return ''; }); }
+  /* the lock date of the document's business (settings per business, core.js NS.cfgFor), else the shared one */
+  function lockDate(d) {
+    return call('get', { store: 'meta', id: 'settings' }).then(function (r) {
+      var S = r && r.v || {};
+      if (!S.byBiz || !NS.cfgFor || !d || !d.seller) return S.lockBefore || '';
+      return call('list', { store: 'biz' }).then(function (l) { return NS.cfgFor(S, d.seller, l || []).lockBefore || ''; }, function () { return S.lockBefore || ''; });
+    }, function () { return ''; });
+  }
   function lockErr(d) {
     var e = new Error(NS.t ? NS.t('b1.locked', { d: NS.fmtDate ? NS.fmtDate(d) : d }) : 'Locked: documents dated before ' + d + ' cannot be changed');
     e.locked = true; return e;
   }
   function checkLock(store, old, obj) {
     if (store !== 'doc') return Promise.resolve();
-    return lockDate().then(function (lk) {
+    return lockDate(obj || old).then(function (lk) {
       if (!lk) return;
       var oldIn = old && old.date && old.date < lk, newIn = obj && obj.date && obj.date < lk;
       if (!oldIn && !newIn) return;
@@ -268,7 +288,8 @@
 
   window.NSStore = {
     ready: function () { return ready().then(function (m) { if (!purged) { purged = true; purgeBin(); } return m; }); },
-    mode: function () { return mode; },
+    mode: function () { return host ? host.mode() : mode; },
+    _call: call, _send: send,   /* for the App's own copies of the makers (see host above) */
     list: function (store) { return call('list', { store: store }).then(function (r) { return r || []; }, function (e) { if (store === 'bin' || store === 'log') return []; throw e; }); },
     get: function (store, id) { return call('get', { store: store, id: id }); },
     put: put,

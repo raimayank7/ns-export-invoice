@@ -101,10 +101,11 @@
   /* settings made in the Configuration Hub (my.niveshsahayak.in), shared through the data home */
   var CFG = {}, lastAuto = '', redraw = null;
   function dset() {
-    if (type === 'invoice') return CFG.invoice || {};
+    var C = NS.cfgFor(CFG, doc && doc.seller);   /* the settings of this document's business */
+    if (type === 'invoice') return C.invoice || {};
     /* the invoice defaults (GST rate, unit, colour, round off) also serve the other documents */
-    var inv = CFG.invoice || {}, base = { gst: inv.gst, unit: inv.unit, round: inv.round, accent: inv.accent, digits: inv.digits, fy: inv.fy };
-    return Object.assign(base, CFG[type] || {});
+    var inv = C.invoice || {}, base = { gst: inv.gst, unit: inv.unit, round: inv.round, accent: inv.accent, digits: inv.digits, fy: inv.fy };
+    return Object.assign(base, C[type] || {});
   }
   function taxOn(d) { return T.alwaysTax || (T.gstFlag ? d.withGst !== false : d.kind === 'tax'); }
   function W() {
@@ -123,13 +124,13 @@
   /* statuses: a note that lowers the balance is refunded (sale) or its amount received back (purchase); one that raises it is received (sale) or paid (purchase) */
   function stList() { if (type !== 'note') return T.status; var k = less() ? (pur() ? 'nrecv' : 'nref') : (pur() ? 'npaid' : 'nrecv'); return T.status.map(function (x) { return x === 'nref' ? k : x; }); }
   /* reasons whose words depend on the direction: price reduced / increased, tax charged in excess / short; discount after purchase */
-  function rsKey(k) { if (type === 'note' && (k === 'price' || k === 'tax')) return 'rs.' + k + '_' + (less() ? 'c' : 'd'); return k === 'disc' && pur() ? 'rs.disc_p' : 'rs.' + k; }
+  function rsKey(k) { if (type === 'note' && (k === 'price' || k === 'tax')) return 'rs.' + k + '_' + (less() ? 'c' : 'd'); return k === 'disc' && pur() ? 'rs.disc_p' : k === 'ret' && pur() ? 'rs.ret_p' : 'rs.' + k; }
   function tw(k, v) { return t(k, Object.assign(W(), v || {})); }
 
   function blank() {
     var c = dset();
     return {
-      type: type, kind: T.kind0 || (T.kinds.indexOf(c.kind) >= 0 ? c.kind : T.kinds[0]), no: '', deliv: '', orig: { no: '', date: '' }, reason: T.kind0 === 'debit' ? 'price' : 'ret', side: type === 'note' ? 'sale' : undefined, tr: { veh: '', tname: '', lr: '' },
+      type: type, kind: T.kind0 || (T.kinds.indexOf(c.kind) >= 0 ? c.kind : T.kinds[0]), no: '', deliv: '', orig: { no: '', date: '' }, reason: T.kind0 === 'debit' ? 'price' : 'ret', side: type === 'note' ? (/[?&]side=purchase/.test(location.search) ? 'purchase' : 'sale') : undefined, tr: { veh: '', tname: '', lr: '' },
       paper: c.paper || T.paper || 'a4', design: c.design || 'classic', copies: 1, date: NS.today(), due: '', pos: '', rc: !!T.rcFixed, recv: '', ref: '',
       seller: { name: '', addr: '', city: '', pin: '', state: '', gstin: '', phone: '', email: '', logo: '', sign: '', bankName: '', bankAcc: '', bankIfsc: '', bankBranch: '', upi: '' },
       buyer: { name: '', addr: '', city: '', pin: '', state: '', gstin: '', phone: '' }, ship: null, einv: null, irn: null,
@@ -228,7 +229,7 @@
 
       '<fieldset class="card"><legend>' + esc(tw('lg.details')) + '</legend><div class="fg">' +
         '<div class="f wide"' + (T.kinds.length < 2 ? ' hidden' : '') + '><label for="d-kind">' + esc(t(T.purpose ? 'l.purpose' : 'l.type')) + '</label><select id="d-kind">' + T.kinds.map(function (k) { return '<option value="' + k + '">' + esc(t('k.' + k)) + '</option>'; }).join('') + '</select><small class="hint" id="kind-hint"></small></div>' +
-        (type === 'note' ? '<div class="f wide"><label for="d-side">' + esc(t('ns.l.side')) + '</label><select id="d-side"><option value="sale">' + esc(t('ns.o.sale')) + '</option><option value="purchase">' + esc(t('ns.o.purchase')) + '</option></select><small class="hint" id="side-hint"></small></div>' : '') +
+        (type === 'note' ? '<div class="f wide"><label for="d-side">' + esc(t('ns.l.side')) + '</label><select id="d-side"><option value="sale">' + esc(t('ux.o.' + (doc.kind === 'debit' ? 'debit' : 'credit') + '.s')) + '</option><option value="purchase">' + esc(t('ux.o.' + (doc.kind === 'debit' ? 'debit' : 'credit') + '.p')) + '</option></select><small class="hint" id="side-hint"></small><small class="hint side-other" id="side-other"></small></div>' : '') +
         (T.gstFlag ? '<div class="f wide"><label class="chk"><input id="d-gst" type="checkbox"> ' + esc(t('l.withgst')) + '</label><small class="hint">' + esc(t('h.withgst')) + '</small></div>' : '') +
         '<div class="f wide" id="comp-box" hidden><label class="chk"><input id="d-comp" type="checkbox"> ' + esc(t('comp')) + '</label></div>' +
         field('d-no', tw('l.no'), { max: 16, hint: type === 'quote' ? t('h.qno') : type === 'invoice' ? t('h.no') : T.prefixes ? t('h.no3') : t('h.no2'), ltr: 1 }) +
@@ -305,7 +306,7 @@
       regKind();
       fillForm(); suggestNumber(true); draw(); saveDraft();
     });
-    NS.suggest($('#b-name', ed), function () { return NSStore.list('party'); }, function (x) { return x.name; }, function (p) {
+    NS.suggest($('#b-name', ed), function () { return NSStore.list('party').then(function (l) { return NS.forBiz(l, doc.seller); }); }, function (x) { return x.name; }, function (p) {
       doc.buyer = { name: p.name, addr: p.addr || '', city: p.city || '', pin: p.pin || '', state: p.state || '', gstin: p.gstin || '', phone: p.phone || '', legal: p.gst && p.gst.legal || '' };
       if (p.ship && p.ship.addr) doc.ship = { name: p.ship.name || p.name, addr: p.ship.addr, city: p.ship.city || '', pin: p.ship.pin || '', state: p.ship.state || p.state || '' };
       buyerType = p.ptype || '';
@@ -367,7 +368,7 @@
     $$('[data-del]', box).forEach(function (b) { b.addEventListener('click', function () { doc.items.splice(+b.getAttribute('data-del'), 1); renderItems(); draw(); saveDraft(); }); });
     $$('.it-desc', box).forEach(function (inp) {
       var i = +inp.closest('.it').getAttribute('data-i');
-      NS.suggest(inp, function () { return NSStore.list('item'); }, function (x) { return x.desc; }, function (m) {
+      NS.suggest(inp, function () { return NSStore.list('item').then(function (l) { return NS.forBiz(l, doc.seller); }); }, function (x) { return x.desc; }, function (m) {
         var it = doc.items[i];
         it.desc = m.desc; it.hsn = m.hsn || ''; it.unit = m.unit || it.unit; var rt = rateFor(m); if (rt != null && rt !== '') it.rate = rt; if (m.gst != null && m.gst !== '') it.gst = m.gst;
         renderItems(); draw(); saveDraft();
@@ -409,6 +410,14 @@
     $('[data-clear="logo"]', ed).hidden = !doc.seller.logo; $('[data-clear="sign"]', ed).hidden = !doc.seller.sign;
     $('#kind-hint', ed).textContent = T.kinds.length > 1 ? t('kh.' + doc.kind) : '';
     if ($('#side-hint', ed)) $('#side-hint', ed).textContent = t('ns.h.' + doc.kind + (pur() ? '.p' : '.s'));
+    /* a supplier's own note is recorded as the OTHER kind on the Purchase side (their credit note = your debit note › Purchase):
+       credit-note. always points there (a shopkeeper looks here first), debit-note. on its Purchase side */
+    var so = $('#side-other', ed);
+    if (so) {
+      var other = doc.kind === 'debit' ? 'credit' : 'debit', show = doc.kind !== 'debit' || pur(), site = other + '-note';
+      so.hidden = !show;
+      if (show) so.innerHTML = esc(t('ux.n.got' + doc.kind)) + ' <a href="' + esc((NS.siteHref ? NS.siteHref(site) : kindSite(site)) + '?side=purchase&new=1') + '">' + esc(t('ux.n.open' + other)) + '</a>';
+    }
     $$('.it-gst', ed).forEach(function (f) { f.hidden = !taxOn(doc); });
     $('#comp-box', ed).hidden = doc.kind !== 'supply';
     if ($('#rec-until-f', ed)) $('#rec-until-f', ed).hidden = !(doc.rec && doc.rec.every);
@@ -821,8 +830,11 @@
     var seller = doc.seller;
     doc = blank(); editingId = null;
     doc.seller = seller;
-    fillForm(); suggestNumber(true); draw(); saveDraft(); setStatus();
+    fillForm(); draw(); saveDraft(); setStatus();
+    /* the seller of the last document may have been deleted since: a new document takes a saved business */
+    NS.liveSeller(seller, CFG, true).then(function (b) { if (b) { setSeller(b); fillForm(); draw(); } return suggestNumber(true); }).then(saveDraft, function () {});
   }
+  function setSeller(b) { doc.seller = Object.assign(blank().seller, b); delete doc.seller.id; delete doc.seller.created; delete doc.seller.updated; regKind(); }
   /* the address of a sibling document site (a split type's other kind) */
   function kindSite(site) {
     var x = ((window.NS_CFG && NS_CFG.tools) || []).filter(function (x) { return x[0] === site; })[0];
@@ -933,6 +945,8 @@
       inv.round = qd.round !== false; inv.accent = qd.accent || inv.accent;
       if (type === 'invoice') inv.kind = !inv.seller.gstin ? 'plain' : qd.withGst === false && !src.gstOff ? 'supply' : 'tax';
       else if (T.gstFlag) inv.withGst = qd.withGst !== false;
+      /* goods going out against a quotation or sales order are a sale (invoice to follow), never job work (ITC-04 rules) */
+      if (type === 'challan') inv.kind = 'sale';
       inv.ref = (NAMES[src.title || qd.kind] ? NAMES[src.title || qd.kind] + ' ' : '') + qd.no;
       inv.fromId = q.id;
       doc = inv; editingId = null;
@@ -980,7 +994,7 @@
     function render() { buildEditor(); fillForm(); draw(); setStatus(); labelButtons(); if (histOpen) renderHistory(); series(); }
     redraw = render;
     /* "Change number series" under the number box: the prefix of this document (each kind for quotation and note) */
-    function series() { NS.seriesLink($('#d-no', root), { type: type, kind: function () { return T.prefixes ? sk(doc) : ''; }, def: function () { return T.prefixes ? T.prefixes[sk(doc)] : T.prefix; },
+    function series() { NS.seriesLink($('#d-no', root), { type: type, biz: function () { return doc.seller; }, kind: function () { return T.prefixes ? sk(doc) : ''; }, def: function () { return T.prefixes ? T.prefixes[sk(doc)] : T.prefix; },
       name: function () { return T.prefixes ? t('k.' + sk(doc)) : t('Doc.' + type); }, apply: function (c) { CFG = c || {}; if (!editingId) suggestNumber(true); } }); }
     render();
     document.addEventListener('ns-lang', render);
@@ -996,7 +1010,7 @@
            saved defaults arrive later and never overwrite what the visitor has started typing */
     if (!/[?&](open|from)=/.test(location.search)) root.classList.add('live');
     NSStore.ready().then(function () {
-      return NSStore.meta('settings').then(function (c) { CFG = c || {}; }, function () {});
+      return NS.loadCfg().then(function (c) { CFG = c || {}; }, function () {});
     }).then(function () {
       var qs = new URLSearchParams(location.search), from = qs.get('from'), open = qs.get('open');
       if (NS.leaving) return;   /* this page is moving to the visitor's language page, which reads ?from= itself */
@@ -1009,24 +1023,28 @@
         history.replaceState(null, '', location.pathname + location.hash);
         return fromQuote(from).then(function (ok) { if (ok) { render(); saveDraft(); return suggestNumber(true); } });
       }
-      /* an unfinished draft keeps everything, but still gets the next number when its number box is empty or still automatic */
-      /* a draft with no buyer and no items is not real work: start fresh (today's date, default business, hub defaults) */
-      if (dr && !typed && !String(doc.buyer.name || '').trim() && !totals(doc).rows.length) dr = null;
-      if (dr || typed) {
-        /* a kept draft without a business still gets the default business */
-        if (doc.seller.name) return suggestNumber(false);
-        return NS.defaultBiz(CFG).then(function (b) {
-          if (b && !doc.seller.name) { doc.seller = Object.assign(blank().seller, b); delete doc.seller.id; delete doc.seller.created; delete doc.seller.updated; regKind(); render(); }
-          return suggestNumber(false);
+      /* a draft of a saved record that no longer exists (deleted elsewhere) is not "Editing saved ...": start fresh */
+      return NS.liveDraft(dr).then(function (live) {
+        if (dr && !live && !typed) { dr = null; editingId = null; doc = blank(); render(); }
+        /* the App's "New ..." (?new=1) starts with the App's business: a draft left under another business starts fresh */
+        var appNew = !typed && /[?&]new=1/.test(location.search) && NS.inApp;
+        /* an unfinished draft keeps everything, but still gets the next number when its number box is empty or still automatic */
+        /* a draft with no buyer and no items is not real work: start fresh (today's date, default business, hub defaults) */
+        if (dr && !typed && !String(doc.buyer.name || '').trim() && !totals(doc).rows.length) dr = null;
+        return NS.liveSeller(doc.seller, CFG, !dr || appNew).then(function (b) {
+          if (dr && appNew && b && doc.seller.name) { dr = null; doc = blank(); }
+          if (dr || typed) {
+            /* a kept draft without a business (or with one no longer saved) gets the default business */
+            if (b && !doc.seller.name) { setSeller(b); render(); }
+            return suggestNumber(false);
+          }
+          /* a fresh start: the hub's defaults and the default business */
+          var seller = doc.seller;
+          doc = blank(); doc.seller = seller;
+          if (b) setSeller(b);
+          render();
+          return suggestNumber(true);
         });
-      }
-      /* a fresh start: the hub's defaults and the default business */
-      var seller = doc.seller;
-      doc = blank(); doc.seller = seller;
-      return NS.defaultBiz(CFG).then(function (b) {
-        if (b && !doc.seller.name) { doc.seller = Object.assign(blank().seller, b); delete doc.seller.id; delete doc.seller.created; delete doc.seller.updated; regKind(); }
-        render();
-        return suggestNumber(true);
       });
     }).then(function () {
       NS.checkReminder();

@@ -21,7 +21,8 @@
   function load() {
     return Promise.all([NSStore.meta('settings'), NSStore.list('item'), NSStore.list('doc')]).then(function (r) {
       CFG = r[0] || {}; ITEMS = r[1] || [];
-      var o = {}; (CFG.salesmen || []).forEach(function (s) { if (s && s.name) o[key(s.name)] = s.name; });
+      var o = {}, lists = [CFG.salesmen || []].concat(Object.keys(CFG.byBiz || {}).map(function (k) { return CFG.byBiz[k].salesmen || []; }));   /* salesmen of every business (suggestions only) */
+      lists.forEach(function (l) { l.forEach(function (s) { if (s && s.name) o[key(s.name)] = s.name; }); });
       (r[2] || []).forEach(function (d) { if (d.sman) o[key(d.sman)] = o[key(d.sman)] || d.sman; });
       SMEN = Object.keys(o).map(function (k) { return o[k]; }).sort();
       if (box && api) { draw(); if (api.type) api.changed(); }

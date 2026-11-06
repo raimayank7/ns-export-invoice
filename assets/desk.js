@@ -139,7 +139,7 @@
     if (A() && A().biz) { var b = A().biz(); return Promise.resolve(b ? b.name : ''); }
     if (!window.NSStore) return Promise.resolve('');
     return Promise.all([NSStore.list('biz'), NSStore.meta('settings')]).then(function (r) {
-      var cfg = r[1] || {}, want = LS.get('ns-app-biz') || cfg.defBiz;
+      var cfg = r[1] || {}, want = NS.curBiz() || cfg.defBiz;
       var b = r[0].filter(function (x) { return x.id === want; })[0] || r[0][0]; return b ? b.name : '';
     }).catch(function () { return ''; });
   }
