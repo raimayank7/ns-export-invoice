@@ -23,6 +23,10 @@
      receipt / voucher disc      cash discount at settlement (WP-3): receipt Dr discount allowed, voucher (app-made) Cr discount received; settles that much more
      wo                          write-off of a bill's balance (WP-3): side recv (reason bad -> bad debts, small / disc -> discount allowed) or
                                  side pay (disc -> discount received, small -> balances written back); alloc [{ id, no, amt }] = the bill
+     receipt adv + gstAdv        advance for services with GST inside (s.13 CGST Act: tax due when it is received): Dr 'gst-adv'
+                                 (GST paid on advances), Cr output GST; the customer still holds the whole amount as an advance
+     advadj (made here)          not stored: when a later bill or a refund uses a GST advance, inBooks() adds an 'advadj' record
+                                 (Dr output GST, Cr 'gst-adv' for the tax inside the part used), so the tax is not paid twice; see advAdjust()
      pdd                         provision for doubtful debts (WP-3): change = new figure - provision before; Dr / Cr exp:provision for doubtful debts
      fa kind 'buy' / 'sale'      fixed asset bought (Dr fa:<asset>, GST credit if itc) / sold (Cr the book value bv saved on the record,
                                  the difference is profit or loss on sale); mode 'credit' = the party (buyer field) is owed / owes
@@ -134,6 +138,7 @@
       case 'gstset': return 'gstset';   /* GSTR-3B set-off of a tax period (WP-4) */
       case 'wo': return 'wo';   /* balance of a bill written off (WP-3) */
       case 'pdd': return 'pdd';   /* provision for doubtful debts (WP-3) */
+      case 'advadj': return 'advadj';   /* GST of an advance used by a bill or refunded (made by advAdjust, never stored) */
     }
     return '';
   }
@@ -157,6 +162,10 @@
     } else if (R === 'in') {
       amt = num(d.amount); var tds = num(d.tds), dsc = num(d.disc);   /* disc: cash discount allowed when the customer paid (WP-3) */
       dr(payAcct(d), amt); dr('tds-receivable', tds); dr(DISC_A, dsc); cr(P, amt + tds + dsc);
+      var at = advTax(d);   /* advance for services with GST inside: the tax is due now (output GST), held in 'gst-adv' until a bill uses it */
+      if (at) { dr(GADV, at.tax); cr('gst-out-cgst', at.cgst); cr(at.ut ? 'gst-out-utgst' : 'gst-out-sgst', at.sgst); cr('gst-out-igst', at.igst); }
+    } else if (R === 'advadj') {   /* the tax of the part of an advance a bill (or a refund) used: no longer due a second time */
+      dr('gst-out-cgst', d.cgst); dr(d.ut ? 'gst-out-utgst' : 'gst-out-sgst', d.sgst); dr('gst-out-igst', d.igst); cr(GADV, r2(num(d.cgst) + num(d.sgst) + num(d.igst)));
     } else if (R === 'oinc') {   /* other income: money in + TDS the payer cut = the income */
       amt = num(d.amount); var tdsI = num(d.tds);
       dr(payAcct(d), amt); dr('tds-receivable', tdsI); cr('inc:' + key(d.head || 'Miscellaneous income'), amt + tdsI);
@@ -224,6 +233,56 @@
     return L;
   }
 
+  /* ---------- GST on advances received for services (round C, C-16) ---------- */
+  /* Rules: services: time of supply = date the advance is received (CGST Act s.13(2)), so its GST goes in GSTR-3B 3.1(a) and GSTR-1 table 11A
+     of that month; when the invoice is issued (or the advance is refunded) the tax already paid is adjusted (GSTR-1 table 11B, 3.1(a) less).
+     Goods: no GST on advances since Notification 66/2017-CT (15 Nov 2017), so only receipts ticked 'GST is included' (services) count. */
+  var GADV = 'gst-adv';
+  /* tax inside an advance receipt (same split as the printed receipt voucher in slip.js), or null */
+  function advTax(d) {
+    if (!d || d.type !== 'receipt' || d.kind !== 'adv' || !d.gstAdv || bounced(d)) return null;
+    var rt = num(d.rate), tot = r2(num(d.amount));
+    if (!rt || !tot) return null;
+    var st = d.seller && d.seller.state, pos = d.pos || st, intra = !d.pos || !st || d.pos === st, tax = r2(tot * rt / (100 + rt));
+    var o = { rate: rt, total: tot, tax: tax, taxable: r2(tot - tax), pos: pos, intra: intra, cgst: 0, sgst: 0, igst: 0 };
+    if (intra) { o.cgst = r2(tax / 2); o.sgst = r2(tax - o.cgst); } else o.igst = tax;
+    o.ut = !!(intra && UT[st || pos]);
+    return o;
+  }
+  /* every use of a GST advance: which bill (or refund) took how much of it, dated the later of the two.
+     Uses the same bill-wise matching as the dues (bills()), so the books, the dues and the returns always agree.
+     [{ type: 'advadj', id, date, rv, rvId, rvDate, bill, billId, billType, refund, pname, pos, rate, gross, taxable, cgst, sgst, igst, ut, seller }] */
+  var ADJC = { docs: null, biz: null, out: null };
+  function advAdjust(docs, biz) {
+    if (ADJC.docs === docs && ADJC.biz === biz) return ADJC.out;
+    var rc = {}, any = false, out = [];
+    inBooks0(docs, biz).forEach(function (d) { var a = advTax(d); if (a && a.tax) { rc[d.id] = { d: d, a: a, used: 0, tx: { cgst: 0, sgst: 0, igst: 0 } }; any = true; } });
+    if (any) {
+      var uses = {}, list = [];
+      bills(docs, biz).every.forEach(function (b) {
+        (b.by || []).forEach(function (x) {
+          var c = rc[x.id]; if (!c || !(num(x.amt) > 0)) return;
+          var k = x.id + '>' + b.id, u = uses[k];
+          if (!u) { u = uses[k] = { c: c, b: b, amt: 0, date: (b.date || '') > (c.d.date || '') ? b.date : c.d.date }; list.push(u); }
+          u.amt = r2(u.amt + num(x.amt));
+        });
+      });
+      list.sort(function (x, y) { return (x.date || '').localeCompare(y.date || '') || String(x.b.id).localeCompare(String(y.b.id)); });
+      list.forEach(function (u) {
+        var c = u.c, a = c.a, amt = Math.min(u.amt, r2(a.total - c.used)); if (!(amt > 0)) return;
+        c.used = r2(c.used + amt);
+        var last = c.used >= a.total - 0.004;
+        var part = function (h) { var v = last ? r2(a[h] - c.tx[h]) : r2(a[h] * amt / a.total); c.tx[h] = r2(c.tx[h] + v); return v; };
+        var cg = part('cgst'), sg = part('sgst'), ig = part('igst'), tax = r2(cg + sg + ig), refund = u.b.type === 'receipt';
+        out.push({ type: 'advadj', id: 'advadj:' + c.d.id + '>' + u.b.id, date: u.date, no: '', rv: c.d.no || '', rvId: c.d.id, rvDate: c.d.date, bill: u.b.no || '', billId: u.b.id, billType: u.b.type,
+          refund: refund, pname: partyName(c.d), pos: a.pos, rate: a.rate, gross: amt, taxable: r2(amt - tax), cgst: cg, sgst: sg, igst: ig, ut: a.ut, seller: c.d.seller, created: 0,
+          narr: 'GST on advance ' + (c.d.no || '') + ' adjusted ' + (refund ? 'on refund ' : 'against bill ') + (u.b.no || '') });
+      });
+    }
+    ADJC = { docs: docs, biz: biz, out: out };
+    return out;
+  }
+
   /* ---------- discounts, write-offs, provision for doubtful debts (Accounts coverage WP-3) ---------- */
   var DISC_A = 'exp:discount allowed', DISC_R = 'inc:discount received', BADD = 'exp:bad debts', WBACK = 'inc:balances written back', PDDX = 'exp:provision for doubtful debts';
   /* the provision for doubtful debts on a day (the 'pdd' account balance, a credit), leaving out one record (the one being changed) */
@@ -278,12 +337,17 @@
   }
 
   /* the business's records in date order (same date: sales and bills before money, so a same-day payment settles them) */
-  var ORDER = { ob: 0, sale: 1, sdeb: 1, buy: 1, exp: 1, fabuy: 1, sret: 2, pret: 2, 'in': 3, out: 3, outexp: 3, refund: 3, fasale: 3, oinc: 3, taxpay: 3, wo: 4, contra: 4, jv: 5, gstset: 6, pdd: 7 };
-  function inBooks(docs, biz) {
+  var ORDER = { ob: 0, sale: 1, sdeb: 1, buy: 1, exp: 1, fabuy: 1, sret: 2, pret: 2, 'in': 3, out: 3, outexp: 3, refund: 3, fasale: 3, oinc: 3, taxpay: 3, advadj: 4, wo: 4, contra: 4, jv: 5, gstset: 6, pdd: 7 };
+  function byOrder(x, y) { return (x.date || '').localeCompare(y.date || '') || ORDER[role(x)] - ORDER[role(y)] || (x.created || 0) - (y.created || 0); }
+  /* the stored records only ('advadj' records are made by advAdjust, never read back from the documents) */
+  function inBooks0(docs, biz) {
     var b = key(biz);
-    return docs.filter(function (d) { return role(d) && (!b || bizOf(d) === b); }).sort(function (x, y) {
-      return (x.date || '').localeCompare(y.date || '') || ORDER[role(x)] - ORDER[role(y)] || (x.created || 0) - (y.created || 0);
-    });
+    return (docs || []).filter(function (d) { return d && d.type !== 'advadj' && role(d) && (!b || bizOf(d) === b); }).sort(byOrder);
+  }
+  /* the records in the books: stored ones plus the GST adjustments of advances used (round C) */
+  function inBooks(docs, biz) {
+    var L = inBooks0(docs, biz), A = advAdjust(docs, biz);
+    return A.length ? L.concat(A).sort(byOrder) : L;
   }
 
   /* party balances: { key: { name, recv, bal, docs } }; bal > 0 = they owe us, < 0 = we owe them */
@@ -317,7 +381,7 @@
      Receivable bills: sales, debit notes, opening 'recv'. Payable bills: purchase bills, self invoices, expenses on credit, opening 'pay'.
      Money and returns go first to the bills they name (alloc / orig no.), then to the oldest bill on the same side. */
   function bills(docs, biz, partyKey) {
-    var list = inBooks(docs, biz).filter(function (d) { return !partyKey || partiesOf(d)[partyKey]; });
+    var list = inBooks0(docs, biz).filter(function (d) { return !partyKey || partiesOf(d)[partyKey]; });
     var open = {}, byId = {}, credits = [];
     function pk(d) { return key(partyName(d)); }
     function bill(d, side, amt) {
@@ -440,7 +504,7 @@
   function vtype(d) {
     var R = role(d);
     return ({ sale: 'sales', fasale: 'sales', sret: 'notes', sdeb: 'notes', 'in': 'receipts', refund: 'payments', out: 'payments', outexp: 'payments',
-      buy: 'purchases', pret: 'purchases', exp: 'purchases', fabuy: 'purchases', jv: 'journal', ob: 'opening', contra: 'journal', oinc: 'receipts', taxpay: 'payments', gstset: 'journal', wo: 'journal', pdd: 'journal' })[R] || 'other';
+      buy: 'purchases', pret: 'purchases', exp: 'purchases', fabuy: 'purchases', jv: 'journal', ob: 'opening', contra: 'journal', oinc: 'receipts', taxpay: 'payments', gstset: 'journal', wo: 'journal', pdd: 'journal', advadj: 'journal' })[R] || 'other';
   }
   /* ledger of one party between two dates: the statement with a voucher type on every row.
      types (optional): only these voucher types are listed; opening, closing and each row's balance stay the true ones,
@@ -552,7 +616,7 @@
   }
 
   var API = { num: num, r2: r2, key: key, role: role, itemTotals: itemTotals, postings: postings, inBooks: inBooks, parties: parties, accounts: accounts,
-    taxPay: taxPay, gstSet: gstSet, provision: provision, bills: bills, ageing: ageing, overdue: overdue, chargeLines: chargeLines, tcsRate: tcsRate, tcsPan: tcsPan, panOk: panOk, addDays: addDays, mainRate: mainRate, statement: statement, book: book, daysBetween: daysBetween, moneyAcct: moneyAcct, payAcct: payAcct, bounced: bounced, partyName: partyName, partiesOf: partiesOf, jvAcct: jvAcct,
+    taxPay: taxPay, gstSet: gstSet, provision: provision, advTax: advTax, advAdjust: advAdjust, inBooks0: inBooks0, GADV: GADV, bills: bills, ageing: ageing, overdue: overdue, chargeLines: chargeLines, tcsRate: tcsRate, tcsPan: tcsPan, panOk: panOk, addDays: addDays, mainRate: mainRate, statement: statement, book: book, daysBetween: daysBetween, moneyAcct: moneyAcct, payAcct: payAcct, bounced: bounced, partyName: partyName, partiesOf: partiesOf, jvAcct: jvAcct,
     vtype: vtype, ledger: ledger, billwise: billwise, groupsOf: groupsOf, groupChain: groupChain, partyGroup: partyGroup, inGroup: inGroup, groupTree: groupTree,
     partyMoves: partyMoves, groupSummary: groupSummary, groupDues: groupDues, topParties: topParties, BUILTIN: BUILTIN };
   if (typeof module !== 'undefined' && module.exports) module.exports = API; else G.NSBooks = API;

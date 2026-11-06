@@ -15,7 +15,7 @@
   'use strict';
   var $ = NS.$, $$ = NS.$$, esc = NS.esc, num = NS.num, r2 = NS.r2, t = NS.t, B = window.NSBooks;
   var LED = [['sales', 'Sales'], ['purchases', 'Purchase'], ['gst-out-cgst', 'Output CGST'], ['gst-out-sgst', 'Output SGST'], ['gst-out-utgst', 'Output UTGST'], ['gst-out-igst', 'Output IGST'],
-    ['gst-in-cgst', 'Input CGST'], ['gst-in-sgst', 'Input SGST'], ['gst-in-igst', 'Input IGST'], ['gst-rcm-payable', 'GST Payable on Reverse Charge'], ['round-off', 'Round Off'],
+    ['gst-in-cgst', 'Input CGST'], ['gst-in-sgst', 'Input SGST'], ['gst-in-igst', 'Input IGST'], ['gst-rcm-payable', 'GST Payable on Reverse Charge'], ['gst-adv', 'GST Paid on Advances'], ['round-off', 'Round Off'],
     ['cash', 'Cash'], ['bank', 'Bank'], ['tds-receivable', 'TDS Receivable'], ['tds-payable', 'TDS Payable']];
   /* Tally's own groups for the ledgers we may create */
   var GROUP = { sales: 'Sales Accounts', purchases: 'Purchase Accounts', 'round-off': 'Indirect Expenses', cash: 'Cash-in-Hand', bank: 'Bank Accounts', 'tds-receivable': 'Loans & Advances (Asset)' };
@@ -198,6 +198,7 @@
     if (d.orig && d.orig.no) bits.push('Against invoice ' + d.orig.no);
     if (d.irn && d.irn.irn) bits.push('IRN ' + d.irn.irn);
     if (d.narr) bits.push(d.narr);
+    if (d.gstAdv && d.type === 'receipt' && d.kind === 'adv') bits.push('Advance with GST ' + num(d.rate) + '% (receipt voucher)');
     if (d.type === 'fa') bits.push((d.kind === 'sale' ? 'Fixed asset sold: ' : 'Fixed asset bought: ') + (d.name || ''));
     if (R === 'exp' || R === 'outexp') bits.push((d.lines || []).map(function (l) { return l.head || l.desc; }).filter(Boolean).join(', ') || d.cat || '');
     return bits.filter(Boolean).join('; ').slice(0, 500);
