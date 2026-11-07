@@ -52,7 +52,7 @@ h1,h2,h3,h4{font-family:var(--font-head);line-height:1.25;letter-spacing:-.01em}
 /* header text links go to the side menu below laptop width: two long guide names pushed the header to 3 rows on tablets */
 @media (max-width:1023px){.hd nav a.hide-sm{display:none}}
 @media (max-width:720px){.brand small{display:none}}
-@media (max-width:380px){.brand b{font-size:.9rem}.brand .mk{height:28px}.hd .wrap{gap:8px}}
+@media (max-width:380px){.brand b{font-size:.9rem}.brand .mk{height:34px}.hd .wrap{gap:8px}}
 .lang-pick{width:auto;max-width:150px;min-height:40px;padding:6px 28px 6px 10px;font-size:.88rem;border-radius:10px}
 @media (max-width:400px){.lang-pick{max-width:120px!important;padding-right:22px}}   /* the header has its own second row on phones now: room for the whole language name */
 /* smallest phones: brand name must not run under the language picker */

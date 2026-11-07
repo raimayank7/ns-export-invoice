@@ -192,7 +192,6 @@ html.embed body{padding-bottom:0}
 }
 @media (max-width:520px){
   .desk-install{display:none!important}
-  .hd .brand>span{display:none}
   .hub-main .tiles{grid-template-columns:repeat(2,minmax(0,1fr))}
   .hub-main .tile b{font-size:1rem}
 }
