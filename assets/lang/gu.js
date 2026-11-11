@@ -4386,5 +4386,9 @@ NS.addLang("gu", {
 
 /* Installed App settings (2026-11-06) */
 NS.addLang("gu", {
-  "hub.h.lang2": "અહીં પસંદ કરેલી ભાષા Nivesh Sahayak ના દરેક ટૂલમાં લાગુ થાય છે."
+  "hub.h.lang2": "અહીં પસંદ કરેલી ભાષા Nivesh Sahayak ના દરેક ટૂલમાં લાગુ થાય છે.",
+  /* links to the look-up sites (ifsc, pincode, distance) */
+  "nav.ifsc": "IFSC કોડ ફાઇન્ડર",
+  "nav.pincode": "PIN કોડ ફાઇન્ડર",
+  "nav.distance": "અંતર કેલ્ક્યુલેટર"
 });

@@ -4385,5 +4385,9 @@ NS.addLang("brx", {
 
 /* Installed App settings (2026-11-06) */
 NS.addLang("brx", {
-  "hub.h.lang2": "बेयाव सायखनाय राव Nivesh Sahayak नि गासै टुलआव बाहायजायो।"
+  "hub.h.lang2": "बेयाव सायखनाय राव Nivesh Sahayak नि गासै टुलआव बाहायजायो।",
+  /* links to the look-up sites (ifsc, pincode, distance) */
+  "nav.ifsc": "IFSC कड फाइन्डार",
+  "nav.pincode": "PIN कड फाइन्डार",
+  "nav.distance": "Distance calculator"
 });

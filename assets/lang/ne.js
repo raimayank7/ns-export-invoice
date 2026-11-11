@@ -4385,5 +4385,9 @@ NS.addLang("ne", {
 
 /* Installed App settings (2026-11-06) */
 NS.addLang("ne", {
-  "hub.h.lang2": "यहाँ छानेको भाषा Nivesh Sahayak का सबै टुलमा लागू हुन्छ।"
+  "hub.h.lang2": "यहाँ छानेको भाषा Nivesh Sahayak का सबै टुलमा लागू हुन्छ।",
+  /* links to the look-up sites (ifsc, pincode, distance) */
+  "nav.ifsc": "IFSC कोड फाइन्डर",
+  "nav.pincode": "PIN कोड फाइन्डर",
+  "nav.distance": "दूरी क्याल्कुलेटर"
 });

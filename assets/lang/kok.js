@@ -4386,5 +4386,9 @@ NS.addLang("kok", {
 
 /* Installed App settings (2026-11-06) */
 NS.addLang("kok", {
-  "hub.h.lang2": "हांगा वेंचिल्ली भास Nivesh Sahayak च्या दर टूलांत लागू जाता."
+  "hub.h.lang2": "हांगा वेंचिल्ली भास Nivesh Sahayak च्या दर टूलांत लागू जाता.",
+  /* links to the look-up sites (ifsc, pincode, distance) */
+  "nav.ifsc": "IFSC कोड फाइंडर",
+  "nav.pincode": "PIN कोड फाइंडर",
+  "nav.distance": "अंतर कॅल्क्युलेटर"
 });

@@ -4386,5 +4386,9 @@ NS.addLang("ur", {
 
 /* Installed App settings (2026-11-06) */
 NS.addLang("ur", {
-  "hub.h.lang2": "یہاں چنی گئی زبان Nivesh Sahayak کے ہر ٹول میں لگتی ہے۔"
+  "hub.h.lang2": "یہاں چنی گئی زبان Nivesh Sahayak کے ہر ٹول میں لگتی ہے۔",
+  /* links to the look-up sites (ifsc, pincode, distance) */
+  "nav.ifsc": "IFSC کوڈ فائنڈر",
+  "nav.pincode": "PIN کوڈ فائنڈر",
+  "nav.distance": "فاصلہ کیلکولیٹر"
 });

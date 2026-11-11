@@ -4255,5 +4255,9 @@ NS.addLang("mni", {
 
 /* Installed App settings (2026-11-06) */
 NS.addLang("mni", {
-  "hub.h.lang2": "ꯃꯐꯝ ꯑꯁꯤꯗꯥ ꯈꯅꯕ ꯂꯣꯟ ꯑꯗꯨ Nivesh Sahayak ꯒꯤ ꯇꯨꯜ ꯈꯨꯗꯤꯡꯃꯛꯇꯥ ꯁꯤꯖꯤꯟꯅꯒꯅꯤ꯫"
+  "hub.h.lang2": "ꯃꯐꯝ ꯑꯁꯤꯗꯥ ꯈꯅꯕ ꯂꯣꯟ ꯑꯗꯨ Nivesh Sahayak ꯒꯤ ꯇꯨꯜ ꯈꯨꯗꯤꯡꯃꯛꯇꯥ ꯁꯤꯖꯤꯟꯅꯒꯅꯤ꯫",
+  /* links to the look-up sites (ifsc, pincode, distance) */
+  "nav.ifsc": "IFSC ꯀꯣꯗ ꯐꯥꯏꯟꯗꯔ",
+  "nav.pincode": "PIN ꯀꯣꯗ ꯐꯥꯏꯟꯗꯔ",
+  "nav.distance": "Distance calculator"
 });

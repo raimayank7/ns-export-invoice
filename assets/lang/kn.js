@@ -4385,5 +4385,9 @@ NS.addLang("kn", {
 
 /* Installed App settings (2026-11-06) */
 NS.addLang("kn", {
-  "hub.h.lang2": "ಇಲ್ಲಿ ಆರಿಸಿದ ಭಾಷೆ Nivesh Sahayak ನ ಪ್ರತಿ ಟೂಲ್‌ನಲ್ಲೂ ಬರುತ್ತದೆ."
+  "hub.h.lang2": "ಇಲ್ಲಿ ಆರಿಸಿದ ಭಾಷೆ Nivesh Sahayak ನ ಪ್ರತಿ ಟೂಲ್‌ನಲ್ಲೂ ಬರುತ್ತದೆ.",
+  /* links to the look-up sites (ifsc, pincode, distance) */
+  "nav.ifsc": "IFSC ಕೋಡ್ ಫೈಂಡರ್",
+  "nav.pincode": "PIN ಕೋಡ್ ಫೈಂಡರ್",
+  "nav.distance": "ದೂರ ಕ್ಯಾಲ್ಕುಲೇಟರ್"
 });

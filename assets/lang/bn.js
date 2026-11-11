@@ -4386,5 +4386,9 @@ NS.addLang("bn", {
 
 /* Installed App settings (2026-11-06) */
 NS.addLang("bn", {
-  "hub.h.lang2": "এখানে বেছে নেওয়া ভাষা Nivesh Sahayak-এর প্রতিটি টুলে চলে।"
+  "hub.h.lang2": "এখানে বেছে নেওয়া ভাষা Nivesh Sahayak-এর প্রতিটি টুলে চলে।",
+  /* links to the look-up sites (ifsc, pincode, distance) */
+  "nav.ifsc": "IFSC কোড ফাইন্ডার",
+  "nav.pincode": "PIN কোড ফাইন্ডার",
+  "nav.distance": "দূরত্ব ক্যালকুলেটর"
 });

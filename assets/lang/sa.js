@@ -4385,5 +4385,9 @@ NS.addLang("sa", {
 
 /* Installed App settings (2026-11-06) */
 NS.addLang("sa", {
-  "hub.h.lang2": "अत्र चिता भाषा Nivesh Sahayak इत्यस्य सर्वेषु साधनेषु प्रवर्तते।"
+  "hub.h.lang2": "अत्र चिता भाषा Nivesh Sahayak इत्यस्य सर्वेषु साधनेषु प्रवर्तते।",
+  /* links to the look-up sites (ifsc, pincode, distance) */
+  "nav.ifsc": "IFSC-कोड-अन्वेषकः",
+  "nav.pincode": "PIN-कोड-अन्वेषकः",
+  "nav.distance": "दूरी कैलकुलेटर"
 });

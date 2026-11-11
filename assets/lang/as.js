@@ -4386,5 +4386,9 @@ NS.addLang("as", {
 
 /* Installed App settings (2026-11-06) */
 NS.addLang("as", {
-  "hub.h.lang2": "ইয়াত বাছি লোৱা ভাষা Nivesh Sahayak ৰ প্ৰতিটো টুলত চলে।"
+  "hub.h.lang2": "ইয়াত বাছি লোৱা ভাষা Nivesh Sahayak ৰ প্ৰতিটো টুলত চলে।",
+  /* links to the look-up sites (ifsc, pincode, distance) */
+  "nav.ifsc": "IFSC কোড ফাইণ্ডাৰ",
+  "nav.pincode": "PIN কোড ফাইণ্ডাৰ",
+  "nav.distance": "দূৰত্ব কেলকুলেটৰ"
 });

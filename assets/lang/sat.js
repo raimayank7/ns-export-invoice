@@ -4385,5 +4385,9 @@ NS.addLang("sat", {
 
 /* Installed App settings (2026-11-06) */
 NS.addLang("sat", {
-  "hub.h.lang2": "ᱱᱚᱸᱰᱮ ᱵᱟᱪᱷᱟᱣ ᱟᱠᱟᱱ ᱯᱟᱹᱨᱥᱤ Nivesh Sahayak ᱨᱮᱭᱟᱜ ᱡᱚᱛᱚ ᱴᱩᱞ ᱨᱮ ᱞᱟᱹᱜᱩᱜ-ᱟ᱾"
+  "hub.h.lang2": "ᱱᱚᱸᱰᱮ ᱵᱟᱪᱷᱟᱣ ᱟᱠᱟᱱ ᱯᱟᱹᱨᱥᱤ Nivesh Sahayak ᱨᱮᱭᱟᱜ ᱡᱚᱛᱚ ᱴᱩᱞ ᱨᱮ ᱞᱟᱹᱜᱩᱜ-ᱟ᱾",
+  /* links to the look-up sites (ifsc, pincode, distance) */
+  "nav.ifsc": "IFSC ᱠᱳᱰ ᱯᱟᱱᱛᱮᱭᱟᱹ",
+  "nav.pincode": "PIN ᱠᱳᱰ ᱯᱟᱱᱛᱮᱭᱟᱹ",
+  "nav.distance": "Distance calculator"
 });

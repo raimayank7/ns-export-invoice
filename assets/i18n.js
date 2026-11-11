@@ -805,7 +805,7 @@
     'pl.l_osk': 'Opening stock', 'pl.l_capstock': 'Stock brought in (opening stock records)', 'pl.l_trec': 'Customers who owe you ({n})', 'pl.l_tpay': 'Suppliers you owe ({n})',
     'pl.l_gstin': 'GST input credit (net)', 'pl.l_gstout': 'GST payable (net)', 'pl.l_earlierp': 'Profit of earlier periods', 'pl.l_earlierl': 'Loss of earlier periods',
     /* hsn.niveshsahayak.in: HSN/SAC finder (hsn.js) */
-    'nav.hsn': 'HSN code finder', 'hs.h.check': 'Check an HSN or SAC code', 'hs.lbl': 'Type the HSN or SAC code (digits only)', 'hs.band': 'Your turnover last financial year',
+    'nav.hsn': 'HSN code finder', 'nav.ifsc': 'IFSC code finder', 'nav.pincode': 'PIN code finder', 'nav.distance': 'Distance calculator', 'hs.h.check': 'Check an HSN or SAC code', 'hs.lbl': 'Type the HSN or SAC code (digits only)', 'hs.band': 'Your turnover last financial year',
     'hs.b.le5': 'Up to ₹5 crore', 'hs.b.gt5': 'Above ₹5 crore', 'hs.b2c': 'Bill to an unregistered buyer (B2C)', 'hs.empty': 'The result shows here as you type.',
     'hs.ok': 'Correct {n}-digit code for your invoices', 'hs.bad': 'This code needs a fix', 'hs.e.digits': 'An HSN or SAC code has digits only.', 'hs.e.short': 'Type at least 2 digits.',
     'hs.e.chapter': 'There is no HSN chapter “{c}”.', 'hs.e.77': 'Chapter 77 is kept empty in the HSN; no goods use it.', 'hs.e.len': 'HSN codes have 2, 4, 6 or 8 digits; this one has {n}.',

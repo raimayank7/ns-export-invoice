@@ -4388,5 +4388,9 @@ NS.addLang("ta", {
 
 /* Installed App settings (2026-11-06) */
 NS.addLang("ta", {
-  "hub.h.lang2": "இங்கே தேர்ந்தெடுக்கும் மொழி Nivesh Sahayak-இன் எல்லா டூல்களிலும் வரும்."
+  "hub.h.lang2": "இங்கே தேர்ந்தெடுக்கும் மொழி Nivesh Sahayak-இன் எல்லா டூல்களிலும் வரும்.",
+  /* links to the look-up sites (ifsc, pincode, distance) */
+  "nav.ifsc": "IFSC கோட் தேடல்",
+  "nav.pincode": "PIN கோட் தேடல்",
+  "nav.distance": "தூர கால்குலேட்டர்"
 });

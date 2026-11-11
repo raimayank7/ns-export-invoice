@@ -4387,5 +4387,9 @@ NS.addLang("doi", {
 
 /* Installed App settings (2026-11-06) */
 NS.addLang("doi", {
-  "hub.h.lang2": "इत्थें चुनी दी भाशा Nivesh Sahayak दे हर टूल च लगदी ऐ।"
+  "hub.h.lang2": "इत्थें चुनी दी भाशा Nivesh Sahayak दे हर टूल च लगदी ऐ।",
+  /* links to the look-up sites (ifsc, pincode, distance) */
+  "nav.ifsc": "IFSC कोड फाइंडर",
+  "nav.pincode": "PIN कोड फाइंडर",
+  "nav.distance": "दूरी कैलकुलेटर"
 });

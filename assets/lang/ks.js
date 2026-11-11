@@ -4386,5 +4386,9 @@ NS.addLang("ks", {
 
 /* Installed App settings (2026-11-06) */
 NS.addLang("ks", {
-  "hub.h.lang2": "یتہِ ژارنہٕ آمٕژ زبان گژھِ Nivesh Sahayak کٮ۪ن ساریٖن ٹولن مَنٛز لاگوٗ۔"
+  "hub.h.lang2": "یتہِ ژارنہٕ آمٕژ زبان گژھِ Nivesh Sahayak کٮ۪ن ساریٖن ٹولن مَنٛز لاگوٗ۔",
+  /* links to the look-up sites (ifsc, pincode, distance) */
+  "nav.ifsc": "IFSC کوڈ فائنڈر",
+  "nav.pincode": "PIN کوڈ فائنڈر",
+  "nav.distance": "فاصلہٕ کیلکولیٹر"
 });

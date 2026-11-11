@@ -4388,5 +4388,9 @@ NS.addLang("te", {
 
 /* Installed App settings (2026-11-06) */
 NS.addLang("te", {
-  "hub.h.lang2": "ఇక్కడ ఎంచుకున్న భాష Nivesh Sahayak లోని ప్రతి టూల్‌లో వస్తుంది."
+  "hub.h.lang2": "ఇక్కడ ఎంచుకున్న భాష Nivesh Sahayak లోని ప్రతి టూల్‌లో వస్తుంది.",
+  /* links to the look-up sites (ifsc, pincode, distance) */
+  "nav.ifsc": "IFSC కోడ్ ఫైండర్",
+  "nav.pincode": "PIN కోడ్ ఫైండర్",
+  "nav.distance": "దూరం కాలిక్యులేటర్"
 });

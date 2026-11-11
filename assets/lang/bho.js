@@ -4385,5 +4385,9 @@ NS.addLang("bho", {
 
 /* Installed App settings (2026-11-06) */
 NS.addLang("bho", {
-  "hub.h.lang2": "इहाँ चुनल भाषा Nivesh Sahayak के हर टूल में लागू होला।"
+  "hub.h.lang2": "इहाँ चुनल भाषा Nivesh Sahayak के हर टूल में लागू होला।",
+  /* links to the look-up sites (ifsc, pincode, distance) */
+  "nav.ifsc": "IFSC कोड फाइंडर",
+  "nav.pincode": "PIN कोड फाइंडर",
+  "nav.distance": "दूरी कैलकुलेटर"
 });
