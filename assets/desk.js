@@ -241,6 +241,12 @@
       return out;
     }).catch(function () { return []; });
   }
+  /* the App: every other business is one search away ("Business: <name>") */
+  function bizActs() {
+    var app = A();
+    if (!app || !app.setBiz || !app.biz || !app.biz()) return [];
+    return app.data().biz.filter(function (b) { return b.id !== app.biz().id; }).map(function (b) { return { g: 'act', t: NS.t('app.biz') + ': ' + b.name, k: 'Alt+S', run: function () { app.setBiz(b.id); } }; });
+  }
   function actions() {
     return [
       { g: 'act', t: T('a_theme'), run: function () { click('[data-theme-btn]'); } },
@@ -248,8 +254,9 @@
       { g: 'act', t: NS.t('md.save'), run: function () { var b = NS.el('button', { 'data-act': 'backup', hidden: '' }); document.body.appendChild(b); b.click(); b.remove(); } },
       { g: 'act', t: T('mini'), k: 'Ctrl+B', run: toggleMenu },
       { g: 'act', t: T('keys'), k: '?', run: keysSheet },
+    ].concat(bizActs()).concat([
       { g: 'act', t: T('lang'), run: function () { var s = $('[data-lang-pick]'); if (s && !s.offsetParent && A() && root.classList.contains('installed')) { location.hash = '#features'; return; } if (s) { s.focus(); if (s.showPicker) try { s.showPicker(); } catch (e) {} } } }
-    ].concat(deferredInstall ? [{ g: 'act', t: T('install'), run: install }] : []);
+    ]).concat(deferredInstall ? [{ g: 'act', t: T('install'), run: install }] : []);
   }
   var back = null, picked = false;
   function palette(from) {
@@ -314,13 +321,13 @@
   NS.deskPalette = function (from) { if (cmd && cmd.open) cmd.close(); else palette(from); };
 
   /* ---------- keyboard ---------- */
-  var KEYS = [['Ctrl K', 'k_cmd'], ['Ctrl B', 'k_menu'], ['Alt 1 … 9', 'k_secs'], ['Alt N', 'k_inv'], ['Alt R', 'k_min'], ['Alt P', 'k_mout'], ['Alt B', 'k_pbill'], ['Alt X', 'k_exp'],
+  var KEYS = [['Ctrl K', 'k_cmd'], ['Ctrl B', 'k_menu'], ['Alt 1 … 9', 'k_secs'], ['Alt N', 'k_inv'], ['Alt R', 'k_min'], ['Alt P', 'k_mout'], ['Alt B', 'k_pbill'], ['Alt X', 'k_exp'], ['Alt S', '=app.biz'],
     ['/', 'k_find'], ['?', 'k_help'], ['Ctrl S', 'k_save'], ['Ctrl P', 'k_print'], ['Esc', 'k_esc']];
   var keysDlg;
   function keysSheet() {
     if (!keysDlg) { keysDlg = NS.el('dialog', { id: 'desk-keys', class: 'desk-keys', 'aria-labelledby': 'desk-keys-h' }); document.body.appendChild(keysDlg); }
     keysDlg.innerHTML = '<div class="dk-hd"><h2 id="desk-keys-h">' + esc(T('keys')) + '</h2><button type="button" class="icon-btn" aria-label="' + esc(NS.t('close')) + '" data-close>✕</button></div>' +
-      '<table class="dk-t"><tbody>' + KEYS.map(function (k) { return '<tr><th scope="row"><kbd>' + esc(k[0]) + '</kbd></th><td>' + esc(T(k[1])) + '</td></tr>'; }).join('') + '</tbody></table><p class="dk-note">' + esc(T('k_note')) + '</p>';
+      '<table class="dk-t"><tbody>' + KEYS.filter(function (k) { return k[1].charAt(0) !== '=' || A() && A().switchBiz && A().data().biz.length > 1; }).map(function (k) { return '<tr><th scope="row"><kbd>' + esc(k[0]) + '</kbd></th><td>' + esc(k[1].charAt(0) === '=' ? NS.t(k[1].slice(1)) : T(k[1])) + '</td></tr>'; }).join('') + '</tbody></table><p class="dk-note">' + esc(T('k_note')) + '</p>';
     $('[data-close]', keysDlg).onclick = function () { keysDlg.close(); };
     keysDlg.showModal();
   }
@@ -337,10 +344,10 @@
       if (n) { var a = $$('#ns-side a[data-sec]')[+n[1] - 1]; if (a) { e.preventDefault(); a.click(); a.focus(); } return; }
       var c = (e.code || '').replace('Key', '').toLowerCase();
       if (c === 'n') { e.preventDefault(); goUrl(siteUrl('billing')); return; }
-      if (app && app.biz && app.biz()) {
-        var job = { r: 'min', p: 'mout', b: 'pbill', x: 'exp' }[c];
-        if (job) { e.preventDefault(); app.openForm(job); }
-      }
+      /* a key pressed while the App is still fetching its data is kept and runs the moment the data is in (it used to be dropped) */
+      var job = { r: 'min', p: 'mout', b: 'pbill', x: 'exp' }[c];
+      if (app && app.openForm && job) { e.preventDefault(); if (e.repeat) return; (app.whenReady || function (f) { f(); })(function () { if (app.biz() && !$('dialog[open]')) app.openForm(job); }); }
+      else if (app && app.switchBiz && c === 's') { e.preventDefault(); if (!e.repeat) (app.whenReady || function (f) { f(); })(app.switchBiz); }
       return;
     }
     if (typing(e) || e.ctrlKey || e.metaKey) return;

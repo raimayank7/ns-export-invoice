@@ -22,6 +22,7 @@
     b2fa: ['fixed-assets'], fin: ['final-accounts', 'trial-balance'], fam: ['manufacturing-account', 'partnership-accounts', 'trust-income-expenditure'],
     b2year: ['year-end'], reports: ['reports-to-excel', 'gst-from-the-app'], acx: ['gst-from-the-app'], stf: ['staff-salary-loans', 'capital-and-loans'], settings: ['additional-features', 'where-data-is-kept']
   };
+  var DO = { ifsc: ['ifsc-code-checker', 'pin-code-finder'], pincode: ['pin-code-finder', 'distance-calculator'], distance: ['distance-calculator', 'pin-code-finder'] };
   var IDX = null, loading = null;
   function base() { return location.origin; }
   function mySite() { return IN_APP || (IDX && IDX.site) || ''; }
@@ -32,7 +33,14 @@
     if (loading && loading.want === L) return loading;
     /* the screen language's list when the help has been translated (help_tr.py), else English */
     var name = '/help/' + (IN_APP || isApp() ? 'all' : 'index'), get = function (u) { return fetch(u, { cache: 'no-cache' }).then(function (r) { if (!r.ok) throw new Error(r.status); return r.json(); }); };
-    loading = (L === 'en' ? get(name + '.json') : get(name + '.' + L + '.json').catch(function () { return get(name + '.json'); })).then(function (j) {
+    loading = (L === 'en' ? get(name + '.json') : get(name + '.' + L + '.json').then(function (j) {
+      /* an article written after the translation was made is still offered, in English */
+      return get(name + '.json').then(function (e) {
+        var have = {}; (j.articles || []).forEach(function (a) { have[(a.site || j.site) + '|' + a.slug] = 1; });
+        (e.articles || []).forEach(function (a) { if (!have[(a.site || e.site) + '|' + a.slug]) j.articles.push(Object.assign({ site: e.site, siteName: e.name, lang: 'en' }, a)); });
+        return j;
+      }).catch(function () { return j; });
+    }).catch(function () { return get(name + '.json'); })).then(function (j) {
       var all = (j.articles || []).map(function (a) { return Object.assign({ site: j.site, siteName: j.name }, a); });
       all.forEach(function (a) { a.lang = a.lang || j.lang || 'en'; });
       IDX = { site: IN_APP || j.site || (isApp() ? 'app' : ''), name: j.name || '', topics: j.topics || [], all: all, lang: j.lang || 'en', want: L };
@@ -49,7 +57,11 @@
     if (!IDX) return [];
     if (isApp() && !IN_APP) {
       var h = (location.hash || '#home').slice(1), sec = h.split('/')[0] || 'home';
-      if (sec === 'do') { var s = h.split('/')[1]; return IDX.all.filter(function (a) { return a.site === s; }).slice(0, 5); }
+      if (sec === 'do') {
+        var s = h.split('/')[1], own = IDX.all.filter(function (a) { return a.site === s; }).slice(0, 5);
+        /* the look-up screens (ifsc, pincode, distance) are other sites shown in a frame: their help is kept with the App's own articles */
+        return own.length || !DO[s] ? own : IDX.all.filter(function (a) { return a.site === 'app' && DO[s].indexOf(a.slug) >= 0; }).sort(function (x, y) { return DO[s].indexOf(x.slug) - DO[s].indexOf(y.slug); });
+      }
       var by = {}; IDX.all.forEach(function (a) { if (a.site === 'app') by[a.slug] = a; });
       return (SEC[sec] || SEC.home).map(function (k) { return by[k]; }).filter(Boolean);
     }
