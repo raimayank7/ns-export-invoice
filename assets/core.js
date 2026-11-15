@@ -248,10 +248,24 @@
     };
     return (navigator.locks && navigator.locks.request ? navigator.locks.request('ns-af-top', go) : go()).then(function (st) {
       AF.st = st; afBar(st === 'ask' ? 'oa.paused' : null); if (st === 'ok') hideReminder();
+      if (st === 'ask') armAsk();
       if (st === 'ask' && window.NSStore) NSStore.meta('autosave').then(function (n) { if (n && n.name && !n.paused) afNote(Object.assign({}, n, { paused: true })); }).catch(function () {});
       return st;
     });
   }
+  /* after a browser restart the OK is gone: the browser may ask only after a click or key, so the first one in the page asks
+     (not a click on Later or on the auto save buttons themselves, which ask on their own) */
+  var asked = false;
+  function armAsk() {
+    if (asked || !NS.folderHere()) return; asked = true;
+    var h = function (e) {
+      if (e.target && e.target.closest && e.target.closest('[data-act^="folder"],[data-act="af-later"]')) return;
+      document.removeEventListener('pointerdown', h, true); document.removeEventListener('keydown', h, true);
+      if (!afBar.later) NS.folderAllow();
+    };
+    document.addEventListener('pointerdown', h, true); document.addEventListener('keydown', h, true);
+  }
+  NS.isInstalled = function () { return !!(window.matchMedia && matchMedia('(display-mode: standalone), (display-mode: window-controls-overlay)').matches) || navigator.standalone === true; };
   function afSoon(ms) {
     if (!NS.folderHere() || !NS.folderSupported()) return;
     clearTimeout(AF.t); AF.t = setTimeout(afWrite, ms == null ? 1500 : ms);
@@ -286,7 +300,7 @@
   };
   /* {supported, on, name, file, allowed, last, here}; on other sites: {on, name, last, host, elsewhere} from the data home's note */
   NS.folderStatus = function () {
-    if (!NS.folderSupported()) return Promise.resolve({ supported: false });
+    if (!NS.folderSupported()) return window.NSStore ? NSStore.meta('autodl').then(function (v) { return { supported: false, autodl: !!v }; }, function () { return { supported: false }; }) : Promise.resolve({ supported: false });
     if (!window.NSStore) return Promise.resolve({ supported: true, on: false, home: false });   /* pages with no saved data (view.) */
     if (NS.folderHere()) {
       return Promise.all([folderGet(), fdbGet('last')]).then(function (r) {
@@ -336,6 +350,16 @@
     }).catch(function () {});
   }
   if (document.readyState === 'complete') setTimeout(folderStart, 1500); else window.addEventListener('load', function () { setTimeout(folderStart, 1500); });
+  /* browsers that cannot keep a folder: if the person switched it on, a backup file goes to Downloads once a day (App or My data open) */
+  function autoDl(now) {
+    if (NS.folderSupported() || !NS.folderHere() || !window.NSStore) return;
+    Promise.all([NSStore.meta('autodl'), NSStore.meta('lastBackup'), NSStore.list('doc'), NSStore.list('party')]).then(function (r) {
+      if (!r[0] || (!r[2].length && !r[3].length)) return;
+      if (!now && Date.now() - (r[1] || 0) < 20 * 36e5) return;
+      return NS.downloadBackup();
+    }).catch(function () {});
+  }
+  if (window.top === window) { setTimeout(function () { autoDl(); }, 6000); setInterval(function () { autoDl(); }, 36e5); }
   /* Safari and every browser on an iPhone or iPad (all use Safari's engine) keep a separate store of data for each website address,
      so billing., quotation. and my. do not see each other's records there. Inside the App all tools share one store: say so, once. */
   NS.splitStore = function () { var ua = navigator.userAgent; return /AppleWebKit/.test(ua) && !/Chrome\/|Chromium\/|Edg\//.test(ua); };
@@ -450,7 +474,9 @@
       var here = NS.folderHere(), away = here ? '' : ' ↗';
       var FB = function (act, key, pri) { return '<button type="button" class="btn sm' + (pri ? ' primary' : '') + '" data-act="' + act + '">' + E(T(key)) + away + '</button>'; };
       /* phones and tablets: the part is still there, saying auto save is for computers (the button "Auto-save and storage" opens it) */
-      var afPane = !f.supported ? '<p>' + off + E(T('ux.af.pc')) + '</p><div class="md-bar">' + B('backup', 'md.save', 1) + '</div>' : NS.mdRow(T('oa.t'), fTxt + (f.on && f.last ? '<br>' + E(T('md.last')) + ' ' + E(new Date(f.last).toLocaleString('en-IN', { dateStyle: 'medium', timeStyle: 'short' })) : ''),
+      var dlRow = '<label class="md-chk"><input type="checkbox" data-autodl' + (f.autodl ? ' checked' : '') + '> <b>' + E(T('oa.dl')) + '</b></label><p class="soft">' + E(T('oa.dlp')) + '</p>';
+      var instTip = f.supported && f.on && here && !NS.isInstalled() ? '<p class="note">' + E(T('oa.inst')) + ' <button type="button" class="btn sm" data-desk-install>' + E(T('desk.install')) + '</button></p>' : '';
+      var afPane = !f.supported ? '<p>' + off + E(T('ux.af.pc')) + '</p><div class="md-bar">' + B('backup', 'md.save', 1) + '</div>' + dlRow : instTip + NS.mdRow(T('oa.t'), fTxt + (f.on && f.last ? '<br>' + E(T('md.last')) + ' ' + E(new Date(f.last).toLocaleString('en-IN', { dateStyle: 'medium', timeStyle: 'short' })) : ''),
           (f.on ? T('oa.on', { file: f.file || BACKUP_NAME + '.json', name: f.name }) + (f.allowed ? '' : ' ' + T('oa.ask')) : T('oa.off')),
           f.home === false ? '' : f.elsewhere ? FB('folder-pick', 'oa.open', 1) : f.on ? (f.allowed ? '' : FB('folder-allow', 'md.allow', 1)) + B('folder-off', 'md.turnoff') : FB('folder-pick', 'md.choose', 1)) +
         (f.other ? '<p class="note">' + E(T('oa.other', { host: f.other.host || '' })) + '</p>' : '') +
@@ -513,6 +539,11 @@
     else if (a === 'remind-later') { var r = NS.$('#ns-remind'); if (r) r.hidden = true; NSStore.meta('lastBackup', Date.now() - 4 * 864e5); }
   });
   function mdAgain() { if (NS.$('#ns-mydata[open]')) NS.openMyData(); }
+  document.addEventListener('change', function (e) {
+    if (!e.target.matches || !e.target.matches('[data-autodl]')) return;
+    var on = e.target.checked;
+    NSStore.meta('autodl', on ? true : null).then(function () { NS.toast(NS.t(on ? 'oa.dlon' : 'oa.dloff')); if (on) autoDl(true); });
+  });
   document.addEventListener('change', function (e) {
     var t = e.target;
     if (t.getAttribute && t.getAttribute('data-act') === 'restore' && t.files && t.files[0]) {

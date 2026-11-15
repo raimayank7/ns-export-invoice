@@ -383,3 +383,6 @@ html[dir=rtl] :is(.tbl-wrap,.gt-scroll,.sb-sheet-wrap):has(>[dir=ltr],>[lang=en-
   .tabbar a span,.tabbar button span{font-size:12px}
 }
 :lang(ur) :is(select,input),:lang(ks) :is(select,input){padding-inline-start:14px;line-height:1.8;min-height:48px}   /* Nastaliq in fields: the first letter is not cut (round C) */
+
+/* auto save: daily download switch (browsers without folder saving) */
+.md-chk{display:flex;gap:8px;align-items:center;margin:14px 0 4px;cursor:pointer}.md-chk input{width:18px;height:18px}

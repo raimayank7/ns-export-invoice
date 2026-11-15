@@ -8809,3 +8809,12 @@ NS.addLang("or", {
   "wk.open": "Open it in the App",
   "wk.ok": "Got it"
 });
+
+/* Auto save: install tip, daily download for browsers without folder saving (15 Nov 2026) */
+NS.addLang("or", {
+  "oa.inst": "Tip: install the App. An installed App keeps your OK for this folder, so the browser does not ask again after it is closed. In a normal tab, choose “Allow on every visit” when Chrome asks.",
+  "oa.dl": "Download a backup file by itself once a day",
+  "oa.dlp": "This browser cannot keep a folder (only Chrome or Edge on a computer can). Instead, once a day when the App is open, a full backup file is saved to your Downloads folder. Keep the newest one somewhere safe, for example in OneDrive or Google Drive.",
+  "oa.dlon": "A backup file will be downloaded once a day while the App is open.",
+  "oa.dloff": "The daily backup download is off."
+});
