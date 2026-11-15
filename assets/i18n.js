@@ -1608,6 +1608,8 @@
     'oa.other': "Auto save was set up on {host}. To let this page save too, choose the same folder here once.",
     'oa.fail': "The backup file could not be written in that folder. Choose another folder, for example a OneDrive or Google Drive folder on this computer.",
     'oa.inst': "Tip: install the App. An installed App keeps your OK for this folder, so the browser does not ask again after it is closed. In a normal tab, choose “Allow on every visit” when Chrome asks.",
+    'oa.inst2': "Tip: install the App. An installed App keeps your OK for this folder, so {b} does not ask again after it is closed. In a normal tab, choose “Allow on every visit” if {b} offers it.",
+    'oa.thisbr': "the browser",
     'oa.dl': "Download a backup file by itself once a day",
     'oa.dlp': "This browser cannot keep a folder (only Chrome or Edge on a computer can). Instead, once a day when the App is open, a full backup file is saved to your Downloads folder. Keep the newest one somewhere safe, for example in OneDrive or Google Drive.",
     'oa.dlon': "A backup file will be downloaded once a day while the App is open.",

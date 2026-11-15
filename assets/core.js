@@ -265,6 +265,18 @@
     };
     document.addEventListener('pointerdown', h, true); document.addEventListener('keydown', h, true);
   }
+  NS.browserName = function () {
+    var u = navigator.userAgent;
+    if (/Edg(e|A|iOS)?\//.test(u)) return 'Edge';
+    if (/OPR\/|Opera/.test(u)) return 'Opera';
+    if (navigator.brave) return 'Brave';
+    if (/Vivaldi\//.test(u)) return 'Vivaldi';
+    if (/SamsungBrowser\//.test(u)) return 'Samsung Internet';
+    if (/Firefox\/|FxiOS\//.test(u)) return 'Firefox';
+    if (/Chrome\/|CriOS\//.test(u)) return 'Chrome';
+    if (/Safari\//.test(u)) return 'Safari';
+    return '';
+  };
   NS.isInstalled = function () { return !!(window.matchMedia && matchMedia('(display-mode: standalone), (display-mode: window-controls-overlay)').matches) || navigator.standalone === true; };
   function afSoon(ms) {
     if (!NS.folderHere() || !NS.folderSupported()) return;
@@ -475,7 +487,7 @@
       var FB = function (act, key, pri) { return '<button type="button" class="btn sm' + (pri ? ' primary' : '') + '" data-act="' + act + '">' + E(T(key)) + away + '</button>'; };
       /* phones and tablets: the part is still there, saying auto save is for computers (the button "Auto-save and storage" opens it) */
       var dlRow = '<label class="md-chk"><input type="checkbox" data-autodl' + (f.autodl ? ' checked' : '') + '> <b>' + E(T('oa.dl')) + '</b></label><p class="soft">' + E(T('oa.dlp')) + '</p>';
-      var instTip = f.supported && f.on && here && !NS.isInstalled() ? '<p class="note">' + E(T('oa.inst')) + ' <button type="button" class="btn sm" data-desk-install>' + E(T('desk.install')) + '</button></p>' : '';
+      var instTip = f.supported && f.on && here && !NS.isInstalled() ? '<p class="note">' + E(T('oa.inst2', { b: NS.browserName() || T('oa.thisbr') })) + ' <button type="button" class="btn sm" data-desk-install>' + E(T('desk.install')) + '</button></p>' : '';
       var afPane = !f.supported ? '<p>' + off + E(T('ux.af.pc')) + '</p><div class="md-bar">' + B('backup', 'md.save', 1) + '</div>' + dlRow : instTip + NS.mdRow(T('oa.t'), fTxt + (f.on && f.last ? '<br>' + E(T('md.last')) + ' ' + E(new Date(f.last).toLocaleString('en-IN', { dateStyle: 'medium', timeStyle: 'short' })) : ''),
           (f.on ? T('oa.on', { file: f.file || BACKUP_NAME + '.json', name: f.name }) + (f.allowed ? '' : ' ' + T('oa.ask')) : T('oa.off')),
           f.home === false ? '' : f.elsewhere ? FB('folder-pick', 'oa.open', 1) : f.on ? (f.allowed ? '' : FB('folder-allow', 'md.allow', 1)) + B('folder-off', 'md.turnoff') : FB('folder-pick', 'md.choose', 1)) +

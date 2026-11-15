@@ -8946,3 +8946,9 @@ NS.addLang("gu", {
   "oa.dlon": "A backup file will be downloaded once a day while the App is open.",
   "oa.dloff": "The daily backup download is off."
 });
+
+/* Install tip names the browser in use (16 Nov 2026) */
+NS.addLang("gu", {
+  "oa.inst2": "Tip: install the App. An installed App keeps your OK for this folder, so {b} does not ask again after it is closed. In a normal tab, choose “Allow on every visit” if {b} offers it.",
+  "oa.thisbr": "the browser"
+});
