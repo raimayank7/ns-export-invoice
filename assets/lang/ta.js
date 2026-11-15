@@ -8923,3 +8923,20 @@ NS.addLang("ta", {
   "app.ab.11": "ஸ்டாஃப் மற்றும் டேக்ஸ்: சம்பள ஸ்லிப், வருகைப் பதிவு, PF ரிட்டர்ன் மற்றும் ESI ஃபைல்கள், அட்வான்ஸ் டேக்ஸ் மற்றும் வருமான வரி திட்டம், பேங்க் ஸ்டேட்மென்ட் இம்போர்ட், போட்டோவிலிருந்து சப்ளையர் பில்லைப் படித்தல்.",
   "app.ab.12": "My day: இன்று கவனிக்க வேண்டியவை, மாத இறுதி சரிபார்ப்புப் பட்டியல், பிசினஸ் ஹெல்த் ஸ்கோர் மற்றும் நினைவூட்டல்கள், கூடவே கிளினிக், சலூன், ஹோட்டல், வாடகை, கேரேஜ், நகைக்கடை, மண்டி, பெட்ரோல் பங்க் போன்றவற்றுக்குத் தயாரான டூல்கள்."
 });
+
+/* Auto save written by the App (15 Nov 2026) */
+NS.addLang("ta", {
+  "oa.away2": "Auto save is set up in the Nivesh Sahayak App: the button opens the App in a new tab. Choose the folder there once. While the App is open, every save on any Nivesh Sahayak tool updates the file, and the App catches up each time you open it.",
+  "oa.here": "This page writes the file: keep it open (or open it now and then) and every save on any Nivesh Sahayak tool, in any tab, is added to the file.",
+  "oa.by": "saved by {host}",
+  "oa.open": "Open the App to change it",
+  "oa.other": "Auto save was set up on {host}. To let this page save too, choose the same folder here once.",
+  "oa.fail": "The backup file could not be written in that folder. Choose another folder, for example a OneDrive or Google Drive folder on this computer."
+});
+
+/* Safari and iPhone: one store per website, use the App (15 Nov 2026) */
+NS.addLang("ta", {
+  "wk.note": "On an iPhone, iPad or Mac Safari, each Nivesh Sahayak website keeps its own records. To keep all your bills, customers and accounts together, use this tool inside the Nivesh Sahayak App.",
+  "wk.open": "Open it in the App",
+  "wk.ok": "Got it"
+});

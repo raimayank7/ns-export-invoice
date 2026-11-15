@@ -8921,3 +8921,20 @@ NS.addLang("bn", {
   "app.ab.11": "স্টাফ ও ট্যাক্স: স্যালারি স্লিপ, হাজিরা, PF রিটার্ন ও ESI ফাইল, অ্যাডভান্স ট্যাক্স ও ইনকাম ট্যাক্স প্ল্যানিং, ব্যাংক স্টেটমেন্ট ইমপোর্ট আর ছবি থেকে সাপ্লায়ারের বিল পড়া।",
   "app.ab.12": "My day: আজ কোন কাজে নজর দিতে হবে, মাস শেষের চেকলিস্ট, বিজনেস হেলথ স্কোর ও রিমাইন্ডার, সঙ্গে ক্লিনিক, সেলুন, হোটেল, ভাড়া, গ্যারেজ, জুয়েলার, মান্ডি, পেট্রোল পাম্প আর অন্য কাজের তৈরি টুল।"
 });
+
+/* Auto save written by the App (15 Nov 2026) */
+NS.addLang("bn", {
+  "oa.away2": "Auto save is set up in the Nivesh Sahayak App: the button opens the App in a new tab. Choose the folder there once. While the App is open, every save on any Nivesh Sahayak tool updates the file, and the App catches up each time you open it.",
+  "oa.here": "This page writes the file: keep it open (or open it now and then) and every save on any Nivesh Sahayak tool, in any tab, is added to the file.",
+  "oa.by": "saved by {host}",
+  "oa.open": "Open the App to change it",
+  "oa.other": "Auto save was set up on {host}. To let this page save too, choose the same folder here once.",
+  "oa.fail": "The backup file could not be written in that folder. Choose another folder, for example a OneDrive or Google Drive folder on this computer."
+});
+
+/* Safari and iPhone: one store per website, use the App (15 Nov 2026) */
+NS.addLang("bn", {
+  "wk.note": "On an iPhone, iPad or Mac Safari, each Nivesh Sahayak website keeps its own records. To keep all your bills, customers and accounts together, use this tool inside the Nivesh Sahayak App.",
+  "wk.open": "Open it in the App",
+  "wk.ok": "Got it"
+});

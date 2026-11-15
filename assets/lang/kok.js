@@ -8924,3 +8924,20 @@ NS.addLang("kok", {
   "app.ab.11": "Staff and tax: salary slips, attendance, the PF return and ESI files, advance tax and income tax planning, bank statement import and reading a supplier's bill from a photo.",
   "app.ab.12": "My day: what needs you today, a month-end checklist, a business health score and reminders, plus ready tools for clinics, salons, hotels, rent, garages, jewellers, mandis, petrol pumps and more."
 });
+
+/* Auto save written by the App (15 Nov 2026) */
+NS.addLang("kok", {
+  "oa.away2": "Auto save is set up in the Nivesh Sahayak App: the button opens the App in a new tab. Choose the folder there once. While the App is open, every save on any Nivesh Sahayak tool updates the file, and the App catches up each time you open it.",
+  "oa.here": "This page writes the file: keep it open (or open it now and then) and every save on any Nivesh Sahayak tool, in any tab, is added to the file.",
+  "oa.by": "saved by {host}",
+  "oa.open": "Open the App to change it",
+  "oa.other": "Auto save was set up on {host}. To let this page save too, choose the same folder here once.",
+  "oa.fail": "The backup file could not be written in that folder. Choose another folder, for example a OneDrive or Google Drive folder on this computer."
+});
+
+/* Safari and iPhone: one store per website, use the App (15 Nov 2026) */
+NS.addLang("kok", {
+  "wk.note": "On an iPhone, iPad or Mac Safari, each Nivesh Sahayak website keeps its own records. To keep all your bills, customers and accounts together, use this tool inside the Nivesh Sahayak App.",
+  "wk.open": "Open it in the App",
+  "wk.ok": "Got it"
+});

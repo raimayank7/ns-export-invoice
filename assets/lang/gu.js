@@ -8920,3 +8920,20 @@ NS.addLang("gu", {
   "app.ab.11": "સ્ટાફ અને ટેક્સ: સેલરી સ્લિપ, હાજરી, PF રિટર્ન અને ESI ફાઇલ, એડવાન્સ ટેક્સ અને ઇન્કમ ટેક્સ પ્લાનિંગ, બેંક સ્ટેટમેન્ટ ઇમ્પોર્ટ અને ફોટામાંથી સપ્લાયરનું બિલ વાંચવું.",
   "app.ab.12": "My day: આજે શેના પર ધ્યાન આપવું, મહિનાના અંતની ચેકલિસ્ટ, બિઝનેસ હેલ્થ સ્કોર અને રિમાઇન્ડર, સાથે ક્લિનિક, સલૂન, હોટલ, ભાડું, ગેરેજ, જ્વેલર, મંડી, પેટ્રોલ પંપ અને બીજા કામ માટે તૈયાર ટૂલ."
 });
+
+/* Auto save written by the App (15 Nov 2026) */
+NS.addLang("gu", {
+  "oa.away2": "Auto save is set up in the Nivesh Sahayak App: the button opens the App in a new tab. Choose the folder there once. While the App is open, every save on any Nivesh Sahayak tool updates the file, and the App catches up each time you open it.",
+  "oa.here": "This page writes the file: keep it open (or open it now and then) and every save on any Nivesh Sahayak tool, in any tab, is added to the file.",
+  "oa.by": "saved by {host}",
+  "oa.open": "Open the App to change it",
+  "oa.other": "Auto save was set up on {host}. To let this page save too, choose the same folder here once.",
+  "oa.fail": "The backup file could not be written in that folder. Choose another folder, for example a OneDrive or Google Drive folder on this computer."
+});
+
+/* Safari and iPhone: one store per website, use the App (15 Nov 2026) */
+NS.addLang("gu", {
+  "wk.note": "On an iPhone, iPad or Mac Safari, each Nivesh Sahayak website keeps its own records. To keep all your bills, customers and accounts together, use this tool inside the Nivesh Sahayak App.",
+  "wk.open": "Open it in the App",
+  "wk.ok": "Got it"
+});

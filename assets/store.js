@@ -90,7 +90,7 @@
   window.addEventListener('message', function (e) {
     if (e.origin !== VAULT_ORIGIN || !e.data || e.data.ns !== 'vault') return;
     if (e.data.blocked) blockedNote(); else if ('ready' in e.data) unblocked();
-    /* the one auto save (vault.js) wrote the backup file ('ok') or needs the browser's OK again ('ask') */
+    /* the data home saw a change made in this or another tab ('chg'): the App's auto save writes the file (core.js) */
     if (e.data.af) document.dispatchEvent(new CustomEvent('ns-autosave', { detail: e.data.af }));
   });
 
@@ -113,9 +113,19 @@
       frame.contentWindow.postMessage({ ns: 'vault', id: id, op: op, args: args || {} }, VAULT_ORIGIN);
     });
   }
+  /* a change of saved data: the auto save (core.js) writes the backup file a moment later. Its own marks (lastBackup, autosave) are not changes. */
+  var CHG = { put: 1, del: 1, clear: 1, importAll: 1 }, CHG_SKIP = { lastBackup: 1, autosave: 1 };
+  function changedOp(op, args) {
+    if (!CHG[op]) return false;
+    if (args && args.store === 'meta') { var v = [].concat(args.value || { id: args.id }); if (v.every(function (x) { return x && CHG_SKIP[x.id]; })) return false; }
+    return true;
+  }
   function call(op, args) {
     if (host) return host._call(op, args);
-    return ready().then(function () { return mode === 'local' ? LOCAL[op](args || {}) : send(op, args); });
+    return ready().then(function () { return mode === 'local' ? LOCAL[op](args || {}) : send(op, args); }).then(function (r) {
+      if (changedOp(op, args)) document.dispatchEvent(new CustomEvent('ns-saved'));
+      return r;
+    });
   }
   window.addEventListener('message', function (e) {
     if (e.origin !== VAULT_ORIGIN || !e.data || e.data.ns !== 'vault' || !e.data.id) return;
