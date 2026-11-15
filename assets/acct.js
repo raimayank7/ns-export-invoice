@@ -10,8 +10,9 @@
   'use strict';
   var NS = window.NS, B = window.NSBooks, $ = NS.$, esc = NS.esc, r2 = NS.r2, num = NS.num;
   function T(k, v) { return NS.t(k, v); }
-  var TYPE = { invoice: 'Tax invoice', cashmemo: 'Cash memo', pharma: 'Pharmacy bill', resto: 'Restaurant bill', lr: 'Bilty (LR)', fee: 'Fee receipt', job: 'Job card bill', rabill: 'RA bill',
+  var TYPE = { invoice: 'Tax invoice', cashmemo: 'Cash memo', pharma: 'Pharmacy bill', resto: 'Restaurant bill', lr: 'Bilty (LR)', fee: 'Fee receipt', job: 'Job card bill', gjob: 'Garage service bill', rabill: 'RA bill',
     note: 'Credit note', receipt: 'Receipt', voucher: 'Payment voucher', self: 'Self invoice', pbill: 'Purchase bill', exp: 'Expense', contra: 'Contra' };
+  TYPE.jewel = 'Jewellery bill'; TYPE.garment = 'Garment bill';
   function tname(d) { var R = B.role(d); return d.type === 'note' ? (d.kind === 'debit' ? 'Debit note' : 'Credit note') : R === 'sdeb' ? 'Debit note' : R === 'pret' ? 'Purchase return' : R === 'refund' ? 'Refund voucher' : TYPE[d.type || 'invoice'] || d.type; }
   function n2(v) { return v ? r2(v).toFixed(2) : '0.00'; }
 

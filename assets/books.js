@@ -126,10 +126,14 @@
   function role(d) {
     if (bounced(d)) return '';
     switch (d.type || 'invoice') {
-      case 'invoice': case 'cashmemo': case 'pharma': return 'sale';   /* pharma: pharmacy.niveshsahayak.in */
+      case 'invoice': case 'cashmemo': case 'pharma': case 'jewel': case 'garment': return 'sale';   /* jewel: jewellery.niveshsahayak.in, garment: garment.niveshsahayak.in */   /* pharma: pharmacy.niveshsahayak.in */
       case 'resto': return d.status === 'open' ? '' : 'sale';   /* restaurant: a running table is not a sale yet */
       case 'lr': return 'sale';   /* bilty: freight earned; the payer is the customer */
+      case 'visit': case 'svc': return num(d.total) ? 'sale' : '';   /* clinic visit bill, salon / gym / coaching bill or membership: a sale when it has an amount */
       case 'fee': return 'sale';   /* fee receipt: fees received (status paid) */
+      case 'rentb': return d.print === 'bill' ? 'sale' : '';   /* rent bill of a property tenancy: a sale once it is a bill (an agreement card is not) */
+      case 'hotel': return d.print === 'bill' && d.stay !== 'cancel' ? 'sale' : '';   /* hotel stay: a sale once it is printed as a bill */
+      case 'gjob': return d.print === 'bill' ? 'sale' : '';   /* garage job card: a sale once it is a service bill */
       case 'job': return d.print === 'bill' ? 'sale' : '';   /* job card: a sale once it is a service bill */
       case 'rabill': return 'sale';   /* contractor RA bill: value of work in this bill (retention and TDS settle at payment) */
       case 'note': if (d.side === 'purchase') return d.kind === 'debit' ? 'pret' : 'buy';   /* against a purchase: debit note = supplier owes back (like a purchase return), credit note = we owe more */
@@ -175,7 +179,10 @@
       other('tcs-payable', t.tcs);
       if (t.round) (t.round > 0 ? other : side)('round-off', Math.abs(t.round));
       /* marked paid on the bill itself (no payment entry linked): money came in on the bill date */
-      if (R === 'sale' && d.status === 'paid' && !d.paidBy) { dr(moneyAcct(d.payMode || 'cash'), t.total); cr(partyName(d) ? P : 'p:cash-customer', t.total); }
+      /* old gold taken in exchange (jewellery): bought from the customer at its value and set off against the bill, so the customer owes that much less */
+      var ex = R === 'sale' ? Math.min(num(d.exch), t.total) : 0;
+      if (ex > 0) { dr('purchases', ex); cr(partyName(d) ? P : 'p:cash-customer', ex); }
+      if (R === 'sale' && d.status === 'paid' && !d.paidBy) { dr(moneyAcct(d.payMode || 'cash'), r2(t.total - ex)); cr(partyName(d) ? P : 'p:cash-customer', r2(t.total - ex)); }
     } else if (R === 'in') {
       amt = num(d.amount); var tds = num(d.tds), dsc = num(d.disc);   /* disc: cash discount allowed when the customer paid (WP-3) */
       dr(payAcct(d), amt); dr('tds-receivable', tds); dr(DISC_A, dsc); cr(P, amt + tds + dsc);
@@ -352,6 +359,8 @@
   }
   /* the records a stored one stands for in the books: a petty cash book is one record per paid line; a paid salary slip adds its payment */
   function expand(d) {
+    /* mandi. and petrol. (vertical tools): the tool saves the books side of its record as ready-made records of the usual kinds in d.books (journal, cash memo, expense ...) */
+    if ((d.type === 'mandi' || d.type === 'pump' || d.type === 'mpay') && d.books && d.books.length) return d.books.map(function (x, i) { return Object.assign({ no: d.no }, x, { id: d.id + '#bk' + i, src: d.id, date: x.date || d.date, seller: d.seller, created: d.created || 0 }); });
     if (d.type === 'petty') {
       if (!d.acct) return [];
       return (d.lines || []).map(function (l, i) {
@@ -515,7 +524,11 @@
       if (!partyName(d)) return;
       if (R === 'fabuy') { if (d.mode === 'credit') bill(d, 'pay', num(d.amount) + num(d.gstAmt)); return; }
       if (R === 'fasale') { if (d.mode === 'credit') bill(d, 'recv', num(d.amount) + num(d.gstAmt)); return; }
-      if (R === 'sale') { t = itemTotals(d).total; bill(d, 'recv', t); if (d.status === 'paid' && !d.paidBy) credits.push({ side: 'recv', amt: t, to: d.id, date: d.date }); }
+      if (R === 'sale') {
+        t = itemTotals(d).total; bill(d, 'recv', t);
+        if (d.status === 'paid' && !d.paidBy) credits.push({ side: 'recv', amt: t, to: d.id, date: d.date });
+        else if (num(d.exch) > 0) credits.push({ side: 'recv', amt: Math.min(num(d.exch), t), to: d.id, date: d.date });   /* old gold set off */
+      }
       else if (R === 'sdeb') bill(d, 'recv', itemTotals(d).total);
       else if (R === 'buy') {
         t = itemTotals(d); bill(d, 'pay', d.type === 'self' ? t.taxable : t.total);

@@ -320,11 +320,20 @@
     return NS.loadLazy(need).then(function () { NS.acct.open(); }, function () { NS.toast(T('b3.ac.noload'), 'bad'); });
   };
 
+  /* the accountant's read-only file (cashare.js + caui.js, loaded when pressed; gap round 2026-11-14) */
+  NS.openCAShareLazy = function () {
+    var need = [];
+    if (!window.NSBooks) need.push('books.js');
+    if (!window.NSCAshare) need.push('cashare.js');
+    if (!window.NSCAUI) need.push('caui.js');
+    return NS.loadLazy(need).then(function () { NS.openCAShare(); }, function () { NS.toast(T('b3.ac.noload'), 'bad'); });
+  };
+
   /* ---------- the extra buttons in the My data box and the hub's Backup section ---------- */
   function extras(box, hub) {
     var w = NS.el('div', { 'class': 'b3-extra' });
     w.innerHTML = '<h3>' + E(T('b3.pw.t')) + '</h3><p class="note">' + E(T('b3.pw.p')) + '</p><div class="btns"><button type="button" class="btn" data-act="backup-lock">' + E(T('b3.pw.b')) + '</button></div>' +
-      '<h3>' + E(T('b3.ac.t')) + '</h3><p class="note">' + E(T('b3.ac.p')) + '</p><div class="btns"><button type="button" class="btn" data-act="acct">' + E(T('b3.ac.b')) + '</button></div>';
+      '<h3>' + E(T('b3.ac.t')) + '</h3><p class="note">' + E(T('b3.ac.p')) + '</p><div class="btns"><button type="button" class="btn" data-act="acct">' + E(T('b3.ac.b')) + '</button> <button type="button" class="btn" data-act="cashare">' + E(T('ca.mk')) + '</button></div>';
     if (hub) w.className += ' card';
     box.appendChild(w);
     NS.gdriveCard(box);
@@ -334,7 +343,7 @@
     var bk = NS.$('[data-md-pane="bk"]', body), ac = NS.$('[data-md-pane="ac"]', body);
     if (!bk || !ac || !NS.mdRow) { extras(body, false); return; }
     bk.insertAdjacentHTML('beforeend', NS.mdRow(T('b3.pw.t'), '', T('b3.pw.p'), '<button type="button" class="btn sm" data-act="backup-lock">' + E(T('b3.pw.b')) + '</button>'));
-    ac.insertAdjacentHTML('beforeend', NS.mdRow(T('b3.ac.t'), '', T('b3.ac.p'), '<button type="button" class="btn sm primary" data-act="acct">' + E(T('b3.ac.b')) + '</button>'));
+    ac.insertAdjacentHTML('beforeend', NS.mdRow(T('b3.ac.t'), '', T('b3.ac.p'), '<button type="button" class="btn sm primary" data-act="acct">' + E(T('b3.ac.b')) + '</button> <button type="button" class="btn sm" data-act="cashare">' + E(T('ca.mk')) + '</button>'));
     NS.gdriveCard(NS.$('[data-md-pane="af"]', body) || bk);
   }
   NS.mdExt = (NS.mdExt || []).concat([mdParts]);
@@ -344,5 +353,6 @@
     var a = b.getAttribute('data-act');
     if (a === 'backup-lock') NS.downloadLockedBackup().then(function (ok) { if (ok && NS.$('#ns-mydata[open]')) NS.openMyData(); }).catch(function () { NS.toast(T('b3.pw.fail'), 'bad'); });
     else if (a === 'acct') NS.openAccountant();
+    else if (a === 'cashare') NS.openCAShareLazy();
   });
 })(typeof window !== 'undefined' ? window : globalThis);

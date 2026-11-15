@@ -203,18 +203,25 @@
     var out = [];
     docs.forEach(function (tpl) {
       var r = tpl.rec; if (!r || !r.every || r.stop || !tpl.date) return;
-      var step = r.every === 'quarter' ? 3 : 1, made = {}, list = [];
+      var made = {}, list = [];
       docs.forEach(function (d) { if (d.recOf === tpl.id) made[d.recFor] = 1; });
-      for (var i = 1; i < 200; i++) {
-        var dt = addMonths(tpl.date, i * step);
-        if (dt > today || r.until && dt > r.until) break;
-        var per = dt.slice(0, 7);
-        if (!made[per]) list.push({ tpl: tpl, date: dt, period: per });
+      if (window.NSReuse) list = NSReuse.dueDates(tpl, made, today);   /* weekly to yearly, stop date, number of bills (reuse.js) */
+      else {
+        var step = r.every === 'quarter' ? 3 : 1;
+        for (var i = 1; i < 200; i++) {
+          var dt = addMonths(tpl.date, i * step);
+          if (dt > today || r.until && dt > r.until) break;
+          var per = dt.slice(0, 7);
+          if (!made[per]) list.push({ date: dt, period: per });
+        }
+        list = list.slice(-3);
       }
-      out = out.concat(list.slice(-3));
+      out = out.concat(list.map(function (x) { return { tpl: tpl, date: x.date, period: x.period }; }));
     });
     return out.sort(function (a, b) { return a.date.localeCompare(b.date); });
   };
+  /* the words for how often a standing bill repeats */
+  NS.repLabel = function (every) { return NS.t(every === 'month' ? 'b1.rep_m' : every === 'quarter' ? 'b1.rep_q' : 'cap.rep_' + every); };
   NS.recurringMake = function (item, all, CFG) {
     var tpl = item.tpl, d = JSON.parse(JSON.stringify(tpl)), gap = tpl.due ? NSBooks.daysBetween(tpl.date, tpl.due) : 0;
     ['id', 'created', 'updated', 'rec', 'irn', 'einv', 'paidBy', 'invNo', 'nextNo', 'nextType', 'fromId'].forEach(function (k) { delete d[k]; });
@@ -258,6 +265,8 @@
   /* ---------- registers and reports (English, like every printout) ---------- */
   var EN = { invoice: 'Invoice', cashmemo: 'Cash memo', credit: 'Credit note', debit: 'Debit note', receipt: 'Receipt', adv: 'Advance received', ref: 'Refund paid', voucher: 'Payment',
     pbill: 'Purchase bill', pret: 'Purchase return', exp: 'Expense', ob: 'Opening balance', self: 'Self invoice', pharma: 'Pharmacy bill', resto: 'Restaurant bill', lr: 'Lorry receipt', fee: 'Fee receipt', job: 'Service bill', rabill: 'RA bill', contra: 'Contra' };
+  EN.jewel = 'Jewellery bill'; EN.garment = 'Garment bill';
+  EN.gjob = 'Service bill';
   function enName(d) { var ty = d.type || 'invoice'; return EN[ty === 'note' ? d.kind : ty === 'receipt' && d.kind !== 'pay' ? d.kind : ty === 'pbill' && d.kind === 'return' ? 'pret' : ty] || ty; }
   function inRange(d, from, to) { return (!from || d.date >= from) && (!to || d.date <= to); }
   function sumRow(rows, from, label) {

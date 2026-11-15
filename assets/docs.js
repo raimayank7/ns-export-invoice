@@ -293,8 +293,9 @@
           : '<div class="f"><label for="d-status">' + esc(t('l.qstat')) + '</label><select id="d-status">' + stList().map(function (k) { return '<option value="' + k + '">' + esc(t('qs.' + k)) + '</option>'; }).join('') + '</select></div>') +
         '<div class="f"><span class="lbl" id="acc-lbl">' + esc(t('l.colour')) + '</span><div class="swatches" role="radiogroup" aria-labelledby="acc-lbl">' + ACCENTS.map(function (c, i) { return '<button type="button" role="radio" class="sw" data-accent="' + c + '" style="--c:' + c + '" aria-label="' + esc(t('colour.n', { n: i + 1 })) + '"></button>'; }).join('') + '</div></div>' +
         '<div class="f"><label class="chk"><input id="d-round" type="checkbox"> ' + esc(t('l.round')) + '</label></div>' +
-        (type === 'invoice' ? '<div class="f"><label for="d-rec">' + esc(t('b1.repeat')) + '</label><select id="d-rec"><option value="">' + esc(t('b1.rep_no')) + '</option><option value="month">' + esc(t('b1.rep_m')) + '</option><option value="quarter">' + esc(t('b1.rep_q')) + '</option></select><small class="hint">' + esc(t('b1.reph')) + '</small></div>' +
-          '<div class="f" id="rec-until-f">' + '<label for="d-recuntil">' + esc(t('b1.repuntil')) + '</label><input id="d-recuntil" type="date"><small class="hint">' + esc(t('b1.repuh')) + '</small></div>' : '') +
+        (type === 'invoice' ? '<div class="f"><label for="d-rec">' + esc(t('b1.repeat')) + '</label><select id="d-rec"><option value="">' + esc(t('b1.rep_no')) + '</option><option value="week">' + esc(t('cap.rep_week')) + '</option><option value="fortnight">' + esc(t('cap.rep_fortnight')) + '</option><option value="month">' + esc(t('b1.rep_m')) + '</option><option value="quarter">' + esc(t('b1.rep_q')) + '</option><option value="half">' + esc(t('cap.rep_half')) + '</option><option value="year">' + esc(t('cap.rep_year')) + '</option></select><small class="hint">' + esc(t('b1.reph')) + '</small></div>' +
+          '<div class="f" id="rec-until-f">' + '<label for="d-recuntil">' + esc(t('b1.repuntil')) + '</label><input id="d-recuntil" type="date"><small class="hint">' + esc(t('b1.repuh')) + '</small></div>' +
+          '<div class="f" id="rec-max-f"><label for="d-recmax">' + esc(t('cap.repmax')) + '</label><input id="d-recmax" inputmode="numeric" dir="ltr" maxlength="3" autocomplete="off"><small class="hint">' + esc(t('cap.repmaxh')) + '</small></div>' : '') +
         '<p class="hint wide print-note">' + esc(tw('print.en')) + '</p>' +
       '</div></fieldset>' +
       ext('editor').join('');
@@ -349,12 +350,14 @@
     $$('[data-chgdel]', box).forEach(function (b) { b.addEventListener('click', function () { doc.charges.splice(+b.getAttribute('data-chgdel'), 1); renderCharges(); draw(); saveDraft(); }); });
   }
   /* rate of a saved item for this document: purchase price on buying documents, wholesale rate for a wholesale party, else the sale rate */
-  var buyerType = '', autoDue = '';
+  var buyerType = '', buyerParty = null, autoDue = '';
   function syncBuyer() {
-    var nm = key(doc.buyer.name); if (!nm) { buyerType = ''; return; }
-    NSStore.list('party').then(function (all) { var p = all.filter(function (x) { return key(x.name) === nm; })[0]; buyerType = p && p.ptype || ''; }).catch(function () {});
+    var nm = key(doc.buyer.name); if (!nm) { buyerType = ''; buyerParty = null; return; }
+    NSStore.list('party').then(function (all) { var p = all.filter(function (x) { return key(x.name) === nm; })[0]; buyerType = p && p.ptype || ''; buyerParty = p || null; }).catch(function () {});
   }
   function rateFor(m) {
+    var own = window.NSReuse ? NSReuse.partyRate(buyerParty, m.desc) : null;   /* this party's own price list (My data > party > Special prices) comes first */
+    if (own != null) return own;
     /* buying documents and notes against purchases take the purchase rate, never the selling rate (round C) */
     if (buying()) return m.prate !== '' && m.prate != null ? m.prate : '';
     if (buyerType === 'wholesale' && m.wrate !== '' && m.wrate != null) return m.wrate;
@@ -414,7 +417,7 @@
       renderItems(); renderCharges(); syncBuyer();
       var tc = doc.tcs || {};
       if ($('#tcs-on', ed)) { $('#tcs-on', ed).checked = !!tc.on; $('#tcs-sec', ed).value = tc.sec || ''; $('#tcs-rate', ed).value = tc.rate == null ? '' : tc.rate; $('#tcs-base', ed).value = tc.base || 'total'; $('#tcs-pan', ed).value = tc.pan || ''; $('#tcs-nopanok', ed).checked = !!tc.nopanOk; panNote(); if (tc.on) $('#tcs-box', ed).open = true; }
-      if ($('#d-rec', ed)) { $('#d-rec', ed).value = doc.rec && doc.rec.every || ''; $('#d-recuntil', ed).value = doc.rec && doc.rec.until || ''; }
+      if ($('#d-rec', ed)) { $('#d-rec', ed).value = doc.rec && doc.rec.every || ''; $('#d-recuntil', ed).value = doc.rec && doc.rec.until || ''; $('#d-recmax', ed).value = doc.rec && doc.rec.max || ''; }
       ['s-gstin', 'b-gstin'].forEach(checkGstin);
       $$('[data-gf]', ed).forEach(function (i) { i.dispatchEvent(new Event('gf-sync')); });
       ext('fill', ed);
@@ -436,7 +439,7 @@
     $('#comp-box', ed).hidden = doc.kind !== 'supply';
     /* reverse charge is a tax-invoice matter: not on a bill of supply or a plain (unregistered) invoice (round C) */
     var rcb = $('#d-rc', ed); if (rcb && T.kinds.indexOf('tax') >= 0) rcb.closest('.f').hidden = doc.kind !== 'tax';
-    if ($('#rec-until-f', ed)) $('#rec-until-f', ed).hidden = !(doc.rec && doc.rec.every);
+    if ($('#rec-until-f', ed)) $('#rec-until-f', ed).hidden = $('#rec-max-f', ed).hidden = !(doc.rec && doc.rec.every);
     $$('#chg-list .chg .f:nth-child(3)', ed).forEach(function (f) { f.hidden = !taxOn(doc); });
   }
 
@@ -501,7 +504,7 @@
       var nat = id === 'tcs-sec' && tcsNature(el.value), rf = $('#tcs-rate', root);
       if (nat && (!doc.tcs.rate || doc.tcs.rate === doc.tcs.auto)) { doc.tcs.rate = doc.tcs.auto = String(nat[1]); if (rf) rf.value = doc.tcs.rate; }
     }
-    else if (id === 'd-rec' || id === 'd-recuntil') { doc.rec = $('#d-rec', root).value ? { every: $('#d-rec', root).value, until: $('#d-recuntil', root).value } : null; fillForm(true); }
+    else if (id === 'd-rec' || id === 'd-recuntil' || id === 'd-recmax') { doc.rec = $('#d-rec', root).value ? { every: $('#d-rec', root).value, until: $('#d-recuntil', root).value } : null; if (doc.rec && parseInt($('#d-recmax', root).value, 10) > 0) doc.rec.max = parseInt($('#d-recmax', root).value, 10); fillForm(true); }
     else return;
     if (id === 's-gstin' || id === 'b-gstin') {
       el.value = el.value.toUpperCase();
@@ -946,7 +949,7 @@
         var st = T.pay ? '<span class="pill ' + (d.status === 'paid' ? 'ok' : '') + '">' + esc(part ? NS.t('app.left', { a: NS.money(lb.left) }) : t(d.status === 'paid' ? 'h.paidp' : 'h.unpaidp')) + '</span>'
           : '<span class="pill ' + (d.status === 'acc' || d.status === 'inv' ? 'ok' : '') + '">' + esc(t('qs.' + (d.status || 'open'))) + (d.invNo ? ' ' + esc(d.invNo) : '') + '</span>';
         if (d.sample) st += ' <span class="b1-pill">' + esc(t('b1.sample')) + '</span>';
-        if (d.rec && d.rec.every) st += ' <span class="pill">' + esc(t(d.rec.every === 'quarter' ? 'b1.rep_q' : 'b1.rep_m')) + '</span>';
+        if (d.rec && d.rec.every) st += ' <span class="pill">' + esc(NS.repLabel(d.rec.every)) + '</span>';
         return '<li><div><b class="mono">' + esc(d.no) + '</b> · ' + NS.fmtDate(d.date) + '<br><span>' + esc(d.buyer && d.buyer.name || t('h.nocust')) + '</span> · <b>' + NS.money(d.total || 0) + '</b> ' + st + '</div>' +
           '<div class="row"><button type="button" class="btn sm" data-h="open" data-id="' + d.id + '">' + esc(t('h.open')) + '</button><button type="button" class="btn sm" data-h="copy" data-id="' + d.id + '">' + esc(t('h.copy')) + '</button>' +
           (T.pay ? '<button type="button" class="btn sm" data-h="paid" data-id="' + d.id + '">' + esc(t(d.status === 'paid' ? 'h.unpaid' : 'h.paid')) + '</button>' : '') +
@@ -1097,16 +1100,21 @@
     ed.addEventListener('input', function () { typed = true; });
     /* the form shows at once (it used to wait for the data home, up to 6 s on a first visit, while the preview already showed);
            saved defaults arrive later and never overwrite what the visitor has started typing */
-    if (!/[?&](open|from)=/.test(location.search)) root.classList.add('live');
+    if (!/[?&](open|from|copy)=/.test(location.search)) root.classList.add('live');
     NSStore.ready().then(function () {
       return NS.loadCfg().then(function (c) { CFG = c || {}; }, function () {});
     }).then(function () {
-      var qs = new URLSearchParams(location.search), from = qs.get('from'), open = qs.get('open');
+      var qs = new URLSearchParams(location.search), from = qs.get('from'), open = qs.get('open'), copy = qs.get('copy');
       if (NS.leaving) return;   /* this page is moving to the visitor's language page, which reads ?from= itself */
       /* ?open=<id>: the Nivesh Sahayak App opens a saved document here to edit, print or share */
       if (open) {
         history.replaceState(null, '', location.pathname + location.hash);
         return NSStore.get('doc', open).then(function (rec) { if (rec && (rec.type || 'invoice') === type && T.split && T.kinds.indexOf(rec.kind) < 0 && T.split[rec.kind]) { location.replace((NS.siteHref ? NS.siteHref(T.split[rec.kind]) : kindSite(T.split[rec.kind])) + '?open=' + encodeURIComponent(open)); return; } if (rec && (rec.type || 'invoice') === type) { openDoc(rec, false); render(); } else NS.toast(t('conv.none'), 'bad'); }).catch(function () {});
+      }
+      /* ?copy=<id>: the App's "make the same bill again": a saved document of this kind opened as a new one (today's date, next number) */
+      if (copy) {
+        history.replaceState(null, '', location.pathname + location.hash);
+        return NSStore.get('doc', copy).then(function (rec) { if (rec && (rec.type || 'invoice') === type) { openDoc(rec, true); render(); } else NS.toast(t('conv.none'), 'bad'); }).catch(function () {});
       }
       if (from) {
         history.replaceState(null, '', location.pathname + location.hash);
