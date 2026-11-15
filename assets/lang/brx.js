@@ -6679,3 +6679,11 @@ NS.addLang("brx", {
   "cap.prices_none": "No bills with this party were found to read rates from.",
   "cap.prices_name": "Type the party's name first."
 });
+
+/* Lines changed on 15 Nov 2026 (ESI template, income-tax source) */
+NS.addLang("brx", {
+  "pr.e_lastday": "last working day needed for this reason code",
+  "pr.unver_esi": "This sheet follows the ESIC portal's own Monthly Contribution template (checked 15 Nov 2026): six text columns, saved as Excel 97-2003 (.xls). Employees with no wages this month are listed too, with a reason code. Upload one month first and look at the portal's result.",
+  "it.b4": "The sections above were checked word by word on 15 Nov 2026 against the official text on the Income Tax Department's website (incometaxindia.gov.in). The printed Act decides.",
+  "it.f_def_h": "Capital gains, winnings, dividend or first-year business profit you have not earned yet: not counted for the earlier instalments if paid in the remaining ones (section 425(4))."
+});
