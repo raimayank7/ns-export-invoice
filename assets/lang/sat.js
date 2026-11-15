@@ -8969,3 +8969,9 @@ NS.addLang("sat", {
   "cap.c_future_warn": "ᱵᱤᱞ ᱛᱟᱨᱤᱠ {a} ᱫᱚ ᱦᱮᱡᱚᱜ ᱚᱠᱛᱚ ᱨᱮ ᱢᱮᱱᱟᱜᱼᱟ᱾",
   "cap.c_noitems_warn": "ᱪᱮᱫ ᱦᱚᱸ ᱟᱭᱴᱮᱢ ᱞᱟᱭᱤᱱ ᱵᱟᱝ ᱯᱟᱲᱦᱟᱣ ᱜᱟᱱ ᱞᱮᱱᱟ᱾ ᱴᱮᱠᱥ ᱞᱟᱜᱟᱣ ᱫᱟᱢ ᱥᱟᱶ ᱢᱤᱫ ᱞᱟᱭᱤᱱ ᱛᱮᱭᱟᱨ ᱮᱱᱟ: ᱟᱭᱴᱮᱢ ᱚᱞ ᱢᱮ᱾"
 });
+
+/* App home: two more lines of what the app does (15 Nov 2026) */
+NS.addLang("sat", {
+  "app.ab.11": "Staff and tax: salary slips, attendance, the PF return and ESI files, advance tax and income tax planning, bank statement import and reading a supplier's bill from a photo.",
+  "app.ab.12": "My day: what needs you today, a month-end checklist, a business health score and reminders, plus ready tools for clinics, salons, hotels, rent, garages, jewellers, mandis, petrol pumps and more."
+});

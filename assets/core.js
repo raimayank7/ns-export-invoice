@@ -237,6 +237,7 @@
   /* {supported, on, name, file, allowed, waiting, last}; home: false when the data home could not be reached */
   NS.folderStatus = function () {
     if (!NS.folderSupported()) return Promise.resolve({ supported: false });
+    if (!window.NSStore) return Promise.resolve({ supported: true, on: false, home: false });   /* pages with no saved data (view.) */
     return NSStore.autosave('afStatus').then(function (st) { return st || { supported: true, on: false, home: false }; },
       function () { return { supported: true, on: false, home: false }; });
   };
@@ -811,10 +812,18 @@
     money: 'M3 7h18v10H3zM12 9.5a2.5 2.5 0 1 0 0 5 2.5 2.5 0 0 0 0-5M6 10v4M18 10v4', clock: 'M12 4a8 8 0 1 0 0 16 8 8 0 0 0 0-16M12 8v4l3 2',
     home: 'M3 11l9-7 9 7v9h-6v-6H9v6H3z', people: 'M9 4a4 4 0 1 0 0 8 4 4 0 0 0 0-8M2 21a7 7 0 0 1 14 0M16 4a4 4 0 0 1 0 8M18 14a6 6 0 0 1 4 7', box: 'M3 7l9-4 9 4v10l-9 4-9-4zM3 7l9 4 9-4M12 11v10', shop: 'M4 10v10h16V10M3 10l2-6h14l2 6zM9 20v-6h6v6', book: 'M4 4h6a2 2 0 0 1 2 2v14a2 2 0 0 0-2-2H4zM20 4h-6a2 2 0 0 0-2 2v14a2 2 0 0 1 2-2h6z', bank: 'M3 10l9-6 9 6M5 10v8M9 10v8M15 10v8M19 10v8M3 21h18', filter: 'M3 5h18l-7 8v6l-4 2v-8z', chart: 'M4 4v16h16M8 16v-5M12 16V8M16 16v-3', keyboard: 'M3 6h18v12H3zM7 10h1M11 10h1M15 10h1M7 14h10', eye: 'M2 12s4-7 10-7 10 7 10 7-4 7-10 7S2 12 2 12M12 9a3 3 0 1 0 0 6 3 3 0 0 0 0-6', camera: 'M4 7h4l2-3h4l2 3h4v13H4zM12 10a3.5 3.5 0 1 0 0 7 3.5 3.5 0 0 0 0-7', calc: 'M6 3h12v18H6zM9 7h6M9 11h1M12 11h1M15 11h1M9 15h1M12 15h1M15 15h1', calendar: 'M4 6h16v15H4zM4 10h16M8 3v4M16 3v4', cart: 'M4 5h2l2 10h10l2-7H7M9 19h.01M17 19h.01',
     folder: 'M3 6h6l2 2h10v11H3z',
+    repeat: 'M17 2l4 4-4 4M3 11V9a3 3 0 0 1 3-3h15M7 22l-4-4 4-4M21 13v2a3 3 0 0 1-3 3H3', layers: 'M12 3l9 5-9 5-9-5zM3 13l9 5 9-5M3 17l9 5 9-5',
+    coins: 'M12 4c4 0 7 1.1 7 2.5S16 9 12 9 5 7.9 5 6.5 8 4 12 4zM5 6.5v5C5 12.9 8 14 12 14s7-1.1 7-2.5v-5M5 11.5v5C5 17.9 8 19 12 19s7-1.1 7-2.5v-5',
+    scale: 'M12 3v18M7 21h10M5 7h14M5 7l-3 7a3 3 0 006 0zM19 7l-3 7a3 3 0 006 0z', shield: 'M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6zM9 12l2 2 4-4',
+    writeoff: 'M6 3h9l4 4v14H6zM14 3v5h5M8 16l8-6', cap: 'M2 9l10-5 10 5-10 5zM6 11v5c3 2.5 9 2.5 12 0v-5M22 9v6',
+    star: 'M12 3l2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 17l-5.4 2.9 1-6.1-4.4-4.3 6.1-.9z', bed: 'M3 18V7M3 13h18v5M21 13a3 3 0 0 0-3-3h-7v3M7 10.5a1.5 1.5 0 1 0 0 .01',
+    wrench: 'M14.7 6.3a4 4 0 0 0-5.4 5.4L3 18l3 3 6.3-6.3a4 4 0 0 0 5.4-5.4l-2.6 2.6-2.4-.6-.6-2.4z',
+    pulse: 'M3 12h4l3-7 4 14 3-7h4', bell: 'M6 16V11a6 6 0 0 1 12 0v5l2 2H4zM10 20a2 2 0 0 0 4 0',
     file: 'M6 3h9l4 4v14H6zM14 3v5h5', link: 'M10 14a4 4 0 0 0 6 0l3-3a4 4 0 0 0-6-6l-1 1M14 10a4 4 0 0 0-6 0l-3 3a4 4 0 0 0 6 6l1-1'
   };
   /* first match wins: [regular expression over "data names + key + English words", icon] */
-  var ICRULES = [[/whats\s?app|\bwa\b/, 'wa'], [/print/, 'print'], [/s-backup/, 'data'], [/desk\.keys|keyboard|shortcut/, 'keyboard'],
+  var ICRULES = [[/whats\s?app|\bwa\b/, 'wa'], [/print/, 'print'], [/stop repeat/, 'x'], [/see and make|repeating|renewals?\b/, 'repeat'], [/write.?off/, 'writeoff'], [/comments file|choose the file/, 'up'], [/make the link/, 'link'],
+    [/s-backup/, 'data'], [/desk\.keys|keyboard|shortcut/, 'keyboard'],
     [/preview/, 'eye'], [/scan|camera/, 'camera'], [/\bpf\b|work out|calculat/, 'calc'], [/filt|\bcf\b|post-dated|bounce|below zero/, 'filter'],
     [/get name|gst portal/, 'search'], [/restore|import|upload/, 'up'], [/backup|download|export|excel|csv|install/, 'down'],   /* "Restore from backup" is an upload (round C) */
     [/\bpdf\b|share/, 'share'], [/delete|remove|\brm\b|bin|trash|clear|-off\b/, 'trash'], [/report|tell|mistake/, 'flag'], [/later/, 'clock'],
@@ -822,6 +831,10 @@
     [/\bnext\b|continue/, 'go'], [/setting|configur/, 'gear'], [/\bsave\b|submit|\bok\b|use these|apply|done/, 'save'],   /* "Next" and "Settings and saved data" are not a floppy disk (round C) */ [/\bnew\b|\badd\b|create/, 'plus'], [/edit|change|rename|series/, 'edit'], [/copy|duplicate/, 'copy'],
     [/close|cancel|dismiss/, 'x'], [/\bback\b|fback/, 'back'], [/search|find|lookup|fetch|check gstin/, 'search'], [/history|saved|list|register/, 'list'],
     [/setting|configur/, 'gear'], [/my.?data|vault/, 'data'], [/new tab|external|portal/, 'ext'],
+    [/all tools by job|group summary|rent board/, 'layers'], [/feedback|loyalty/, 'star'], [/staff view/, 'people'], [/room diary/, 'calendar'], [/\brooms?\b/, 'bed'],
+    [/\bunits\b/, 'home'], [/products and variants/, 'box'], [/service visits?/, 'wrench'], [/all contracts|\bcontracts?\b/, 'file'], [/attendance/, 'calendar'], [/\besi\b/, 'shield'], [/staff advance|\bsalary\b/, 'money'], [/\bloans?\b|\bemi\b/, 'coins'],
+    [/trial balance|balance sheet/, 'scale'], [/profit and loss/, 'chart'], [/students?\b/, 'cap'], [/fee set.?up/, 'gear'],
+    [/month end/, 'calendar'], [/business health|health \d/, 'pulse'], [/\breminders\b/, 'bell'],
     [/paid|payment|money|receiv|cash|\bpay\b/, 'money'], [/later|ageing|due/, 'clock'], [/open|convert|toinv|make invoice|next|go\b/, 'go'], [/doc|bill|invoice|statement|receipt|stmt/, 'file'],
     [/\bbk\b|book/, 'book'], [/b2pv|by item|by party|month|\bday\b|today|sale/, 'chart'], [/financial year|\bfy\b|year/, 'calendar'],
     [/salesm|customer|supplier|part(y|ies)|tenant|employee/, 'people'], [/count|stock|godown|item/, 'box'], [/bank/, 'bank'],

@@ -2184,6 +2184,8 @@
     "app.ab.8": "Stock and accounts: stock with godowns and batches, manufacturing, party and stock ledgers, trial balance and final accounts (T format or Schedule III).",
     "app.ab.9": "GST work: GSTR-1 tables and the JSON file for the portal, GSTR-3B working, GSTR-2B matching, and e-invoice and e-way bill files.",
     "app.ab.10": "Every document opens inside the App. Install it, and a short first-run setup switches on what your kind of business needs.",
+    "app.ab.11": "Staff and tax: salary slips, attendance, the PF return and ESI files, advance tax and income tax planning, bank statement import and reading a supplier's bill from a photo.",
+    "app.ab.12": "My day: what needs you today, a month-end checklist, a business health score and reminders, plus ready tools for clinics, salons, hotels, rent, garages, jewellers, mandis, petrol pumps and more.",
     /* Fixes user test 2026-11-06 (accounts) */
     "fx.ty_stk": "Production and job work (Stock Journal)",
     "fx.ty_sj": "Production, job work and godown transfers come as Stock Journal vouchers. In TallyPrime turn on multiple godowns (F11) first.",

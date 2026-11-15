@@ -8786,3 +8786,9 @@ NS.addLang("or", {
   "cap.c_future_warn": "ବିଲ୍ ତାରିଖ {a} ଭବିଷ୍ୟତର।",
   "cap.c_noitems_warn": "କୌଣସି ଆଇଟମ୍ ଲାଇନ୍ ପଢ଼ି ହେଲା ନାହିଁ। ଟ୍ୟାକ୍ସେବଲ୍ ମୂଲ୍ୟ ସହ ଗୋଟିଏ ଲାଇନ୍ ତିଆରି ହେଲା: ଆଇଟମ୍ ଲେଖନ୍ତୁ।"
 });
+
+/* App home: two more lines of what the app does (15 Nov 2026) */
+NS.addLang("or", {
+  "app.ab.11": "Staff and tax: salary slips, attendance, the PF return and ESI files, advance tax and income tax planning, bank statement import and reading a supplier's bill from a photo.",
+  "app.ab.12": "My day: what needs you today, a month-end checklist, a business health score and reminders, plus ready tools for clinics, salons, hotels, rent, garages, jewellers, mandis, petrol pumps and more."
+});
