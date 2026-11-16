@@ -362,3 +362,37 @@
   function init() { build(); }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init); else init();
 })();
+
+/* What's new (App only, NS_CFG.wn = newest day + its first headline): a dot on the side menu link when the App changed since
+   this person last opened What's new, and one slim note after an update. First visit: remembered quietly, no note. */
+(function () {
+  var W = window.NS_CFG && NS_CFG.wn;
+  if (!W || window.top !== window || !window.NS) return;
+  var SEEN = 'ns-wn-seen', NOTE = 'ns-wn-note', get = function (k) { try { return localStorage.getItem(k) || ''; } catch (e) { return null; } };
+  var put = function (k) { try { localStorage.setItem(k, W.d); } catch (e) {} };
+  var seen = get(SEEN);
+  if (seen === null) return;
+  if (/\/whats-new\/$/.test(location.pathname)) [].forEach.call(document.querySelectorAll('#ns-side a[href$="whats-new/"]'), function (a) { a.setAttribute('aria-current', 'page'); });
+  if (/\/whats-new\/$/.test(location.pathname) || !seen) { put(SEEN); put(NOTE); return; }
+  if (seen >= W.d) return;
+  function dot() { [].forEach.call(document.querySelectorAll('#ns-side a[href$="whats-new/"]'), function (a) { a.classList.add('wn-new'); }); }
+  dot(); setTimeout(dot, 1500);
+  if (get(NOTE) >= W.d) return;
+  function note() {
+    if (document.getElementById('ns-wnnote')) return;
+    var L = NS.lang ? NS.lang() : 'en', link = document.querySelector('#ns-side a[href$="whats-new/"]');
+    var bar = NS.el('div', { id: 'ns-wnnote', class: 'remind', role: 'status' });
+    bar.innerHTML = '<div class="wrap"><span></span><a class="btn primary" data-ic="new"></a><button type="button" class="btn" data-wn-ok></button></div>';
+    NS.$('span', bar).textContent = NS.t('wn.note') + ' ' + ((W.t && (W.t[L] || W.t.en)) || '');
+    var a = NS.$('a', bar); a.href = link ? link.getAttribute('href') : '/whats-new/'; a.textContent = NS.t('wn.see');
+    var ok = NS.$('[data-wn-ok]', bar); ok.textContent = NS.t('wn.ok');
+    ok.onclick = function () { put(NOTE); bar.remove(); };
+    a.addEventListener('click', function () { put(NOTE); });
+    var at = document.getElementById('main') || document.body; at.insertBefore(bar, at.firstChild);
+    document.addEventListener('ns-lang', function () {
+      var l2 = NS.lang(); NS.$('span', bar).textContent = NS.t('wn.note') + ' ' + ((W.t && (W.t[l2] || W.t.en)) || '');
+      a.textContent = NS.t('wn.see'); ok.textContent = NS.t('wn.ok');
+    });
+  }
+  if (document.readyState === 'complete') setTimeout(note, 2500); else window.addEventListener('load', function () { setTimeout(note, 2500); });
+})();

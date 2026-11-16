@@ -8957,3 +8957,11 @@ NS.addLang("bho", {
   "oa.inst2": "Tip: install the App. An installed App keeps your OK for this folder, so {b} does not ask again after it is closed. In a normal tab, choose “Allow on every visit” if {b} offers it.",
   "oa.thisbr": "the browser"
 });
+
+/* What's new in the App (16 Nov 2026) */
+NS.addLang("bho", {
+  "wn.title": "What's new",
+  "wn.note": "New in the App:",
+  "wn.see": "See what changed",
+  "wn.ok": "Got it"
+});
