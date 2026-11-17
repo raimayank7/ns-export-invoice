@@ -344,6 +344,7 @@
       if (n) { var a = $$('#ns-side a[data-sec]')[+n[1] - 1]; if (a) { e.preventDefault(); a.click(); a.focus(); } return; }
       var c = (e.code || '').replace('Key', '').toLowerCase();
       if (c === 'n') { e.preventDefault(); goUrl(siteUrl('billing')); return; }
+      if (c === 'q' && app && app.quickEntry) { e.preventDefault(); if (!e.repeat) app.quickEntry(); return; }   /* quick entry (app.js) */
       /* a key pressed while the App is still fetching its data is kept and runs the moment the data is in (it used to be dropped) */
       var job = { r: 'min', p: 'mout', b: 'pbill', x: 'exp' }[c];
       if (app && app.openForm && job) { e.preventDefault(); if (e.repeat) return; (app.whenReady || function (f) { f(); })(function () { if (app.biz() && !$('dialog[open]')) app.openForm(job); }); }
