@@ -254,7 +254,7 @@
 
   /* shared folder mode (sharedfolder.js): a staff member signed in on this tab cannot delete, nor change settings and PINs. A lock for everyday
      use, not security: it is only in the page. Off (no role set) = nothing changes. */
-  var SF_NO = { settings: 1, pin: 1, groups: 1, heads: 1, sf: 1 };
+  var SF_NO = { settings: 1, pin: 1, groups: 1, heads: 1, sf: 1, sfcfg: 1 };
   function sfDenied(op, store, id) {
     try { if (sessionStorage.getItem('ns-sf-role') !== 'staff') return false; } catch (e) { return false; }
     return op === 'del' || (store === 'meta' && !!SF_NO[id]);
@@ -339,6 +339,18 @@
     sfTag: function () {
       return Promise.all([call('get', { store: 'meta', id: 'sf' }), call('get', { store: 'meta', id: 'sf-tag' })]).then(function (r) { return r[0] && r[0].v && r[0].v.on && r[1] && r[1].v || ''; }, function () { return ''; });
     },
+    /* shared folder mode, common series: the App page around a maker (or the page itself) holds the folder; null = not available here, number as usual */
+    sfClaim: function (a) { return sfReady().then(function (sf) { if (!sf) return null; a.owner = SF_OWNER; hookLeave(sf); return sf.claim(a).then(function (n) { return n || null; }, function () { return null; }); }); },
+    sfRelease: function () { return sfReady().then(function (sf) { return sf ? sf.release(SF_OWNER) : null; }); },
+    sfEditing: function (id, no) { return sfReady().then(function (sf) { if (!sf) return null; hookLeave(sf); return sf.setEditing(SF_OWNER, id || null, no || '').then(function () { return id ? sf.editorOf(id) : null; }, function () { return null; }); }); },
     uid: uid
   };
+  var SF_OWNER = 'o' + Math.random().toString(36).slice(2, 10), leaving = false;
+  /* waits until the App page knows whether the shared folder is on (a few seconds after it opened); a page with no App around it answers at once */
+  function sfReady() {
+    try { var w = host ? window.parent : window; if (!(w.NS && w.NS.sf && w.NS.sf.ready)) return Promise.resolve(null); return w.NS.sf.ready().then(sfTop); } catch (e) { return Promise.resolve(null); }
+  }
+  function sfTop() { try { var w = host ? window.parent : window; return w.NS && w.NS.sf && w.NS.sf.engine && w.NS.sf.engine() ? w.NS.sf : null; } catch (e) { return null; } }
+  /* the page (a maker's frame) closes: its reserved number goes back unless a bill has it, and it no longer shows as editing */
+  function hookLeave(sf) { if (leaving) return; leaving = true; window.addEventListener('pagehide', function () { try { sf.release(SF_OWNER); sf.setEditing(SF_OWNER, null); } catch (e) {} }); }
 })();

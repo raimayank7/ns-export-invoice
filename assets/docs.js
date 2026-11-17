@@ -539,19 +539,22 @@
     var prefix = (pre ? pre + '/' : '') + (c.fy === false ? '' : short + '/'), digits = Math.min(6, Math.max(1, +c.digits || 3));
     return Promise.all([NSStore.list('doc'), NSStore.sfTag()]).then(function (r) {
       var all = r[0]; prefix += r[1];   /* shared folder mode: this computer's own letter, INV/26-27/A001 */
-      var key = (doc.seller.name || '').trim().toLowerCase(), max = 0;
+      var key = (doc.seller.name || '').trim().toLowerCase(), max = 0, nos = [];
       all.forEach(function (d) {
         if (d.type !== doc.type || d.id === editingId || NS.fy(d.date) !== fy) return;
         if (d.counter) return;   /* bills of the pos counter have their own POS/ series */
         if (T.prefixes && sk(d) !== sk(doc)) return;
         if ((d.seller && d.seller.name || '').trim().toLowerCase() !== key) return;
         var m = String(d.no || '').match(/(\d+)\s*$/);
-        if (m) max = Math.max(max, +m[1]);
+        if (m) { max = Math.max(max, +m[1]); nos.push(d.no); }
       });
       if (force || !doc.no || doc.no === lastAuto || /^[A-Z]+\/\d\d-\d\d\/[A-Z]{0,3}\d+$/.test(doc.no)) {
-        doc.no = lastAuto = prefix + String(max + 1).padStart(digits, '0');
-        var n = $('#d-no', root); if (n) n.value = doc.no;
-        draw();
+        /* shared folder mode, one common series: the number is reserved in the folder, so two computers never get the same one */
+        return NSStore.sfClaim({ scope: key, prefix: prefix, digits: digits, nos: nos }).then(function (c) {
+          doc.no = lastAuto = c || prefix + String(max + 1).padStart(digits, '0');
+          var n = $('#d-no', root); if (n) n.value = doc.no;
+          draw();
+        });
       }
     });
   }
@@ -905,6 +908,8 @@
   function setStatus() {
     var st = $('#tool-status', root);
     if (st) st.textContent = editingId ? tw('st.edit', { no: doc.no }) : tw('st.new');
+    /* shared folder mode: another computer has this bill open right now */
+    var eid = editingId; NSStore.sfEditing(editingId, doc.no).then(function (o) { if (o && st && eid === editingId) st.textContent = tw('st.edit', { no: doc.no }) + ' \u00b7 ' + NS.t('sfd.editing', { who: o.who || o.name }); });
   }
 
   function startNew() {

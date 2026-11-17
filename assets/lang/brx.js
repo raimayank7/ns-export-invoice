@@ -9125,7 +9125,7 @@ NS.addLang("brx", {
   "cp.scope": "The rule is for micro and small suppliers registered on Udyam when they supplied. Ask your CA whether a supplier that only trades (retail or wholesale trade) is covered.",
   /* Shared folder mode (sharedfolder.js) */
   "sfd.tab": "Shared folder",
-  "sfd.p": "Use one shared folder on several computers. Everyone opens the App on their own computer and all of you read and write the same folder, for example a shared Windows folder or a OneDrive folder. A bill made on one computer shows up on the others within a minute. No server, no extra cost.",
+  "sfd.p": "Use one shared folder on several computers. Everyone opens the App on their own computer and all of you read and write the same folder, for example a shared Windows folder or a OneDrive folder. A bill made on one computer shows up on the others within a few seconds. No server, no extra cost.",
   "sfd.no": "This needs Chrome or Edge on a computer. On a phone, Firefox or Safari it is not available. Keep saving your own backup file there.",
   "sfd.safe": "Your records stay in this browser as always; the folder only carries the changes. If the folder cannot be reached you can keep working, and it catches up later.",
   "sfd.choose": "Choose the shared folder",
@@ -9183,5 +9183,15 @@ NS.addLang("brx", {
   "sfd.ago.m": "{n} min ago",
   "sfd.ago.h": "{n} hours ago",
   /* Shared folder mode (sharedfolder.js) */
-  "sfd.sites": "The letter is also added in the separate tools (billing, receipt and so on) once the App has been opened on this computer. If you can, make bills inside the App. If two computers still make the same number, it is listed above under \"Same number used twice\"."
+  "sfd.sites": "The letter is also added in the separate tools (billing, receipt and so on) once the App has been opened on this computer. If you can, make bills inside the App. If two computers still make the same number, it is listed above under \"Same number used twice\".",
+  /* Shared folder mode (sharedfolder.js) */
+  "sfd.num.t": "Bill numbers",
+  "sfd.num.common": "One common series for all computers (live)",
+  "sfd.num.common.h": "INV/26-27/001, 002, 003 ... in the order the bills are made, whichever computer makes them. When someone opens a new bill, the number is reserved in the shared folder at once, so nobody else gets it. Best on a Windows shared folder in your office network.",
+  "sfd.num.letters": "Each computer has its own letter",
+  "sfd.num.letters.h": "INV/26-27/A001 on one computer, B001 on the next. Numbers can never clash, even when a computer is offline or the folder is slow (for example a OneDrive folder), but each computer counts its own bills.",
+  "sfd.num.slow": "The network is slow: wait longer before a number is confirmed",
+  "sfd.reserved": "Numbers reserved on this computer and not saved yet: {list}. A number nobody saves is given back.",
+  "sfd.reserved.none": "No number is reserved on this computer right now.",
+  "sfd.editing": "also open on another computer ({who})"
 });
