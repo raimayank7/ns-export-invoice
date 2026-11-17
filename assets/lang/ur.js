@@ -8290,7 +8290,38 @@ NS.addLang("ur", {
   "sfd.num.slow": "The network is slow: wait longer before a number is confirmed",
   "sfd.reserved": "Numbers reserved on this computer and not saved yet: {list}. A number nobody saves is given back.",
   "sfd.reserved.none": "No number is reserved on this computer right now.",
-  "sfd.editing": "also open on another computer ({who})"
+  "sfd.editing": "also open on another computer ({who})",
+  /* Declarations maker (decl.js) */
+  "nav.declaration": "Declarations (Form 127)",
+  "f.declaration": "Declarations (Form 127 and more)",
+  "dc.l.form": "Which declaration?",
+  "dc.fillme": "Fill my saved details",
+  "dc.saveme": "Save these as my details",
+  "dc.from": "Fill from a saved business or party",
+  "dc.reset": "Clear the form",
+  "dc.mine": "What you type stays in this browser. Nothing is sent anywhere.",
+  "dc.print": "Print / PDF",
+  "dc.copy": "Copy the text",
+  "dc.txt": "Download as text",
+  "dc.copied": "Copied.",
+  "dc.nocopy": "Could not copy. Use Download as text.",
+  "dc.saved": "Saved in this browser.",
+  "dc.orig": "Original",
+  "dc.dup": "Duplicate",
+  "dc.prob": "Check these before you print:",
+  "dc.p.empty": "needed",
+  "dc.p.pan": "a PAN has 5 letters, 4 digits and 1 letter",
+  "dc.p.tan": "a TAN has 4 letters, 5 digits and 1 letter",
+  "dc.p.gstin": "does not look like a GSTIN",
+  "dc.p.udyam": "should look like UDYAM-PB-12-0001234",
+  "dc.p.num": "type a number",
+  "dc.p.ten": "the declaration is only for ten or fewer goods carriages",
+  "dc.g.tax": "Income tax declarations",
+  "dc.g.gst": "GST and supplier declarations",
+  "dc.g.personal": "Personal and general",
+  /* Declarations maker (decl.js) */
+  "dc.p.share": "the shares must add up to 100",
+  "dc.p.guard": "name a guardian for the minor nominee"
 });
 
 /* Sending a saved PDF on WhatsApp from a computer (2026-11-17) */
