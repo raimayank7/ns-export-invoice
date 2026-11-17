@@ -841,14 +841,24 @@
     a.href = u; a.download = name; document.body.appendChild(a); a.click(); a.remove();
     setTimeout(function () { URL.revokeObjectURL(u); }, 4000);
   }
+  /* A computer cannot hand a file to WhatsApp (wa.me only carries text). The PDF is saved; this bar then opens the customer's
+     WhatsApp chat (phone known) or WhatsApp's own chooser with the message ready, and says to attach the saved file. */
+  NS.waBar = function (fname, text, phone) {
+    var old = document.querySelector('.pdf-wa'); if (old) old.remove();
+    var p = String(phone || '').replace(/\D/g, '').slice(-10), url = 'https://wa.me/' + (p.length === 10 ? '91' + p : '') + '?text=' + encodeURIComponent(String(text || '') + '\n' + NS.t('pdf.attached', { file: fname }));
+    var bar = NS.el('div', { 'class': 'pdf-wa', role: 'status' }, '<span>' + NS.esc(NS.t('pdf.wamsg', { file: fname })) + '</span> <a class="btn sm primary" target="_blank" rel="noopener" href="' + NS.esc(url) + '">' + NS.esc(NS.t('pdf.waopen')) + '</a> <button type="button" class="btn sm" data-x>' + NS.esc(NS.t('pdf.waclose')) + '</button>');
+    bar.addEventListener('click', function (e) { var b = e.target.closest('a,button'); if (b) setTimeout(function () { bar.remove(); }, 200); });
+    document.body.appendChild(bar);
+    setTimeout(function () { bar.remove(); }, 60000);
+  };
   /* phone: share sheet with the PDF file; computer or old phone: the PDF is downloaded. A slow PDF can outlast the tap, so then one more tap shares it. */
-  NS.sharePdf = function (nodes, name, paper, title, text) {
+  NS.sharePdf = function (nodes, name, paper, title, text, o) {
     var fname = String(name).replace(/[\\\/:*?"<>|]+/g, '-').replace(/\s+/g, ' ').trim().slice(0, 90) + '.pdf';
     NS.toast(NS.t('pdf.making'));
     return NS.makePdf(nodes, paper).then(function (blob) {
       var file = new File([blob], fname, { type: 'application/pdf' });
       var can = navigator.canShare && navigator.canShare({ files: [file] });
-      if (!can) { saveBlob(blob, fname); NS.toast(NS.t('pdf.saved', { file: fname })); return; }
+      if (!can) { saveBlob(blob, fname); NS.toast(NS.t('pdf.saved', { file: fname })); NS.waBar(fname, text, o && o.phone); return; }
       var go = function () { return navigator.share({ files: [file], title: title, text: text }); };
       return go().catch(function (e) {
         if (e && e.name === 'AbortError') return;

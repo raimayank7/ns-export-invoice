@@ -1016,7 +1016,7 @@
   /* Share = a PDF through the phone's share sheet (WhatsApp, email…); where files can't be shared it downloads the PDF */
   function shareDoc() {
     showTab('preview', true); fit();
-    NS.sharePdf($$('.sh', sheet), fileName(), doc.paper, docName() + ' ' + doc.no, shareText());
+    NS.sharePdf($$('.sh', sheet), fileName(), doc.paper, docName() + ' ' + doc.no, shareText(), { phone: doc.buyer && doc.buyer.phone });
   }
   /* ---------- quotation, proforma, sales order or challan -> invoice: saved first, then the billing site opens it by id from the shared data home ---------- */
   function toInvoice() {

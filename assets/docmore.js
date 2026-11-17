@@ -88,16 +88,20 @@
   function line(o) {
     if (!STOCK[type()]) return '';
     var it = o.it, i = o.i, tr = trackOf(it.desc) || (it.batch || it.exp ? 'batch' : it.serial ? 'serial' : '');
-    if (!tr) return '';
+    if (!tr && !it.warr) return '';
     function f(k, lbl, extra) { return '<div class="f it-x"><label for="it-' + k + '-' + i + '">' + esc(lbl) + '</label><input id="it-' + k + '-' + i + '" data-k="' + k + '" value="' + esc(it[k] || '') + '"' + (extra || '') + '></div>'; }
     return (tr === 'batch' || tr === 'both' ? f('batch', t('b2.batch'), ' dir="ltr" autocomplete="off"') + f('exp', t('b2.expm2'), ' type="month" dir="ltr"') : '') +
-      (tr === 'serial' || tr === 'both' ? f('serial', t('b2.serials'), ' dir="ltr" autocomplete="off"') : '');
+      (tr === 'serial' || tr === 'both' ? f('serial', t('b2.serials'), ' dir="ltr" autocomplete="off"') : '') +
+      /* optional warranty on a serial / IMEI line: months and "service every N months" (the Warranty screen of the App reads them; warrcore.js) */
+      (tr === 'serial' || tr === 'both' || it.warr ? f('warr', t('wr.f_warr'), ' type="number" min="0" max="240" step="1" inputmode="numeric" dir="ltr"') + f('svcm', t('wr.f_svc'), ' type="number" min="0" max="120" step="1" inputmode="numeric" dir="ltr"') : '');
   }
   function lineNote(it) {
     var p = [];
     if (it.batch) p.push('Batch: ' + esc(it.batch));
     if (/^\d{4}-\d{2}$/.test(it.exp || '')) p.push('Exp: ' + it.exp.slice(5, 7) + '/' + it.exp.slice(2, 4));
     if (it.serial) p.push('S/N: ' + esc(it.serial));
+    var wm = Math.floor(parseFloat(it.warr) || 0), sm = Math.floor(parseFloat(it.svcm) || 0);
+    if (wm > 0) p.push('Warranty: ' + wm + ' month' + (wm === 1 ? '' : 's') + (sm > 0 ? ' · service every ' + sm + ' months' : ''));
     return p.length ? '<br><small class="ln-x">' + p.join(' · ') + '</small>' : '';
   }
   function block(d) { return NS.closedMsg(d.seller && d.seller.name, d.date); }

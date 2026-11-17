@@ -133,6 +133,7 @@
       case 'fee': return 'sale';   /* fee receipt: fees received (status paid) */
       case 'rentb': return d.print === 'bill' ? 'sale' : '';   /* rent bill of a property tenancy: a sale once it is a bill (an agreement card is not) */
       case 'hotel': return d.print === 'bill' && d.stay !== 'cancel' ? 'sale' : '';   /* hotel stay: a sale once it is printed as a bill */
+      case 'tsh': return 'sale';   /* tripsheet.: a taxi trip sheet, travel booking bill or courier statement is a sale to its customer (India plan C) */
       case 'gjob': return d.print === 'bill' ? 'sale' : '';   /* garage job card: a sale once it is a service bill */
       case 'job': return d.print === 'bill' ? 'sale' : '';   /* job card: a sale once it is a service bill */
       case 'rabill': return 'sale';   /* contractor RA bill: value of work in this bill (retention and TDS settle at payment) */
@@ -147,6 +148,7 @@
       case 'contra': return 'contra';
       case 'jv': return 'jv';
       case 'fa': return d.kind === 'sale' ? 'fasale' : 'fabuy';
+      case 'don': return 'oinc';   /* donation or subscription received by a trust / society (trust.js): income, like other income received */
       case 'oinc': return 'oinc';   /* other income received (Accounts coverage WP-2) */
       case 'taxpay': return 'taxpay';   /* tax paid to the government or a tax refund (WP-4) */
       case 'gstset': return 'gstset';   /* GSTR-3B set-off of a tax period (WP-4) */
@@ -361,6 +363,8 @@
   function expand(d) {
     /* mandi. and petrol. (vertical tools): the tool saves the books side of its record as ready-made records of the usual kinds in d.books (journal, cash memo, expense ...) */
     if ((d.type === 'mandi' || d.type === 'pump' || d.type === 'mpay') && d.books && d.books.length) return d.books.map(function (x, i) { return Object.assign({ no: d.no }, x, { id: d.id + '#bk' + i, src: d.id, date: x.date || d.date, seller: d.seller, created: d.created || 0 }); });
+    /* dairy. (milk diary): one passbook = one journal entry made by NSDairy.books */
+    if (d.type === 'dairy' && d.books && d.books.length) return d.books.map(function (x, i) { return Object.assign({ no: d.no }, x, { id: d.id + '#bk' + i, src: d.id, date: x.date || d.date, seller: d.seller, created: d.created || 0 }); });
     if (d.type === 'petty') {
       if (!d.acct) return [];
       return (d.lines || []).map(function (l, i) {
