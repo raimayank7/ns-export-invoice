@@ -248,6 +248,7 @@
           '<div class="f wide"><label for="d-reason">' + esc(t('l.reason')) + '</label><select id="d-reason">' + reasons().map(function (k) { return '<option value="' + k + '">' + esc(t(rsKey(k))) + '</option>'; }).join('') + '</select></div>' : '') +
         field('d-pos', t('l.pos'), { type: 'state', hint: t(buying() ? 'h.pos2' : 'h.pos') }) +
         field('d-ref', t('l.' + (T.refLbl || 'ref')), {}) +
+        (type === 'self' ? '<p class="hint wide" style="grid-column:1/-1">' + esc(t('cp.si2027')) + '</p>' : '') +
         (T.rc && !T.rcFixed ? '<div class="f"><label class="chk"><input id="d-rc" type="checkbox"> ' + esc(t('l.rc')) + '</label></div>' : '') +
         (T.transport ? field('tr-veh', t('l.veh'), { ltr: 1, ph: 'PB10AB1234' }) + field('tr-tname', t('l.tname')) + field('tr-lr', t('l.lr'), { ltr: 1 }) : '') +
       '</div></fieldset>' +
@@ -536,7 +537,8 @@
     var c = dset(), fy = NS.fy(doc.date), short = fy.slice(2, 4) + '-' + fy.slice(5);
     var pre = String(T.prefixes ? (c.prefixes || {})[sk(doc)] || T.prefixes[sk(doc)] : c.prefix != null ? c.prefix : T.prefix).trim().replace(/[^A-Za-z0-9\/\-]/g, '');
     var prefix = (pre ? pre + '/' : '') + (c.fy === false ? '' : short + '/'), digits = Math.min(6, Math.max(1, +c.digits || 3));
-    return NSStore.list('doc').then(function (all) {
+    return Promise.all([NSStore.list('doc'), NSStore.sfTag()]).then(function (r) {
+      var all = r[0]; prefix += r[1];   /* shared folder mode: this computer's own letter, INV/26-27/A001 */
       var key = (doc.seller.name || '').trim().toLowerCase(), max = 0;
       all.forEach(function (d) {
         if (d.type !== doc.type || d.id === editingId || NS.fy(d.date) !== fy) return;
@@ -546,7 +548,7 @@
         var m = String(d.no || '').match(/(\d+)\s*$/);
         if (m) max = Math.max(max, +m[1]);
       });
-      if (force || !doc.no || doc.no === lastAuto || /^[A-Z]+\/\d\d-\d\d\/\d+$/.test(doc.no)) {
+      if (force || !doc.no || doc.no === lastAuto || /^[A-Z]+\/\d\d-\d\d\/[A-Z]{0,3}\d+$/.test(doc.no)) {
         doc.no = lastAuto = prefix + String(max + 1).padStart(digits, '0');
         var n = $('#d-no', root); if (n) n.value = doc.no;
         draw();

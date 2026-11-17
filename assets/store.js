@@ -252,7 +252,17 @@
     }).catch(function () {});
   }
 
+  /* shared folder mode (sharedfolder.js): a staff member signed in on this tab cannot delete, nor change settings and PINs. A lock for everyday
+     use, not security: it is only in the page. Off (no role set) = nothing changes. */
+  var SF_NO = { settings: 1, pin: 1, groups: 1, heads: 1, sf: 1 };
+  function sfDenied(op, store, id) {
+    try { if (sessionStorage.getItem('ns-sf-role') !== 'staff') return false; } catch (e) { return false; }
+    return op === 'del' || (store === 'meta' && !!SF_NO[id]);
+  }
+  function sfErr() { var e = new Error(window.NS && NS.t ? NS.t('sfd.denied') : 'Staff cannot do this. Ask the owner.'); e.denied = true; return Promise.reject(e); }
+
   function put(store, obj) {
+    if (sfDenied('put', store, obj && obj.id)) return sfErr();
     if (!obj.id) obj.id = uid();
     var old;
     return (KEPT[store] ? call('get', { store: store, id: obj.id }) : Promise.resolve()).then(function (o) {
@@ -269,6 +279,7 @@
   }
   /* opts.hard: no bin and no history (removing sample records) */
   function del(store, id, opts) {
+    if (sfDenied('del', store, id)) return sfErr();
     if (!KEPT[store]) return call('del', { store: store, id: id });
     var hard = opts && opts.hard, rec;
     return call('get', { store: store, id: id }).then(function (r) {
@@ -320,8 +331,13 @@
     autosave: function (op, args) { return ready().then(function (m) { return m === 'vault' ? send(op, args) : null; }); },
     meta: function (key, val) {
       if (arguments.length < 2) return call('get', { store: 'meta', id: key }).then(function (r) { return r ? r.v : undefined; });
+      if (sfDenied('put', 'meta', key)) return sfErr();
       if (key === 'who') who = val || '';
       return call('put', { store: 'meta', value: { id: key, v: val, updated: Date.now() } });
+    },
+    /* shared folder mode: this computer's bill-number letter (sharedfolder.js keeps it here), '' when the mode is off */
+    sfTag: function () {
+      return Promise.all([call('get', { store: 'meta', id: 'sf' }), call('get', { store: 'meta', id: 'sf-tag' })]).then(function (r) { return r[0] && r[0].v && r[0].v.on && r[1] && r[1].v || ''; }, function () { return ''; });
     },
     uid: uid
   };
