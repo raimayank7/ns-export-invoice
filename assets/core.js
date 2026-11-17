@@ -1096,3 +1096,24 @@
   };
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', NS.start); else NS.start();
 })();
+
+/* A page shown inside the App's frame (another address than the App's: the feature sites, a maker's guide pages):
+   a link to another Nivesh Sahayak page asks the App to open it on its own screen, so Back, the title and the App's
+   keys keep working and the App never ends up inside its own frame. Links to other websites open in a new tab
+   (most of them refuse to be shown in a frame). Same-origin App copies (/do/<site>/) use inapp.js instead. */
+(function () {
+  'use strict';
+  if (window.self === window.top) return;
+  try { if (window.parent.location.origin === location.origin) return; } catch (e) {}
+  var FAM = /(^|\.)niveshsahayak\.in$/;
+  document.addEventListener('click', function (e) {
+    var a = e.target.closest && e.target.closest('a[href]');
+    if (!a || e.defaultPrevented || e.button || e.ctrlKey || e.metaKey || e.shiftKey || e.altKey || a.hasAttribute('download') || a.target === '_blank') return;
+    var u; try { u = new URL(a.href); } catch (er) { return; }
+    if (!/^https?:$/.test(u.protocol)) return;
+    if (u.origin === location.origin && u.pathname === location.pathname && u.search === location.search) return;   /* a place on this page */
+    e.preventDefault();
+    if (FAM.test(u.hostname)) { try { window.parent.postMessage({ nsOpen: u.href }, '*'); return; } catch (er2) {} }
+    window.open(u.href, '_blank', 'noopener');
+  }, true);
+})();

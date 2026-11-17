@@ -8960,3 +8960,41 @@ NS.addLang("gu", {
   "wn.see": "See what changed",
   "wn.ok": "Got it"
 });
+
+/* Party ledger: switch party, entries first, preview on request (2026-11-17) */
+NS.addLang("gu", {
+  "app.lg_switch": "Party",
+  "app.lg_switchph": "Type a name to switch party",
+  "app.lg_prev": "Previous party",
+  "app.lg_next": "Next party",
+  "app.lg_entries": "Entries",
+  "app.lg_more": "{n} older entries are not listed. Narrow the dates to see them.",
+  "app.lg_prev_btn": "Preview Party Ledger",
+  "app.lg_hideprev": "Hide preview",
+  "app.lg_prevh": "The ledger page stays closed until you press Preview Party Ledger. Excel and WhatsApp work without it."
+});
+
+/* Follow-ups, bulk reminders, bill WhatsApp, dashboard cards (2026-11-17) */
+NS.addLang("gu", {
+  "app.fu_last": "Last reminded {d}",
+  "app.fu_promise": "Promised to pay on",
+  "app.fu_broken": "Promise missed",
+  "app.fu_again": "You already sent a reminder today.",
+  "app.fu_pick": "Select {p}",
+  "app.fu_pickall": "Select all overdue",
+  "app.fu_bulk": "Remind selected",
+  "app.fu_bulkh": "Send the reminders one by one. Each button opens WhatsApp with the message ready.",
+  "app.fu_send": "Send on WhatsApp",
+  "app.fu_sent": "Sent",
+  "app.fu_none": "Tick at least one party first.",
+  "app.fu_nophone": "No phone number",
+  "app.fu_close": "Done",
+  "app.rwa": "WhatsApp",
+  "app.rwa_msg": "Hello {p}, bill {n} dated {d} from {b}: {a}.{l} Thank you.",
+  "app.rwa_left": " Still due: {l}.",
+  "app.d_cf": "Money this month",
+  "app.d_in": "Money in",
+  "app.d_out": "Money out",
+  "app.d_net": "Net",
+  "app.d_top": "Top 5 who owe you"
+});

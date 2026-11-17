@@ -7846,3 +7846,41 @@ NS.addLang("pa", {
   "wn.see": "ਵੇਖੋ ਕੀ ਬਦਲਿਆ",
   "wn.ok": "ਸਮਝ ਗਿਆ"
 });
+
+/* Party ledger: switch party, entries first, preview on request (2026-11-17) */
+NS.addLang("pa", {
+  "app.lg_switch": "ਪਾਰਟੀ",
+  "app.lg_switchph": "ਪਾਰਟੀ ਬਦਲਣ ਲਈ ਨਾਂ ਲਿਖੋ",
+  "app.lg_prev": "ਪਿਛਲੀ ਪਾਰਟੀ",
+  "app.lg_next": "ਅਗਲੀ ਪਾਰਟੀ",
+  "app.lg_entries": "ਐਂਟਰੀਆਂ",
+  "app.lg_more": "{n} ਪੁਰਾਣੀਆਂ ਐਂਟਰੀਆਂ ਇੱਥੇ ਨਹੀਂ ਦਿਖਾਈਆਂ। ਵੇਖਣ ਲਈ ਤਾਰੀਖਾਂ ਛੋਟੀਆਂ ਕਰੋ।",
+  "app.lg_prev_btn": "ਪਾਰਟੀ ਲੈਜਰ ਪ੍ਰੀਵਿਊ",
+  "app.lg_hideprev": "ਪ੍ਰੀਵਿਊ ਲੁਕਾਓ",
+  "app.lg_prevh": "ਲੈਜਰ ਦਾ ਪੰਨਾ ਉਦੋਂ ਤੱਕ ਬੰਦ ਰਹਿੰਦਾ ਹੈ ਜਦੋਂ ਤੱਕ ਤੁਸੀਂ ਪਾਰਟੀ ਲੈਜਰ ਪ੍ਰੀਵਿਊ ਨਹੀਂ ਦਬਾਉਂਦੇ। Excel ਅਤੇ WhatsApp ਇਸ ਤੋਂ ਬਿਨਾਂ ਵੀ ਚੱਲਦੇ ਹਨ।"
+});
+
+/* Follow-ups, bulk reminders, bill WhatsApp, dashboard cards (2026-11-17) */
+NS.addLang("pa", {
+  "app.fu_last": "ਆਖ਼ਰੀ ਯਾਦ ਦੁਆਇਆ {d}",
+  "app.fu_promise": "ਭੁਗਤਾਨ ਦਾ ਵਾਅਦਾ",
+  "app.fu_broken": "ਵਾਅਦਾ ਖੁੰਝ ਗਿਆ",
+  "app.fu_again": "ਅੱਜ ਤੁਸੀਂ ਰਿਮਾਈਂਡਰ ਭੇਜ ਚੁੱਕੇ ਹੋ।",
+  "app.fu_pick": "{p} ਚੁਣੋ",
+  "app.fu_pickall": "ਸਾਰੇ ਲੇਟ ਚੁਣੋ",
+  "app.fu_bulk": "ਚੁਣਿਆਂ ਨੂੰ ਰਿਮਾਈਂਡਰ",
+  "app.fu_bulkh": "ਰਿਮਾਈਂਡਰ ਇੱਕ-ਇੱਕ ਕਰਕੇ ਭੇਜੋ। ਹਰ ਬਟਨ ਸੁਨੇਹਾ ਤਿਆਰ ਕਰਕੇ WhatsApp ਖੋਲ੍ਹਦਾ ਹੈ।",
+  "app.fu_send": "WhatsApp ਤੇ ਭੇਜੋ",
+  "app.fu_sent": "ਭੇਜ ਦਿੱਤਾ",
+  "app.fu_none": "ਪਹਿਲਾਂ ਘੱਟੋ-ਘੱਟ ਇੱਕ ਪਾਰਟੀ ਚੁਣੋ।",
+  "app.fu_nophone": "ਫ਼ੋਨ ਨੰਬਰ ਨਹੀਂ ਹੈ",
+  "app.fu_close": "ਹੋ ਗਿਆ",
+  "app.rwa": "WhatsApp",
+  "app.rwa_msg": "ਸਤ ਸ੍ਰੀ ਅਕਾਲ {p}, {b} ਦਾ ਬਿੱਲ {n} ਮਿਤੀ {d}: {a}।{l} ਧੰਨਵਾਦ।",
+  "app.rwa_left": " ਬਾਕੀ: {l}।",
+  "app.d_cf": "ਇਸ ਮਹੀਨੇ ਦਾ ਪੈਸਾ",
+  "app.d_in": "ਪੈਸਾ ਆਇਆ",
+  "app.d_out": "ਪੈਸਾ ਗਿਆ",
+  "app.d_net": "ਬਚਤ",
+  "app.d_top": "ਸਭ ਤੋਂ ਵੱਧ ਬਕਾਇਆ ਵਾਲੇ 5"
+});

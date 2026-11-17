@@ -7803,3 +7803,41 @@ NS.addLang("hi", {
   "wn.see": "देखें क्या बदला",
   "wn.ok": "समझ गया"
 });
+
+/* Party ledger: switch party, entries first, preview on request (2026-11-17) */
+NS.addLang("hi", {
+  "app.lg_switch": "पार्टी",
+  "app.lg_switchph": "पार्टी बदलने के लिए नाम लिखें",
+  "app.lg_prev": "पिछली पार्टी",
+  "app.lg_next": "अगली पार्टी",
+  "app.lg_entries": "एंट्री",
+  "app.lg_more": "{n} पुरानी एंट्री यहाँ नहीं दिखाई गईं। देखने के लिए तारीखें छोटी करें।",
+  "app.lg_prev_btn": "पार्टी लेजर प्रीव्यू",
+  "app.lg_hideprev": "प्रीव्यू छिपाएँ",
+  "app.lg_prevh": "लेजर का पेज तब तक बंद रहता है जब तक आप पार्टी लेजर प्रीव्यू नहीं दबाते। Excel और WhatsApp इसके बिना भी चलते हैं।"
+});
+
+/* Follow-ups, bulk reminders, bill WhatsApp, dashboard cards (2026-11-17) */
+NS.addLang("hi", {
+  "app.fu_last": "आख़िरी याद दिलाया {d}",
+  "app.fu_promise": "भुगतान का वादा",
+  "app.fu_broken": "वादा चूक गया",
+  "app.fu_again": "आज आप रिमाइंडर भेज चुके हैं।",
+  "app.fu_pick": "{p} चुनें",
+  "app.fu_pickall": "सभी लेट चुनें",
+  "app.fu_bulk": "चुने हुए को रिमाइंडर",
+  "app.fu_bulkh": "रिमाइंडर एक-एक करके भेजें। हर बटन मैसेज तैयार करके WhatsApp खोलता है।",
+  "app.fu_send": "WhatsApp पर भेजें",
+  "app.fu_sent": "भेज दिया",
+  "app.fu_none": "पहले कम से कम एक पार्टी चुनें।",
+  "app.fu_nophone": "फ़ोन नंबर नहीं है",
+  "app.fu_close": "हो गया",
+  "app.rwa": "WhatsApp",
+  "app.rwa_msg": "नमस्ते {p}, {b} का बिल {n} दिनांक {d}: {a}।{l} धन्यवाद।",
+  "app.rwa_left": " बाकी: {l}।",
+  "app.d_cf": "इस महीने का पैसा",
+  "app.d_in": "पैसा आया",
+  "app.d_out": "पैसा गया",
+  "app.d_net": "बचत",
+  "app.d_top": "सबसे ज़्यादा बकाया वाले 5"
+});
