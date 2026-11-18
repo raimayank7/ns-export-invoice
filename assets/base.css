@@ -34,7 +34,7 @@ h1,h2,h3,h4{font-family:var(--font-head);line-height:1.25;letter-spacing:-.01em}
 .hd .wrap{display:flex;align-items:center;gap:12px;min-height:60px}
 .brand{display:flex;align-items:center;gap:10px;text-decoration:none;color:var(--ink);min-width:0}
 .brand .mk{height:58px;width:auto;flex:none}
-@media (max-width:520px){.brand .mk{height:42px}}
+@media (min-width:1100px){.brand .mk{height:64px}}@media (max-width:520px){.brand .mk{height:42px}}
 .brand .mk-d{display:none}
 @media (prefers-color-scheme:dark){:root:not([data-theme=light]) .brand .mk-l{display:none}:root:not([data-theme=light]) .brand .mk-d{display:block}}
 :root[data-theme=dark] .brand .mk-l{display:none}:root[data-theme=dark] .brand .mk-d{display:block}

@@ -168,6 +168,15 @@ html.has-hub .hub>.hub-nav{display:none}
 .dk-t{border-collapse:collapse;width:calc(100% - 32px);margin:8px 16px}
 .dk-t th,.dk-t td{text-align:start;padding:6px 4px;border-bottom:1px solid var(--line);font-size:.9rem;font-weight:500}
 .dk-t th{width:38%}
+.desk-keys{width:min(640px,calc(100% - 24px));max-height:calc(100vh - 40px)}
+.dk-g{font-size:.95rem;margin:14px 16px 0}
+.dk-3 thead th{font-size:.78rem;color:var(--soft);font-weight:600;width:auto;white-space:nowrap}
+.dk-3 td:nth-child(2),.dk-3 td:nth-child(3){white-space:nowrap;width:1%}
+.dk-t kbd{font:600 .78rem ui-monospace,Consolas,monospace;border:1px solid var(--line);border-bottom-width:2px;border-radius:5px;padding:1px 6px;background:var(--bg)}
+/* the screen's key shows at the end of its menu line when pointed at */
+.side a[data-kh]:is(:hover,:focus-visible)::after{content:attr(data-kh);margin-inline-start:auto;padding-inline-start:8px;font:600 .7rem ui-monospace,Consolas,monospace;opacity:.65;white-space:nowrap}
+html.side-mini .side a[data-kh]::after{content:none}
+.desk-cmd.cmd-go li[role=option] kbd{font-size:.85rem;min-width:2.4em;text-align:center}
 .dk-note{color:var(--soft);font-size:.82rem;margin:8px 16px 0}
 
 /* inside the App's frame: the App is the window */

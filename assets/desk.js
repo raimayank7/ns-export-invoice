@@ -70,6 +70,8 @@
     $$('a[data-sec]', hub).forEach(function (a, i) {
       a.setAttribute('data-ic', SECIC[a.getAttribute('data-sec')] || 'dot');
       if (i < 9) a.setAttribute('aria-keyshortcuts', 'Alt+' + (i + 1));
+      var m = SECKEY[a.getAttribute('data-sec')], fk = m && fName(a.getAttribute('data-sec'));
+      if (m) { var hk = fk || (m[1] ? 'Alt+' + m[1] : 'Alt+G ' + m[0]); a.setAttribute('data-kh', hk); a.title = hk + (m[1] || fk ? '  ·  Alt+G ' + m[0] : ''); }
     });
     if (!own) {
       own = NS.el('div', { class: 'side-g side-own', 'data-g': 'own' });
@@ -179,9 +181,69 @@
     deferredInstall.prompt(); deferredInstall.userChoice.finally(function () { deferredInstall = null; var b = $('[data-desk-install]'); if (b) b.hidden = true; });
   }
 
+
+  /* ---------- shortcuts for every tool (owner 2026-11-18: "like normal Windows software") ----------
+     Tally-style F keys for new entries, Alt+letter for the main screens, and Alt+G + a 2-letter code ("Go to", as in
+     TallyPrime) for EVERY screen and document maker. Fixed letters, so a key never moves when the business type hides tools. */
+  var SECKEY = { home: ['DB', 'H'], sales: ['SL', 'L'], money: ['MN', 'M'], acx: ['OI'], stf: ['SF'], itx: ['IT'], bimp: ['BI'], dues: ['DU', 'U'],
+    msme: ['MS'], limits: ['LH'], buy: ['PE', 'W'], parties: ['PA', 'Y'], grp: ['GR'], chq: ['CQ'], books: ['CB', 'K'], cash: ['CK'], repeat: ['RB'],
+    reports: ['RE'], day: ['MD'], tools: ['AT', 'T'], fin: ['FA', 'A'], capl: ['CL'], b2jv: ['JE', 'J'], b2fa: ['FX'], b2gd: ['GD'], b2make: ['PR'],
+    b2job: ['JW'], b2profit: ['PF'], b2sman: ['SM'], b2year: ['YE'], features: ['AF'], packs: ['TP'], trust: ['DM'], warr: ['WS'], cacom: ['CC'],
+    fees: ['FE'], stock: ['SK'], fam: ['MA'] };
+  var DOCKEY = { billing: ['IN', 'N'], quotation: ['QT', 'O'], proforma: ['PI'], 'sales-order': ['SO'], challan: ['DC', 'C'], 'purchase-order': ['PO'],
+    'credit-note': ['CN'], 'debit-note': ['DN'], 'cash-memo': ['CM'], receipt: ['RC'], voucher: ['VC'], 'self-invoice': ['SI'], 'rent-receipt': ['RR'],
+    'salary-slip': ['SS'], 'petty-cash': ['PC'], pos: ['PS'], pharmacy: ['PH'], restaurant: ['RT'], bilty: ['LR'], 'job-card': ['JC'], hotel: ['HT'],
+    rent: ['RN'], 'contractor-bill': ['CT'], 'fee-receipt': ['FR'], clinic: ['CV'], salon: ['SN'], jewellery: ['JL'], garment: ['GM'], mandi: ['MI'],
+    petrol: ['PP'], dairy: ['DY'], subscribers: ['SU'], tripsheet: ['TS'] };
+  /* new entries: [form, 2-letter code, F key] (the App's own forms) */
+  var FORMKEY = [['sale', 'SB', 'F8'], ['min', 'MR', 'F6'], ['mout', 'MP', 'F5'], ['pbill', 'PB', 'F9'], ['exp', 'EX', 'F10'], ['contra', 'CO', 'F4'], ['pret', 'PT', ''], ['ob', 'OB', '']];
+  var FKEY = { F3: 'biz', F4: 'contra', F5: 'mout', F6: 'min', F7: 'b2jv', F8: 'sale', F9: 'pbill', F10: 'exp', 'Ctrl+F8': 'credit-note', 'Ctrl+F9': 'debit-note' };
+  var ALTKEY = {};   /* letter -> what it opens (filled from SECKEY / DOCKEY) */
+  Object.keys(SECKEY).forEach(function (s) { if (SECKEY[s][1]) ALTKEY[SECKEY[s][1].toLowerCase()] = { sec: s }; });
+  Object.keys(DOCKEY).forEach(function (s) { if (DOCKEY[s][1]) ALTKEY[DOCKEY[s][1].toLowerCase()] = { site: s }; });
+  function secName(s) { var a = $('#ns-side a[data-sec="' + s + '"]'); return a ? (a.textContent || '').trim() : ''; }
+  function goSec(s) { var a = $('#ns-side a[data-sec="' + s + '"]'); if (a) { a.click(); a.focus(); } else location.hash = s; }
+  function newDoc(site) { var app = A(); if (app && app.newDoc) app.newDoc(site); else goUrl(siteUrl(site)); }
+  function runForm(f) {
+    var app = A(); if (!app || !app.openForm) return;
+    (app.whenReady || function (g) { g(); })(function () { if (app.biz() && !$('dialog[open]')) app.openForm(f); });
+  }
+  function fRun(what) {
+    var app = A();
+    if (what === 'biz') { if (app && app.switchBiz) (app.whenReady || function (g) { g(); })(app.switchBiz); return; }
+    if (SECKEY[what]) { goSec(what); return; }
+    if (DOCKEY[what]) { newDoc(what); return; }
+    runForm(what);
+  }
+  function fName(k) { var r = []; Object.keys(FKEY).forEach(function (x) { if (FKEY[x] === k) r.push(x); }); return r[0] || ''; }
+  /* every tool with its keys: [group, name, direct key, code, run] (the sheet, the Go to box and the Ctrl K box use it) */
+  function registry() {
+    var app = A(), out = [];
+    if (!app || !app.biz) return out;
+    FORMKEY.forEach(function (f) { out.push({ g: 'rec', t: app.T(f[0] === 'sale' ? 'qe_sale' : f[0]), k: f[2], c: f[1], run: function () { runForm(f[0]); } }); });
+    out.push({ g: 'rec', t: NS.t('app.qe_title'), k: 'Alt+Q', c: 'QE', run: function () { if (app.quickEntry) app.quickEntry(); } });
+    $$('#ns-side a[data-sec]').forEach(function (a) {
+      var s = a.getAttribute('data-sec'), m = SECKEY[s] || [];
+      out.push({ g: 'go', t: (a.textContent || '').trim(), k: fName(s) || (m[1] ? 'Alt+' + m[1] : ''), c: m[0] || '', run: function () { goSec(s); } });
+    });
+    (app.newDocs ? app.newDocs() : []).forEach(function (n) {
+      var m = DOCKEY[n[0]] || [];
+      out.push({ g: 'new', t: n[1], k: fName(n[0]) || (m[1] ? 'Alt+' + m[1] : ''), c: m[0] || '', run: function () { newDoc(n[0]); } });
+    });
+    /* a screen or maker this table does not know yet still gets a code: its first free pair of letters */
+    var used = {}; out.forEach(function (x) { if (x.c) used[x.c] = 1; });
+    out.forEach(function (x) {
+      if (x.c) return;
+      var L = (x.t || '').toUpperCase().replace(/[^A-Z]/g, '');
+      for (var i = 1; i < L.length && !x.c; i++) { var c = L[0] + L[i]; if (!used[c]) { x.c = c; used[c] = 1; } }
+    });
+    return out;
+  }
+  NS.deskKeys = registry;
+
   /* ---------- command box (Ctrl+K) ---------- */
   var cmd, list, items = [], shown = [], at = 0;
-  var FORMS = [['min', 'Alt+R'], ['mout', 'Alt+P'], ['pbill', 'Alt+B'], ['exp', 'Alt+X'], ['pret', ''], ['ob', '']];
+  var FORMS = [['min', 'F6'], ['mout', 'F5'], ['pbill', 'F9'], ['exp', 'F10'], ['pret', ''], ['ob', '']];
   var OWNSITE = { invoice: 'billing', quote: 'quotation', proforma: 'proforma', so: 'sales-order', challan: 'challan', po: 'purchase-order', self: 'self-invoice', note: 'credit-note', cashmemo: 'cash-memo', receipt: 'receipt', voucher: 'voucher', rent: 'rent-receipt', salary: 'salary-slip', petty: 'petty-cash' };
   var DOCWORD = { invoice: 'Doc.invoice', quote: 'Doc.quote', proforma: 'Doc.proforma', so: 'Doc.so', challan: 'Doc.challan', po: 'Doc.po', self: 'Doc.self', note: 'Doc.note', cashmemo: 'Doc.cashmemo', receipt: 'Doc.receipt', voucher: 'Doc.voucher', rent: 'Doc.rent', salary: 'Doc.salary', petty: 'Doc.petty' };
   function formOf(d) { return d.type === 'contra' ? 'contra' : d.type === 'exp' ? 'exp' : d.type === 'ob' ? 'ob' : d.type === 'pbill' ? (d.kind === 'return' ? 'pret' : 'pbill') : d.type === 'receipt' ? 'min' : 'mout'; }
@@ -203,7 +265,7 @@
         var sec = a.getAttribute('data-sec'), i = sec ? $$('#ns-side a[data-sec]').indexOf(a) : -1;
         var tx = (a.textContent || '').trim();
         out.push({ off: off, s: off ? NS.t('fr.offnote') : '', g: g.getAttribute('data-g') === 'docs' || g.getAttribute('data-g') === 'more' ? 'new' : gk, t: tx, e: NS.meaning(tx) + ' ' + (SYN[sec] || ''),
-          k: a.getAttribute('data-ic') === 'd-billing' ? 'Alt+N' : i >= 0 && i < 9 ? 'Alt+' + (i + 1) : '', run: function () { a.click(); } });
+          k: a.getAttribute('data-ic') === 'd-billing' ? 'Alt+N' : sec && SECKEY[sec] ? (fName(sec) || (SECKEY[sec][1] ? 'Alt+' + SECKEY[sec][1] : 'Alt+G ' + SECKEY[sec][0])) : i >= 0 && i < 9 ? 'Alt+' + (i + 1) : '', run: function () { a.click(); } });
       });
     });
     var app = A();
@@ -258,8 +320,9 @@
       { g: 'act', t: T('lang'), run: function () { var s = $('[data-lang-pick]'); if (s && !s.offsetParent && A() && root.classList.contains('installed')) { location.hash = '#features'; return; } if (s) { s.focus(); if (s.showPicker) try { s.showPicker(); } catch (e) {} } } }
     ]).concat(deferredInstall ? [{ g: 'act', t: T('install'), run: install }] : []);
   }
-  var back = null, picked = false;
-  function palette(from) {
+  var back = null, picked = false, goMode = false;
+  function palette(from, mode) {
+    goMode = mode === 'go';
     if (!cmd) {
       cmd = NS.el('dialog', { id: 'desk-cmd', class: 'desk-cmd' });
       cmd.innerHTML = '<div class="cmd-in">' + ic(SEARCH) + '<input type="search" role="combobox" aria-label="' + esc(T('find')) + '" aria-expanded="true" aria-controls="desk-cmd-l" aria-autocomplete="list" autocomplete="off" spellcheck="false" dir="auto"><kbd>Esc</kbd></div>' +
@@ -267,7 +330,13 @@
       document.body.appendChild(cmd);
       list = $('ul', cmd);
       var inpt = $('input', cmd);
-      inpt.addEventListener('input', function () { at = 0; draw(inpt.value); });
+      inpt.addEventListener('input', function () {
+        at = 0;
+        /* Go to: the 2 letters of a code open it at once (Alt+G, I, N = new invoice) */
+        var v = inpt.value.trim().toUpperCase();
+        if (goMode && /^[A-Z]{2}$/.test(v)) { var hitc = items.filter(function (x) { return x.code === v; })[0]; if (hitc) { picked = true; cmd.close(); setTimeout(hitc.run, 0); return; } }
+        draw(inpt.value);
+      });
       inpt.addEventListener('keydown', function (e) {
         if (e.key === 'ArrowDown' || e.key === 'ArrowUp') { e.preventDefault(); if (shown.length) { at = (at + (e.key === 'ArrowDown' ? 1 : -1) + shown.length) % shown.length; mark(); } }
         else if (e.key === 'Enter') { e.preventDefault(); pick(at); }
@@ -285,23 +354,24 @@
     }
     var inp = $('input', cmd);
     cmd.setAttribute('aria-label', T('find'));
-    inp.placeholder = T('ph'); inp.setAttribute('aria-label', T('ph')); $('.cmd-ft', cmd).textContent = T('cmdft');
-    items = collect(); inp.value = ''; at = 0; draw('');
+    inp.placeholder = T(goMode ? 'go_ph' : 'ph'); inp.setAttribute('aria-label', T(goMode ? 'go_ph' : 'ph')); $('.cmd-ft', cmd).textContent = T(goMode ? 'go_ft' : 'cmdft');
+    cmd.classList.toggle('cmd-go', goMode);
+    items = goMode ? registry().map(function (x) { return { g: x.g, t: x.t, s: x.k, e: x.c, k: x.c, code: x.c, run: x.run }; }) : collect(); inp.value = ''; at = 0; draw('');
     back = from || (document.activeElement !== document.body ? document.activeElement : null);
     cmd.showModal(); inp.focus(); setTimeout(function () { if (cmd.open && document.activeElement !== inp) inp.focus(); }, 30);
-    dataItems().then(function (more) { items = items.concat(more); if (cmd.open && inp.value) draw(inp.value); });
+    if (!goMode) dataItems().then(function (more) { items = items.concat(more); if (cmd.open && inp.value) draw(inp.value); });
     /* other files add their own results (helppanel.js: help articles), each a function giving items or a promise of them */
-    (NS.cmdMore || []).forEach(function (f) { Promise.resolve().then(f).then(function (more) { items = items.concat(more || []); if (cmd.open && inp.value) draw(inp.value); }).catch(function () {}); });
+    if (!goMode) (NS.cmdMore || []).forEach(function (f) { Promise.resolve().then(f).then(function (more) { items = items.concat(more || []); if (cmd.open && inp.value) draw(inp.value); }).catch(function () {}); });
   }
   var GROUPS = ['go', 'rec', 'new', 'party', 'doc', 'help', 'act'];
   function draw(qs) {
     var words = qs.toLowerCase().split(/\s+/).filter(Boolean);
     var hit = items.filter(function (x) { var h = (x.t + ' ' + (x.s || '') + ' ' + (x.e || '')).toLowerCase(); return words.every(function (w) { return h.indexOf(w) >= 0; }); });
-    if (!words.length) hit = hit.filter(function (x) { return !x.off && x.g !== 'doc' && x.g !== 'party' && x.g !== 'new' && x.g !== 'help'; });
+    if (!words.length && !goMode) hit = hit.filter(function (x) { return !x.off && x.g !== 'doc' && x.g !== 'party' && x.g !== 'new' && x.g !== 'help'; });
     else hit = hit.filter(function (x) { return !x.off; }).concat(hit.filter(function (x) { return x.off; }));   /* what is switched off comes last, so it never pushes the business's own tools down */
     shown = []; var html = '';
     GROUPS.forEach(function (g) {
-      var part = hit.filter(function (x) { return x.g === g; }).slice(0, words.length ? 8 : 12);
+      var part = hit.filter(function (x) { return x.g === g; }).slice(0, goMode ? 99 : words.length ? 8 : 12);
       if (!part.length) return;
       html += '<li class="cmd-g" role="presentation">' + esc(T('g_' + g)) + '</li>';
       part.forEach(function (x) {
@@ -322,16 +392,26 @@
   NS.deskPalette = function (from) { if (cmd && cmd.open) cmd.close(); else palette(from); };
 
   /* ---------- keyboard ---------- */
-  var KEYS = [['Ctrl K', 'k_cmd'], ['Ctrl B', 'k_menu'], ['Alt 1 … 9', 'k_secs'], ['Alt N', 'k_inv'], ['Alt R', 'k_min'], ['Alt P', 'k_mout'], ['Alt B', 'k_pbill'], ['Alt X', 'k_exp'], ['Alt S', '=app.biz'],
-    ['/', 'k_find'], ['?', 'k_help'], ['Ctrl S', 'k_save'], ['Ctrl P', 'k_print'], ['Esc', 'k_esc']];
+  var KEYS = [['Alt G', 'k_go'], ['Ctrl K', 'k_cmd'], ['Ctrl B', 'k_menu'], ['Alt 1 … 9', 'k_secs'], ['F3 / Alt S', '=app.biz'],
+    ['/', 'k_find'], ['F1', 'k_hlp'], ['?', 'k_help'], ['Ctrl S', 'k_save'], ['Ctrl P', 'k_print'], ['Esc', 'k_esc']];
   var keysDlg;
   function keysSheet() {
     if (!keysDlg) { keysDlg = NS.el('dialog', { id: 'desk-keys', class: 'desk-keys', 'aria-labelledby': 'desk-keys-h' }); document.body.appendChild(keysDlg); }
     keysDlg.innerHTML = '<div class="dk-hd"><h2 id="desk-keys-h">' + esc(T('keys')) + '</h2><button type="button" class="icon-btn" aria-label="' + esc(NS.t('close')) + '" data-close>✕</button></div>' +
-      '<table class="dk-t"><tbody>' + KEYS.filter(function (k) { return k[1].charAt(0) !== '=' || A() && A().switchBiz && A().data().biz.length > 1; }).map(function (k) { return '<tr><th scope="row"><kbd>' + esc(k[0]) + '</kbd></th><td>' + esc(k[1].charAt(0) === '=' ? NS.t(k[1].slice(1)) : T(k[1])) + '</td></tr>'; }).join('') + '</tbody></table><p class="dk-note">' + esc(T('k_note')) + '</p>';
+      '<h3 class="dk-g">' + esc(T('kg_gen')) + '</h3><table class="dk-t"><tbody>' + KEYS.filter(function (k) { return k[1].charAt(0) !== '=' || A() && A().switchBiz && A().data().biz.length > 1; }).map(function (k) { return '<tr><th scope="row"><kbd>' + esc(k[0]) + '</kbd></th><td>' + esc(k[1].charAt(0) === '=' ? NS.t(k[1].slice(1)) : T(k[1])) + '</td></tr>'; }).join('') + '</tbody></table>' + toolTables() + '<p class="dk-note">' + esc(T('k_note')) + '</p>';
     $('[data-close]', keysDlg).onclick = function () { keysDlg.close(); };
     keysDlg.showModal();
   }
+  /* every tool: its key and its Go to code (Alt+G, then the 2 letters) */
+  function toolTables() {
+    var reg = registry(); if (!reg.length) return '';
+    return [['rec', 'kg_rec'], ['go', 'kg_go'], ['new', 'kg_new']].map(function (g) {
+      var rows = reg.filter(function (x) { return x.g === g[0]; });
+      return rows.length ? '<h3 class="dk-g">' + esc(T(g[1])) + '</h3><table class="dk-t dk-3"><thead><tr><th scope="col">' + esc(T('k_what')) + '</th><th scope="col">' + esc(T('k_key')) + '</th><th scope="col">Alt G +</th></tr></thead><tbody>' +
+        rows.map(function (x) { return '<tr><td>' + esc(x.t) + '</td><td>' + (x.k ? '<kbd>' + esc(x.k) + '</kbd>' : '') + '</td><td><kbd>' + esc(x.c) + '</kbd></td></tr>'; }).join('') + '</tbody></table>' : '';
+    }).join('');
+  }
+  NS.deskKeysSheet = function () { keysSheet(); };
   function typing(e) { var t = e.target; return t && (t.isContentEditable || /^(INPUT|TEXTAREA|SELECT)$/.test(t.tagName)); }
   document.addEventListener('keydown', function (e) {
     var k = (e.key || '').toLowerCase();
@@ -340,11 +420,20 @@
     if (e.key === 'Escape' && root.classList.contains('side-open')) { drawer(false); var b = $('[data-side-btn]'); if (b) b.focus(); return; }
     if ($('dialog[open]')) return;
     var app = A();
+    /* F keys, Tally style (F8 sale, F9 purchase, F6 receipt, F5 payment, F4 contra, F7 journal, F10 expense, F3 business,
+       Ctrl+F8 credit note, Ctrl+F9 debit note): only inside the App, where they never type a letter, so they work in any box */
+    if (app && app.biz && /^F([3-9]|10)$/.test(e.key) && !e.altKey && !e.shiftKey && !e.metaKey) {
+      var fk = FKEY[(e.ctrlKey ? 'Ctrl+' : '') + e.key];
+      if (fk) { e.preventDefault(); if (!e.repeat) fRun(fk); }
+      return;
+    }
     if (e.altKey && !e.ctrlKey && !e.metaKey) {
       var n = /^Digit([1-9])$/.exec(e.code || '');
       if (n) { var a = $$('#ns-side a[data-sec]')[+n[1] - 1]; if (a) { e.preventDefault(); a.click(); a.focus(); } return; }
       var c = (e.code || '').replace('Key', '').toLowerCase();
-      if (c === 'n') { e.preventDefault(); goUrl(siteUrl('billing')); return; }
+      if (c === 'g' && app && app.biz) { e.preventDefault(); if (!e.repeat) palette(null, 'go'); return; }
+      if (app && app.biz && ALTKEY[c] && !/^[nrpbxsq]$/.test(c)) { e.preventDefault(); if (e.repeat) return; var to = ALTKEY[c]; (app.whenReady || function (f) { f(); })(function () { if (to.sec) goSec(to.sec); else newDoc(to.site); }); return; }
+      if (c === 'n') { e.preventDefault(); if (app && app.newDoc) app.newDoc('billing'); else goUrl(siteUrl('billing')); return; }
       if (c === 'q' && app && app.quickEntry) { e.preventDefault(); if (!e.repeat) app.quickEntry(); return; }   /* quick entry (app.js) */
       /* a key pressed while the App is still fetching its data is kept and runs the moment the data is in (it used to be dropped) */
       var job = { r: 'min', p: 'mout', b: 'pbill', x: 'exp' }[c];

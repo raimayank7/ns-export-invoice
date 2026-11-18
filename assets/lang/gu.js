@@ -9978,3 +9978,16 @@ NS.addLang("gu", {
   "fr.offnote": "turned off for your business: opens as usual",
   "fr.hidnote": "Tools your type of business does not need are hidden here. Turn any of them on in"
 });
+/* Shortcuts for every tool */
+NS.addLang("gu", {
+  "desk.k_go": "Go to any screen or document: Alt+G, then its 2-letter code",
+  "desk.go_ph": "Type the 2-letter code, or a name",
+  "desk.go_ft": "Two letters open it at once. Enter opens the first in the list. Esc closes.",
+  "desk.k_hlp": "Help for this screen",
+  "desk.kg_gen": "General",
+  "desk.kg_rec": "New entries",
+  "desk.kg_go": "Screens",
+  "desk.kg_new": "New documents",
+  "desk.k_what": "What it opens",
+  "desk.k_key": "Key"
+});

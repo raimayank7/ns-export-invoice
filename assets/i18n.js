@@ -1652,6 +1652,9 @@
     'desk.k_min': 'Money received (in the App)', 'desk.k_mout': 'Money paid (in the App)', 'desk.k_pbill': 'Purchase bill (in the App)', 'desk.k_exp': 'Expense (in the App)',
     'desk.k_find': 'Search in this list', 'desk.k_help': 'This list', 'desk.k_save': 'Save the document', 'desk.k_print': 'Print the document', 'desk.k_esc': 'Close a window',
     'desk.k_note': 'On a Mac use Cmd instead of Ctrl, and Option instead of Alt.',
+    'desk.k_go': 'Go to any screen or document: Alt+G, then its 2-letter code', 'desk.go_ph': 'Type the 2-letter code, or a name',
+    'desk.go_ft': 'Two letters open it at once. Enter opens the first in the list. Esc closes.', 'desk.k_hlp': 'Help for this screen',
+    'desk.kg_gen': 'General', 'desk.kg_rec': 'New entries', 'desk.kg_go': 'Screens', 'desk.kg_new': 'New documents', 'desk.k_what': 'What it opens', 'desk.k_key': 'Key',
     /* notice when a file of the page did not load (ad blocker, old saved copy): build.py CRITICAL */
     /* line under the promotion card (core.js NS.sponsor) */
     'sp.promo': "Want your business on this card? Promote it here",
