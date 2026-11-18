@@ -177,6 +177,9 @@ html.has-hub .hub>.hub-nav{display:none}
 .side a[data-kh]:is(:hover,:focus-visible)::after{content:attr(data-kh);margin-inline-start:auto;padding-inline-start:8px;font:600 .7rem ui-monospace,Consolas,monospace;opacity:.65;white-space:nowrap}
 html.side-mini .side a[data-kh]::after{content:none}
 .desk-cmd.cmd-go li[role=option] kbd{font-size:.85rem;min-width:2.4em;text-align:center}
+.dk-hd>span{display:flex;gap:6px;align-items:center}
+#dk-printarea{display:none}
+@media print{html.dk-print body>*:not(#dk-printarea){display:none!important}html.dk-print #dk-printarea{display:block;color:#000;background:#fff;font:11pt/1.35 system-ui,sans-serif}#dk-printarea h1{font-size:15pt;margin:0 0 4px}#dk-printarea .dk-g{margin:12px 0 4px;font-size:12pt;break-after:avoid}#dk-printarea .dk-t{width:100%;margin:0;border-collapse:collapse}#dk-printarea tr{break-inside:avoid}#dk-printarea th,#dk-printarea td{border-bottom:1px solid #bbb;padding:3px 4px;color:#000}#dk-printarea kbd{border:1px solid #888;border-radius:3px;padding:0 4px;background:#fff;color:#000}}
 .dk-note{color:var(--soft);font-size:.82rem;margin:8px 16px 0}
 
 /* inside the App's frame: the App is the window */

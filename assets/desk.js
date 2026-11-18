@@ -189,7 +189,7 @@
     msme: ['MS'], limits: ['LH'], buy: ['PE', 'W'], parties: ['PA', 'Y'], grp: ['GR'], chq: ['CQ'], books: ['CB', 'K'], cash: ['CK'], repeat: ['RB'],
     reports: ['RE'], day: ['MD'], tools: ['AT', 'T'], fin: ['FA', 'A'], capl: ['CL'], b2jv: ['JE', 'J'], b2fa: ['FX'], b2gd: ['GD'], b2make: ['PR'],
     b2job: ['JW'], b2profit: ['PF'], b2sman: ['SM'], b2year: ['YE'], features: ['AF'], packs: ['TP'], trust: ['DM'], warr: ['WS'], cacom: ['CC'],
-    fees: ['FE'], stock: ['SK'], fam: ['MA'] };
+    fees: ['FE'], stock: ['SK'], fam: ['MA'], cadb: ['CD'], cadoc: ['CA'], cagst: ['CG'], ebook: ['EB'], khata: ['KH'], preg: ['PG'] };
   var DOCKEY = { billing: ['IN', 'N'], quotation: ['QT', 'O'], proforma: ['PI'], 'sales-order': ['SO'], challan: ['DC', 'C'], 'purchase-order': ['PO'],
     'credit-note': ['CN'], 'debit-note': ['DN'], 'cash-memo': ['CM'], receipt: ['RC'], voucher: ['VC'], 'self-invoice': ['SI'], 'rent-receipt': ['RR'],
     'salary-slip': ['SS'], 'petty-cash': ['PC'], pos: ['PS'], pharmacy: ['PH'], restaurant: ['RT'], bilty: ['LR'], 'job-card': ['JC'], hotel: ['HT'],
@@ -265,7 +265,7 @@
         var sec = a.getAttribute('data-sec'), i = sec ? $$('#ns-side a[data-sec]').indexOf(a) : -1;
         var tx = (a.textContent || '').trim();
         out.push({ off: off, s: off ? NS.t('fr.offnote') : '', g: g.getAttribute('data-g') === 'docs' || g.getAttribute('data-g') === 'more' ? 'new' : gk, t: tx, e: NS.meaning(tx) + ' ' + (SYN[sec] || ''),
-          k: a.getAttribute('data-ic') === 'd-billing' ? 'Alt+N' : sec && SECKEY[sec] ? (fName(sec) || (SECKEY[sec][1] ? 'Alt+' + SECKEY[sec][1] : 'Alt+G ' + SECKEY[sec][0])) : i >= 0 && i < 9 ? 'Alt+' + (i + 1) : '', run: function () { a.click(); } });
+          k: a.getAttribute('data-ic') === 'd-billing' ? 'Alt+N' : DOCKEY[(a.getAttribute('data-ic') || '').replace(/^[dt]-/, '')] ? (function (m, s) { return fName(s) || (m[1] ? 'Alt+' + m[1] : 'Alt+G ' + m[0]); })(DOCKEY[(a.getAttribute('data-ic') || '').replace(/^[dt]-/, '')], (a.getAttribute('data-ic') || '').replace(/^[dt]-/, '')) : sec && SECKEY[sec] ? (fName(sec) || (SECKEY[sec][1] ? 'Alt+' + SECKEY[sec][1] : 'Alt+G ' + SECKEY[sec][0])) : i >= 0 && i < 9 ? 'Alt+' + (i + 1) : '', run: function () { a.click(); } });
       });
     });
     var app = A();
@@ -366,7 +366,9 @@
   var GROUPS = ['go', 'rec', 'new', 'party', 'doc', 'help', 'act'];
   function draw(qs) {
     var words = qs.toLowerCase().split(/\s+/).filter(Boolean);
-    var hit = items.filter(function (x) { var h = (x.t + ' ' + (x.s || '') + ' ' + (x.e || '')).toLowerCase(); return words.every(function (w) { return h.indexOf(w) >= 0; }); });
+    var one = goMode && /^[a-z]$/i.test(qs.trim()) ? qs.trim().toUpperCase() : '';
+    var hit = one ? items.filter(function (x) { return x.code && x.code.charAt(0) === one; }) :
+      items.filter(function (x) { var h = (x.t + ' ' + (x.s || '') + ' ' + (x.e || '')).toLowerCase(); return words.every(function (w) { return h.indexOf(w) >= 0; }); });
     if (!words.length && !goMode) hit = hit.filter(function (x) { return !x.off && x.g !== 'doc' && x.g !== 'party' && x.g !== 'new' && x.g !== 'help'; });
     else hit = hit.filter(function (x) { return !x.off; }).concat(hit.filter(function (x) { return x.off; }));   /* what is switched off comes last, so it never pushes the business's own tools down */
     shown = []; var html = '';
@@ -397,9 +399,18 @@
   var keysDlg;
   function keysSheet() {
     if (!keysDlg) { keysDlg = NS.el('dialog', { id: 'desk-keys', class: 'desk-keys', 'aria-labelledby': 'desk-keys-h' }); document.body.appendChild(keysDlg); }
-    keysDlg.innerHTML = '<div class="dk-hd"><h2 id="desk-keys-h">' + esc(T('keys')) + '</h2><button type="button" class="icon-btn" aria-label="' + esc(NS.t('close')) + '" data-close>✕</button></div>' +
+    keysDlg.innerHTML = '<div class="dk-hd"><h2 id="desk-keys-h">' + esc(T('keys')) + '</h2><span>' + (registry().length ? '<button type="button" class="btn sm" data-dk-print>' + esc(NS.t('b.print')) + '</button> ' : '') + '<button type="button" class="icon-btn" aria-label="' + esc(NS.t('close')) + '" data-close>✕</button></span></div>' +
       '<h3 class="dk-g">' + esc(T('kg_gen')) + '</h3><table class="dk-t"><tbody>' + KEYS.filter(function (k) { return k[1].charAt(0) !== '=' || A() && A().switchBiz && A().data().biz.length > 1; }).map(function (k) { return '<tr><th scope="row"><kbd>' + esc(k[0]) + '</kbd></th><td>' + esc(k[1].charAt(0) === '=' ? NS.t(k[1].slice(1)) : T(k[1])) + '</td></tr>'; }).join('') + '</tbody></table>' + toolTables() + '<p class="dk-note">' + esc(T('k_note')) + '</p>';
     $('[data-close]', keysDlg).onclick = function () { keysDlg.close(); };
+    var pb = $('[data-dk-print]', keysDlg);
+    /* print: the sheet is copied into a plain block (a modal window does not print well), everything else is hidden */
+    if (pb) pb.onclick = function () {
+      var box = NS.el('div', { id: 'dk-printarea' }), biz = A() && A().biz && A().biz();
+      box.innerHTML = '<h1>Nivesh Sahayak: ' + esc(T('keys')) + '</h1>' + (biz ? '<p>' + esc(biz.name) + '</p>' : '') + $$('.dk-g, .dk-t', keysDlg).map(function (n) { return n.outerHTML; }).join('');
+      document.body.appendChild(box); keysDlg.close(); root.classList.add('dk-print');
+      var done = function () { root.classList.remove('dk-print'); box.remove(); window.removeEventListener('afterprint', done); };
+      window.addEventListener('afterprint', done); setTimeout(function () { window.print(); }, 60);
+    };
     keysDlg.showModal();
   }
   /* every tool: its key and its Go to code (Alt+G, then the 2 letters) */
