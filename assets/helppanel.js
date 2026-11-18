@@ -15,7 +15,7 @@
   var IN_APP = window.NS_CFG && NS_CFG.inApp;   /* a maker's copy inside the App (app.niveshsahayak.in/do/<site>/) */
   /* App sections and the articles that explain them, most useful first */
   var SEC = {
-    home: ['dashboard', 'getting-started', 'search-and-shortcuts'], sales: ['sales-screen', 'new-document-inside-the-app', 'repeating-bills'],
+    home: ['dashboard', 'quick-entry', 'getting-started', 'search-and-shortcuts'], sales: ['sales-screen', 'new-document-inside-the-app', 'repeating-bills'],
     money: ['money-received', 'money-paid', 'opening-balances'], dues: ['dues-and-reminders', 'party-ledger'], parties: ['party-ledger', 'group-reports'],
     st: ['party-ledger'], grp: ['group-reports'], buy: ['purchase-bill', 'expenses'], exp: ['expenses'], cash: ['cash-and-bank-books', 'cheques'], books: ['cash-and-bank-books'],
     chq: ['cheques'], stock: ['stock-in-the-app'], b2make: ['production'], b2job: ['job-work'], b2jv: ['journal-entries'], capl: ['capital-and-loans'],

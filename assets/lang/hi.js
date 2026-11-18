@@ -7804,6 +7804,21 @@ NS.addLang("hi", {
   "wn.ok": "समझ गया"
 });
 
+/* Quick entry (17 Nov 2026) */
+NS.addLang("hi", {
+  "app.qe_title": "क्विक एंट्री",
+  "app.qe_sale": "बिक्री बिल",
+  "app.qe_no": "बिल नं.",
+  "app.qe_gstin": "ग्राहक का GSTIN",
+  "app.qe_state": "ग्राहक का राज्य",
+  "app.qe_recv": "पैसा अभी मिला?",
+  "app.qe_recvh": "अगर ग्राहक ने तुरंत पैसे दिए तो तरीका चुनें। साथ में रसीद सेव होगी और बिल पेड मार्क होगा।",
+  "app.qe_keys": "Enter: अगला बॉक्स। Ctrl+S: सेव करें और अगला शुरू करें। Alt+1 से 5: बदलें। Esc: बंद करें।",
+  "app.qe_saved": "{no} सेव हुआ। अगले के लिए तैयार।",
+  "app.qe_nobiz": "पहले अपना बिज़नेस जोड़ें (My data)।",
+  "app.qe_dup": "बिल नं. {no} इस वित्त वर्ष में पहले से इस्तेमाल हो चुका है। नंबर बदलें।",
+  "app.qe_nogst": "इस बिल पर GST नहीं (बिल ऑफ़ सप्लाई: कंपोज़िशन डीलर या छूट वाला सामान)"
+});
 /* Party ledger: switch party, entries first, preview on request (2026-11-17) */
 NS.addLang("hi", {
   "app.lg_switch": "पार्टी",
@@ -8775,6 +8790,10 @@ NS.addLang("hi", {
   "sw.w.fromBill": "बिल सूची से बनाई गई पार्टी।",
   "sw.w.obExists": "इस पार्टी का शुरुआती बकाया पहले से सेव है, दोबारा नहीं जोड़ा।",
   "sw.w.billsWin": "शुरुआती बकाया की जगह बकाया बिल इस्तेमाल हुए।"
+});
+/* Windows program link */
+NS.addLang("hi", {
+  "nav.desktop": "Windows प्रोग्राम"
 });
 
 /* Business-type tools filter (2026-11-17) */

@@ -7847,6 +7847,21 @@ NS.addLang("pa", {
   "wn.ok": "ਸਮਝ ਗਿਆ"
 });
 
+/* Quick entry (17 Nov 2026) */
+NS.addLang("pa", {
+  "app.qe_title": "ਕੁਇੱਕ ਐਂਟਰੀ",
+  "app.qe_sale": "ਵਿਕਰੀ ਬਿੱਲ",
+  "app.qe_no": "ਬਿੱਲ ਨੰ.",
+  "app.qe_gstin": "ਗਾਹਕ ਦਾ GSTIN",
+  "app.qe_state": "ਗਾਹਕ ਦਾ ਰਾਜ",
+  "app.qe_recv": "ਪੈਸੇ ਹੁਣੇ ਮਿਲੇ?",
+  "app.qe_recvh": "ਜੇ ਗਾਹਕ ਨੇ ਤੁਰੰਤ ਪੈਸੇ ਦਿੱਤੇ ਤਾਂ ਤਰੀਕਾ ਚੁਣੋ। ਨਾਲ ਰਸੀਦ ਸੇਵ ਹੋਵੇਗੀ ਅਤੇ ਬਿੱਲ ਪੇਡ ਮਾਰਕ ਹੋਵੇਗਾ।",
+  "app.qe_keys": "Enter: ਅਗਲਾ ਬਾਕਸ। Ctrl+S: ਸੇਵ ਕਰੋ ਅਤੇ ਅਗਲਾ ਸ਼ੁਰੂ ਕਰੋ। Alt+1 ਤੋਂ 5: ਬਦਲੋ। Esc: ਬੰਦ ਕਰੋ।",
+  "app.qe_saved": "{no} ਸੇਵ ਹੋਇਆ। ਅਗਲੇ ਲਈ ਤਿਆਰ।",
+  "app.qe_nobiz": "ਪਹਿਲਾਂ ਆਪਣਾ ਬਿਜ਼ਨੈੱਸ ਜੋੜੋ (My data)।",
+  "app.qe_dup": "ਬਿੱਲ ਨੰ. {no} ਇਸ ਵਿੱਤੀ ਸਾਲ ਵਿੱਚ ਪਹਿਲਾਂ ਹੀ ਵਰਤਿਆ ਗਿਆ ਹੈ। ਨੰਬਰ ਬਦਲੋ।",
+  "app.qe_nogst": "ਇਸ ਬਿੱਲ ਤੇ GST ਨਹੀਂ (ਬਿੱਲ ਆਫ਼ ਸਪਲਾਈ: ਕੰਪੋਜ਼ੀਸ਼ਨ ਡੀਲਰ ਜਾਂ ਛੋਟ ਵਾਲਾ ਸਾਮਾਨ)"
+});
 /* Party ledger: switch party, entries first, preview on request (2026-11-17) */
 NS.addLang("pa", {
   "app.lg_switch": "ਪਾਰਟੀ",
@@ -8818,6 +8833,10 @@ NS.addLang("pa", {
   "sw.w.fromBill": "ਬਿੱਲ ਸੂਚੀ ਤੋਂ ਬਣਾਈ ਪਾਰਟੀ।",
   "sw.w.obExists": "ਇਸ ਪਾਰਟੀ ਦਾ ਸ਼ੁਰੂਆਤੀ ਬਕਾਇਆ ਪਹਿਲਾਂ ਹੀ ਸੇਵ ਹੈ, ਦੁਬਾਰਾ ਨਹੀਂ ਜੋੜਿਆ।",
   "sw.w.billsWin": "ਸ਼ੁਰੂਆਤੀ ਬਕਾਏ ਦੀ ਥਾਂ ਬਕਾਇਆ ਬਿੱਲ ਵਰਤੇ ਗਏ।"
+});
+/* Windows program link */
+NS.addLang("pa", {
+  "nav.desktop": "Windows ਪ੍ਰੋਗਰਾਮ"
 });
 
 /* Business-type tools filter (2026-11-17) */

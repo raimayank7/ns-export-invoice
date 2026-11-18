@@ -8964,6 +8964,21 @@ NS.addLang("te", {
   "wn.ok": "Got it"
 });
 
+/* Quick entry (17 Nov 2026) */
+NS.addLang("te", {
+  "app.qe_title": "Quick entry",
+  "app.qe_sale": "Sale bill",
+  "app.qe_no": "Bill no.",
+  "app.qe_gstin": "Customer GSTIN",
+  "app.qe_state": "Customer state",
+  "app.qe_recv": "Money received now?",
+  "app.qe_recvh": "Pick how the customer paid if they paid at once. A receipt is saved with it and the bill is marked paid.",
+  "app.qe_keys": "Enter: next box. Ctrl+S: save and start the next one. Alt+1 to 5: switch. Esc: close.",
+  "app.qe_saved": "Saved {no}. Ready for the next one.",
+  "app.qe_nobiz": "Add your business first (My data).",
+  "app.qe_dup": "Bill no. {no} is already used in this financial year. Change the number.",
+  "app.qe_nogst": "No GST on this bill (bill of supply: composition dealer or exempt goods)"
+});
 /* Party ledger: switch party, entries first, preview on request (2026-11-17) */
 NS.addLang("te", {
   "app.lg_switch": "Party",
@@ -9935,6 +9950,10 @@ NS.addLang("te", {
   "sw.w.fromBill": "Party made from the bill list.",
   "sw.w.obExists": "An opening balance for this party is already saved: not added again.",
   "sw.w.billsWin": "Outstanding bills are used instead of the opening balance."
+});
+/* Windows program link */
+NS.addLang("te", {
+  "nav.desktop": "Windows program"
 });
 
 /* Business-type tools filter (2026-11-17) */
