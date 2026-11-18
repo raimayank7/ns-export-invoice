@@ -654,7 +654,7 @@
 
   /* party groups (data home meta 'groups' = { party: [{ id, name, under }], item: [...] }; under = 'debtors' | 'creditors' | a group id).
      The two built-in groups: debtors = Customers, creditors = Suppliers (Tally's Sundry Debtors / Sundry Creditors). */
-  var BUILTIN = { debtors: 'Customers', creditors: 'Suppliers' };
+  var BUILTIN = { debtors: 'Sundry Debtors', creditors: 'Sundry Creditors' };
   function groupsOf(meta, kind) { var g = meta && meta[kind || 'party']; return Array.isArray(g) ? g : []; }
   function findGroup(meta, id) { return groupsOf(meta, 'party').filter(function (g) { return g.id === id; })[0]; }
   /* the group and its parents up to Customers or Suppliers: [id, parent, ..., 'debtors' | 'creditors']; [] if the group is not there */

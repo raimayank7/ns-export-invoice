@@ -831,7 +831,7 @@
       if (!lim) return;
       var others = r[1].filter(function (d) { return d.id !== editingId; }), bal = (NSBooks.parties(others, doc.seller.name)[NSBooks.key(doc.buyer.name)] || { bal: 0 }).bal;
       var after = r2(bal + tt0.grand);
-      if (after > lim && !confirm(t('b1.over', { name: p.name, limit: NS.money(lim), now: NS.money(Math.max(0, bal)), after: NS.money(after) }))) throw new Error('cancel');
+      if (after > lim) return askBox(t('b1.over', { name: p.name, limit: NS.money(lim), now: NS.money(Math.max(0, bal)), after: NS.money(after) })).then(function (ok) { if (!ok) throw new Error('cancel'); });
     });
   }
   function maxUnit(tt, withGst) { return Math.max.apply(null, [0].concat(tt.rows.map(function (r) { return (withGst ? r.amount : r.taxable) / (num(r.it.qty) || 1); }))); }
@@ -1116,7 +1116,7 @@
       /* ?open=<id>: NSBiz opens a saved document here to edit, print or share */
       if (open) {
         history.replaceState(null, '', location.pathname + location.hash);
-        return NSStore.get('doc', open).then(function (rec) { if (rec && (rec.type || 'invoice') === type && T.split && T.kinds.indexOf(rec.kind) < 0 && T.split[rec.kind]) { location.replace((NS.siteHref ? NS.siteHref(T.split[rec.kind]) : kindSite(T.split[rec.kind])) + '?open=' + encodeURIComponent(open)); return; } if (rec && (rec.type || 'invoice') === type) { openDoc(rec, false); render(); } else NS.toast(t('conv.none'), 'bad'); }).catch(function () {});
+        return NSStore.get('doc', open).then(function (rec) { if (rec && (rec.type || 'invoice') === type && T.split && T.kinds.indexOf(rec.kind) < 0 && T.split[rec.kind]) { location.replace((NS.siteHref ? NS.siteHref(T.split[rec.kind]) : kindSite(T.split[rec.kind])) + '?open=' + encodeURIComponent(open)); return; } if (rec && (rec.type || 'invoice') === type) { openDoc(rec, false); render(); } else NS.toast(t('conv.none'), 'bad'); }).then(function () { if (NS.autoPrint && NS.autoPrint()) setTimeout(printDoc, 900); }).catch(function () {});
       }
       /* ?copy=<id>: the App's "make the same bill again": a saved document of this kind opened as a new one (today's date, next number) */
       if (copy) {
@@ -1163,7 +1163,7 @@
         /* a document with a number is saved before it is printed or shared, so the number is taken and the copy sent is the one
            kept (round C: a shared PDF stayed an unsaved draft and its number could be used again) */
         else if (a === 'print' || a === 'share') { var go = a === 'print' ? printDoc : shareDoc; if (totals(doc).rows.length) save().then(go, function () {}); else go(); }
-        else if (a === 'new') { if (!editingId && totals(doc).rows.length && !confirm(tw('c.new'))) return; startNew(); }
+        else if (a === 'new') { if (!editingId && totals(doc).rows.length) askBox(tw('c.new')).then(function (ok) { if (ok) startNew(); }); else startNew(); }
         else if (a === 'history') openHistory();
         else if (a === 'toinv') toInvoice();
       });

@@ -8896,3 +8896,144 @@ NS.addLang("pa", {
   "app.vs_discard": "ਬਿਨਾਂ ਸੇਵ ਕੀਤੇ ਬਾਹਰ ਜਾਓ",
   "app.vs_stay": "ਰੁਕੋ ਅਤੇ ਪੂਰਾ ਕਰੋ"
 });
+/* Notification centre */
+NS.addLang("pa", {
+  "hm.bell": "ਸੂਚਨਾਵਾਂ",
+  "hm.bell_none": "ਹੁਣੇ ਕਿਸੇ ਕੰਮ ਦੀ ਲੋੜ ਨਹੀਂ ਹੈ।",
+  "hm.bell_read": "ਸਭ ਪੜ੍ਹਿਆ ਕਰੋ",
+  "hm.bell_day": "ਮੇਰਾ ਦਿਨ ਖੋਲ੍ਹੋ"
+});
+/* Customize the Dashboard */
+NS.addLang("pa", {
+  "ds.custom": "ਆਪਣੇ ਹਿਸਾਬ ਨਾਲ ਬਦਲੋ",
+  "ds.title": "ਡੈਸ਼ਬੋਰਡ ਆਪਣੇ ਹਿਸਾਬ ਨਾਲ ਬਦਲੋ",
+  "ds.hint": "ਜੋ ਦੇਖਣਾ ਹੈ ਉਸ ਤੇ ਟਿੱਕ ਕਰੋ। ਕ੍ਰਮ ਬਦਲਣ ਲਈ ਤੀਰ ਦਬਾਓ। ਰੱਖਣ ਲਈ ਸੇਵ ਦਬਾਓ।",
+  "ds.quick": "ਜਲਦੀ ਜੋੜੋ ਦੇ ਬਟਨ",
+  "ds.tiles": "ਪੈਸੇ ਦੀਆਂ ਟਾਈਲਾਂ",
+  "ds.cards": "ਕਾਰਡ",
+  "ds.up": "ਉੱਪਰ ਕਰੋ",
+  "ds.down": "ਹੇਠਾਂ ਕਰੋ",
+  "ds.reset": "ਪਹਿਲਾਂ ਵਰਗਾ ਕਰ ਦਿਓ",
+  "ds.saved": "ਡੈਸ਼ਬੋਰਡ ਸੇਵ ਹੋ ਗਿਆ"
+});
+/* Side menu groups */
+NS.addLang("pa", {
+  "desk.sg_daily": "ਰੋਜ਼ ਦਾ ਕੰਮ",
+  "desk.sg_parties": "ਪਾਰਟੀਆਂ ਅਤੇ ਬਕਾਇਆ",
+  "desk.sg_bank": "ਕੈਸ਼ ਅਤੇ ਬੈਂਕ",
+  "desk.sg_acc": "ਖਾਤੇ",
+  "desk.sg_stock": "ਸਟਾਕ ਅਤੇ ਪ੍ਰੋਡਕਸ਼ਨ",
+  "desk.sg_people": "ਸਟਾਫ਼ ਅਤੇ ਮੈਂਬਰ",
+  "desk.sg_tax": "ਟੈਕਸ",
+  "desk.sg_reports": "ਰਿਪੋਰਟਾਂ ਅਤੇ ਟੂਲ",
+  "desk.sg_more": "ਹੋਰ"
+});
+/* Party items view */
+NS.addLang("pa", {
+  "app.lg_items": "ਆਈਟਮ",
+  "app.lg_sold": "{p} ਨੂੰ ਵੇਚਿਆ",
+  "app.lg_bought": "{p} ਤੋਂ ਖ਼ਰੀਦਿਆ",
+  "app.lg_itm": "ਆਈਟਮ",
+  "app.lg_iqty": "ਮਾਤਰਾ",
+  "app.lg_irate": "ਔਸਤ ਰੇਟ",
+  "app.lg_ibills": "ਬਿੱਲ",
+  "app.lg_ilast": "ਆਖ਼ਰੀ ਬਿੱਲ",
+  "app.lg_iamt": "ਰਕਮ",
+  "app.lg_itot": "ਕੁੱਲ",
+  "app.lg_noitems": "ਇਨ੍ਹਾਂ ਤਰੀਕਾਂ ਵਿੱਚ ਇਸ ਪਾਰਟੀ ਨਾਲ ਆਈਟਮ ਵਾਲਾ ਕੋਈ ਬਿੱਲ ਨਹੀਂ।"
+});
+/* Open an entry */
+NS.addLang("pa", {
+  "app.vw_mode": "ਭੁਗਤਾਨ ਦਾ ਤਰੀਕਾ",
+  "app.vw_ref": "ਰੈਫ਼ਰੈਂਸ",
+  "app.vw_head": "ਖਾਤਾ",
+  "app.vw_due": "ਦੇਣ ਦੀ ਤਰੀਕ",
+  "app.vw_items": "ਆਈਟਮ",
+  "app.vw_rate": "ਰੇਟ",
+  "app.vw_gst": "ਜੀਐਸਟੀ",
+  "app.vw_entry": "ਅਕਾਊਂਟਿੰਗ ਐਂਟਰੀ",
+  "app.vw_acct": "ਖਾਤਾ",
+  "app.vw_dr": "ਡੈਬਿਟ",
+  "app.vw_cr": "ਕ੍ਰੈਡਿਟ",
+  "app.vw_to": "To",
+  "app.vw_note": "ਨੋਟ"
+});
+/* Side menu: makers heading */
+NS.addLang("pa", {
+  "desk.sg_new": "ਨਵਾਂ ਡਾਕੂਮੈਂਟ ਬਣਾਓ"
+});
+/* Quick add party or item */
+NS.addLang("pa", {
+  "qa.newparty": "\"{n}\" ਹਾਲੇ ਤੁਹਾਡੀਆਂ ਪਾਰਟੀਆਂ ਵਿੱਚ ਨਹੀਂ ਹੈ।",
+  "qa.newitem": "\"{n}\" ਹਾਲੇ ਤੁਹਾਡੀਆਂ ਆਈਟਮਾਂ ਵਿੱਚ ਨਹੀਂ ਹੈ।",
+  "qa.addparty": "ਪਾਰਟੀ ਜੋੜੋ",
+  "qa.additem": "ਆਈਟਮ ਜੋੜੋ",
+  "qa.tparty": "ਨਵੀਂ ਪਾਰਟੀ",
+  "qa.titem": "ਨਵੀਂ ਆਈਟਮ",
+  "qa.pname": "ਪਾਰਟੀ ਦਾ ਨਾਮ",
+  "qa.iname": "ਆਈਟਮ ਦਾ ਨਾਮ",
+  "qa.role": "ਕਿਸਮ",
+  "qa.cust": "ਗਾਹਕ",
+  "qa.supp": "ਸਪਲਾਇਰ",
+  "qa.both": "ਗਾਹਕ ਅਤੇ ਸਪਲਾਇਰ",
+  "qa.gstin": "ਜੀਐਸਟੀਆਈਐਨ",
+  "qa.phone": "ਫ਼ੋਨ",
+  "qa.addr": "ਪਤਾ",
+  "qa.city": "ਸ਼ਹਿਰ",
+  "qa.state": "ਰਾਜ",
+  "qa.unit": "ਯੂਨਿਟ",
+  "qa.hsn": "HSN / SAC",
+  "qa.gst": "ਜੀਐਸਟੀ %",
+  "qa.srate": "ਵਿਕਰੀ ਰੇਟ",
+  "qa.prate": "ਖ਼ਰੀਦ ਰੇਟ",
+  "qa.open": "ਸ਼ੁਰੂਆਤੀ ਸਟਾਕ (ਮਾਤਰਾ)",
+  "qa.save": "ਸੇਵ ਕਰੋ",
+  "qa.cancel": "ਰੱਦ ਕਰੋ",
+  "qa.needname": "ਨਾਮ ਲਿਖੋ।",
+  "qa.exists": "ਇਹ ਨਾਮ ਪਹਿਲਾਂ ਹੀ ਸੇਵ ਹੈ।",
+  "qa.badgst": "ਇਹ ਜੀਐਸਟੀਆਈਐਨ ਸਹੀ ਨਹੀਂ ਹੈ।",
+  "qa.partyok": "{n} ਤੁਹਾਡੀਆਂ ਪਾਰਟੀਆਂ ਵਿੱਚ ਜੁੜ ਗਈ।",
+  "qa.itemok": "{n} ਤੁਹਾਡੀਆਂ ਆਈਟਮਾਂ ਵਿੱਚ ਜੁੜ ਗਈ।",
+  "qa.fail": "ਸੇਵ ਨਹੀਂ ਹੋਇਆ। ਫਿਰ ਕੋਸ਼ਿਸ਼ ਕਰੋ।"
+});
+/* Quick add key */
+NS.addLang("pa", {
+  "desk.k_qadd": "ਪਾਰਟੀ ਜਾਂ ਆਈਟਮ ਦੇ ਬਾਕਸ ਵਿੱਚ: ਨਵਾਂ ਜੋੜੋ"
+});
+/* Quick add, more details; accounting group names */
+NS.addLang("pa", {
+  "grp.debtors": "ਸੰਡਰੀ ਡੈਟਰਜ਼ (ਦੇਣਦਾਰ)",
+  "grp.creditors": "ਸੰਡਰੀ ਕ੍ਰੈਡਿਟਰਜ਼ (ਲੈਣਦਾਰ)",
+  "grp.p_party": "ਪਾਰਟੀਆਂ ਨੂੰ ਲੈਜਰ ਗਰੁੱਪਾਂ ਵਿੱਚ ਰੱਖੋ, ਜਿਵੇਂ ਰਿਟੇਲ ਗਾਹਕ ਜਾਂ ਲੁਧਿਆਣਾ ਰੂਟ। ਸੰਡਰੀ ਡੈਟਰਜ਼ (ਗਾਹਕ) ਅਤੇ ਸੰਡਰੀ ਕ੍ਰੈਡਿਟਰਜ਼ (ਸਪਲਾਇਰ) ਪਹਿਲਾਂ ਤੋਂ ਬਣੇ ਹਨ; ਤੁਹਾਡੇ ਗਰੁੱਪ ਉਨ੍ਹਾਂ ਹੇਠ ਆਉਂਦੇ ਹਨ ਅਤੇ ਹਰ ਗਰੁੱਪ ਦੇ ਸਬ-ਗਰੁੱਪ ਬਣ ਸਕਦੇ ਹਨ। Tally ਵਿੱਚ ਵੀ ਇਹੀ ਗਰੁੱਪ ਜਾਂਦੇ ਹਨ।",
+  "grp.h_pgroup": "ਨਵੀਂ ਪਾਰਟੀ ਆਪਣੀ ਕਿਸਮ ਨਾਲ ਸੰਡਰੀ ਡੈਟਰਜ਼ ਜਾਂ ਸੰਡਰੀ ਕ੍ਰੈਡਿਟਰਜ਼ ਵਿੱਚ ਜਾਂਦੀ ਹੈ। ਆਪਣੇ ਗਰੁੱਪ Groups ਵਿੱਚ ਬਣਾਓ।",
+  "qa.group": "ਗਰੁੱਪ (ਲੈਜਰ)",
+  "qa.nogroup": "ਕੋਈ ਗਰੁੱਪ ਨਹੀਂ",
+  "qa.kind": "ਮਾਲ ਜਾਂ ਸਰਵਿਸ",
+  "qa.goods": "ਮਾਲ",
+  "qa.service": "ਸਰਵਿਸ",
+  "qa.more": "ਹੋਰ ਜਾਣਕਾਰੀ (ਜ਼ਰੂਰੀ ਨਹੀਂ)",
+  "qa.code": "ਆਈਟਮ ਕੋਡ",
+  "qa.wrate": "ਹੋਲਸੇਲ ਰੇਟ",
+  "qa.mrp": "ਐਮਆਰਪੀ",
+  "qa.min": "ਘੱਟ ਸਟਾਕ ਦੀ ਹੱਦ",
+  "qa.pan": "ਪੈਨ",
+  "qa.pin": "ਪਿੰਨ ਕੋਡ",
+  "qa.email": "ਈਮੇਲ",
+  "qa.cdays": "ਉਧਾਰ ਦੇ ਦਿਨ",
+  "qa.climit": "ਉਧਾਰ ਦੀ ਹੱਦ",
+  "qa.ob": "ਸ਼ੁਰੂਆਤੀ ਬਕਾਇਆ",
+  "qa.obside": "ਸ਼ੁਰੂਆਤੀ ਬਕਾਇਆ",
+  "qa.obrecv": "ਲੈਣਾ ਹੈ (Dr): ਉਹ ਸਾਨੂੰ ਦੇਣਗੇ",
+  "qa.obpay": "ਦੇਣਾ ਹੈ (Cr): ਅਸੀਂ ਉਨ੍ਹਾਂ ਨੂੰ ਦੇਣਾ",
+  "qa.badpan": "ਇਹ ਪੈਨ ਸਹੀ ਨਹੀਂ ਹੈ।"
+});
+/* Multitasking: parked entries */
+NS.addLang("pa", {
+  "desk.tasks": "ਖੁੱਲ੍ਹੀਆਂ ਐਂਟਰੀਆਂ",
+  "desk.task": "ਐਂਟਰੀ",
+  "desk.resume": "ਇਸ ਐਂਟਰੀ 'ਤੇ ਵਾਪਸ ਜਾਓ; ਲਿਖਿਆ ਹੋਇਆ ਰਹਿੰਦਾ ਹੈ",
+  "desk.parked": "{n} ਹੇਠਾਂ ਸਟੇਟਸ ਬਾਰ ਵਿੱਚ ਖੁੱਲ੍ਹੀ ਰੱਖੀ ਹੈ। ਅੱਗੇ ਭਰਨ ਲਈ ਉਸ 'ਤੇ ਕਲਿੱਕ ਕਰੋ।",
+  "desk.parkq": "ਤੁਹਾਡੀ ਸ਼ੁਰੂ ਕੀਤੀ ਇੱਕ ਐਂਟਰੀ ਖੁੱਲ੍ਹੀ ਰੱਖੀ ਹੈ। ਉਸ 'ਤੇ ਵਾਪਸ ਜਾਓ, ਜਾਂ ਉਸਨੂੰ ਛੱਡ ਕੇ ਨਵੀਂ ਸ਼ੁਰੂ ਕਰੋ?",
+  "desk.parkback": "ਉਸ 'ਤੇ ਵਾਪਸ ਜਾਓ",
+  "desk.parkdrop": "ਛੱਡੋ, ਨਵੀਂ ਸ਼ੁਰੂ ਕਰੋ"
+});

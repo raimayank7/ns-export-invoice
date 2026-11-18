@@ -33,20 +33,20 @@ h1,h2,h3,h4{font-family:var(--font-head);line-height:1.25;letter-spacing:-.01em}
 .hd{background:var(--surface);border-bottom:1px solid var(--line);position:sticky;top:0;z-index:20}
 .hd .wrap{display:flex;align-items:center;gap:12px;min-height:60px}
 .brand{display:flex;align-items:center;gap:10px;text-decoration:none;color:var(--ink);min-width:0}
-.brand .mk{height:58px;width:auto;flex:none}
-@media (min-width:1100px){.brand .mk{height:64px}}@media (max-width:520px){.brand .mk{height:42px}}
+.brand .mk{height:52px;width:auto;flex:none}
+@media (min-width:1100px){.brand .mk{height:56px}}@media (max-width:520px){.brand .mk{height:40px}}
 .brand .mk-d{display:none}
 @media (prefers-color-scheme:dark){:root:not([data-theme=light]) .brand .mk-l{display:none}:root:not([data-theme=light]) .brand .mk-d{display:block}}
 :root[data-theme=dark] .brand .mk-l{display:none}:root[data-theme=dark] .brand .mk-d{display:block}
 .brand b{font-family:var(--font-head);font-weight:800;font-size:1.05rem;line-height:1.1;display:block}
 /* the NSBiz wordmark (owner 2026-11-18): style G lettering (Cinzel Decorative) for NS in the emblem's teal, style U: BIZ on a round gold pill (variant 2);
    as tall as the NS emblem beside it */
-.brand b.nsb{font-family:'Cinzel Decorative',Georgia,'Times New Roman',serif;font-size:46px;font-weight:900;letter-spacing:0;line-height:1;display:inline-flex;align-items:center;white-space:nowrap;overflow-wrap:normal}
+.brand b.nsb{font-family:'Cinzel Decorative',Georgia,'Times New Roman',serif;font-size:40px;font-weight:900;letter-spacing:0;line-height:1;display:inline-flex;align-items:center;white-space:nowrap;overflow-wrap:normal}
 .nsb-n{-webkit-background-clip:text;background-clip:text;color:transparent;padding-block:.06em;background-image:linear-gradient(170deg,#127F74 0%,#063F39 100%);filter:drop-shadow(0 1px 1px rgba(0,0,0,.15))}
 .nsb-b{margin-inline-start:.12em;border-radius:999px;padding:.1em .22em .14em;font-size:.7em;color:#fff;background:linear-gradient(170deg,#E9BC52,#B47F23);box-shadow:0 2px 6px rgba(142,100,25,.35),inset 0 1px 0 rgba(255,255,255,.4)}
 @media (prefers-color-scheme:dark){:root:not([data-theme=light]) .nsb-n{background-image:linear-gradient(170deg,#9AF5E8 0%,#1E9C8E 100%)}:root:not([data-theme=light]) .nsb-b{color:#0E1726;background:linear-gradient(170deg,#FBE29A,#D9A23A);box-shadow:0 2px 8px rgba(0,0,0,.5),inset 0 1px 0 rgba(255,255,255,.5)}}
 :root[data-theme=dark] .nsb-n{background-image:linear-gradient(170deg,#9AF5E8 0%,#1E9C8E 100%)}:root[data-theme=dark] .nsb-b{color:#0E1726;background:linear-gradient(170deg,#FBE29A,#D9A23A);box-shadow:0 2px 8px rgba(0,0,0,.5),inset 0 1px 0 rgba(255,255,255,.5)}
-@media (max-width:1099px){.brand b.nsb{font-size:42px}}@media (max-width:520px){.brand b.nsb{font-size:30px}}@media (max-width:380px){.brand b.nsb{font-size:24px}}
+@media (max-width:1099px){.brand b.nsb{font-size:37px}}@media (max-width:520px){.brand b.nsb{font-size:28px}}@media (max-width:380px){.brand b.nsb{font-size:22px}}
 @media (forced-colors:active){.nsb-n{color:CanvasText;background:none;filter:none}.nsb-b{border:1px solid CanvasText}}
 .brand-ic{display:inline-flex;vertical-align:-.2em;margin-inline-start:.15em;color:var(--accent)}
 .brand-ic::before{content:"";width:1.2em;height:1.2em;background:currentColor;-webkit-mask:var(--i) center/contain no-repeat;mask:var(--i) center/contain no-repeat}
@@ -61,7 +61,7 @@ h1,h2,h3,h4{font-family:var(--font-head);line-height:1.25;letter-spacing:-.01em}
 /* header text links go to the side menu below laptop width: two long guide names pushed the header to 3 rows on tablets */
 @media (max-width:1023px){.hd nav a.hide-sm{display:none}}
 @media (max-width:720px){.brand small{display:none}}
-@media (max-width:380px){.brand b{font-size:.9rem}.brand .mk{height:34px}.hd .wrap{gap:8px}}
+@media (max-width:380px){.brand b{font-size:.9rem}.brand .mk{height:32px}.hd .wrap{gap:8px}}
 .lang-pick{width:auto;max-width:150px;min-height:40px;padding:6px 28px 6px 10px;font-size:.88rem;border-radius:10px}
 @media (max-width:400px){.lang-pick{max-width:120px!important;padding-right:22px}}   /* the header has its own second row on phones now: room for the whole language name */
 /* smallest phones: brand name must not run under the language picker */
@@ -395,3 +395,17 @@ html[dir=rtl] :is(.tbl-wrap,.gt-scroll,.sb-sheet-wrap):has(>[dir=ltr],>[lang=en-
 
 /* auto save: daily download switch (browsers without folder saving) */
 .md-chk{display:flex;gap:8px;align-items:center;margin:14px 0 4px;cursor:pointer}.md-chk input{width:18px;height:18px}
+
+/* "NSBiz" inside text, drawn like the header (core.js NS.nsbMarks): it follows the size of the words around it */
+b.nsb-in{font-family:'Cinzel Decorative',Georgia,'Times New Roman',serif;font-weight:900;font-size:1.08em;letter-spacing:0;line-height:1;display:inline-flex;align-items:center;white-space:nowrap;vertical-align:-.06em;text-transform:none}
+b.nsb-in .nsb-b{box-shadow:0 1px 3px rgba(142,100,25,.3);margin-inline-start:.08em}
+.side-h b.nsb-in,.sg-h b.nsb-in{font-size:1.6em}
+
+/* a name that is not saved yet, and the small box that adds it (core.js NS.quickAdd) */
+.qa-new{display:flex;flex-wrap:wrap;align-items:center;gap:6px 8px;margin:4px 0 0;padding:5px 8px;border:1px dashed var(--line);border-radius:8px;background:var(--surface2);font-size:.85rem;color:var(--soft)}
+.qa-new .btn.sm{min-height:28px;padding:2px 10px}.qa-new kbd{font:600 .72rem var(--mono,monospace);border:1px solid var(--line);border-radius:4px;padding:0 4px}
+.qa-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px 12px}.qa-f{display:grid;gap:4px;font-size:.85rem;font-weight:600}
+@media (max-width:520px){.qa-grid{grid-template-columns:1fr}}
+.qa-msg{color:var(--bad,#dc2626);margin:10px 0 0}.qa-acts{display:flex;gap:8px;margin-top:14px}
+.qa-dlg .qa-form{max-width:760px}.qa-dlg .qa-w{grid-column:1/-1}
+.qa-more{margin-top:14px;border:1px solid var(--line);border-radius:10px;padding:8px 12px}.qa-more summary{cursor:pointer;font-weight:600}.qa-more .qa-grid{margin-top:10px}

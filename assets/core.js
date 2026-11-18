@@ -140,9 +140,122 @@
       var hit = cache.filter(function (x) { return label(x).toLowerCase() === v; })[0];
       if (hit && input._picked !== hit.id) { input._picked = hit.id; onPick(hit); }
     });
+    /* a party or item field: a name that is not saved yet can be added from here (NS.quickAdd) */
+    var src = String(getList), qa = /["']item["']/.test(src) ? 'item' : /["']party["']/.test(src) && input.id !== 's-name' ? 'party' : '';
+    if (qa) input._qa = { kind: qa, known: function (v) { v = String(v || '').trim().toLowerCase(); return !v || cache.some(function (x) { return label(x).toLowerCase() === v; }); },
+      done: function (rec) { refresh().then(function () { input.value = label(rec); input._picked = rec.id; onPick(rec); input.dispatchEvent(new Event('change', { bubbles: true })); }); } };
     refresh();
     return { refresh: refresh };
   };
+
+  /* ---------- add a new party or item from inside a voucher (a small box; F2 in the field) ---------- */
+  var QA_LIST = { 'dl-party': 'party', 'dl-item': 'item' };
+  function qaOf(inp) {
+    if (!inp || inp.tagName !== 'INPUT') return null;
+    if (inp._qa) return inp._qa;
+    var k = QA_LIST[inp.getAttribute('list') || ''] || inp.getAttribute('data-qa'); if (!k) return null;
+    return { kind: k, known: function (v) { v = String(v || '').trim().toLowerCase(); var dl = document.getElementById(inp.getAttribute('list') || ''); return !v || !dl || [].some.call(dl.options, function (o) { return o.value.toLowerCase() === v; }); },
+      done: function (rec) { var dl = document.getElementById(inp.getAttribute('list') || ''); if (dl) dl.appendChild(NS.el('option', { value: k === 'item' ? rec.desc : rec.name })); inp.value = k === 'item' ? rec.desc : rec.name; inp.dispatchEvent(new Event('input', { bubbles: true })); inp.dispatchEvent(new Event('change', { bubbles: true })); } };
+  }
+  function qaChip(inp, q) {
+    var c = inp._qaChip, v = inp.value.trim();
+    if (!v || q.known(v)) { if (c) c.hidden = true; return; }
+    if (!c) {
+      c = inp._qaChip = NS.el('div', { 'class': 'qa-new' });
+      inp.insertAdjacentElement('afterend', c);
+      c.addEventListener('mousedown', function (e) { e.preventDefault(); });
+      c.addEventListener('click', function (e) { if (e.target.closest('button')) NS.quickAdd(inp); });
+    }
+    c.innerHTML = '<span>' + NS.esc(NS.t(q.kind === 'item' ? 'qa.newitem' : 'qa.newparty', { n: v })) + '</span> <button type="button" class="btn sm">' + NS.esc(NS.t(q.kind === 'item' ? 'qa.additem' : 'qa.addparty')) + '</button> <kbd>F2</kbd>';
+    c.hidden = false;
+  }
+  document.addEventListener('focusout', function (e) { var q = qaOf(e.target); if (q) setTimeout(function () { qaChip(e.target, q); }, 150); }, true);
+  document.addEventListener('input', function (e) { var q = qaOf(e.target); if (q && e.target._qaChip && !e.target._qaChip.hidden) qaChip(e.target, q); }, true);
+  document.addEventListener('keydown', function (e) {
+    if (e.key !== 'F2' || e.altKey || e.ctrlKey || e.metaKey || e.shiftKey) return;   /* F2 is free everywhere; Alt+C stays Challan */
+    var q = qaOf(document.activeElement); if (!q) return;
+    e.preventDefault(); e.stopPropagation(); NS.quickAdd(document.activeElement);
+  }, true);
+  function qaSide() { var k = (document.querySelector('dialog[open][data-kind]') || { getAttribute: function () { return ''; } }).getAttribute('data-kind'); if (k) return /^(mout|pbill|pret|exp|po)$/.test(k) ? 'supplier' : 'customer'; return /^(purchase|purchase-order|voucher|debit-note|self-invoice)\./i.test(location.host) ? 'supplier' : 'customer'; }
+  NS.quickAdd = function (inp) {
+    var q = qaOf(inp); if (!q) return;
+    var item = q.kind === 'item', name = inp.value.trim(), d = document.getElementById('qa-dlg');
+    if (!d) { d = NS.el('dialog', { id: 'qa-dlg', 'class': 'qa-dlg' }); document.body.appendChild(d); }
+    var T = NS.t, E = NS.esc, f = function (id, lbl, html, wide) { return '<label class="qa-f' + (wide ? ' qa-w' : '') + '" for="' + id + '"><span>' + E(T(lbl)) + '</span>' + html + '</label>'; };
+    var states = NS.STATES.map(function (s) { return '<option value="' + s[0] + '">' + E(s[1]) + '</option>'; }).join('');
+    var main = item
+      ? f('qa-n', 'qa.iname', '<input id="qa-n" required>', 1) + f('qa-gr', 'qa.group', '<select id="qa-gr"></select>') + f('qa-k', 'qa.kind', '<select id="qa-k"><option value="goods">' + E(T('qa.goods')) + '</option><option value="service">' + E(T('qa.service')) + '</option></select>') +
+        f('qa-u', 'qa.unit', '<input id="qa-u" value="Nos">') + f('qa-h', 'qa.hsn', '<input id="qa-h" inputmode="numeric">') +
+        f('qa-g', 'qa.gst', '<select id="qa-g">' + [0, 0.1, 0.25, 3, 5, 12, 18, 28, 40].map(function (r) { return '<option' + (r === 18 ? ' selected' : '') + '>' + r + '</option>'; }).join('') + '</select>') +
+        f('qa-r', 'qa.srate', '<input id="qa-r" inputmode="decimal">') + f('qa-p', 'qa.prate', '<input id="qa-p" inputmode="decimal">') + f('qa-o', 'qa.open', '<input id="qa-o" inputmode="decimal">')
+      : f('qa-n', 'qa.pname', '<input id="qa-n" required>', 1) + f('qa-t', 'qa.role', '<select id="qa-t"><option value="customer">' + E(T('qa.cust')) + '</option><option value="supplier">' + E(T('qa.supp')) + '</option><option value="both">' + E(T('qa.both')) + '</option></select>') +
+        f('qa-gr', 'qa.group', '<select id="qa-gr"></select>') +
+        f('qa-gs', 'qa.gstin', '<input id="qa-gs" maxlength="15" autocapitalize="characters">') + f('qa-ph', 'qa.phone', '<input id="qa-ph" inputmode="tel">') +
+        f('qa-a', 'qa.addr', '<input id="qa-a">', 1) + f('qa-c', 'qa.city', '<input id="qa-c">') + f('qa-s', 'qa.state', '<select id="qa-s"><option value=""></option>' + states + '</select>');
+    var more = item
+      ? f('qa-code', 'qa.code', '<input id="qa-code">') + f('qa-w', 'qa.wrate', '<input id="qa-w" inputmode="decimal">') + f('qa-m', 'qa.mrp', '<input id="qa-m" inputmode="decimal">') + f('qa-min', 'qa.min', '<input id="qa-min" inputmode="decimal">')
+      : f('qa-pan', 'qa.pan', '<input id="qa-pan" maxlength="10" autocapitalize="characters">') + f('qa-pin', 'qa.pin', '<input id="qa-pin" inputmode="numeric" maxlength="6">') + f('qa-em', 'qa.email', '<input id="qa-em" type="email">') +
+        f('qa-cd', 'qa.cdays', '<input id="qa-cd" inputmode="numeric">') + f('qa-cl', 'qa.climit', '<input id="qa-cl" inputmode="decimal">') +
+        f('qa-ob', 'qa.ob', '<input id="qa-ob" inputmode="decimal">') + f('qa-obs', 'qa.obside', '<select id="qa-obs"><option value="recv">' + E(T('qa.obrecv')) + '</option><option value="pay">' + E(T('qa.obpay')) + '</option></select>');
+    d.innerHTML = '<div class="dlg-hd"><h2>' + E(T(item ? 'qa.titem' : 'qa.tparty')) + '</h2></div><form class="qa-form"><div class="qa-grid">' + main + '</div>' +
+      '<details class="qa-more"><summary>' + E(T('qa.more')) + '</summary><div class="qa-grid">' + more + '</div></details>' +
+      '<p class="qa-msg" role="alert" hidden></p><div class="qa-acts"><button type="submit" class="btn primary">' + E(T('qa.save')) + '</button><button type="button" class="btn" data-qa-x>' + E(T('qa.cancel')) + '</button></div></form>';
+    var $q = function (id) { return document.getElementById(id); }, gsel = $q('qa-gr');
+    $q('qa-n').value = name;
+    /* the group (ledger group): Sundry Debtors / Sundry Creditors and the user's own groups under them; items: the item groups */
+    NSStore.meta('groups').then(function (meta) {
+      var list = NS.groupsOf(meta || {}, item ? 'item' : 'party'), opt = function (g, sub) { return '<option value="' + E(g.id) + '">' + (sub ? '\u2003' : '') + E(g.name) + '</option>'; };
+      var html = item ? '<option value="">' + E(T('qa.nogroup')) + '</option>' : '';
+      list.filter(function (g) { return !g.under; }).forEach(function (g) { html += opt(g); list.filter(function (x) { return x.under === g.id; }).forEach(function (x) { html += opt(x, 1); list.filter(function (y) { return y.under === x.id; }).forEach(function (y) { html += opt(y, 2); }); }); });
+      gsel.innerHTML = html; if (!item) gsel.value = $q('qa-t').value === 'supplier' ? 'creditors' : 'debtors';
+    }, function () {});
+    if (!item) {
+      $q('qa-t').value = qaSide();
+      $q('qa-t').addEventListener('change', function () { if (/^(debtors|creditors)$/.test(gsel.value)) gsel.value = this.value === 'supplier' ? 'creditors' : 'debtors'; $q('qa-obs').value = this.value === 'supplier' ? 'pay' : 'recv'; });
+      $q('qa-obs').value = $q('qa-t').value === 'supplier' ? 'pay' : 'recv';
+      $q('qa-gs').addEventListener('input', function () { var g = this.value.toUpperCase().replace(/\s/g, ''); this.value = g; if (/^\d{2}/.test(g) && NS.stateName(g.slice(0, 2))) $q('qa-s').value = g.slice(0, 2); if (g.length >= 12 && !$q('qa-pan').value) $q('qa-pan').value = g.slice(2, 12); });
+    } else {
+      $q('qa-h').addEventListener('input', function () { if (/^99/.test(this.value.trim())) $q('qa-k').value = 'service'; });
+    }
+    d.querySelector('[data-qa-x]').addEventListener('click', function () { d.removeAttribute('data-dirty'); d.close(); inp.focus(); });
+    d.addEventListener('close', function () { setTimeout(function () { if (document.contains(inp)) inp.focus(); }, 0); }, { once: true });
+    d.querySelector('form').addEventListener('submit', function (e) {
+      e.preventDefault();
+      var msg = d.querySelector('.qa-msg'), nm = $q('qa-n').value.trim(), say = function (t) { msg.textContent = t; msg.hidden = false; }, v = function (id) { var x = $q(id); return x ? x.value.trim() : ''; }, n = function (id) { return NS.num(v(id)); };
+      if (!nm) return say(T('qa.needname'));
+      if (q.known(nm) && nm.toLowerCase() !== name.toLowerCase()) return say(T('qa.exists'));
+      var rec, extra = Promise.resolve(), biz = function () { return window.NSApp && NSApp.biz && NSApp.biz() ? Promise.resolve(NSApp.biz()) : NS.defaultBiz(); };
+      var fyStart = (function () { var t = NS.today(), y = +t.slice(0, 4), m = +t.slice(5, 7); return (m < 4 ? y - 1 : y) + '-04-01'; })();
+      if (item) {
+        rec = { desc: nm, kind: v('qa-k') || 'goods', unit: v('qa-u') || 'Nos', hsn: v('qa-h'), gst: +$q('qa-g').value };
+        if (gsel.value) { rec.group = gsel.value; rec.cat = gsel.options[gsel.selectedIndex].text.trim(); }
+        if (n('qa-r')) rec.rate = n('qa-r'); if (n('qa-p')) rec.prate = n('qa-p'); if (n('qa-w')) rec.wrate = n('qa-w'); if (n('qa-m')) rec.mrp = n('qa-m');
+        if (v('qa-code')) rec.code = v('qa-code'); if (n('qa-min')) rec.min = n('qa-min');
+        var oq = n('qa-o');
+        /* opening stock goes in as an opening stock entry of the business in use, like the Stock screen makes it */
+        if (oq && rec.kind === 'goods') extra = biz().then(function (b) { return b ? NSStore.put('doc', { type: 'stk', kind: 'open', date: NS.today(), no: '', seller: b, lines: [{ desc: nm, unit: rec.unit, qty: oq, rate: rec.prate || 0 }] }) : null; });
+      } else {
+        var g = v('qa-gs').toUpperCase(), ck = NS.gstinCheck(g), pan = v('qa-pan').toUpperCase();
+        if (g && !ck.ok) return say(ck.msg || T('qa.badgst'));
+        if (pan && !/^[A-Z]{5}[0-9]{4}[A-Z]$/.test(pan)) return say(T('qa.badpan'));
+        rec = { name: nm, role: v('qa-t'), gstin: g, phone: v('qa-ph'), addr: v('qa-a'), city: v('qa-c'), state: v('qa-s') || (g ? g.slice(0, 2) : '') };
+        if (gsel.value && !/^(debtors|creditors)$/.test(gsel.value)) rec.group = gsel.value;
+        if (pan) rec.pan = pan; if (v('qa-pin')) rec.pin = v('qa-pin'); if (v('qa-em')) rec.email = v('qa-em');
+        if (n('qa-cd')) rec.cdays = n('qa-cd'); if (n('qa-cl')) rec.climit = n('qa-cl');
+        var ob = n('qa-ob');
+        /* opening balance: the same entry the App's Opening balance form makes, dated the first day of this financial year */
+        if (ob) extra = biz().then(function (b) { return b ? NSStore.put('doc', { type: 'ob', app: 1, date: fyStart, seller: b, buyer: { name: nm }, side: v('qa-obs') || 'recv', amount: ob, no: '', total: ob }) : null; });
+      }
+      extra.then(function () { return NSStore.put(item ? 'item' : 'party', rec); }).then(function (saved) {
+        var r = saved && saved.id ? saved : rec;
+        d.removeAttribute('data-dirty'); d.close(); if (inp._qaChip) inp._qaChip.hidden = true;
+        NS.toast(T(item ? 'qa.itemok' : 'qa.partyok', { n: nm }));
+        q.done(r);
+      }, function (er) { say((er && er.message) || T('qa.fail')); });
+    });
+    d.showModal(); setTimeout(function () { var x = $q(item ? 'qa-h' : 'qa-gs'); (name ? x : $q('qa-n')).focus(); }, 30);
+  };
+
 
   /* ---------- backup, restore, reminder, auto-save folder ---------- */
   var BACKUP_NAME = 'nivesh-sahayak-backup';
@@ -395,7 +508,7 @@
      Each change is also copied into the data home (meta 'prefs' = {key: {v, t}}), so it is in "Back up everything", the one auto save
      and on every site and device the backup is restored to. On load the newer side wins; values only on this site are carried in.
      Not copied: look and place (theme, language, side menu, chosen business, last screen) and unsaved drafts of a document. */
-  var PREF = /^ns-(aato|tally-led|prl|bc-set|gstcal|gstcal-told|gstcal-note|pl-draft-.+|hsn-band|stock-(sv|lv|mv)|gstin-recent|c8|g1|g3|td)$/;
+  var PREF = /^ns-(aato|tally-led|prl|bc-set|gstcal|gstcal-told|gstcal-note|pl-draft-.+|hsn-band|stock-(sv|lv|mv)|gstin-recent|c8|g1|g3|td|dash)$/;
   var lsSet = Storage.prototype.setItem, lsDel = Storage.prototype.removeItem, prefDue = {}, prefT = 0;
   function prefStamps(v) {
     if (v) { try { lsSet.call(localStorage, 'ns-prefs-t', JSON.stringify(v)); } catch (e) {} return v; }
@@ -720,7 +833,7 @@
      A party with no (or an unknown) group is in the built-in for its role; an item with no group is found by its cat text.
      partyGroup / itemGroup return { id, name, top, under }: top = the built-in for a party ('debtors' | 'creditors'), the top item
      group for an item ('' when the item has no group). */
-  var GB = { debtors: ['grp.debtors', 'Customers'], creditors: ['grp.creditors', 'Suppliers'] };
+  var GB = { debtors: ['grp.debtors', 'Sundry Debtors'], creditors: ['grp.creditors', 'Sundry Creditors'] };
   function gName(id) { var v = NS.t ? NS.t(GB[id][0]) : ''; return v && v !== GB[id][0] ? v : GB[id][1]; }
   NS.groupsOf = function (meta, kind) {
     var own = ((meta && meta[kind]) || []).filter(function (g) { return g && g.id && String(g.name || '').trim(); });
@@ -983,6 +1096,36 @@
     var k = icFor(b); if (!k || !IC[k]) return;
     b.insertAdjacentHTML('afterbegin', '<svg class="bi" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="' + IC[k] + '"/></svg>');
   }
+  /* ?open=<id>&print=1 (the App's Print button): the maker prints the document as soon as it is open; read once */
+  var AUTOPRINT = /[?&]print=1\b/.test(location.search);
+  NS.autoPrint = function () { var x = AUTOPRINT; AUTOPRINT = false; return x; };
+  NS.icSvg = function (k) { return IC[k] ? '<svg class="bi" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="' + IC[k] + '"/></svg>' : ''; };
+  /* ---------- every "NSBiz" written on screen is drawn like the header's name: NS in teal, Biz on the gold pill (owner 2026-11-18).
+     Not inside fields, lists of choices, printed sheets, the page title or text that is being typed. ---------- */
+  var NSB_SKIP = 'script,style,textarea,input,select,option,title,noscript,code,pre,svg,[contenteditable],.brand,.nsb,#sheet,.sh,.stsheet,[data-sheet],#vch-print,.no-nsb';
+  function nsbIn(root) {
+    if (!root || root.nodeType !== 1 || (root.closest && root.closest(NSB_SKIP))) return;
+    var w = document.createTreeWalker(root, NodeFilter.SHOW_TEXT, { acceptNode: function (n) {
+      return n.nodeValue.indexOf('NSBiz') >= 0 && !(n.parentNode && n.parentNode.closest && n.parentNode.closest(NSB_SKIP)) ? 1 : 2; } }), list = [], n;
+    while ((n = w.nextNode())) list.push(n);
+    list.forEach(function (t) {
+      var parts = t.nodeValue.split('NSBiz'), f = document.createDocumentFragment();
+      parts.forEach(function (p, i) {
+        if (p) f.appendChild(document.createTextNode(p));
+        if (i < parts.length - 1) { var b = document.createElement('b'); b.className = 'nsb nsb-in'; b.setAttribute('aria-label', 'NSBiz'); b.innerHTML = '<span class="nsb-n" aria-hidden="true">NS</span><span class="nsb-b" aria-hidden="true">Biz</span>'; f.appendChild(b); }
+      });
+      t.parentNode.replaceChild(f, t);
+    });
+  }
+  NS.nsbMarks = function () {
+    if (!document.body) return;
+    var todo = new Set(), queued = false;
+    function run() { queued = false; todo.forEach(function (x) { if (x.isConnected) nsbIn(x.nodeType === 3 ? x.parentNode : x); }); todo.clear(); }
+    function add(x) { if (!x) return; todo.add(x); if (!queued) { queued = true; setTimeout(run, 20); } }
+    add(document.body);
+    new MutationObserver(function (ms) { ms.forEach(function (m) { if (m.type === 'characterData') add(m.target); else [].forEach.call(m.addedNodes, function (x) { add(x.nodeType === 3 ? x.parentNode : x); }); }); })
+      .observe(document.body, { subtree: true, childList: true, characterData: true });
+  };
   NS.btnIcons = function () {
     if (!document.body) return;
     var todo = new Set(), queued = false;
@@ -1086,7 +1229,7 @@
     var lang = NS.initLang ? NS.initLang() : null;
     NS.initTheme();
     NS.motion();
-    NS.btnIcons();
+    NS.btnIcons(); NS.nsbMarks();
     var y = NS.$('[data-year]'); if (y) y.textContent = new Date().getFullYear();
     NS.sponsor();
     if ('serviceWorker' in navigator && location.protocol === 'https:') navigator.serviceWorker.register('/sw.js').catch(function () {});

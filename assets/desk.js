@@ -80,6 +80,7 @@
     }
     var h = $('.side-h', own); own.insertBefore(hub, h.nextSibling);
     var home = $('a[data-ic=home]', own); if (home && hub.contains(home) === false) home.remove();   /* the screen list has its own Dashboard */
+    groupHub(hub); foldOthers();
     root.classList.add('has-hub');
     /* phones: the first four screens also sit in a tab bar at the bottom, the rest are under More (the side menu) */
     if (!$('.tabbar')) {
@@ -89,6 +90,67 @@
       document.body.appendChild(tb);
       $$('a', tb).forEach(function (a) { a.addEventListener('click', function () { var o = $('#ns-side a[data-sec="' + a.getAttribute('data-sec') + '"]'); if (o) { a.blur(); } }); });
     }
+  }
+  /* ---------- the App's screens in groups (owner 2026-11-18): a heading per group, click it to fold; the group of the screen
+     in use always opens; what is folded is remembered (localStorage ns-sg). A screen added later by another file lands in its
+     group too; one this list does not know goes under More. ---------- */
+  var SG = [['daily', ['home', 'day', 'sales', 'buy', 'money']], ['parties', ['parties', 'dues', 'grp', 'msme', 'chq', 'st']],
+    ['bank', ['books', 'cash', 'bimp', 'repeat']], ['acc', ['b2jv', 'fin', 'capl', 'b2fa', 'acx', 'fam', 'b2year']],
+    ['stock', ['stock', 'b2gd', 'b2make', 'b2job', 'b2profit', 'b2sman']], ['people', ['stf', 'fees', 'trust', 'warr']],
+    ['tax', ['itx', 'limits']], ['reports', ['reports', 'tools', 'packs', 'cacom', 'cadb', 'cadoc', 'cagst', 'ebook', 'khata', 'preg', 'features']]];
+  var SGOF = {}; SG.forEach(function (g) { g[1].forEach(function (s) { SGOF[s] = g[0]; }); });
+  function sgFolded() { try { return JSON.parse(localStorage.getItem('ns-sg') || '{}') || {}; } catch (e) { return {}; } }
+  /* Inside the App the side menu's other parts (document makers, more tools, Your software, pages) fold the same way and start
+     folded, sit below the App's own groups, and leave out every tool that is already an App screen (Cash book = Cash and bank,
+     Cheques, Khata...), so nothing shows twice. The makers' heading reads "Make a new document" (Billing makes an invoice; Sales lists them). */
+  function foldOthers() {
+    var map = (window.NS_CFG && NS_CFG.inapp) || {}, door = {};
+    Object.keys(map).forEach(function (k) { var v = map[k] || []; if (/^#/.test(String(v[2] || ''))) { door[k] = 1; if (v[1]) door[':' + v[1]] = 1; } });
+    var fold = sgFolded(), order = ['docs', 'more', 'app'];
+    $$('.side-g:not(.side-own)', side).forEach(function (g) {
+      var id = g.getAttribute('data-g') || 'x', h = $('.side-h', g); if (!h || g.hasAttribute('data-sgx')) return;
+      g.setAttribute('data-sgx', '');
+      $$('a', g).forEach(function (a) {
+        var host = '', port = a.getAttribute('data-port');
+        try { host = new URL(a.href, location.href).hostname.split('.')[0]; } catch (e) {}
+        if (door[host] || (port && door[':' + port])) a.hidden = true;
+      });
+      if (id === 'docs') { var sp = $('span', h); if (sp) { sp.setAttribute('data-i18n', 'desk.sg_new'); sp.textContent = NS.t('desk.sg_new'); } }
+      var b = NS.el('button', { type: 'button', 'class': 'sg-h', 'aria-expanded': 'true' }); b.innerHTML = h.innerHTML; h.replaceWith(b);
+      var box = NS.el('div', { 'class': 'sg-b' }); while (b.nextSibling) box.appendChild(b.nextSibling); g.appendChild(box);
+      g.classList.add('sg'); g.setAttribute('data-sg', 'x-' + id);
+      var shut = fold['x-' + id] !== false; g.classList.toggle('shut', shut); b.setAttribute('aria-expanded', String(!shut));
+      b.addEventListener('click', function () { var f = sgFolded(), sh = !g.classList.contains('shut'); g.classList.toggle('shut', sh); b.setAttribute('aria-expanded', String(!sh)); f['x-' + id] = sh; try { localStorage.setItem('ns-sg', JSON.stringify(f)); } catch (e) {} });
+      if (!$$('.sg-b a:not([hidden])', g).length) g.hidden = true;
+    });
+    /* order below the App: makers, more tools, then Your software, then any other part */
+    var parts = $$('.side-g[data-sgx]', side).sort(function (x, y) { var a = order.indexOf(x.getAttribute('data-g')), c = order.indexOf(y.getAttribute('data-g')); return (a < 0 ? 9 : a) - (c < 0 ? 9 : c); });
+    parts.forEach(function (g) { side.appendChild(g); });
+  }
+  function groupHub(hub) {
+    var made = {}, fold = sgFolded();
+    function box(k) {
+      if (made[k]) return made[k];
+      var g = $('.sg[data-sg="' + k + '"]', hub);
+      if (!g) {
+        g = NS.el('div', { 'class': 'sg', 'data-sg': k });
+        g.innerHTML = '<button type="button" class="sg-h" aria-expanded="true"><span data-i18n="desk.sg_' + k + '">' + esc(NS.t('desk.sg_' + k)) + '</span></button><div class="sg-b"></div>';
+        var order = SG.map(function (x) { return x[0]; }).concat(['more']), at = order.indexOf(k), next = null;
+        $$('.sg', hub).forEach(function (o) { if (!next && order.indexOf(o.getAttribute('data-sg')) > at) next = o; });
+        hub.insertBefore(g, next);
+        $('.sg-h', g).addEventListener('click', function () { var f = sgFolded(), shut = !g.classList.contains('shut'); g.classList.toggle('shut', shut); this.setAttribute('aria-expanded', String(!shut)); f[k] = shut; try { localStorage.setItem('ns-sg', JSON.stringify(f)); } catch (e) {} });
+        if (fold[k]) { g.classList.add('shut'); $('.sg-h', g).setAttribute('aria-expanded', 'false'); }
+      }
+      return (made[k] = $('.sg-b', g));
+    }
+    function sort() {
+      $$(':scope > a[data-sec]', hub).forEach(function (a) { box(SGOF[a.getAttribute('data-sec')] || 'more').appendChild(a); });
+      /* the group of the screen in use is open */
+      var cur = $('a[aria-current="page"]', hub); if (cur) { var g = cur.closest('.sg'); if (g && g.classList.contains('shut')) { g.classList.remove('shut'); $('.sg-h', g).setAttribute('aria-expanded', 'true'); } }
+    }
+    sort();
+    new MutationObserver(function () { if ($(':scope > a[data-sec]', hub)) sort(); }).observe(hub, { childList: true });
+    window.addEventListener('hashchange', function () { setTimeout(sort, 50); });
   }
   function build() {
     side = $('#ns-side'); sbar = $('[data-sbar]');
@@ -399,9 +461,145 @@
   /* a document inside the App's frame sends its Ctrl K here (inapp.js): the box opens, takes the cursor, and Esc gives it back to that field */
   NS.deskPalette = function (from) { if (cmd && cmd.open) cmd.close(); else palette(from); };
 
+  /* ---------- the voucher screen (moved here from app.js so every site and tool has it): every entry form (#app-form) is a full screen beside the side menu, not a box over the page
+     (owner 2026-11-18). Title bar with Back, the form, a Save bar that stays at the bottom. Leaving with unsaved typing asks first
+     (Esc, Back, Cancel, an F key for another entry). Small questions stay small boxes. ---------- */
+  function voucherScreen(d) {
+    if (!d) {
+      /* every site and tool (owner 2026-11-18): the App's entry form, the b2 boxes, and any box with an entry form */
+      var af = $('#app-form'); if (af) voucherScreen(af);   /* never call with no box: that would start this again, for ever */
+      $$('dialog.b2-dlg').forEach(function (x) { voucherScreen(x); });
+      new MutationObserver(function (ms) { ms.forEach(function (m) { [].forEach.call(m.addedNodes, function (n) { if (n.nodeType === 1 && n.matches('dialog.b2-dlg')) voucherScreen(n); }); }); }).observe(document.body, { childList: true });
+      /* any other box with an entry form (a Save button and a title bar) becomes a voucher screen when it opens; questions, search,
+         help, the setup and other small boxes stay small. Some boxes draw their whole inside again at every opening: dressed each time */
+      var SMALL = '#desk-ask,#desk-cmd,#desk-keys,#ns-help,.nsf-dlg,.pk-dlg,.bz-dlg,#ns-mydata,.cap-dlg,#ns-tell,#ns-series,.sf-gate,.help-pnl';
+      var open0 = HTMLDialogElement.prototype.showModal;
+      HTMLDialogElement.prototype.showModal = function () {
+        try { if (this.classList.contains('vs')) vsDress(this); else if (!this.matches(SMALL) && $('.dlg-hd,.dlg-h', this) && $('input:not([type=hidden]),select,textarea,table,button[type=submit]', this)) voucherScreen(this);   /* any titled box with fields or a list (a tool's rooms, diary, stock...) */ } catch (e) {}
+        this._at = Date.now();
+        return open0.apply(this, arguments);
+      };
+      return;
+    }
+    if (d.classList.contains('vs')) return;
+    d.classList.add('vs', 'hub-dlg');
+    /* Back asks first when something is typed (before the box's own close listener runs) */
+    d.addEventListener('click', function (e) { if (e.target.closest && e.target.closest('.vs-back')) { e.preventDefault(); e.stopPropagation(); NS.vsLeave(null, d); } }, true);
+    d.addEventListener('input', function (e) { if (e.target.closest && e.target.closest('form')) d.setAttribute('data-dirty', '1'); });
+    d.addEventListener('change', function (e) { if (e.target.closest && e.target.closest('form')) d.setAttribute('data-dirty', '1'); });
+    /* the other parts' boxes get the same keys as the App's own entry form: Ctrl+S saves, Enter goes to the next box */
+    if (d.id !== 'app-form') d.addEventListener('keydown', function (e) {
+      var k = (e.key || '').toLowerCase(), t = e.target, sb = $('button[type=submit]', d), f = sb && sb.closest('form');
+      if (!f) return;
+      if ((e.ctrlKey || e.metaKey) && !e.altKey && k === 's') { e.preventDefault(); if (f.requestSubmit) f.requestSubmit(sb); else sb.click(); return; }
+      if (k !== 'enter' || e.shiftKey || e.ctrlKey || !t || t.tagName !== 'INPUT' || /^(checkbox|radio|file|submit|button)$/.test(t.type)) return;
+      var all = $$('input,select', f).filter(function (x) { return !x.disabled && x.type !== 'hidden' && x.type !== 'file' && x.type !== 'checkbox' && x.offsetParent !== null && !x.closest('details:not([open])'); });
+      var i = all.indexOf(t); if (i >= 0 && i < all.length - 1) { e.preventDefault(); all[i + 1].focus(); }
+    });
+    d.addEventListener('cancel', function (e) { if (d.getAttribute('data-dirty')) { e.preventDefault(); NS.vsLeave(null, d); } });
+    d.addEventListener('close', function () { if (!d._parking) d.removeAttribute('data-dirty'); });
+    /* a form drawn again inside the box (the App's entry form, the b2 boxes) is dressed again */
+    new MutationObserver(function () { vsDress(d); }).observe(d, { childList: true, subtree: false });
+    $$('form', d).forEach(function (f) { new MutationObserver(function () { vsDress(d); }).observe(f, { childList: true }); });
+    vsDress(d);
+  }
+  /* the title bar's close button becomes Back; the Save bar gets the keys to remember; a new form starts clean at the top */
+  function vsDress(d) {
+    var back = $('.vs-back', d) || $('.dlg-hd .icon-btn', d) || $('.dlg-hd [data-x]', d) || $('.dlg-h form[method=dialog] button', d) || $('.dlg-h > button:last-child', d);
+    if (back && !back.classList.contains('vs-back')) {
+      back.removeAttribute('onclick'); back.type = 'button'; back.className = 'btn sm vs-back'; back.setAttribute('aria-keyshortcuts', 'Escape');
+      back.innerHTML = '<span data-i18n="app.back">' + esc(NS.t('app.back')) + '</span>';
+    }
+    var sb = $('button[type=submit]', d), ft = sb && (sb.closest('.dlg-foot,.btns,.dlg-f') || sb.parentNode);
+    if (ft) ft.classList.add('vs-foot');
+    if (ft && !$('.vs-keys', ft)) ft.insertAdjacentHTML('beforeend', '<span class="vs-keys" aria-hidden="true">' + esc(NS.t('app.vs_keys')) + '</span>');
+    if (d._resuming || Date.now() - (d._resumeAt || 0) < 1500) { d._resuming = false; return; }   /* a parked entry comes back as it was */
+    d.removeAttribute('data-dirty'); d.scrollTop = 0;
+  }
+  /* leave the voucher screen; with typing in it, ask first. then = what to open next (an F key) */
+  NS.vsLeave = function (then, d) {
+    d = d || $('dialog.vs[open]');
+    var go = function () { if (d) { d.removeAttribute('data-dirty'); if (d.open) d.close(); } if (then) setTimeout(then, 0); };
+    if (!d || !d.open || !d.getAttribute('data-dirty')) { go(); return; }
+    NS.ask(NS.t('app.vs_leave'), { ok: NS.t('app.vs_discard'), no: NS.t('app.vs_stay'), danger: 1 }).then(function (y) { if (y) go(); else { var x = $('input,select', d); if (x) x.focus(); } });
+  };
+  voucherScreen();
+  /* going to another screen (Ctrl K, an Alt or F key, a link) while an entry screen is open: the entry screen closes, asking first
+     when something is typed (owner 2026-11-18: the party ledger did not show until Esc) */
+  /* ---------- multitasking: an entry with typing in it is PARKED when another screen opens (a link, Ctrl K, an Alt key):
+     it goes to the status bar as a button with its name, and that button brings it back exactly as it was (owner 2026-11-18).
+     An entry with nothing typed simply closes. Parked boxes are closed without counting as closed (_parking), so a bill
+     number kept for them is not let go. ---------- */
+  var parked = [];   /* [{ list: [dialogs, bottom first], name }] */
+  function taskName(list) {
+    var top = list[list.length - 1], base = list[0];
+    var t = (($('.dlg-hd h2,.dlg-h h2,h2', base) || {}).textContent || '').replace(/\s+/g, ' ').trim();
+    var p = $('input[list="dl-party"],#b-name,#f-party', base), pv = p && p.value.trim();
+    return (t || NS.t('desk.task')) + (pv ? ' · ' + pv : '') + (top !== base ? ' + ' + ((($('h2', top) || {}).textContent) || '').trim() : '');
+  }
+  function drawTray() {
+    var tray = $('#ns-tasks');
+    if (!tray && sbar) { tray = NS.el('div', { id: 'ns-tasks', 'class': 'task-tray', role: 'group' }); tray.setAttribute('aria-label', NS.t('desk.tasks')); sbar.insertBefore(tray, sbar.firstChild); }
+    if (!tray) return;
+    tray.hidden = !parked.length;
+    tray.innerHTML = parked.length ? '<span class="tt-l">' + esc(NS.t('desk.tasks')) + '</span>' + parked.map(function (k, i) {
+      return '<button type="button" class="tt-b" data-task="' + i + '" title="' + esc(NS.t('desk.resume')) + '">' + NS.icSvg('edit') + '<span>' + esc(k.name) + '</span></button>';
+    }).join('') : '';
+  }
+  document.addEventListener('click', function (e) { var b = e.target.closest && e.target.closest('[data-task]'); if (b) NS.vsResume(+b.getAttribute('data-task')); });
+  NS.vsPark = function (then) {
+    var open = $$('dialog.vs[open]');
+    if (!open.length) { if (then) then(); return; }
+    if (!open.some(function (d) { return d.getAttribute('data-dirty'); })) { open.forEach(function (d) { d.close(); }); if (then) then(); return; }
+    var task = { list: open, name: taskName(open) };
+    for (var i = open.length - 1; i >= 0; i--) { var d = open[i]; d._parking = true; d._parked = task; d._scroll = d.scrollTop; d.addEventListener('close', function () { var x = this; setTimeout(function () { x._parking = false; }, 0); }, { once: true }); d.close(); }   /* the close event comes a moment later: the mark stays until it has run */
+    parked.push(task); drawTray();
+    NS.toast(NS.t('desk.parked', { n: task.name }));
+    if (then) setTimeout(then, 0);
+  };
+  NS.vsResume = function (i) {
+    var task = typeof i === 'number' ? parked[i] : parked.filter(function (k) { return k.list.indexOf(i) >= 0; })[0];
+    if (!task) return;
+    var go = function () {
+      parked.splice(parked.indexOf(task), 1); drawTray();
+      task.list.forEach(function (d) { if (!document.contains(d)) return; var dirty = d.getAttribute('data-dirty'); d._resuming = true; d._resumeAt = Date.now(); d.showModal(); d._parked = null; if (dirty) d.setAttribute('data-dirty', dirty); d.scrollTop = d._scroll || 0; });
+      var top = task.list[task.list.length - 1], f = top && $('input:not([type=hidden]),select,textarea', top); if (f) f.focus();
+    };
+    if ($$('dialog.vs[open]').length) NS.vsPark(go); else go();
+  };
+  NS.vsDrop = function (d) { var task = parked.filter(function (k) { return k.list.indexOf(d) >= 0; })[0]; if (!task) return; parked.splice(parked.indexOf(task), 1); task.list.forEach(function (x) { x._parked = null; x.removeAttribute('data-dirty'); }); drawTray(); };
+  NS.vsParked = function (d) { return !!(d && d._parked); };
+  window.addEventListener('hashchange', function () {
+    if ($$('dialog.vs[open]').some(function (d) { return Date.now() - (d._at || 0) > 400; })) NS.vsPark();
+  });
+
+  /* ---------- the folded side menu shows only icons: pointing at one (or moving onto it with Tab) shows its name and key
+     beside it (owner 2026-11-18: "taking the cursor to the sidebar should say what this is") ---------- */
+  (function sideTip() {
+    var tip = null;
+    function hide() { if (tip) tip.hidden = true; }
+    function show(a) {
+      if (!root.classList.contains('side-mini') || !a) return;
+      var name = ($('span', a) || a).textContent.trim() || a.getAttribute('aria-label') || '';
+      if (!name) return;
+      if (!tip) { tip = NS.el('div', { 'class': 'side-tip', role: 'tooltip', id: 'side-tip' }); document.body.appendChild(tip); }
+      var k = a.getAttribute('data-kh') || a.getAttribute('aria-keyshortcuts') || '';
+      tip.innerHTML = esc(name) + (k ? ' <kbd>' + esc(k.replace(/\+/g, '+')) + '</kbd>' : '');
+      tip.hidden = false;
+      var r = a.getBoundingClientRect(), rtl = document.documentElement.dir === 'rtl';
+      tip.style.top = Math.max(4, r.top + r.height / 2 - tip.offsetHeight / 2) + 'px';
+      if (rtl) { tip.style.left = ''; tip.style.right = (innerWidth - r.left + 8) + 'px'; } else { tip.style.right = ''; tip.style.left = (r.right + 8) + 'px'; }
+      a.setAttribute('aria-describedby', 'side-tip');
+    }
+    document.addEventListener('mouseover', function (e) { var a = e.target.closest && e.target.closest('#ns-side a, #ns-side button.side-fold'); if (a) show(a); else hide(); });
+    document.addEventListener('focusin', function (e) { var a = e.target.closest && e.target.closest('#ns-side a'); if (a) show(a); else hide(); });
+    document.addEventListener('scroll', hide, true);
+    window.addEventListener('blur', hide);
+  })();
+
   /* ---------- keyboard ---------- */
   var KEYS = [['Alt G', 'k_go'], ['Ctrl K', 'k_cmd'], ['Ctrl B', 'k_menu'], ['Alt 1 … 9', 'k_secs'], ['F3 / Alt S', '=app.biz'],
-    ['/', 'k_find'], ['F1', 'k_hlp'], ['?', 'k_help'], ['Ctrl S', 'k_save'], ['Ctrl P', 'k_print'], ['Esc', 'k_esc']];
+    ['/', 'k_find'], ['F1', 'k_hlp'], ['?', 'k_help'], ['Ctrl S', 'k_save'], ['F2', 'k_qadd'], ['Ctrl P', 'k_print'], ['Esc', 'k_esc']];
   var keysDlg;
   function keysSheet() {
     if (!keysDlg) { keysDlg = NS.el('dialog', { id: 'desk-keys', class: 'desk-keys', 'aria-labelledby': 'desk-keys-h' }); document.body.appendChild(keysDlg); }
@@ -413,7 +611,7 @@
     /* print: the sheet is copied into a plain block (a modal window does not print well), everything else is hidden */
     if (pb) pb.onclick = function () {
       var box = NS.el('div', { id: 'dk-printarea' }), biz = A() && A().biz && A().biz();
-      box.innerHTML = '<h1>Nivesh Sahayak: ' + esc(T('keys')) + '</h1>' + (biz ? '<p>' + esc(biz.name) + '</p>' : '') + $$('.dk-g, .dk-t', keysDlg).map(function (n) { return n.outerHTML; }).join('');
+      box.innerHTML = '<h1>NSBiz: ' + esc(T('keys')) + '</h1>' + (biz ? '<p>' + esc(biz.name) + '</p>' : '') + $$('.dk-g, .dk-t', keysDlg).map(function (n) { return n.outerHTML; }).join('');
       document.body.appendChild(box); keysDlg.close(); root.classList.add('dk-print');
       var done = function () { root.classList.remove('dk-print'); box.remove(); window.removeEventListener('afterprint', done); };
       window.addEventListener('afterprint', done); setTimeout(function () { window.print(); }, 60);
@@ -443,7 +641,7 @@
       var fk2 = /^F([3-9]|10)$/.test(e.key) && !e.altKey && !e.shiftKey && !e.metaKey ? FKEY[(e.ctrlKey ? 'Ctrl+' : '') + e.key] : null;
       var al = e.altKey && !e.ctrlKey && !e.metaKey ? (e.code || '').replace('Key', '').toLowerCase() : '';
       if (fk2) { e.preventDefault(); if (!e.repeat) NS.vsLeave(function () { fRun(fk2); }); return; }
-      if (al === 'g' || ALTKEY[al] && !/^[nrpbxsq]$/.test(al)) { e.preventDefault(); if (!e.repeat) NS.vsLeave(function () { if (al === 'g') palette(null, 'go'); else { var to = ALTKEY[al]; if (isOff(to.sec || to.site)) NS.toast(NS.t('desk.offkey')); else if (to.sec) goSec(to.sec); else newDoc(to.site); } }); return; }
+      if (al === 'g' || ALTKEY[al] && !/^[nrpbxsq]$/.test(al)) { e.preventDefault(); if (!e.repeat) NS.vsPark(function () { if (al === 'g') palette(null, 'go'); else { var to = ALTKEY[al]; if (isOff(to.sec || to.site)) NS.toast(NS.t('desk.offkey')); else if (to.sec) goSec(to.sec); else newDoc(to.site); } }); return; }
       return;
     }
     /* F keys, Tally style (F8 sale, F9 purchase, F6 receipt, F5 payment, F4 contra, F7 journal, F10 expense, F3 business,

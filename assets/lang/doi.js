@@ -10015,3 +10015,142 @@ NS.addLang("doi", {
   "app.vs_discard": "Leave without saving",
   "app.vs_stay": "Stay and finish"
 });
+/* Notification centre */
+NS.addLang("doi", {
+  "hm.bell": "Notifications",
+  "hm.bell_none": "Nothing needs you right now.",
+  "hm.bell_read": "Mark all as read",
+  "hm.bell_day": "Open My day"
+});
+/* Customize the Dashboard */
+NS.addLang("doi", {
+  "ds.custom": "Customize",
+  "ds.title": "Customize the Dashboard",
+  "ds.hint": "Tick what you want to see. Use the arrows to change the order. Press Save to keep it.",
+  "ds.quick": "Quick add buttons",
+  "ds.tiles": "Money tiles",
+  "ds.cards": "Cards",
+  "ds.up": "Move up",
+  "ds.down": "Move down",
+  "ds.reset": "Back to the standard layout",
+  "ds.saved": "Dashboard saved"
+});
+/* Side menu groups */
+NS.addLang("doi", {
+  "desk.sg_daily": "Daily work",
+  "desk.sg_parties": "Parties and dues",
+  "desk.sg_bank": "Cash and bank",
+  "desk.sg_acc": "Accounts",
+  "desk.sg_stock": "Stock and production",
+  "desk.sg_people": "Staff and members",
+  "desk.sg_tax": "Tax",
+  "desk.sg_reports": "Reports and tools",
+  "desk.sg_more": "More"
+});
+/* Party items view */
+NS.addLang("doi", {
+  "app.lg_items": "Items",
+  "app.lg_sold": "Sold to {p}",
+  "app.lg_bought": "Bought from {p}",
+  "app.lg_itm": "Item",
+  "app.lg_iqty": "Quantity",
+  "app.lg_irate": "Average rate",
+  "app.lg_ibills": "Bills",
+  "app.lg_ilast": "Last bill",
+  "app.lg_iamt": "Amount",
+  "app.lg_itot": "Total",
+  "app.lg_noitems": "No item bills with this party in these dates."
+});
+/* Open an entry */
+NS.addLang("doi", {
+  "app.vw_mode": "Paid by",
+  "app.vw_ref": "Reference",
+  "app.vw_head": "Head",
+  "app.vw_due": "Due on",
+  "app.vw_items": "Items",
+  "app.vw_rate": "Rate",
+  "app.vw_gst": "GST",
+  "app.vw_entry": "Accounting entry",
+  "app.vw_acct": "Account",
+  "app.vw_dr": "Debit",
+  "app.vw_cr": "Credit",
+  "app.vw_to": "To",
+  "app.vw_note": "Note"
+});
+/* Side menu: makers heading */
+NS.addLang("doi", {
+  "desk.sg_new": "Make a new document"
+});
+/* Quick add party or item */
+NS.addLang("doi", {
+  "qa.newparty": "\"{n}\" is not in your parties yet.",
+  "qa.newitem": "\"{n}\" is not in your items yet.",
+  "qa.addparty": "Add party",
+  "qa.additem": "Add item",
+  "qa.tparty": "New party",
+  "qa.titem": "New item",
+  "qa.pname": "Party name",
+  "qa.iname": "Item name",
+  "qa.role": "Type",
+  "qa.cust": "Customer",
+  "qa.supp": "Supplier",
+  "qa.both": "Customer and supplier",
+  "qa.gstin": "GSTIN",
+  "qa.phone": "Phone",
+  "qa.addr": "Address",
+  "qa.city": "City",
+  "qa.state": "State",
+  "qa.unit": "Unit",
+  "qa.hsn": "HSN / SAC",
+  "qa.gst": "GST %",
+  "qa.srate": "Sale rate",
+  "qa.prate": "Purchase rate",
+  "qa.open": "Opening stock (quantity)",
+  "qa.save": "Save",
+  "qa.cancel": "Cancel",
+  "qa.needname": "Type a name.",
+  "qa.exists": "This name is already saved.",
+  "qa.badgst": "This GSTIN is not right.",
+  "qa.partyok": "{n} added to your parties.",
+  "qa.itemok": "{n} added to your items.",
+  "qa.fail": "Could not save. Try again."
+});
+/* Quick add key */
+NS.addLang("doi", {
+  "desk.k_qadd": "In a party or item box: add a new one"
+});
+/* Quick add, more details; accounting group names */
+NS.addLang("doi", {
+  "grp.debtors": "Sundry Debtors",
+  "grp.creditors": "Sundry Creditors",
+  "qa.group": "Group (ledger)",
+  "qa.nogroup": "No group",
+  "qa.kind": "Goods or service",
+  "qa.goods": "Goods",
+  "qa.service": "Service",
+  "qa.more": "More details (optional)",
+  "qa.code": "Item code",
+  "qa.wrate": "Wholesale rate",
+  "qa.mrp": "MRP",
+  "qa.min": "Low stock level",
+  "qa.pan": "PAN",
+  "qa.pin": "PIN code",
+  "qa.email": "Email",
+  "qa.cdays": "Credit days",
+  "qa.climit": "Credit limit",
+  "qa.ob": "Opening balance",
+  "qa.obside": "Opening balance is",
+  "qa.obrecv": "Receivable (Dr): they owe us",
+  "qa.obpay": "Payable (Cr): we owe them",
+  "qa.badpan": "This PAN is not right."
+});
+/* Multitasking: parked entries */
+NS.addLang("doi", {
+  "desk.tasks": "Open entries",
+  "desk.task": "Entry",
+  "desk.resume": "Go back to this entry; what you typed is kept",
+  "desk.parked": "{n} is kept open in the status bar below. Click it to carry on.",
+  "desk.parkq": "An entry you started is kept open (parked). Go back to it, or let it go and start the new one?",
+  "desk.parkback": "Go back to it",
+  "desk.parkdrop": "Let it go, start new"
+});
