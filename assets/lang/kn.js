@@ -8961,21 +8961,6 @@ NS.addLang("kn", {
   "wn.ok": "Got it"
 });
 
-/* Quick entry (17 Nov 2026) */
-NS.addLang("kn", {
-  "app.qe_title": "Quick entry",
-  "app.qe_sale": "Sale bill",
-  "app.qe_no": "Bill no.",
-  "app.qe_gstin": "Customer GSTIN",
-  "app.qe_state": "Customer state",
-  "app.qe_recv": "Money received now?",
-  "app.qe_recvh": "Pick how the customer paid if they paid at once. A receipt is saved with it and the bill is marked paid.",
-  "app.qe_keys": "Enter: next box. Ctrl+S: save and start the next one. Alt+1 to 5: switch. Esc: close.",
-  "app.qe_saved": "Saved {no}. Ready for the next one.",
-  "app.qe_nobiz": "Add your business first (My data).",
-  "app.qe_dup": "Bill no. {no} is already used in this financial year. Change the number.",
-  "app.qe_nogst": "No GST on this bill (bill of supply: composition dealer or exempt goods)"
-});
 /* Party ledger: switch party, entries first, preview on request (2026-11-17) */
 NS.addLang("kn", {
   "app.lg_switch": "Party",
@@ -9948,7 +9933,29 @@ NS.addLang("kn", {
   "sw.w.obExists": "An opening balance for this party is already saved: not added again.",
   "sw.w.billsWin": "Outstanding bills are used instead of the opening balance."
 });
-/* Windows program link */
+
+/* Business-type tools filter (2026-11-17) */
 NS.addLang("kn", {
-  "nav.desktop": "Windows program"
+  "fr.k_dairy": "Dairy or milk business",
+  "fr.kh_dairy": "Milk collection, deliveries, farmer and customer passbooks",
+  "fr.k_hotel": "Hotel or guest house",
+  "fr.kh_hotel": "Room bookings, bills, food and staff",
+  "fr.k_rent": "Landlord or rent",
+  "fr.kh_rent": "Tenants, rent bills and agreement dates",
+  "fr.k_garage": "Garage or workshop",
+  "fr.kh_garage": "Job cards, service history, spares and reminders",
+  "fr.k_jewel": "Jeweller",
+  "fr.kh_jewel": "Weight, purity, making charges and old gold",
+  "fr.k_garment": "Garment or cloth shop",
+  "fr.kh_garment": "Size and colour stock, counter bills",
+  "fr.k_petrol": "Petrol pump",
+  "fr.kh_petrol": "Shift reports, meter readings, dip stock and cash",
+  "fr.k_mandi": "Mandi or commission agent",
+  "fr.kh_mandi": "Weighment, settlement slips and farmer payments",
+  "fr.k_online": "Online seller",
+  "fr.kh_online": "Marketplace orders, returns, fees and payouts",
+  "fr.g_learn": "Help and extras",
+  "fr.f_lrn": "Calculators, forms to file and lessons",
+  "fr.offnote": "turned off for your business: opens as usual",
+  "fr.hidnote": "Tools your type of business does not need are hidden here. Turn any of them on in"
 });

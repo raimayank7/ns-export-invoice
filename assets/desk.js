@@ -199,15 +199,15 @@
     $$('#ns-side .side-g').forEach(function (g) {
       var gk = g.getAttribute('data-g') === 'about' ? 'act' : 'go';
       $$('a', g).forEach(function (a) {
-        if (NS.featHidden && NS.featHidden(a)) return;   /* a feature switched off in the installed App (firstrun.js) */
+        var off = !!(NS.featHidden && NS.featHidden(a));   /* a feature switched off (firstrun.js): still found when typed, never in the first list */
         var sec = a.getAttribute('data-sec'), i = sec ? $$('#ns-side a[data-sec]').indexOf(a) : -1;
         var tx = (a.textContent || '').trim();
-        out.push({ g: g.getAttribute('data-g') === 'docs' || g.getAttribute('data-g') === 'more' ? 'new' : gk, t: tx, e: NS.meaning(tx) + ' ' + (SYN[sec] || ''),
+        out.push({ off: off, s: off ? NS.t('fr.offnote') : '', g: g.getAttribute('data-g') === 'docs' || g.getAttribute('data-g') === 'more' ? 'new' : gk, t: tx, e: NS.meaning(tx) + ' ' + (SYN[sec] || ''),
           k: a.getAttribute('data-ic') === 'd-billing' ? 'Alt+N' : i >= 0 && i < 9 ? 'Alt+' + (i + 1) : '', run: function () { a.click(); } });
       });
     });
     var app = A();
-    if (app && app.biz && app.biz()) FORMS.forEach(function (f) { if (NS.featHidden && NS.featHidden(f[0])) return; out.push({ g: 'rec', t: app.T(f[0]), e: NS.meaning(app.T(f[0])), k: f[1], run: function () { app.openForm(f[0]); } }); });
+    if (app && app.biz && app.biz()) FORMS.forEach(function (f) { var off = !!(NS.featHidden && NS.featHidden(f[0])); out.push({ off: off, s: off ? NS.t('fr.offnote') : '', g: 'rec', t: app.T(f[0]), e: NS.meaning(app.T(f[0])), k: f[1], run: function () { app.openForm(f[0]); } }); });
     /* screens inside a section (final accounts) are found by their own names too */
     if (app && $('#ns-side a[data-sec="fin"]')) SUB.forEach(function (x) { out.push({ g: 'go', t: NS.t(x[1]), e: x[2], run: function () { location.hash = x[0]; } }); });
     return out.concat(actions());
@@ -297,7 +297,8 @@
   function draw(qs) {
     var words = qs.toLowerCase().split(/\s+/).filter(Boolean);
     var hit = items.filter(function (x) { var h = (x.t + ' ' + (x.s || '') + ' ' + (x.e || '')).toLowerCase(); return words.every(function (w) { return h.indexOf(w) >= 0; }); });
-    if (!words.length) hit = hit.filter(function (x) { return x.g !== 'doc' && x.g !== 'party' && x.g !== 'new' && x.g !== 'help'; });
+    if (!words.length) hit = hit.filter(function (x) { return !x.off && x.g !== 'doc' && x.g !== 'party' && x.g !== 'new' && x.g !== 'help'; });
+    else hit = hit.filter(function (x) { return !x.off; }).concat(hit.filter(function (x) { return x.off; }));   /* what is switched off comes last, so it never pushes the business's own tools down */
     shown = []; var html = '';
     GROUPS.forEach(function (g) {
       var part = hit.filter(function (x) { return x.g === g; }).slice(0, words.length ? 8 : 12);
@@ -344,7 +345,6 @@
       if (n) { var a = $$('#ns-side a[data-sec]')[+n[1] - 1]; if (a) { e.preventDefault(); a.click(); a.focus(); } return; }
       var c = (e.code || '').replace('Key', '').toLowerCase();
       if (c === 'n') { e.preventDefault(); goUrl(siteUrl('billing')); return; }
-      if (c === 'q' && app && app.quickEntry) { e.preventDefault(); if (!e.repeat) app.quickEntry(); return; }   /* quick entry (app.js) */
       /* a key pressed while the App is still fetching its data is kept and runs the moment the data is in (it used to be dropped) */
       var job = { r: 'min', p: 'mout', b: 'pbill', x: 'exp' }[c];
       if (app && app.openForm && job) { e.preventDefault(); if (e.repeat) return; (app.whenReady || function (f) { f(); })(function () { if (app.biz() && !$('dialog[open]')) app.openForm(job); }); }
