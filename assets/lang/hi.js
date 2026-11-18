@@ -8791,3 +8791,7 @@ NS.addLang("hi", {
   "sw.w.obExists": "इस पार्टी का शुरुआती बकाया पहले से सेव है, दोबारा नहीं जोड़ा।",
   "sw.w.billsWin": "शुरुआती बकाया की जगह बकाया बिल इस्तेमाल हुए।"
 });
+/* Windows program link */
+NS.addLang("hi", {
+  "nav.desktop": "Windows प्रोग्राम"
+});

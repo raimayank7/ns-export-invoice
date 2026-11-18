@@ -1699,6 +1699,7 @@
     'oa.inst2': "Tip: install the App. An installed App keeps your OK for this folder, so {b} does not ask again after it is closed. In a normal tab, choose “Allow on every visit” if {b} offers it.",
     'oa.thisbr': "the browser",
     'wn.title': "What's new",
+    'nav.desktop': "Windows program",
     'wn.note': "New in the App:",
     'wn.see': "See what changed",
     'wn.ok': "Got it",

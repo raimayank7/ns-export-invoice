@@ -8834,3 +8834,7 @@ NS.addLang("pa", {
   "sw.w.obExists": "ਇਸ ਪਾਰਟੀ ਦਾ ਸ਼ੁਰੂਆਤੀ ਬਕਾਇਆ ਪਹਿਲਾਂ ਹੀ ਸੇਵ ਹੈ, ਦੁਬਾਰਾ ਨਹੀਂ ਜੋੜਿਆ।",
   "sw.w.billsWin": "ਸ਼ੁਰੂਆਤੀ ਬਕਾਏ ਦੀ ਥਾਂ ਬਕਾਇਆ ਬਿੱਲ ਵਰਤੇ ਗਏ।"
 });
+/* Windows program link */
+NS.addLang("pa", {
+  "nav.desktop": "Windows ਪ੍ਰੋਗਰਾਮ"
+});

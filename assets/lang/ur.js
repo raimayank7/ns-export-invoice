@@ -9054,3 +9054,7 @@ NS.addLang("ur", {
   "sw.w.obExists": "An opening balance for this party is already saved: not added again.",
   "sw.w.billsWin": "Outstanding bills are used instead of the opening balance."
 });
+/* Windows program link */
+NS.addLang("ur", {
+  "nav.desktop": "Windows program"
+});
