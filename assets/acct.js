@@ -85,7 +85,7 @@
       has.t ? 'tally-masters.xml  TallyPrime: Import > Masters first (party and account ledgers).' : '',
       has.t ? 'tally-vouchers.xml  then Import > Transactions (sales, purchases, notes, receipts, payments). Try it on a backup company first.' : '',
       has.d ? 'data-for-nivesh-sahayak.json  The same documents and the business, party and item lists as a Nivesh Sahayak backup file. Open https://my.niveshsahayak.in/ , press "Restore from a backup file" and pick it to see every bill.' + (has.lock ? ' It is locked with a password: ask your client for it.' : '') : '',
-      '', 'All amounts in rupees. Figures are worked out from the saved documents; please check them before filing any return.', 'Made free at https://my.niveshsahayak.in/'].filter(function (l, i, a) { return l !== '' || a[i - 1] !== ''; }).join('\r\n');
+      '', 'All amounts in rupees. Figures are worked out from the saved documents; please check them before filing any return.', 'NSBiz by Nivesh Sahayak'].filter(function (l, i, a) { return l !== '' || a[i - 1] !== ''; }).join('\r\n');
   }
 
   /* ---------- the box ---------- */

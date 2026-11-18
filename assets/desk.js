@@ -48,6 +48,7 @@
   /* ---------- side menu ---------- */
   function standalone() { var t; try { t = sessionStorage.getItem('ns-fr-installed') === '1'; } catch (e) {} return t || matchMedia('(display-mode: standalone), (display-mode: window-controls-overlay)').matches || navigator.standalone === true; }   /* ?installed=1 (firstrun.js) = test flag */
   var side, sbar, deferredInstall = null;
+  var VSZ = 60;   /* entry screens open without locking the page; the newest sits on top */
   function wide() { return matchMedia('(min-width: 861px)').matches; }
   function mini(force) {
     var on = typeof force === 'boolean' ? force : !root.classList.contains('side-mini');
@@ -91,18 +92,106 @@
       $$('a', tb).forEach(function (a) { a.addEventListener('click', function () { var o = $('#ns-side a[data-sec="' + a.getAttribute('data-sec') + '"]'); if (o) { a.blur(); } }); });
     }
   }
-  /* ---------- the App's screens in groups (owner 2026-11-18): a heading per group, click it to fold; the group of the screen
-     in use always opens; what is folded is remembered (localStorage ns-sg). A screen added later by another file lands in its
-     group too; one this list does not know goes under More. ---------- */
-  var SG = [['daily', ['home', 'day', 'sales', 'buy', 'money']], ['parties', ['parties', 'dues', 'grp', 'msme', 'chq', 'st']],
-    ['bank', ['books', 'cash', 'bimp', 'repeat']], ['acc', ['b2jv', 'fin', 'capl', 'b2fa', 'acx', 'fam', 'b2year']],
-    ['stock', ['stock', 'b2gd', 'b2make', 'b2job', 'b2profit', 'b2sman']], ['people', ['stf', 'fees', 'trust', 'warr']],
-    ['tax', ['itx', 'limits']], ['reports', ['reports', 'tools', 'packs', 'cacom', 'cadb', 'cadoc', 'cagst', 'ebook', 'khata', 'preg', 'features']]];
-  var SGOF = {}; SG.forEach(function (g) { g[1].forEach(function (s) { SGOF[s] = g[0]; }); });
+  /* ---------- the umbrella (owner 2026-11-18, after showing Tally, Busy, ZEEFA and Evershine): the App's menu by accounting job,
+     Masters / Transactions / Reports / GST and tax / Utilities, like an accounting program's gateway. Each group holds screens
+     (data-sec, moved here from the App's own list), voucher entries ({f: form}), master pages in My data ({my: part}),
+     final account views ({fin: view}) and GST tools ({site: name}). Dashboard and My day stay on top without a heading.
+     Click a heading to open or fold it; the group of the screen in use opens; what is folded is remembered (ns-sg).
+     A screen this list does not know goes under More. No new keys: every item shows the key it already had. ---------- */
+  var SG = [
+    ['top', ['home', 'day']],
+    ['masters', [{ h: 'coa', t: 'v_coa', ic: 'layers' }, 'parties', { my: 'item', t: 'v_items', ic: 'box' }, { my: 'pgroups', t: 'v_groups', ic: 'layers' }, { my: 'biz', t: 'v_biz', ic: 'shop' }, 'b2gd', 'stf', 'b2sman', { f: 'ob', t: 'v_ob', ic: 'scale' }, 'trust', 'fees', 'warr']],
+    ['trans', [{ f: 'sale', t: 'v_sale', ic: 'doc' }, { f: 'pbill', t: 'v_pbill', ic: 'cart' }, { f: 'min', t: 'v_min', ic: 'money' }, { f: 'mout', t: 'v_mout', ic: 'money' }, { f: 'contra', t: 'v_contra', ic: 'bank' }, 'b2jv', { f: 'exp', t: 'v_exp', ic: 'cart' }, { f: 'pret', t: 'v_pret', ic: 'repeat' },
+      'sales', 'buy', 'money', 'chq', 'capl', 'b2fa', 'b2make', 'b2job', 'repeat', 'khata', 'preg']],
+    ['reports', [{ fin: 'bs', t: 'v_bs', ic: 'scale' }, { fin: 'pl', t: 'v_pl', ic: 'chart' }, { fin: 'tb', t: 'v_tb', ic: 'list' }, { h: 'dlist', t: 'v_dlist', ic: 'people' }, { h: 'clist', t: 'v_clist', ic: 'people' }, { h: 'ssum', t: 'v_ssum', ic: 'chart' }, { h: 'psum', t: 'v_psum', ic: 'chart' }, { h: 'vreg', t: 'v_vreg', ic: 'list' }, { h: 'cbsum', t: 'v_cbsum', ic: 'bank' }, 'fin', 'books', 'dues', 'grp', 'msme', 'stock', 'b2profit', 'reports', 'cadb', 'ebook']],
+    ['tax', ['acx', { site: 'gstr1' }, { site: 'gstr3b' }, { site: 'gstr2b' }, { site: 'cmp08' }, { site: 'tds' }, 'cagst', 'itx', 'limits', 'cacom', 'cadoc']],
+    ['util', [{ h: 'mprint', t: 'v_mprint', ic: 'doc' }, 'bimp', 'b2year', { my: 'backup', t: 'v_backup', ic: 'data' }, { my: 'settings', t: 'v_settings', ic: 'set' }, 'features', 'packs', 'tools']]];
+  var SGOF = {}; SG.forEach(function (g) { g[1].forEach(function (s) { if (typeof s === 'string') SGOF[s] = g[0]; }); });
+  SGOF.st = 'masters';
+  function sgName(g) { return g === 'docs' ? NS.t('desk.sg_new') : NS.t('desk.um_' + g); }
+  function myUrl(part) { var a = $('#ns-side a[data-ic=set]'); return (a ? a.href.split('#')[0] : 'https://my.niveshsahayak.in/') + '#' + part; }
+  function formKey(f) { var r = FORMKEY.filter(function (x) { return x[0] === f; })[0]; return r ? r[2] || 'Alt+G ' + r[1] : ''; }
+  function secKey(s) { var m = SECKEY[s], fk = m && fName(s); return fk || (m && m[1] ? 'Alt+' + m[1] : m ? 'Alt+G ' + m[0] : ''); }
+  /* an item of the list that is not one of the App's screens: drawn like a side link */
+  function vItem(x) {
+    var a = NS.el('a', { 'class': 'side-v', 'data-ic': x.ic || 'dot' }), key = '';
+    if (x.f) { a.href = '#'; a.setAttribute('data-dform', x.f); key = formKey(x.f); if (offForm(x.f)) a.hidden = true; }
+    else if (x.my) a.href = myUrl(x.my);
+    else if (x.fin) a.href = '#fin/' + x.fin;
+    else if (x.h) { a.href = '#' + x.h; key = secKey(x.h); }
+    else if (x.site) { var o = $('#ns-side .side-g a[data-ic="t-' + x.site + '"]'); if (!o) return null; a.href = o.href; a.setAttribute('data-ic', 't-' + x.site); if (o.getAttribute('data-port')) a.setAttribute('data-port', o.getAttribute('data-port')); a.innerHTML = o.innerHTML; a.title = (o.textContent || '').trim(); o.hidden = true; return a; }   /* listed here, not twice */
+    a.innerHTML = '<span data-i18n="desk.' + x.t + '">' + esc(NS.t('desk.' + x.t)) + '</span>';
+    if (key) { a.setAttribute('data-kh', key); a.title = NS.t('desk.' + x.t) + '  ·  ' + key; } else a.title = NS.t('desk.' + x.t);
+    return a;
+  }
+  document.addEventListener('click', function (e) {
+    var a = e.target.closest && e.target.closest('[data-dform]'); if (!a) return;
+    e.preventDefault(); closeDrops(); runForm(a.getAttribute('data-dform'));
+  });
+  NS.crumbs = function (cur) {   /* called by the App when it draws a screen: the Dashboard gets the shortcut panel */
+    var on = cur === 'home' && root.classList.contains('has-hub');
+    root.classList.toggle('sc-on', on);
+    return on ? scPanel() : '';
+  };
+  /* ---- 4. the Dashboard's shortcut panel (like Busy and Evershine): the usual entries and reports with their keys ---- */
+  function scPanel() {
+    var L = [['v_newparty', myUrl('party'), 'people', ''], ['v_newitem', myUrl('item'), 'box', '']].concat(
+      [['sale', 'v_sale'], ['pbill', 'v_pbill'], ['min', 'v_min'], ['mout', 'v_mout'], ['contra', 'v_contra'], ['b2jv', 'v_jv'], ['exp', 'v_exp']].map(function (x) { return [x[1], x[0] === 'b2jv' ? '#b2jv' : 'f:' + x[0], 'doc', x[0] === 'b2jv' ? secKey('b2jv') : formKey(x[0])]; }),
+      [['v_tb', '#fin/tb', 'list', ''], ['v_bs', '#fin/bs', 'scale', ''], ['v_pl', '#fin/pl', 'chart', ''], ['v_ledger', '#parties', 'people', secKey('parties')], ['v_dlist', '#dlist', 'people', secKey('dlist')], ['v_clist', '#clist', 'people', secKey('clist')], ['v_dues', '#dues', 'clock', secKey('dues')], ['v_stock', '#stock', 'box', secKey('stock')], ['v_books', '#books', 'book', secKey('books')]]);
+    return '<aside class="sc-panel" aria-label="' + esc(NS.t('desk.sc_t')) + '"><h3>' + esc(NS.t('desk.sc_t')) + '</h3>' + L.filter(function (x) {
+      var h = x[1]; if (/^f:/.test(h)) return !offForm(h.slice(2)); if (/^#/.test(h)) { var s = h.slice(1).split('/')[0]; return s === 'fin' || /^(dlist|clist|ssum|psum|vreg|cbsum|coa)$/.test(s) || ($('#ns-side a[data-sec="' + s + '"]') && !isOff(s)); } return true;
+    }).map(function (x) {
+      var f = /^f:/.test(x[1]);
+      return '<a class="sc-i" href="' + (f ? '#' : esc(x[1])) + '"' + (f ? ' data-dform="' + x[1].slice(2) + '"' : '') + ' data-ic="' + x[2] + '"><span>' + esc(NS.t('desk.' + x[0])) + '</span>' + (x[3] ? '<kbd>' + esc(x[3]) + '</kbd>' : '') + '</a>';
+    }).join('') + '</aside>';
+  }
+  /* ---- 2 + 3. the menu bar (Masters ▾ Transactions ▾ ...) and the voucher toolbar, App only, on computers ---- */
+  var mbar = null;
+  function closeDrops() { $$('.mb-drop').forEach(function (d) { d.remove(); }); $$('.mb-m[aria-expanded="true"]').forEach(function (b) { b.setAttribute('aria-expanded', 'false'); }); }
+  function menuBar() {
+    if (mbar || !$('#app .hub-nav, #app [data-pane]')) return;
+    var main = $('#main'); if (!main) return;
+    mbar = NS.el('div', { 'class': 'mbar', role: 'menubar' });
+    var menus = SG.filter(function (g) { return g[0] !== 'top'; }).map(function (g) { return g[0]; });
+    menus.splice(2, 0, 'docs');
+    mbar.innerHTML = '<div class="mb-menus">' + menus.map(function (k) { return '<button type="button" class="mb-m" role="menuitem" aria-haspopup="true" aria-expanded="false" data-mb="' + k + '"><span data-i18n="' + (k === 'docs' ? 'desk.sg_new' : 'desk.um_' + k) + '">' + esc(sgName(k)) + '</span> ▾</button>'; }).join('') + '</div>' +
+      '<div class="mb-tools" role="toolbar" aria-label="' + esc(NS.t('desk.tb_t')) + '">' + [['sale', 'tb_sale'], ['pbill', 'tb_pur'], ['min', 'tb_rec'], ['mout', 'tb_pay'], ['contra', 'tb_contra'], ['#b2jv', 'tb_jv'], ['exp', 'tb_exp'], ['@challan', 'tb_challan'], ['@credit-note', 'tb_cn'], ['@debit-note', 'tb_dn']].map(function (t) {
+        var w = t[0], key = w.charAt(0) === '#' ? secKey(w.slice(1)) : w.charAt(0) === '@' ? (DOCKEY[w.slice(1)] ? (DOCKEY[w.slice(1)][1] ? 'Alt+' + DOCKEY[w.slice(1)][1] : 'Alt+G ' + DOCKEY[w.slice(1)][0]) : '') : formKey(w);
+        if (w.charAt(0) === '@' ? isOff(w.slice(1)) : w.charAt(0) === '#' ? isOff(w.slice(1)) : offForm(w)) return '';
+        return '<button type="button" class="mb-t" data-mbt="' + esc(w) + '" title="' + esc(NS.t('desk.' + t[1]) + (key ? '  ·  ' + key : '')) + '"><span data-i18n="desk.' + t[1] + '">' + esc(NS.t('desk.' + t[1])) + '</span>' + (key ? '<kbd>' + esc(key.replace('Alt+G ', '')) + '</kbd>' : '') + '</button>';
+      }).join('') + '</div>';
+    main.insertBefore(mbar, $('#app', main) || main.firstChild);
+    var setH = function () { root.style.setProperty('--mb-h', (mbar.offsetHeight || 0) + 'px'); }; setH(); window.addEventListener('resize', setH);
+    mbar.addEventListener('click', function (e) {
+      var t = e.target.closest('[data-mbt]');
+      if (t) { var w = t.getAttribute('data-mbt'); closeDrops(); if (w.charAt(0) === '#') goSec(w.slice(1)); else if (w.charAt(0) === '@') newDoc(w.slice(1)); else runForm(w); return; }
+      var b = e.target.closest('[data-mb]'); if (!b) return;
+      var was = b.getAttribute('aria-expanded') === 'true'; closeDrops(); if (was) return;
+      var k = b.getAttribute('data-mb'), src = k === 'docs' ? $('.side-g[data-g="docs"] .sg-b', side) : $('.sg[data-sg="' + k + '"] .sg-b', side);
+      var d = NS.el('div', { 'class': 'mb-drop', role: 'menu' });
+      if (src) $$(':scope > a:not([hidden])', src).forEach(function (a) { var c = a.cloneNode(true); c.removeAttribute('id'); c.removeAttribute('aria-current'); c.setAttribute('role', 'menuitem'); c.classList.remove('on'); var kh = a.getAttribute('data-kh'); if (kh) c.insertAdjacentHTML('beforeend', '<kbd>' + esc(kh) + '</kbd>'); d.appendChild(c); });
+      if (!d.children.length) return;
+      b.setAttribute('aria-expanded', 'true'); b.parentNode.appendChild(d);
+      d.style.insetInlineStart = (b.offsetLeft) + 'px';
+      var first = $('a', d); if (first) first.focus();
+    });
+    mbar.addEventListener('keydown', function (e) {
+      var d = $('.mb-drop', mbar); if (!d) return;
+      var items = $$('a', d), i = items.indexOf(document.activeElement);
+      if (e.key === 'ArrowDown') { e.preventDefault(); (items[i + 1] || items[0]).focus(); }
+      else if (e.key === 'ArrowUp') { e.preventDefault(); (items[i - 1] || items[items.length - 1]).focus(); }
+      else if (e.key === 'Escape') { e.preventDefault(); e.stopPropagation(); var b = $('.mb-m[aria-expanded="true"]', mbar); closeDrops(); if (b) b.focus(); }
+    });
+    mbar.addEventListener('click', function (e) { if (e.target.closest('.mb-drop a')) setTimeout(closeDrops, 0); }, true);
+    document.addEventListener('click', function (e) { if (!e.target.closest('.mbar')) closeDrops(); });
+    window.addEventListener('hashchange', closeDrops);
+  }
   function sgFolded() { try { return JSON.parse(localStorage.getItem('ns-sg') || '{}') || {}; } catch (e) { return {}; } }
   /* Inside the App the side menu's other parts (document makers, more tools, Your software, pages) fold the same way and start
      folded, sit below the App's own groups, and leave out every tool that is already an App screen (Cash book = Cash and bank,
      Cheques, Khata...), so nothing shows twice. The makers' heading reads "Make a new document" (Billing makes an invoice; Sales lists them). */
+  /* the document makers and the more tools in A to Z order of the names on screen (owner 2026-11-18) */
+  function abcSort(box) { var L = (NS.lang && NS.lang()) || 'en'; $$(':scope > a', box).sort(function (x, y) { return (x.textContent || '').trim().localeCompare((y.textContent || '').trim(), L, { sensitivity: 'base' }); }).forEach(function (x) { box.appendChild(x); }); }
   function foldOthers() {
     var map = (window.NS_CFG && NS_CFG.inapp) || {}, door = {};
     Object.keys(map).forEach(function (k) { var v = map[k] || []; if (/^#/.test(String(v[2] || ''))) { door[k] = 1; if (v[1]) door[':' + v[1]] = 1; } });
@@ -122,31 +211,41 @@
       var shut = fold['x-' + id] !== false; g.classList.toggle('shut', shut); b.setAttribute('aria-expanded', String(!shut));
       b.addEventListener('click', function () { var f = sgFolded(), sh = !g.classList.contains('shut'); g.classList.toggle('shut', sh); b.setAttribute('aria-expanded', String(!sh)); f['x-' + id] = sh; try { localStorage.setItem('ns-sg', JSON.stringify(f)); } catch (e) {} });
       if (!$$('.sg-b a:not([hidden])', g).length) g.hidden = true;
+      if (id === 'docs' || id === 'more') { abcSort(box); document.addEventListener('ns-lang', function () { setTimeout(function () { abcSort(box); }, 50); }); }
     });
     /* order below the App: makers, more tools, then Your software, then any other part */
     var parts = $$('.side-g[data-sgx]', side).sort(function (x, y) { var a = order.indexOf(x.getAttribute('data-g')), c = order.indexOf(y.getAttribute('data-g')); return (a < 0 ? 9 : a) - (c < 0 ? 9 : c); });
     parts.forEach(function (g) { side.appendChild(g); });
+    var tr = $('.sg[data-sg="trans"]', side), dg = $('.side-g[data-g="docs"]', side); if (tr && dg) tr.parentNode.insertBefore(dg, tr.nextSibling);
+    menuBar();
   }
   function groupHub(hub) {
-    var made = {}, fold = sgFolded();
+    var made = {}, fold = sgFolded(), done = {};
     function box(k) {
       if (made[k]) return made[k];
       var g = $('.sg[data-sg="' + k + '"]', hub);
       if (!g) {
-        g = NS.el('div', { 'class': 'sg', 'data-sg': k });
-        g.innerHTML = '<button type="button" class="sg-h" aria-expanded="true"><span data-i18n="desk.sg_' + k + '">' + esc(NS.t('desk.sg_' + k)) + '</span></button><div class="sg-b"></div>';
+        g = NS.el('div', { 'class': 'sg' + (k === 'top' ? ' sg-top' : ''), 'data-sg': k });
+        g.innerHTML = (k === 'top' ? '' : '<button type="button" class="sg-h" aria-expanded="true"><span data-i18n="desk.um_' + k + '">' + esc(NS.t('desk.um_' + k)) + '</span></button>') + '<div class="sg-b"></div>';
         var order = SG.map(function (x) { return x[0]; }).concat(['more']), at = order.indexOf(k), next = null;
         $$('.sg', hub).forEach(function (o) { if (!next && order.indexOf(o.getAttribute('data-sg')) > at) next = o; });
         hub.insertBefore(g, next);
-        $('.sg-h', g).addEventListener('click', function () { var f = sgFolded(), shut = !g.classList.contains('shut'); g.classList.toggle('shut', shut); this.setAttribute('aria-expanded', String(!shut)); f[k] = shut; try { localStorage.setItem('ns-sg', JSON.stringify(f)); } catch (e) {} });
-        if (fold[k]) { g.classList.add('shut'); $('.sg-h', g).setAttribute('aria-expanded', 'false'); }
+        var h = $('.sg-h', g);
+        if (h) h.addEventListener('click', function () { var f = sgFolded(), shut = !g.classList.contains('shut'); g.classList.toggle('shut', shut); this.setAttribute('aria-expanded', String(!shut)); f['u-' + k] = shut; try { localStorage.setItem('ns-sg', JSON.stringify(f)); } catch (e) {} });
+        if (h && fold['u-' + k]) { g.classList.add('shut'); h.setAttribute('aria-expanded', 'false'); }
       }
       return (made[k] = $('.sg-b', g));
     }
     function sort() {
-      $$(':scope > a[data-sec]', hub).forEach(function (a) { box(SGOF[a.getAttribute('data-sec')] || 'more').appendChild(a); });
-      /* the group of the screen in use is open */
-      var cur = $('a[aria-current="page"]', hub); if (cur) { var g = cur.closest('.sg'); if (g && g.classList.contains('shut')) { g.classList.remove('shut'); $('.sg-h', g).setAttribute('aria-expanded', 'true'); } }
+      SG.forEach(function (g) {
+        var b = box(g[0]);
+        g[1].forEach(function (x) {
+          if (typeof x === 'string') { var a = $(':scope > a[data-sec="' + x + '"]', hub) || $('.sg-b > a[data-sec="' + x + '"]', hub); if (a) b.appendChild(a); return; }
+          var id = JSON.stringify(x); if (!done[id]) { var v = vItem(x); done[id] = v || 1; } if (done[id] && done[id] !== 1) b.appendChild(done[id]);
+        });
+      });
+      $$(':scope > a[data-sec]', hub).forEach(function (a) { box('more').appendChild(a); });
+      var cur = $('a[aria-current="page"]', hub); if (cur) { var g = cur.closest('.sg'); if (g && g.classList.contains('shut')) { g.classList.remove('shut'); var h = $('.sg-h', g); if (h) h.setAttribute('aria-expanded', 'true'); } }
     }
     sort();
     new MutationObserver(function () { if ($(':scope > a[data-sec]', hub)) sort(); }).observe(hub, { childList: true });
@@ -251,7 +350,7 @@
     msme: ['MS'], limits: ['LH'], buy: ['PE', 'W'], parties: ['PA', 'Y'], grp: ['GR'], chq: ['CQ'], books: ['CB', 'K'], cash: ['CK'], repeat: ['RB'],
     reports: ['RE'], day: ['MD'], tools: ['AT', 'T'], fin: ['FA', 'A'], capl: ['CL'], b2jv: ['JE', 'J'], b2fa: ['FX'], b2gd: ['GD'], b2make: ['PR'],
     b2job: ['JW'], b2profit: ['PF'], b2sman: ['SM'], b2year: ['YE'], features: ['AF'], packs: ['TP'], trust: ['DM'], warr: ['WS'], cacom: ['CC'],
-    fees: ['FE'], stock: ['SK'], fam: ['MA'], cadb: ['CD'], cadoc: ['CA'], cagst: ['CG'], ebook: ['EB'], khata: ['KH'], preg: ['PG'] };
+    fees: ['FE'], stock: ['SK'], fam: ['MA'], cadb: ['CD'], cadoc: ['CA'], cagst: ['CG'], ebook: ['EB'], khata: ['KH'], preg: ['PG'], dlist: ['DR'], clist: ['CR'], ssum: ['SY'], psum: ['PY'], vreg: ['VR'], cbsum: ['CS'], mprint: ['MV'], coa: ['AC'], acl: ['LA'] };
   var DOCKEY = { billing: ['IN', 'N'], quotation: ['QT', 'O'], proforma: ['PI'], 'sales-order': ['SO'], challan: ['DC', 'C'], 'purchase-order': ['PO'],
     'credit-note': ['CN'], 'debit-note': ['DN'], 'cash-memo': ['CM'], receipt: ['RC'], voucher: ['VC'], 'self-invoice': ['SI'], 'rent-receipt': ['RR'],
     'salary-slip': ['SS'], 'petty-cash': ['PC'], pos: ['PS'], pharmacy: ['PH'], restaurant: ['RT'], bilty: ['LR'], 'job-card': ['JC'], hotel: ['HT'],
@@ -472,11 +571,14 @@
       new MutationObserver(function (ms) { ms.forEach(function (m) { [].forEach.call(m.addedNodes, function (n) { if (n.nodeType === 1 && n.matches('dialog.b2-dlg')) voucherScreen(n); }); }); }).observe(document.body, { childList: true });
       /* any other box with an entry form (a Save button and a title bar) becomes a voucher screen when it opens; questions, search,
          help, the setup and other small boxes stay small. Some boxes draw their whole inside again at every opening: dressed each time */
-      var SMALL = '#desk-ask,#desk-cmd,#desk-keys,#ns-help,.nsf-dlg,.pk-dlg,.bz-dlg,#ns-mydata,.cap-dlg,#ns-tell,#ns-series,.sf-gate,.help-pnl';
+      var SMALL = '#desk-ask,#desk-cmd,#desk-keys,#ns-help,.nsf-dlg,.pk-dlg,.bz-dlg,#ns-mydata,.cap-dlg,#ns-tell,#ns-series,.sf-gate,.help-pnl,.qe-cus';
       var open0 = HTMLDialogElement.prototype.showModal;
       HTMLDialogElement.prototype.showModal = function () {
         try { if (this.classList.contains('vs')) vsDress(this); else if (!this.matches(SMALL) && $('.dlg-hd,.dlg-h', this) && $('input:not([type=hidden]),select,textarea,table,button[type=submit]', this)) voucherScreen(this);   /* any titled box with fields or a list (a tool's rooms, diary, stock...) */ } catch (e) {}
         this._at = Date.now();
+        /* an entry screen opens WITHOUT locking the page (multitasking): the title bar (bell, search, Help), the side menu and the
+           status bar stay usable; a newer screen sits above an older one. Small boxes and questions still lock the page. */
+        if (this.classList.contains('vs')) { VSZ += 1; this.style.zIndex = String(VSZ); return HTMLDialogElement.prototype.show.apply(this, arguments); }
         return open0.apply(this, arguments);
       };
       return;
@@ -517,6 +619,13 @@
     d.removeAttribute('data-dirty'); d.scrollTop = 0;
   }
   /* leave the voucher screen; with typing in it, ask first. then = what to open next (an F key) */
+  /* Esc on an entry screen (it is not a locked box, so the browser does not do it): the top one goes back, asking first when typed */
+  document.addEventListener('keydown', function (e) {
+    if (e.key !== 'Escape' || e.defaultPrevented || $('dialog:modal')) return;
+    var open = $$('dialog.vs[open]'); if (!open.length) return;
+    var d = open.sort(function (a, b) { return (+b.style.zIndex || 0) - (+a.style.zIndex || 0); })[0];
+    e.preventDefault(); var ev = new Event('cancel', { cancelable: true }); if (d.dispatchEvent(ev)) d.close();
+  });
   NS.vsLeave = function (then, d) {
     d = d || $('dialog.vs[open]');
     var go = function () { if (d) { d.removeAttribute('data-dirty'); if (d.open) d.close(); } if (then) setTimeout(then, 0); };

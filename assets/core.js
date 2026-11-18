@@ -508,7 +508,7 @@
      Each change is also copied into the data home (meta 'prefs' = {key: {v, t}}), so it is in "Back up everything", the one auto save
      and on every site and device the backup is restored to. On load the newer side wins; values only on this site are carried in.
      Not copied: look and place (theme, language, side menu, chosen business, last screen) and unsaved drafts of a document. */
-  var PREF = /^ns-(aato|tally-led|prl|bc-set|gstcal|gstcal-told|gstcal-note|pl-draft-.+|hsn-band|stock-(sv|lv|mv)|gstin-recent|c8|g1|g3|td|dash)$/;
+  var PREF = /^ns-(aato|tally-led|prl|bc-set|gstcal|gstcal-told|gstcal-note|pl-draft-.+|hsn-band|stock-(sv|lv|mv)|gstin-recent|c8|g1|g3|td|dash|qe)$/;
   var lsSet = Storage.prototype.setItem, lsDel = Storage.prototype.removeItem, prefDue = {}, prefT = 0;
   function prefStamps(v) {
     if (v) { try { lsSet.call(localStorage, 'ns-prefs-t', JSON.stringify(v)); } catch (e) {} return v; }
@@ -1099,6 +1099,9 @@
   /* ?open=<id>&print=1 (the App's Print button): the maker prints the document as soon as it is open; read once */
   var AUTOPRINT = /[?&]print=1\b/.test(location.search);
   NS.autoPrint = function () { var x = AUTOPRINT; AUTOPRINT = false; return x; };
+  /* the one line at the bottom of every printed or shared document: NS + gold Biz, then "by", the emblem and "Nivesh Sahayak" in bold (owner's order) */
+  NS.creditLine = function (cls) { return '<p class="ns-cl' + (cls ? ' ' + cls : '') + '"><b class="nsb nsb-in" aria-label="NSBiz"><span class="nsb-n">NS</span><span class="nsb-b">Biz</span></b><span class="cl-by">by</span><img src="/icons/mark-light-48.webp" alt="" width="20" height="14"><span class="cl-ns">Nivesh Sahayak</span></p>'; };
+  NS.creditText = 'NSBiz by Nivesh Sahayak';
   NS.icSvg = function (k) { return IC[k] ? '<svg class="bi" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="' + IC[k] + '"/></svg>' : ''; };
   /* ---------- every "NSBiz" written on screen is drawn like the header's name: NS in teal, Biz on the gold pill (owner 2026-11-18).
      Not inside fields, lists of choices, printed sheets, the page title or text that is being typed. ---------- */

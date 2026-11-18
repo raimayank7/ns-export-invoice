@@ -409,3 +409,13 @@ b.nsb-in .nsb-b{box-shadow:0 1px 3px rgba(142,100,25,.3);margin-inline-start:.08
 .qa-msg{color:var(--bad,#dc2626);margin:10px 0 0}.qa-acts{display:flex;gap:8px;margin-top:14px}
 .qa-dlg .qa-form{max-width:760px}.qa-dlg .qa-w{grid-column:1/-1}
 .qa-more{margin-top:14px;border:1px solid var(--line);border-radius:10px;padding:8px 12px}.qa-more summary{cursor:pointer;font-weight:600}.qa-more .qa-grid{margin-top:10px}
+b.nsb-in{display:inline-flex!important;font-family:'Cinzel Decorative',Georgia,'Times New Roman',serif!important;font-weight:900!important;text-transform:none!important;letter-spacing:0!important}
+b.nsb-in .nsb-n,b.nsb-in .nsb-b{font:inherit!important;font-size:inherit}b.nsb-in .nsb-b{font-size:.7em!important}
+
+/* the one credit line at the bottom of every document (core.js NS.creditLine): the header's mark, always in its light colours on paper */
+.ns-cl{display:flex;align-items:center;justify-content:center;gap:4px;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+.ns-cl img{height:1.6em;width:auto}.ns-cl b.nsb-in{font-size:1.45em}.ns-cl .cl-by{color:#6B7280}
+.ns-cl .nsb-n{background-image:linear-gradient(170deg,#127F74 0%,#063F39 100%)!important;filter:none!important}
+.ns-cl .nsb-b{color:#fff!important;background:linear-gradient(170deg,#E9BC52,#B47F23)!important;box-shadow:none!important}
+.made.ns-cl{font-size:11px}
+.ns-cl .cl-by,.ns-cl .cl-ns{font-weight:700;color:#374151}.ns-cl .cl-by{margin-inline-start:2px}

@@ -459,3 +459,17 @@ html:has(#tool .actions) body{padding-bottom:calc(66px + env(safe-area-inset-bot
 
 .pdf-wa{position:fixed;left:50%;bottom:90px;transform:translateX(-50%);z-index:60;display:flex;flex-wrap:wrap;gap:8px;align-items:center;max-width:min(560px,94vw);padding:10px 12px;border-radius:12px;background:var(--surface,#fff);color:var(--ink,#111);border:1px solid var(--line,#ccc);box-shadow:0 6px 24px rgba(0,0,0,.25)}
 @media print{.pdf-wa{display:none}}
+
+/* every maker on a computer (inside NSBiz and on its own site): like the App's entry screens, every button sits in one bar fixed at the
+   bottom (New, Saved, Save, Print, Share...), the form scrolls above it; Esc goes back to the App (inapp.js) */
+@media (min-width:961px){
+.tool-top .row:has(>[data-do=new]){display:none}
+.tool-top{position:static;margin-bottom:6px;border:0;box-shadow:none}
+#tool .actions{position:fixed;left:0;right:0;bottom:0;z-index:30;margin:0;display:flex;flex-wrap:wrap;align-items:center;gap:8px;padding:10px 24px;background:var(--bg);box-shadow:0 -1px 0 var(--line)}
+#tool .actions .act-x{display:inline-flex}
+#tool .actions .btn{flex:none;min-width:120px}
+#tool .actions::after{content:attr(data-keys);margin-inline-start:auto;color:var(--soft);font-size:.8rem}
+html:has(#tool .actions) body{padding-bottom:64px}
+.pv-col{top:12px}
+}
+@media print{#tool .actions{display:none}}

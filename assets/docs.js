@@ -599,7 +599,7 @@
     return '<table class="meta">' + h + '</table>';
   }
   function colLbl(tax, d) { return tax || type === 'invoice' && (!d || d.kind === 'tax') ? P.taxable : T.purpose ? P.value : P.amount; }
-  function made() { return '<p class="made">Made free at ' + esc(/^(localhost|127\.)/.test(location.hostname) ? (window.NS_CFG && NS_CFG.host || 'billing.niveshsahayak.in') : location.hostname.replace(/^www\./, '')) + '</p>'; }
+  function made() { return NS.creditLine('made'); }
   function bankHtml(s) {
     return '<div class="bank"><h4>' + P.bank + '</h4><p>' + esc(s.bankName) + (s.bankAcc ? '<br>' + P.acc + ' <b class="mono">' + esc(s.bankAcc) + '</b>' : '') + (s.bankIfsc ? '<br>' + P.ifsc + ' <b class="mono">' + esc(s.bankIfsc) + '</b>' : '') + (s.bankBranch ? '<br>' + P.branch + ': ' + esc(s.bankBranch) : '') + '</p></div>';
   }
@@ -994,6 +994,20 @@
   }
 
   /* ---------- print, share ---------- */
+  function printAll(r) {
+    var me = String(doc.seller && doc.seller.name || '').trim().toLowerCase();
+    return NSStore.list('doc').then(function (all) {
+      var list = all.filter(function (x) { return (x.type || 'invoice') === type && (!T.split || !T.kinds || T.kinds.indexOf(x.kind) >= 0) && (x.date || '') >= r[0] && (x.date || '') <= (r[1] || r[0]) && (!me || String(x.seller && x.seller.name || '').trim().toLowerCase() === me); })
+        .sort(function (a, b) { return (a.date || '').localeCompare(b.date || '') || String(a.no || '').localeCompare(String(b.no || '')); });
+      if (!list.length) { NS.toast(t('conv.none'), 'bad'); return; }
+      showTab('preview', true);
+      sheet.innerHTML = list.map(function (d, i) { return '<div class="pa-doc" data-pa="' + i + '">' + labelsFor(d, true).map(function (l) { return sheetHtml(d, l); }).join('') + '</div>'; }).join('');
+      list.forEach(function (d, i) { $$('[data-qr]', $('[data-pa="' + i + '"]', sheet)).forEach(function (q) { drawQr(q, d.seller, d, totals(d).grand); }); });
+      pageStyle(list[0].paper); fit();
+      var old = document.title; document.title = docName() + ' ' + r[0] + ' to ' + (r[1] || r[0]);
+      setTimeout(function () { window.print(); document.title = old; setTimeout(function () { draw(); }, 300); }, 500);
+    });
+  }
   function printDoc() {
     var old = document.title;
     document.title = fileName();
@@ -1113,6 +1127,9 @@
     }).then(function () {
       var qs = new URLSearchParams(location.search), from = qs.get('from'), open = qs.get('open'), copy = qs.get('copy');
       if (NS.leaving) return;   /* this page is moving to the visitor's language page, which reads ?from= itself */
+      /* ?printall=from,to: NSBiz's Print many vouchers: every document of this kind in those dates, one after another */
+      var pall = qs.get('printall');
+      if (pall) { history.replaceState(null, '', location.pathname + location.hash); return printAll(pall.split(',')); }
       /* ?open=<id>: NSBiz opens a saved document here to edit, print or share */
       if (open) {
         history.replaceState(null, '', location.pathname + location.hash);
