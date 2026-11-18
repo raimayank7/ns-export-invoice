@@ -419,3 +419,38 @@ b.nsb-in .nsb-n,b.nsb-in .nsb-b{font:inherit!important;font-size:inherit}b.nsb-i
 .ns-cl .nsb-b{color:#fff!important;background:linear-gradient(170deg,#E9BC52,#B47F23)!important;box-shadow:none!important}
 .made.ns-cl{font-size:11px}
 .ns-cl .cl-by,.ns-cl .cl-ns{font-weight:700;color:#374151}.ns-cl .cl-by{margin-inline-start:2px}
+/* NSBiz inside text: only the lettering of the header's name, no gold pill or colours (owner 2026-11-18: "repeated too many
+   times"). The header logo, the credit line on documents (.ns-cl) and the Dashboard logo keep the full mark. */
+b.nsb-in:not(.ns-cl .nsb-in) .nsb-n{background:none!important;-webkit-text-fill-color:currentColor;color:inherit;filter:none!important;padding:0}
+b.nsb-in:not(.ns-cl .nsb-in) .nsb-b{background:none!important;box-shadow:none!important;color:inherit!important;padding:0!important;margin:0!important;border-radius:0;font-size:1em!important}
+/* Report sheets in dark theme (screen only): soft dark paper instead of bright white. Print, PDF (.lg-paper) and the print copy stay white. */
+@media screen and (prefers-color-scheme:dark){
+:root:not([data-theme=light]) .stsheet:not(.lg-paper){background:#15212F;color:#D7E1EB;border-color:#2A3D53}
+:root:not([data-theme=light]) .stsheet:not(.lg-paper) .tbl{background:transparent;color:inherit}
+:root:not([data-theme=light]) .stsheet:not(.lg-paper) .tbl th,:root:not([data-theme=light]) .stsheet:not(.lg-paper) .tbl td,:root:not([data-theme=light]) .stsheet:not(.lg-paper) .tf-t th,:root:not([data-theme=light]) .stsheet:not(.lg-paper) .tf-t td{border-color:#2A3D53;color:inherit}
+:root:not([data-theme=light]) .stsheet:not(.lg-paper) .tbl thead th,:root:not([data-theme=light]) .stsheet:not(.lg-paper) .tbl tfoot th,:root:not([data-theme=light]) .stsheet:not(.lg-paper) .lg-gt th,:root:not([data-theme=light]) .stsheet:not(.lg-paper) .tf-t tr.sec th{background:#1C2D42;color:#E6EDF5}
+:root:not([data-theme=light]) .stsheet:not(.lg-paper) .lg-gh th,:root:not([data-theme=light]) .stsheet:not(.lg-paper) .fr-st tr.sec th,:root:not([data-theme=light]) .stsheet:not(.lg-paper) .fr-tb tr.sec th,:root:not([data-theme=light]) .stsheet:not(.lg-paper) .tbl tr.b td{background:#192739;color:#E6EDF5}
+:root:not([data-theme=light]) .stsheet:not(.lg-paper) .soft,:root:not([data-theme=light]) .stsheet:not(.lg-paper) .tf-t td.i,:root:not([data-theme=light]) .stsheet:not(.lg-paper) .sl-led tr.op td{color:#9FB1C4}
+:root:not([data-theme=light]) .stsheet:not(.lg-paper) h1,:root:not([data-theme=light]) .stsheet:not(.lg-paper) h2,:root:not([data-theme=light]) .stsheet:not(.lg-paper) h3,:root:not([data-theme=light]) .stsheet:not(.lg-paper) h4{color:#E6EDF5}
+:root:not([data-theme=light]) .stsheet:not(.lg-paper) a{color:#7FD8CC}
+:root:not([data-theme=light]) .stsheet:not(.lg-paper) tr.first td,:root:not([data-theme=light]) .stsheet:not(.lg-paper) .fr-st tr.tot th,:root:not([data-theme=light]) .stsheet:not(.lg-paper) .fr-st tr.tot td{border-top-color:#4A6280}
+:root:not([data-theme=light]) .stsheet:not(.lg-paper) .np{color:#F5B76B}
+:root:not([data-theme=light]) .stsheet:not(.lg-paper) .tbl tr.low td{background:#3A2F14}
+:root:not([data-theme=light]) .stsheet:not(.lg-paper) .pb{border-top-color:#3A506A}
+:root:not([data-theme=light]) .stsheet:not(.lg-paper) .ns-cl .cl-by,:root:not([data-theme=light]) .stsheet:not(.lg-paper) .ns-cl .cl-ns{color:#C9D4E0}
+}
+@media screen{
+:root[data-theme=dark] .stsheet:not(.lg-paper){background:#15212F;color:#D7E1EB;border-color:#2A3D53}
+:root[data-theme=dark] .stsheet:not(.lg-paper) .tbl{background:transparent;color:inherit}
+:root[data-theme=dark] .stsheet:not(.lg-paper) .tbl th,:root[data-theme=dark] .stsheet:not(.lg-paper) .tbl td,:root[data-theme=dark] .stsheet:not(.lg-paper) .tf-t th,:root[data-theme=dark] .stsheet:not(.lg-paper) .tf-t td{border-color:#2A3D53;color:inherit}
+:root[data-theme=dark] .stsheet:not(.lg-paper) .tbl thead th,:root[data-theme=dark] .stsheet:not(.lg-paper) .tbl tfoot th,:root[data-theme=dark] .stsheet:not(.lg-paper) .lg-gt th,:root[data-theme=dark] .stsheet:not(.lg-paper) .tf-t tr.sec th{background:#1C2D42;color:#E6EDF5}
+:root[data-theme=dark] .stsheet:not(.lg-paper) .lg-gh th,:root[data-theme=dark] .stsheet:not(.lg-paper) .fr-st tr.sec th,:root[data-theme=dark] .stsheet:not(.lg-paper) .fr-tb tr.sec th,:root[data-theme=dark] .stsheet:not(.lg-paper) .tbl tr.b td{background:#192739;color:#E6EDF5}
+:root[data-theme=dark] .stsheet:not(.lg-paper) .soft,:root[data-theme=dark] .stsheet:not(.lg-paper) .tf-t td.i,:root[data-theme=dark] .stsheet:not(.lg-paper) .sl-led tr.op td{color:#9FB1C4}
+:root[data-theme=dark] .stsheet:not(.lg-paper) h1,:root[data-theme=dark] .stsheet:not(.lg-paper) h2,:root[data-theme=dark] .stsheet:not(.lg-paper) h3,:root[data-theme=dark] .stsheet:not(.lg-paper) h4{color:#E6EDF5}
+:root[data-theme=dark] .stsheet:not(.lg-paper) a{color:#7FD8CC}
+:root[data-theme=dark] .stsheet:not(.lg-paper) tr.first td,:root[data-theme=dark] .stsheet:not(.lg-paper) .fr-st tr.tot th,:root[data-theme=dark] .stsheet:not(.lg-paper) .fr-st tr.tot td{border-top-color:#4A6280}
+:root[data-theme=dark] .stsheet:not(.lg-paper) .np{color:#F5B76B}
+:root[data-theme=dark] .stsheet:not(.lg-paper) .tbl tr.low td{background:#3A2F14}
+:root[data-theme=dark] .stsheet:not(.lg-paper) .pb{border-top-color:#3A506A}
+:root[data-theme=dark] .stsheet:not(.lg-paper) .ns-cl .cl-by,:root[data-theme=dark] .stsheet:not(.lg-paper) .ns-cl .cl-ns{color:#C9D4E0}
+}

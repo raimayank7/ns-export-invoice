@@ -118,31 +118,33 @@
     if (x.f) { a.href = '#'; a.setAttribute('data-dform', x.f); key = formKey(x.f); if (offForm(x.f)) a.hidden = true; }
     else if (x.my) a.href = myUrl(x.my);
     else if (x.fin) a.href = '#fin/' + x.fin;
-    else if (x.h) { a.href = '#' + x.h; key = secKey(x.h); }
+    else if (x.h) { a.href = '#' + x.h; a.setAttribute('data-hsec', x.h); key = secKey(x.h); }
     else if (x.site) { var o = $('#ns-side .side-g a[data-ic="t-' + x.site + '"]'); if (!o) return null; a.href = o.href; a.setAttribute('data-ic', 't-' + x.site); if (o.getAttribute('data-port')) a.setAttribute('data-port', o.getAttribute('data-port')); a.innerHTML = o.innerHTML; a.title = (o.textContent || '').trim(); o.hidden = true; return a; }   /* listed here, not twice */
     a.innerHTML = '<span data-i18n="desk.' + x.t + '">' + esc(NS.t('desk.' + x.t)) + '</span>';
     if (key) { a.setAttribute('data-kh', key); a.title = NS.t('desk.' + x.t) + '  ·  ' + key; } else a.title = NS.t('desk.' + x.t);
     return a;
   }
   document.addEventListener('click', function (e) {
+    var qn = e.target.closest && e.target.closest('[data-qnew]');   /* New party / New item open the quick add box right here, not My data */
+    if (qn) { e.preventDefault(); closeDrops(); NS.quickAddNew(qn.getAttribute('data-qnew')); return; }
     var a = e.target.closest && e.target.closest('[data-dform]'); if (!a) return;
     e.preventDefault(); closeDrops(); runForm(a.getAttribute('data-dform'));
   });
   NS.crumbs = function (cur) {   /* called by the App when it draws a screen: the Dashboard gets the shortcut panel */
     var on = cur === 'home' && root.classList.contains('has-hub');
     root.classList.toggle('sc-on', on);
-    return on ? scPanel() : '';
+    return on ? scPanel() + '<div class="dash-logo" aria-hidden="true"><span class="brand"><img class="mk mk-l" src="/icons/mark-light-270.webp" alt=""><img class="mk mk-d" src="/icons/mark-dark-270.webp" alt=""><b class="nsb"><span class="nsb-b">Biz</span></b></span></div>' : '';
   };
   /* ---- 4. the Dashboard's shortcut panel (like Busy and Evershine): the usual entries and reports with their keys ---- */
   function scPanel() {
-    var L = [['v_newparty', myUrl('party'), 'people', ''], ['v_newitem', myUrl('item'), 'box', '']].concat(
+    var L = [['v_newparty', 'q:party', 'people', ''], ['v_newitem', 'q:item', 'box', '']].concat(
       [['sale', 'v_sale'], ['pbill', 'v_pbill'], ['min', 'v_min'], ['mout', 'v_mout'], ['contra', 'v_contra'], ['b2jv', 'v_jv'], ['exp', 'v_exp']].map(function (x) { return [x[1], x[0] === 'b2jv' ? '#b2jv' : 'f:' + x[0], 'doc', x[0] === 'b2jv' ? secKey('b2jv') : formKey(x[0])]; }),
       [['v_tb', '#fin/tb', 'list', ''], ['v_bs', '#fin/bs', 'scale', ''], ['v_pl', '#fin/pl', 'chart', ''], ['v_ledger', '#parties', 'people', secKey('parties')], ['v_dlist', '#dlist', 'people', secKey('dlist')], ['v_clist', '#clist', 'people', secKey('clist')], ['v_dues', '#dues', 'clock', secKey('dues')], ['v_stock', '#stock', 'box', secKey('stock')], ['v_books', '#books', 'book', secKey('books')]]);
     return '<aside class="sc-panel" aria-label="' + esc(NS.t('desk.sc_t')) + '"><h3>' + esc(NS.t('desk.sc_t')) + '</h3>' + L.filter(function (x) {
-      var h = x[1]; if (/^f:/.test(h)) return !offForm(h.slice(2)); if (/^#/.test(h)) { var s = h.slice(1).split('/')[0]; return s === 'fin' || /^(dlist|clist|ssum|psum|vreg|cbsum|coa)$/.test(s) || ($('#ns-side a[data-sec="' + s + '"]') && !isOff(s)); } return true;
+      var h = x[1]; if (/^q:/.test(h)) return !!NS.quickAddNew; if (/^f:/.test(h)) return !offForm(h.slice(2)); if (/^#/.test(h)) { var s = h.slice(1).split('/')[0]; return s === 'fin' || /^(dlist|clist|ssum|psum|vreg|cbsum|coa)$/.test(s) || ($('#ns-side a[data-sec="' + s + '"]') && !isOff(s)); } return true;
     }).map(function (x) {
-      var f = /^f:/.test(x[1]);
-      return '<a class="sc-i" href="' + (f ? '#' : esc(x[1])) + '"' + (f ? ' data-dform="' + x[1].slice(2) + '"' : '') + ' data-ic="' + x[2] + '"><span>' + esc(NS.t('desk.' + x[0])) + '</span>' + (x[3] ? '<kbd>' + esc(x[3]) + '</kbd>' : '') + '</a>';
+      var f = /^f:/.test(x[1]), q = /^q:/.test(x[1]);
+      return '<a class="sc-i" href="' + (f || q ? '#' : esc(x[1])) + '"' + (f ? ' data-dform="' + x[1].slice(2) + '"' : '') + (q ? ' data-qnew="' + x[1].slice(2) + '"' : '') + ' data-ic="' + x[2] + '"><span>' + esc(NS.t('desk.' + x[0])) + '</span>' + (x[3] ? '<kbd>' + esc(x[3]) + '</kbd>' : '') + '</a>';
     }).join('') + '</aside>';
   }
   /* ---- 2 + 3. the menu bar (Masters ▾ Transactions ▾ ...) and the voucher toolbar, App only, on computers ---- */
@@ -160,7 +162,7 @@
         if (w.charAt(0) === '@' ? isOff(w.slice(1)) : w.charAt(0) === '#' ? isOff(w.slice(1)) : offForm(w)) return '';
         return '<button type="button" class="mb-t" data-mbt="' + esc(w) + '" title="' + esc(NS.t('desk.' + t[1]) + (key ? '  ·  ' + key : '')) + '"><span data-i18n="desk.' + t[1] + '">' + esc(NS.t('desk.' + t[1])) + '</span>' + (key ? '<kbd>' + esc(key.replace('Alt+G ', '')) + '</kbd>' : '') + '</button>';
       }).join('') + '</div>';
-    main.insertBefore(mbar, $('#app', main) || main.firstChild);
+    main.insertBefore(mbar, $('#app', main) || main.firstChild); root.classList.add('mb-on');
     var setH = function () { root.style.setProperty('--mb-h', (mbar.offsetHeight || 0) + 'px'); }; setH(); window.addEventListener('resize', setH);
     mbar.addEventListener('click', function (e) {
       var t = e.target.closest('[data-mbt]');
@@ -388,6 +390,12 @@
       var s = a.getAttribute('data-sec'), m = SECKEY[s] || [];
       out.push({ g: 'go', off: offSec(s), t: (a.textContent || '').trim(), k: fName(s) || (m[1] ? 'Alt+' + m[1] : ''), c: m[0] || '', run: function () { goSec(s); } });
     });
+    /* report screens that sit in the side menu as plain links (Debtors list, Chart of Accounts...): Alt+G codes and Ctrl K find them too (P2-10) */
+    $$('#ns-side a[data-hsec]').forEach(function (a) {
+      var s = a.getAttribute('data-hsec'), m = SECKEY[s] || [];
+      if (out.some(function (x) { return x.sec === s; })) return;
+      out.push({ g: 'go', sec: s, off: false, t: (a.textContent || '').trim(), k: fName(s) || (m[1] ? 'Alt+' + m[1] : ''), c: m[0] || '', run: function () { location.hash = s; } });
+    });
     (app.newDocs ? app.newDocs() : []).forEach(function (n) {
       var m = DOCKEY[n[0]] || [];
       out.push({ g: 'new', off: offSite(n[0]), t: n[1], k: fName(n[0]) || (m[1] ? 'Alt+' + m[1] : ''), c: m[0] || '', run: function () { newDoc(n[0]); } });
@@ -591,10 +599,11 @@
     d.addEventListener('change', function (e) { if (e.target.closest && e.target.closest('form')) d.setAttribute('data-dirty', '1'); });
     /* the other parts' boxes get the same keys as the App's own entry form: Ctrl+S saves, Enter goes to the next box */
     if (d.id !== 'app-form') d.addEventListener('keydown', function (e) {
+      if (e.defaultPrevented) return;   /* a box's own keys handled it (quick add: P4-17, saved twice) */
       var k = (e.key || '').toLowerCase(), t = e.target, sb = $('button[type=submit]', d), f = sb && sb.closest('form');
       if (!f) return;
       if ((e.ctrlKey || e.metaKey) && !e.altKey && k === 's') { e.preventDefault(); if (f.requestSubmit) f.requestSubmit(sb); else sb.click(); return; }
-      if (k !== 'enter' || e.shiftKey || e.ctrlKey || !t || t.tagName !== 'INPUT' || /^(checkbox|radio|file|submit|button)$/.test(t.type)) return;
+      if (k !== 'enter' || e.shiftKey || e.ctrlKey || !t || !/^(INPUT|SELECT)$/.test(t.tagName) || /^(checkbox|radio|file|submit|button)$/.test(t.type)) return;
       var all = $$('input,select', f).filter(function (x) { return !x.disabled && x.type !== 'hidden' && x.type !== 'file' && x.type !== 'checkbox' && x.offsetParent !== null && !x.closest('details:not([open])'); });
       var i = all.indexOf(t); if (i >= 0 && i < all.length - 1) { e.preventDefault(); all[i + 1].focus(); }
     });
@@ -625,6 +634,18 @@
     var open = $$('dialog.vs[open]'); if (!open.length) return;
     var d = open.sort(function (a, b) { return (+b.style.zIndex || 0) - (+a.style.zIndex || 0); })[0];
     e.preventDefault(); var ev = new Event('cancel', { cancelable: true }); if (d.dispatchEvent(ev)) d.close();
+  });
+  /* Esc on any other App screen goes one level up, like Tally: the screen's own Back, else the Dashboard.
+     In a box being typed in, the first Esc only leaves the box. */
+  document.addEventListener('keydown', function (e) {
+    if (e.key !== 'Escape' || e.defaultPrevented || e.altKey || e.ctrlKey || e.metaKey || $('dialog[open]') || !A() || root.classList.contains('side-open')) return;
+    if ($('.mb-drop')) return;
+    var t = e.target; if (t && (t.isContentEditable || /^(INPUT|TEXTAREA|SELECT)$/.test(t.tagName))) { t.blur(); return; }
+    var h = location.hash.replace(/^#/, ''); if (!h || h === 'home') return;
+    var vis = function (n) { return n && n.offsetParent !== null; };
+    var bk = $$('[data-fback]').filter(vis)[0] || $$('#main a.link[href^="#"]').filter(function (a) { return vis(a) && /^\s*‹|back/i.test(a.textContent); })[0];
+    e.preventDefault();
+    if (bk) bk.click(); else location.hash = 'home';
   });
   NS.vsLeave = function (then, d) {
     d = d || $('dialog.vs[open]');

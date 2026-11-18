@@ -473,3 +473,4 @@ html:has(#tool .actions) body{padding-bottom:64px}
 .pv-col{top:12px}
 }
 @media print{#tool .actions{display:none}}
+.dp-box{grid-column:1/-1;border:1px solid var(--line);border-radius:10px;padding:8px 12px}.dp-box summary{cursor:pointer;font-weight:600}.dp-box .fg{margin-top:8px}

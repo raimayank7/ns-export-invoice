@@ -10268,3 +10268,29 @@ NS.addLang("te", {
   "desk.v_cbsum": "Cash and bank summary",
   "desk.v_mprint": "Print many vouchers"
 });
+/* Ship to, dispatch details, UOM */
+NS.addLang("te", {
+  "dp.uom": "UOM",
+  "dp.sum": "Ship to and dispatch details",
+  "dp.shipon": "Ship to a different address (bill to one party, ship to another)",
+  "dp.shname": "Ship to: name",
+  "dp.shaddr": "Address",
+  "dp.shcity": "City",
+  "dp.shpin": "PIN code",
+  "dp.shstate": "State",
+  "dp.shgstin": "GSTIN (if any)",
+  "dp.t": "Dispatch details",
+  "dp.through": "Dispatched through",
+  "dp.dest": "Destination",
+  "dp.mode": "Mode of transport",
+  "dp.veh": "Vehicle no.",
+  "dp.tname": "Transporter",
+  "dp.lr": "LR / Bilty no.",
+  "dp.lrdate": "LR date",
+  "dp.ewb": "E-way bill no."
+});
+NS.addLang("te",{"c.renum":"Number {a} was just used by another bill, so this one is saved as {b}."});
+NS.addLang("te",{"app.ldisc":"Disc. %"});
+NS.addLang("te",{"b2.deldep":"Its posted depreciation is taken out of the books too."});
+NS.addLang("te",{"pdf.failp":"The PDF could not be made here. In the print window that opens, choose Save as PDF."});
+NS.addLang("te",{"c.inv2":"This was already made into invoice {no}. Make another invoice from it?"});

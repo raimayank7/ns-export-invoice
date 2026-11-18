@@ -155,7 +155,7 @@
     if (inp._qa) return inp._qa;
     var k = QA_LIST[inp.getAttribute('list') || ''] || inp.getAttribute('data-qa'); if (!k) return null;
     return { kind: k, known: function (v) { v = String(v || '').trim().toLowerCase(); var dl = document.getElementById(inp.getAttribute('list') || ''); return !v || !dl || [].some.call(dl.options, function (o) { return o.value.toLowerCase() === v; }); },
-      done: function (rec) { var dl = document.getElementById(inp.getAttribute('list') || ''); if (dl) dl.appendChild(NS.el('option', { value: k === 'item' ? rec.desc : rec.name })); inp.value = k === 'item' ? rec.desc : rec.name; inp.dispatchEvent(new Event('input', { bubbles: true })); inp.dispatchEvent(new Event('change', { bubbles: true })); } };
+      done: function (rec) { var dl = document.getElementById(inp.getAttribute('list') || ''); if (dl) dl.appendChild(NS.el('option', { value: k === 'item' ? rec.desc : rec.name })); document.dispatchEvent(new CustomEvent('ns-qa', { detail: { kind: k, rec: rec, inp: inp } })); inp.value = k === 'item' ? rec.desc : rec.name; inp.dispatchEvent(new Event('input', { bubbles: true })); inp.dispatchEvent(new Event('change', { bubbles: true })); } };
   }
   function qaChip(inp, q) {
     var c = inp._qaChip, v = inp.value.trim();
@@ -177,6 +177,16 @@
     e.preventDefault(); e.stopPropagation(); NS.quickAdd(document.activeElement);
   }, true);
   function qaSide() { var k = (document.querySelector('dialog[open][data-kind]') || { getAttribute: function () { return ''; } }).getAttribute('data-kind'); if (k) return /^(mout|pbill|pret|exp|po)$/.test(k) ? 'supplier' : 'customer'; return /^(purchase|purchase-order|voucher|debit-note|self-invoice)\./i.test(location.host) ? 'supplier' : 'customer'; }
+  /* the same box without a voucher behind it (Dashboard shortcuts New party / New item) */
+  NS.quickAddNew = function (kind) {
+    var it = kind === 'item', i = NS.el('input', { 'data-qa': it ? 'item' : 'party' });
+    /* no datalist behind this box: check the name against the saved records instead, and redraw the App after saving */
+    return NSStore.list(it ? 'item' : 'party').then(function (L) {
+      var have = {}; (L || []).forEach(function (r) { have[String((it ? r.desc : r.name) || '').trim().toLowerCase()] = 1; });
+      i._qa = { kind: it ? 'item' : 'party', known: function (v) { return !!have[String(v || '').trim().toLowerCase()]; }, done: function () { if (window.NSApp && NSApp.show) NSApp.show(); } };
+      NS.quickAdd(i);
+    });
+  };
   NS.quickAdd = function (inp) {
     var q = qaOf(inp); if (!q) return;
     var item = q.kind === 'item', name = inp.value.trim(), d = document.getElementById('qa-dlg');
@@ -253,6 +263,13 @@
         q.done(r);
       }, function (er) { say((er && er.message) || T('qa.fail')); });
     });
+    if (!d._qaKeys) { d._qaKeys = 1; d.addEventListener('keydown', function (e) {
+      var k = (e.key || '').toLowerCase(), t = e.target, f = d.querySelector('form'); if (!f) return;
+      if ((e.ctrlKey || e.metaKey) && !e.altKey && (k === 's' || k === 'enter')) { e.preventDefault(); e.stopImmediatePropagation(); if (f.requestSubmit) f.requestSubmit(); return; }
+      if (k !== 'enter' || e.shiftKey || e.ctrlKey || !t || !/^(INPUT|SELECT)$/.test(t.tagName) || /^(checkbox|radio|submit|button)$/.test(t.type)) return;
+      var all = [].filter.call(f.querySelectorAll('input,select'), function (x) { return !x.disabled && x.type !== 'hidden' && x.type !== 'checkbox' && x.offsetParent !== null && !x.closest('details:not([open])'); });
+      var i = all.indexOf(t); e.preventDefault(); e.stopImmediatePropagation(); if (i >= 0 && i < all.length - 1) all[i + 1].focus(); else if (f.requestSubmit) f.requestSubmit();
+    }); }
     d.showModal(); setTimeout(function () { var x = $q(item ? 'qa-h' : 'qa-gs'); (name ? x : $q('qa-n')).focus(); }, 30);
   };
 
@@ -980,7 +997,10 @@
         document.body.appendChild(b);
         setTimeout(function () { b.remove(); }, 20000);
       });
-    }).catch(function () {
+    }).catch(function (er) {
+      try { console.warn('PDF could not be made', er); } catch (e2) {}
+      /* a computer: the print window, where 'Save as PDF' makes the same file (P2-6: a toast alone left nothing) */
+      if (!(window.matchMedia && matchMedia('(pointer:coarse)').matches)) { NS.toast(NS.t('pdf.failp'), 'bad'); setTimeout(function () { window.print(); }, 400); return; }
       NS.toast(NS.t('pdf.fail'), 'bad');
       if (navigator.share) navigator.share({ title: title, text: text }).catch(function () {});
       else window.open('https://wa.me/?text=' + encodeURIComponent(text), '_blank', 'noopener');
@@ -1227,11 +1247,40 @@
     });
   })();
 
+  /* ---------- the browser's own autofill stays out of the way (owner, 18 Nov 2026) ----------
+     Chrome, Edge and phones pop up saved names, addresses and cards over our boxes and over NSBiz's own suggestion lists
+     (parties, items, HSN). Every box and form gets autocomplete off; boxes that look like a name, address, phone, email,
+     GSTIN or PIN get a token the browser does not know, because Chrome still fills addresses for a plain "off".
+     A box that asks for its own value (search, a password, data-ac) is left alone. NSBiz's own datalist suggestions still show. */
+  var AC_SEL = 'input:not([type=hidden]):not([type=checkbox]):not([type=radio]):not([type=file]):not([type=submit]):not([type=button]):not([type=range]):not([type=color]):not([type=password]):not([data-ac]),textarea:not([data-ac])';
+  var AC_ADDR = /name|addr|city|pin|state|phone|mobile|tel|email|mail|gst|pan|party|cust|supp|payee|buyer|seller|ship|bank|ifsc|acc/i;
+  function noAuto(el) {
+    if (!el || el.nodeType !== 1) return;
+    var list = el.matches && el.matches(AC_SEL) ? [el] : [];
+    if (el.querySelectorAll) list = list.concat([].slice.call(el.querySelectorAll(AC_SEL)));
+    list.forEach(function (x) {
+      if (x.type === 'search' || x.getAttribute('data-ac-done')) return;
+      x.setAttribute('data-ac-done', '1');
+      var a = x.getAttribute('autocomplete');
+      if (a && a !== 'on' && a !== 'off') return;   /* the page asked for something on purpose (a plain off is made stronger below) */
+      var lb = x.closest('label') || (x.id && document.querySelector('label[for="' + x.id + '"]')), hint = (x.id || '') + ' ' + (x.name || '') + ' ' + (x.getAttribute('list') || '') + ' ' + (x.type || '') + ' ' + (x.placeholder || '') + ' ' + (lb ? (NS.meaning ? NS.meaning(lb.textContent.trim()) + ' ' : '') + lb.textContent : '');   /* the label's key and English words, so it works in every language */
+      x.setAttribute('autocomplete', AC_ADDR.test(hint) ? 'nsbiz-nofill' : 'off');
+    });
+    if (el.tagName === 'FORM' && !el.getAttribute('autocomplete')) el.setAttribute('autocomplete', 'off');
+    if (el.querySelectorAll) [].forEach.call(el.querySelectorAll('form:not([autocomplete])'), function (f) { f.setAttribute('autocomplete', 'off'); });
+  }
+  NS.noAutofill = function () {
+    if (!document.body) return;
+    noAuto(document.body);
+    if (window.MutationObserver) new MutationObserver(function (ms) { ms.forEach(function (m) { [].forEach.call(m.addedNodes, noAuto); }); }).observe(document.body, { childList: true, subtree: true });
+    document.addEventListener('focusin', function (e) { noAuto(e.target); }, true);   /* a box drawn some other way: before the browser offers anything */
+  };
+
   /* ---------- page start ---------- */
   NS.start = function () {
     var lang = NS.initLang ? NS.initLang() : null;
     NS.initTheme();
-    NS.motion();
+    NS.motion(); NS.noAutofill();
     NS.btnIcons(); NS.nsbMarks();
     var y = NS.$('[data-year]'); if (y) y.textContent = new Date().getFullYear();
     NS.sponsor();

@@ -23,7 +23,11 @@
   /* words printed on the invoice (English, like the rest of the printout) */
   var P = { irn: 'IRN', ack: 'Ack No.', ackdt: 'Ack Date', ewb: 'E-Way Bill No.', ewbdt: 'E-Way Bill Date', till: 'Valid till', qr: 'e-Invoice QR' };
 
-  function ex(d) { var e = d.einv || (d.einv = { sup: 'B2B', dist: '0', mode: '1', veh: '', vtype: 'R', tid: '', tname: '', tdoc: '', tdate: '', withEwb: false }); if (e.aato == null) e.aato = (d.seller && d.seller.aato) || savedAato(); if (d.type === 'exp' && d.kind) e.sup = d.kind.toUpperCase(); return e; }
+  function ex(d) { var e = d.einv || (d.einv = { sup: 'B2B', dist: '0', mode: '1', veh: '', vtype: 'R', tid: '', tname: '', tdoc: '', tdate: '', withEwb: false }); if (e.aato == null) e.aato = (d.seller && d.seller.aato) || savedAato(); if (d.type === 'exp' && d.kind) e.sup = d.kind.toUpperCase();
+    /* the bill's own Dispatch details (owner 2026-11-18) fill the e-way part when it is still empty */
+    var dp = d.disp || {}; if (!e.veh && dp.veh) e.veh = dp.veh; if (!e.tname && dp.tname) e.tname = dp.tname; if (!e.tdoc && dp.lr) e.tdoc = dp.lr; if (!e.tdate && dp.lrdate) e.tdate = dp.lrdate;
+    if (dp.mode && (!e.mode || e.mode === '1')) e.mode = { Road: '1', Rail: '2', Air: '3', Ship: '4' }[dp.mode] || e.mode;
+    return e; }
   function days(from) { return Math.round((Date.parse(NS.today()) - Date.parse(from)) / 864e5); }
   function dmy(iso) { var m = String(iso || '').match(/^(\d{4})-(\d\d)-(\d\d)/); return m ? m[3] + '/' + m[2] + '/' + m[1] : ''; }
   function digits(s) { return String(s || '').replace(/\D/g, ''); }
@@ -39,6 +43,8 @@
   function phone(p) { var x = digits(p); if (x.length === 12 && x.slice(0, 2) === '91') x = x.slice(2); return x.length >= 6 && x.length <= 12 ? x : null; }
   function email(e) { e = String(e || '').trim(); return /^[^\s@]{1,64}@[^\s@]+\.[^\s@]+$/.test(e) && e.length >= 6 && e.length <= 100 ? e : null; }
   function put(o, k, v) { if (v !== '' && v != null) o[k] = v; return o; }
+  /* an optional text field the schema allows only from 3 characters (Addr2, TrdNm): left out when shorter */
+  function put3(o, k, v) { return String(v || '').trim().length >= 3 ? put(o, k, v) : o; }
   /* the e-way bill portal codes a buyer outside India as 99 ("Other Countries"); our state list uses 96 like the e-invoice */
   function ewbState(c) { return c === '96' ? 99 : +c; }
   function fileName(prefix, no) { return prefix + '-' + (String(no || 'invoice').replace(/[^A-Za-z0-9-]+/g, '-').replace(/^-|-$/g, '') || 'invoice') + '.json'; }
@@ -124,10 +130,10 @@
     var e = ex(d), s = d.seller, b = d.buyer, exp = /^EXP/.test(e.sup), rows = itemRows(d, tt, e.sup !== 'B2B' && e.sup !== 'DEXP');
     var sa = lines(s.addr), ba = lines(b.addr);
     var seller = { Gstin: s.gstin, LglNm: clip(s.name, 100), Addr1: sa[0], Loc: clip(s.city, 50), Pin: +digits(s.pin), Stcd: s.state };
-    put(seller, 'Addr2', sa[1]); put(seller, 'Ph', phone(s.phone)); put(seller, 'Em', email(s.email));
+    put3(seller, 'Addr2', sa[1]); put(seller, 'Ph', phone(s.phone)); put(seller, 'Em', email(s.email));
     var buyer = { Gstin: exp ? 'URP' : b.gstin, LglNm: clip(b.name, 100), Pos: exp ? '96' : (d.pos || b.state), Addr1: ba[0], Loc: clip(b.city, 50),
       Pin: exp ? 999999 : +digits(b.pin), Stcd: exp ? '96' : b.state };
-    put(buyer, 'Addr2', ba[1]); put(buyer, 'Ph', phone(b.phone));
+    put3(buyer, 'Addr2', ba[1]); put(buyer, 'Ph', phone(b.phone));
     var out = {
       Version: '1.1',
       TranDtls: { TaxSch: 'GST', SupTyp: e.sup, RegRev: d.rc ? 'Y' : 'N', IgstOnIntra: 'N' },
@@ -136,7 +142,9 @@
     };
     if (d.ship && d.ship.addr) {
       var sh = lines(d.ship.addr);
-      out.ShipDtls = put({ LglNm: clip(d.ship.name || b.name, 100), Addr1: sh[0], Loc: clip(d.ship.city, 50), Pin: +digits(d.ship.pin), Stcd: d.ship.state || b.state }, 'Addr2', sh[1]);
+      var sg = String(d.ship.gstin || '').trim().toUpperCase();
+      out.ShipDtls = put3({ LglNm: clip(d.ship.name || b.name, 100), Addr1: sh[0], Loc: clip(d.ship.city, 100), Pin: +digits(d.ship.pin), Stcd: d.ship.state || b.state }, 'Addr2', sh[1]);
+      if (sg && NS.gstinCheck(sg).ok) out.ShipDtls = Object.assign({ Gstin: sg }, out.ShipDtls);   /* optional in INV-01 v1.1 */
     }
     var sum = { ass: 0, c: 0, s: 0, i: 0, val: 0, disc: 0 };
     out.ItemList = rows.map(function (r) {
@@ -164,7 +172,7 @@
       return o;
     }
     /* official bulk schema (NIC, Version 1.0.0621): transMode and transDistance are numbers; no Part B (vehicle or transport doc) = Part A only, no validity yet */
-    var o2 = { transporterId: clip(e.tid, 15).toUpperCase(), transporterName: clip(e.tname, 100), transDocNo: clip(e.tdoc, 15), transDistance: +e.dist || 0, transDocDate: dmy(e.tdate), vehicleNo: v, vehicleType: e.vtype || 'R' };
+    var o2 = { transporterId: clip(e.tid, 15).toUpperCase(), transporterName: clip(e.tname, 25)   /* official bulk attributes: Text(25) */, transDocNo: clip(e.tdoc, 15), transDistance: +e.dist || 0, transDocDate: dmy(e.tdate), vehicleNo: v, vehicleType: e.vtype || 'R' };
     if (v || e.tdoc) o2.transMode = +(e.mode || 1);
     return o2;
   }

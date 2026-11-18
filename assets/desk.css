@@ -430,3 +430,17 @@ html.side-mini .side .side-v::after{display:none}
   .sc-i span{flex:1}.sc-i kbd{font:600 .66rem var(--mono,monospace);color:var(--soft)}.sc-i:hover{border-color:var(--accent)}
 }
 @media print{.mbar,.sc-panel{display:none!important}}
+
+/* the Dashboard on a computer: blank, only the NSBiz logo in the centre (owner 2026-11-18). The menu bar, the voucher toolbar,
+   the side menu and the Shortcuts panel are the way in; phones keep the full Dashboard */
+.dash-logo{display:none}
+@media (min-width:1100px) and (pointer:fine){
+  html.mb-on.sc-on [data-pane]>:not(.dash-logo):not(.sc-panel){display:none!important}
+  html.mb-on.sc-on .dash-logo{display:flex;align-items:center;justify-content:center;min-height:calc(100vh - var(--hd-h,64px) - var(--mb-h,74px) - var(--sbh,30px) - 40px)}
+  .dash-logo .brand{display:flex;align-items:center;gap:22px;pointer-events:none}
+  .dash-logo .mk{height:150px!important;width:auto}
+  .dash-logo b.nsb{font-size:104px!important}
+}
+@media (min-width:1100px) and (pointer:fine){html.mb-on.sc-on .dash-logo{width:100%;box-sizing:border-box}html.mb-on.sc-on [data-pane]{display:block}html.mb-on.sc-on .sponsor-slot,html.mb-on.sc-on .tell,html.mb-on.sc-on #ns-tell,html.mb-on.sc-on .ft{display:none!important}}
+@media (min-width:1100px) and (pointer:fine){.dash-logo .brand{flex:none!important;margin:0 auto!important;width:auto!important;min-width:0!important}html.mb-on.sc-on .dash-logo{justify-content:center!important}}
+.dash-logo .nsb-b{margin-inline-start:0!important}

@@ -79,7 +79,9 @@
       o.taxable += amt;
       if (intra) { o.cgst += tax / 2; o.sgst += tax / 2; } else o.igst += tax;
     });
-    o.taxable = r2(o.taxable); o.cgst = r2(o.cgst); o.sgst = r2(o.sgst); o.igst = r2(o.igst);
+    /* CGST + SGST add up to exactly the tax on the lines, split as the printed invoice splits it (docs.js totals): CGST rounded, SGST the rest (P1-21) */
+    var txs = r2(o.cgst + o.sgst);
+    o.taxable = r2(o.taxable); o.cgst = r2(txs / 2); o.sgst = r2(txs - o.cgst); o.igst = r2(o.igst);
     /* TCS (income-tax, collected by the seller): on the total with GST or on the taxable value, as chosen on the bill */
     o.tcs = d.tcs && d.tcs.on ? r2((d.tcs.base === 'taxable' ? o.taxable : o.taxable + o.cgst + o.sgst + o.igst) * tcsRate(d) / 100) : 0;
     var total = r2(o.taxable + o.cgst + o.sgst + o.igst + o.tcs);

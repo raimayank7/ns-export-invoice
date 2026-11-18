@@ -251,6 +251,9 @@
         (type === 'self' ? '<p class="hint wide" style="grid-column:1/-1">' + esc(t('cp.si2027')) + '</p>' : '') +
         (T.rc && !T.rcFixed ? '<div class="f"><label class="chk"><input id="d-rc" type="checkbox"> ' + esc(t('l.rc')) + '</label></div>' : '') +
         (T.transport ? field('tr-veh', t('l.veh'), { ltr: 1, ph: 'PB10AB1234' }) + field('tr-tname', t('l.tname')) + field('tr-lr', t('l.lr'), { ltr: 1 }) : '') +
+        (!T.transport && /^(invoice|so|proforma|cashmemo)$/.test(type) ? '<details class="f wide dp-box"><summary>' + esc(t('dp.t')) + '</summary><div class="fg">' +
+          field('dp-through', t('dp.through')) + field('dp-dest', t('dp.dest')) + '<div class="f"><label for="dp-mode">' + esc(t('dp.mode')) + '</label><select id="dp-mode">' + ['', 'Road', 'Rail', 'Air', 'Ship', 'Courier', 'By hand'].map(function (x) { return '<option>' + x + '</option>'; }).join('') + '</select></div>' +
+          field('dp-veh', t('dp.veh'), { ltr: 1, ph: 'PB10AB1234' }) + field('dp-tname', t('dp.tname')) + field('dp-lr', t('dp.lr'), { ltr: 1 }) + field('dp-lrdate', t('dp.lrdate'), { type: 'date' }) + field('dp-ewb', t('dp.ewb'), { ltr: 1 }) + '</div></details>' : '') +
       '</div></fieldset>' +
 
       '<fieldset class="card"><legend>' + esc(t(type === 'quote' ? 'lg.qto' : 'lg.' + (pk(T.party, T.kinds[0]) || 'billto'))) + '</legend><div class="fg">' +
@@ -395,6 +398,7 @@
   var SMAP = { 's-name': 'name', 's-addr': 'addr', 's-city': 'city', 's-pin': 'pin', 's-state': 'state', 's-gstin': 'gstin', 's-phone': 'phone', 's-email': 'email', 's-bankName': 'bankName', 's-bankAcc': 'bankAcc', 's-bankIfsc': 'bankIfsc', 's-bankBranch': 'bankBranch', 's-upi': 'upi' };
   var BMAP = { 'b-name': 'name', 'b-addr': 'addr', 'b-city': 'city', 'b-pin': 'pin', 'b-state': 'state', 'b-gstin': 'gstin', 'b-phone': 'phone' };
   var SHMAP = { 'sh-name': 'name', 'sh-addr': 'addr', 'sh-city': 'city', 'sh-pin': 'pin', 'sh-state': 'state' };
+  var DPMAP = { 'dp-through': 'through', 'dp-dest': 'dest', 'dp-mode': 'mode', 'dp-veh': 'veh', 'dp-tname': 'tname', 'dp-lr': 'lr', 'dp-lrdate': 'lrdate', 'dp-ewb': 'ewb' };   /* dispatch details (owner 2026-11-18) */
   var DMAP = { 'd-kind': 'kind', 'd-no': 'no', 'd-date': 'date', 'd-due': 'due', 'd-valid': 'valid', 'd-deliv': 'deliv', 'd-recv': 'recv', 'd-pos': 'pos', 'd-ref': 'ref', 'd-notes': 'notes', 'd-terms': 'terms', 'd-status': 'status', 'd-copy': 'copyLabel',
     'd-reason': 'reason', 'd-side': 'side', 'd-paper': 'paper', 'd-design': 'design', 'd-copies': 'copies' };
   var OMAP = { 'd-ono': 'no', 'd-odate': 'date' }, TRMAP = { 'tr-veh': 'veh', 'tr-tname': 'tname', 'tr-lr': 'lr' };
@@ -415,6 +419,8 @@
       $('#d-round', ed).checked = !!doc.round; $('#d-comp', ed).checked = doc.comp !== false;
       $('#b-ship', ed).checked = !!doc.ship; $('#ship-box', ed).hidden = !doc.ship;
       if (doc.ship) Object.keys(SHMAP).forEach(function (id) { $('#' + id, ed).value = doc.ship[SHMAP[id]] || ''; });
+      Object.keys(DPMAP).forEach(function (id) { var e = $('#' + id, ed); if (e) e.value = (doc.disp && doc.disp[DPMAP[id]]) || ''; });
+      var dpb = $('.dp-box', ed); if (dpb) dpb.open = !!(doc.disp && Object.keys(doc.disp).some(function (k) { return doc.disp[k]; }));
       renderItems(); renderCharges(); syncBuyer();
       var tc = doc.tcs || {};
       if ($('#tcs-on', ed)) { $('#tcs-on', ed).checked = !!tc.on; $('#tcs-sec', ed).value = tc.sec || ''; $('#tcs-rate', ed).value = tc.rate == null ? '' : tc.rate; $('#tcs-base', ed).value = tc.base || 'total'; $('#tcs-pan', ed).value = tc.pan || ''; $('#tcs-nopanok', ed).checked = !!tc.nopanOk; panNote(); if (tc.on) $('#tcs-box', ed).open = true; }
@@ -486,6 +492,7 @@
     if (SMAP[id]) doc.seller[SMAP[id]] = el.value;
     else if (BMAP[id]) doc.buyer[BMAP[id]] = el.value;
     else if (SHMAP[id]) { doc.ship = doc.ship || {}; doc.ship[SHMAP[id]] = el.value; }
+    else if (DPMAP[id]) { doc.disp = doc.disp || {}; doc.disp[DPMAP[id]] = id === 'dp-veh' ? el.value.toUpperCase() : el.value; }
     else if (DMAP[id]) doc[DMAP[id]] = id === 'd-copies' ? +el.value : el.value;
     else if (OMAP[id]) { doc.orig = doc.orig || {}; doc.orig[OMAP[id]] = el.value; if (id === 'd-ono' && e.type === 'change') fromOrig(el.value); }
     else if (TRMAP[id]) { doc.tr = doc.tr || {}; doc.tr[TRMAP[id]] = id === 'tr-veh' ? el.value.toUpperCase().replace(/\s+/g, '') : el.value; }
@@ -590,6 +597,8 @@
     if (T.rc && tax) x.push([P.rc, d.rc ? P.yes : P.no2]);
     if (d.ref) x.push([P[T.refLbl || 'ref'], esc(d.ref)]);   /* an empty "Order ref." row is not printed (round C) */
     if (d.against) x.push(['Against', esc(d.against)]);
+    var dp = d.disp || {};   /* dispatch details, only the ones typed */
+    [['through', 'Dispatched through'], ['dest', 'Destination'], ['mode', 'Mode of transport'], ['veh', 'Vehicle no.'], ['tname', 'Transporter'], ['lr', 'LR / Bilty no.'], ['lrdate', 'LR date'], ['ewb', 'E-way bill no.']].forEach(function (z) { if (dp[z[0]]) x.push([z[1], z[0] === 'lrdate' ? NS.fmtDate(dp[z[0]]) : '<span' + (/^(veh|lr|ewb)$/.test(z[0]) ? ' class="mono"' : '') + '>' + esc(dp[z[0]]) + '</span>']); });
     if (T.transport) { if (tr.veh) x.push([P.veh, '<span class="mono">' + esc(tr.veh) + '</span>']); if (tr.tname) x.push([P.tname, esc(tr.tname)]); if (tr.lr) x.push([P.lr, esc(tr.lr)]); }
     return x;
   }
@@ -862,6 +871,9 @@
     }
     return creditCheck(tt0).then(function () { return NSStore.list('doc'); }).then(function (all) {
       var dup = all.filter(function (d) { return d.id !== editingId && d.type === doc.type && key(d.no) === key(doc.no) && NS.fy(d.date) === NS.fy(doc.date) && key(d.seller && d.seller.name) === key(doc.seller.name); })[0];
+      if (dup && !editingId && doc.no === lastAuto) { renumMsg = NS.t('c.renum', { a: doc.no, b: '' }); var was = doc.no; return suggestNumber(true).then(function () { renumMsg = NS.t('c.renum', { a: was, b: doc.no }); }); }   /* P3-6 */
+      /* a number typed by hand that another bill of this series already has: a tax invoice, cash memo or note must not repeat (Rule 46), so it is refused */
+      if (dup && /^(invoice|cashmemo|note)$/.test(doc.type)) { NS.toast(NS.t('app.qe_dup', { no: doc.no }), 'bad'); var ni = $('#d-no', root); if (ni) ni.focus(); throw new Error('cancel'); }
       if (dup) return askBox(tw(T.valid ? 'c.qdup' : 'c.dup', { no: doc.no })).then(function (ok) { if (!ok) throw new Error('cancel'); });
     }).then(function () {
       var s = doc.seller, b = doc.buyer, jobs = [];
@@ -898,7 +910,7 @@
         if (type === 'invoice') { if (q.status === 'inv') return; q.status = 'inv'; q.invNo = doc.no; } else { if (q.nextNo === doc.no) return; q.nextNo = doc.no; q.nextType = type; }
         return NSStore.put('doc', q);
       }).catch(function () {});
-      NS.toast(tw('saved', { no: doc.no }));
+      NS.toast(renumMsg || tw('saved', { no: doc.no }), renumMsg ? 'warn' : ''); renumMsg = '';
       NS.folderWrite(false);
       NS.checkReminder();
       setStatus();
@@ -926,6 +938,21 @@
     var x = ((window.NS_CFG && NS_CFG.tools) || []).filter(function (x) { return x[0] === site; })[0];
     return /^(localhost|127\.0\.0\.1)$/.test(location.hostname) && x ? 'http://localhost:' + x[4] + '/' : 'https://' + site + '.niveshsahayak.in/';
   }
+  var renumMsg = '';   /* the note that a taken number moved on: shown instead of the plain 'saved' toast */
+  function syncSaved() {
+    if (!editingId || !NSStore.get) return;
+    var id = editingId;
+    NSStore.get('doc', id).then(function (rec) {
+      if (!rec || id !== editingId) return;
+      var ch = ['status', 'invNo', 'nextNo', 'nextType'].filter(function (k) { return (rec[k] || '') !== (doc[k] || ''); });
+      if (!ch.length) return;
+      ch.forEach(function (k) { doc[k] = rec[k]; });
+      var st = $('#d-status', root); if (st && doc.status) st.value = doc.status;
+      saveDraft(); setStatus(); draw();
+    }).catch(function () {});
+  }
+  ['ns-shown', 'ns-data'].forEach(function (ev) { document.addEventListener(ev, syncSaved); });
+  window.addEventListener('focus', syncSaved);
   function openDoc(rec, asCopy) {
     doc = Object.assign(blank(), JSON.parse(JSON.stringify(rec)));
     delete doc.id; delete doc.created; delete doc.updated; delete doc.total;
@@ -978,7 +1005,7 @@
         NSStore.get('doc', id).then(function (rec) {
           if (!rec) return;
           if (act === 'open' || act === 'copy') { dlg.close(); openDoc(rec, act === 'copy'); }
-          else if (act === 'inv') { goTo(BILLING + '?from=' + encodeURIComponent(id)); }
+          else if (act === 'inv') { NSStore.get('doc', id).then(againOk).then(function (ok) { if (ok) goTo(BILLING + '?from=' + encodeURIComponent(id)); }); }
           else if (act === 'paid') { rec.status = rec.status === 'paid' ? 'unpaid' : 'paid'; return NSStore.put('doc', rec).then(function () { if (editingId === id) { doc.status = rec.status; fillForm(); draw(); } renderHistory(); }); }
           else if (act === 'log') NS.showLog(id, t('b1.changesof', { no: rec.no }));
           else if (act === 'del' && NS.closedMsg && NS.closedMsg(rec.seller && rec.seller.name, rec.date)) NS.toast(NS.closedMsg(rec.seller && rec.seller.name, rec.date), 'bad');   /* closed year (docmore.js) */
@@ -1033,8 +1060,9 @@
     NS.sharePdf($$('.sh', sheet), fileName(), doc.paper, docName() + ' ' + doc.no, shareText(), { phone: doc.buyer && doc.buyer.phone });
   }
   /* ---------- quotation, proforma, sales order or challan -> invoice: saved first, then the billing site opens it by id from the shared data home ---------- */
+  function againOk(d) { return d && d.status === 'inv' ? askBox(NS.t('c.inv2', { no: d.invNo || '' })) : Promise.resolve(true); }
   function toInvoice() {
-    save().then(function (rec) { goTo(BILLING + '?from=' + encodeURIComponent(rec.id)); }).catch(function () {});
+    againOk(doc).then(function (ok) { if (!ok) return; return save().then(function (rec) { goTo(BILLING + '?from=' + encodeURIComponent(rec.id)); }); }).catch(function () {});
   }
   function fromQuote(id) {
     return NSStore.get('doc', id).then(function (q) {
