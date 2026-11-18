@@ -803,9 +803,9 @@ NS.addLang('doi', {
   "rx.v.doc": "इस बिल च शेड्यूल दुआई ऐ: डाक्टर दा नां लिखो।",
   "rx.v.pat": "Schedule H1 बिक्री आस्तै मरीज दा नां जरूरी ऐ।"
 });
-/* Nivesh Sahayak App (Phase 2) */
+/* NSBiz (Phase 2) */
 NS.addLang("doi", {
-  "app.title": "Nivesh Sahayak App",
+  "app.title": "NSBiz",
   "app.home": "डैशबोर्ड",
   "app.sales": "बिक्री",
   "app.buy": "खरीद ते खर्चे",
@@ -985,7 +985,7 @@ NS.addLang("doi", {
   "app.advh": "बिल शा पैह्लें मिलेआ जां दित्ता पैसा।",
   "app.intro": "तुंदे बिल, मिलेआ ते दित्ता पैसा, खरीद, खर्चे ते बकाया, सब इक जगह। एह् मुफ्त डॉक्यूमेंट मेकरें (बिलिंग, कोटेशन, रसीद बगैरा) दा गै सेव डेटा बरतदा ऐ, इस करी उत्थें बने दा हर बिल इत्थें दिखदा ऐ। मुफ्त, बगैर लॉगिन, ते डेटा इसै ब्राउजर च रौंह्दा ऐ।",
   "app.ab.h": "निक्के बिजनेस लेई ऐप केह् करदा ऐ",
-  "app.ab.p": "मते मुफ्त बिल मेकर बिल बनाइयै रुकी जंदे न। Nivesh Sahayak App अग्गें चलदा ऐ: हर पेमेंट गी उनें बिलें कन्नै जोड़दा ऐ जिनेंगी ओह् चुकता करदी ऐ, तां जे तुसेंगी हमेशां पता रौह्ऐ जे केह्ड़े कस्टमर उप्पर कितना ते कदूं थमां बाकी ऐ, ते तुसें कुसी गी देना ऐ।",
+  "app.ab.p": "मते मुफ्त बिल मेकर बिल बनाइयै रुकी जंदे न। NSBiz अग्गें चलदा ऐ: हर पेमेंट गी उनें बिलें कन्नै जोड़दा ऐ जिनेंगी ओह् चुकता करदी ऐ, तां जे तुसेंगी हमेशां पता रौह्ऐ जे केह्ड़े कस्टमर उप्पर कितना ते कदूं थमां बाकी ऐ, ते तुसें कुसी गी देना ऐ।",
   "app.ab.1": "डैशबोर्ड: अज्जै दी ते इस म्हीने दी बिक्री, लैना ते देना, हत्थै च कैश ते बैंक च पैसा।",
   "app.ab.2": "पैसा आया ते गेआ: पेमेंट इक बारी लिखो ते जिनें बिलें गी ओह् चुकता करदी ऐ उंदे उप्पर टिक करो। थोह्ड़ी-थोह्ड़ी पेमेंट ते एडवांस अपने आप संभलदे न, ते कस्टमर दा कट्टे दा TDS बी गिनेआ जंदा ऐ।",
   "app.ab.3": "बकाया ते पुरानापन: कुस उप्पर कितना बाकी, 0–30, 31–60, 61–90 ते 90 दिनें शा मते च बंडोए दा, तेआर WhatsApp रिमाइंडर कन्नै।",
@@ -2261,9 +2261,9 @@ NS.addLang("doi", {
   "hs.i.save": "सेव",
   "hs.i.saved": "{n} सेव होई गेआ।"
 });
-/* links to the Nivesh Sahayak App */
+/* links to NSBiz */
 NS.addLang("doi", {
-  "nav.app": "Nivesh Sahayak ऐप",
+  "nav.app": "NSBiz",
   "hub.app": "बकाया, मिलेआ ते दित्ता पैसा, खरीद, खर्चे ते पार्टी स्टेटमेंट, सब इक जगह",
   /* the app shell: documents open inside the app */
   "app.newdoc": "नमां डॉक्यूमेंट",
@@ -2320,7 +2320,7 @@ NS.addLang("doi", {
   "prl.saved": "{n} आइटमें दे रेट सेव होए।",
   "prl.cost": "खाल्ली खरीद रेट खरीद बिलें थमां भरो",
   "prl.costed": "{n} आइटमें दा खरीद रेट भरोई गेआ। जांचो ते रेट सेव करो दबाओ।",
-  "prl.nocost": "मिलदे-जुलदे खरीद बिल नेईं लब्भे। Nivesh Sahayak App च सेव खरीद बिल इत्थें कम्म औंदे न।",
+  "prl.nocost": "मिलदे-जुलदे खरीद बिल नेईं लब्भे। NSBiz च सेव खरीद बिल इत्थें कम्म औंदे न।",
   "prl.all": "सारें पर टिक",
   "prl.nonesel": "सारें थमां टिक हटाओ",
   "prl.h.add": "आइटम जोड़ो",
@@ -2419,7 +2419,7 @@ NS.addLang("doi", {
   "b1.rep_no": "नेईं दोहराना",
   "b1.rep_m": "हर म्हीने",
   "b1.rep_q": "हर त्रिमाही",
-  "b1.reph": "अपने आप किश नेईं बनदा: Nivesh Sahayak ऐप च बनाने आह्लियां कापियां दी लिस्ट औंदी ऐ, तुस टैप करियै बनांदे ओ।",
+  "b1.reph": "अपने आप किश नेईं बनदा: NSBiz च बनाने आह्लियां कापियां दी लिस्ट औंदी ऐ, तुस टैप करियै बनांदे ओ।",
   "b1.repuntil": "कदूं तक दोहराओ",
   "b1.repuh": "हमेशां दोहराने आस्तै खाली छोड़ो।",
   "b1.rep_t": "दोहराए जाने आह्ले बिल",
@@ -2475,7 +2475,7 @@ NS.addLang("doi", {
   "b1.pin_t": "PIN लॉक",
   "b1.pin_on": "चालू",
   "b1.pin_off": "बंद",
-  "b1.pin_p": "PIN लाने कन्नै तुंदा डेटा इस स्क्रीन ते Nivesh Sahayak ऐप च PIN पाने तक छप्पेआ रौंह्दा ऐ। एह् स्क्रीन लॉक ऐ, एन्क्रिप्शन नेईं: डेटा आप नेईं बदलोंदा, ते डॉक्यूमेंट साइटां बिल भरने आस्तै उसगी पढ़ी सकदियां न। PIN भुल्ली गे तां बापस औने दा इक्कै रस्ता: इस ब्राउज़र दा डेटा मटाओ ते बैकअप फ़ाइल रिस्टोर करो।",
+  "b1.pin_p": "PIN लाने कन्नै तुंदा डेटा इस स्क्रीन ते NSBiz च PIN पाने तक छप्पेआ रौंह्दा ऐ। एह् स्क्रीन लॉक ऐ, एन्क्रिप्शन नेईं: डेटा आप नेईं बदलोंदा, ते डॉक्यूमेंट साइटां बिल भरने आस्तै उसगी पढ़ी सकदियां न। PIN भुल्ली गे तां बापस औने दा इक्कै रस्ता: इस ब्राउज़र दा डेटा मटाओ ते बैकअप फ़ाइल रिस्टोर करो।",
   "b1.pin_cur": "हुनै दा PIN",
   "b1.pin_new": "नमां PIN (4 थमां 8 अंक)",
   "b1.pin_new2": "नमां PIN",
@@ -5042,7 +5042,7 @@ NS.addLang("doi", {
   "am.vis": "Service visits",
   "am.unp": "Unpaid",
   "am.all": "All contracts",
-  "am.invh": "Each billing period becomes one ordinary invoice, dated today. It shows in the Nivesh Sahayak App dues, GST and reports. Nothing is made until you tap.",
+  "am.invh": "Each billing period becomes one ordinary invoice, dated today. It shows in NSBiz dues, GST and reports. Nothing is made until you tap.",
   "am.make": "Make invoice",
   "am.makeall": "Make all {n} invoices",
   "am.made": "{n} invoice(s) made.",
@@ -5351,7 +5351,7 @@ NS.addLang("doi", {
   "mk.cust": "Customer",
   "mk.amount": "Amount",
   "mk.booksh": "Add this payout to your books (optional)",
-  "mk.booksp": "The marketplace is shown as a customer in the free Nivesh Sahayak App: the money received, the fees (as an expense), TCS and TDS clear what it owes you. Your invoices and credit notes must be in the books already.",
+  "mk.booksp": "The marketplace is shown as a customer in the free NSBiz: the money received, the fees (as an expense), TCS and TDS clear what it owes you. Your invoices and credit notes must be in the books already.",
   "mk.party": "Marketplace as a customer",
   "mk.mode": "Money came into",
   "mk.save": "Save this check",
@@ -6694,7 +6694,7 @@ NS.addLang("doi", {
 NS.addLang("doi", {
   "sum.gst": "GST {v}",
   "gf.ph": "Legal Name of Business … Trade Name … Principal Place of Business …",
-  "app.title": "Nivesh Sahayak App",
+  "app.title": "NSBiz",
   "app.dr": "Dr",
   "app.cr": "Cr",
   "app.waupi": "\nUPI: {u}",
@@ -6989,7 +6989,7 @@ NS.addLang("doi", {
   "mk.cust": "कस्टमर",
   "mk.amount": "रकम",
   "mk.booksh": "इस पेआउट गी अपने खातें च जोड़ो (जेकर चाह्‌ओ)",
-  "mk.booksp": "मुफ्त Nivesh Sahayak App च मार्केटप्लेस इक कस्टमर दे तौर पर दिक्खदा ऐ: मिले दा पैसा, फीसां (खर्चे दे तौर पर), TCS ते TDS रलियै ओह्दा बकाया चुकता करदे न। तुंदे इनवॉइस ते क्रेडिट नोट पैह्लें गै खातें च होने चाहिदे।",
+  "mk.booksp": "मुफ्त NSBiz च मार्केटप्लेस इक कस्टमर दे तौर पर दिक्खदा ऐ: मिले दा पैसा, फीसां (खर्चे दे तौर पर), TCS ते TDS रलियै ओह्दा बकाया चुकता करदे न। तुंदे इनवॉइस ते क्रेडिट नोट पैह्लें गै खातें च होने चाहिदे।",
   "mk.party": "कस्टमर दे तौर पर मार्केटप्लेस",
   "mk.mode": "पैसा कुत्थें आया",
   "mk.save": "एह् जांच सेव करो",
@@ -7416,7 +7416,7 @@ NS.addLang("doi", {
   "am.vis": "सर्विस विज़िट",
   "am.unp": "बकाया",
   "am.all": "सारे कॉन्ट्रैक्ट",
-  "am.invh": "हर बिल अवधि इक आम इनवॉइस बनदी ऐ, अज्जै दी तरीक कन्नै। ओह् Nivesh Sahayak App दे बकाया, GST ते रिपोर्टें च दिक्खदा ऐ। तुंदे दबाए बिना किश नेईं बनदा।",
+  "am.invh": "हर बिल अवधि इक आम इनवॉइस बनदी ऐ, अज्जै दी तरीक कन्नै। ओह् NSBiz दे बकाया, GST ते रिपोर्टें च दिक्खदा ऐ। तुंदे दबाए बिना किश नेईं बनदा।",
   "am.make": "इनवॉइस बनाओ",
   "am.makeall": "सारे {n} इनवॉइस बनाओ",
   "am.made": "{n} इनवॉइस बनी गे।",
@@ -8928,7 +8928,7 @@ NS.addLang("doi", {
 
 /* Auto save written by the App (15 Nov 2026) */
 NS.addLang("doi", {
-  "oa.away2": "Auto save is set up in the Nivesh Sahayak App: the button opens the App in a new tab. Choose the folder there once. While the App is open, every save on any Nivesh Sahayak tool updates the file, and the App catches up each time you open it.",
+  "oa.away2": "Auto save is set up in NSBiz: the button opens the App in a new tab. Choose the folder there once. While the App is open, every save on any Nivesh Sahayak tool updates the file, and the App catches up each time you open it.",
   "oa.here": "This page writes the file: keep it open (or open it now and then) and every save on any Nivesh Sahayak tool, in any tab, is added to the file.",
   "oa.by": "saved by {host}",
   "oa.open": "Open the App to change it",
@@ -8938,7 +8938,7 @@ NS.addLang("doi", {
 
 /* Safari and iPhone: one store per website, use the App (15 Nov 2026) */
 NS.addLang("doi", {
-  "wk.note": "On an iPhone, iPad or Mac Safari, each Nivesh Sahayak website keeps its own records. To keep all your bills, customers and accounts together, use this tool inside the Nivesh Sahayak App.",
+  "wk.note": "On an iPhone, iPad or Mac Safari, each Nivesh Sahayak website keeps its own records. To keep all your bills, customers and accounts together, use this tool inside NSBiz.",
   "wk.open": "Open it in the App",
   "wk.ok": "Got it"
 });
@@ -9506,7 +9506,7 @@ NS.addLang("doi", {
   "dy.adv": "Advance already given or taken (₹)",
   "dy.advh": "Shown on the statement. Record the advance itself as money paid or received in the App.",
   "dy.paid": "Paid (farmer) or received (customer) now (₹)",
-  "dy.paidh": "Booked in the Nivesh Sahayak App with this passbook.",
+  "dy.paidh": "Booked in NSBiz with this passbook.",
   "dy.pmode": "Mode",
   "dy.state": "Passbook",
   "dy.s.open": "Open",
@@ -9611,7 +9611,7 @@ NS.addLang("doi", {
   "sq.owedt": "{n} subscribers owe {v}",
   "sq.over": "{n} days overdue",
   "sq.openinv": "Open bill",
-  "sq.unph": "Payments recorded in the Nivesh Sahayak App are taken into account.",
+  "sq.unph": "Payments recorded in NSBiz are taken into account.",
   "sq.excelo": "Download list of unpaid bills",
   "sq.excel": "Download list of subscribers",
   "sq.nosub": "No subscribers yet.",
@@ -9760,7 +9760,7 @@ NS.addLang("doi", {
   "tp.r.drvh": "Cash with driver = cash given minus what he spent. A minus figure means you owe him. Batta is shown apart and is already a cost of the trip.",
   "tp.r.tripdue": "On trips",
   "tp.r.lrdue": "On lorry receipts",
-  "tp.r.partyh": "Trips: freight not yet received. Lorry receipts: the balance in your Nivesh Sahayak App books, so money you record there is taken off. A lorry receipt that is on a trip is counted once, through the trip.",
+  "tp.r.partyh": "Trips: freight not yet received. Lorry receipts: the balance in your NSBiz books, so money you record there is taken off. A lorry receipt that is on a trip is counted once, through the trip.",
   "tp.nodues": "No freight is due.",
   "tp.nodata": "Nothing in this period.",
   "tp.docsh2": "Vehicle papers and driver licences that are over or end within 30 days. The WhatsApp button gives a message you can send to the driver or keep for yourself.",
@@ -9838,7 +9838,7 @@ NS.addLang("doi", {
   "ts.p.n": "{n} sheet(s)",
   "ts.p.billed": "Billed",
   "ts.p.due": "Due",
-  "ts.p.h": "Due is from your Nivesh Sahayak App books, so money you record there is taken off. COD to hand over is from the sheets.",
+  "ts.p.h": "Due is from your NSBiz books, so money you record there is taken off. COD to hand over is from the sheets.",
   "ts.s.trips": "{n} trip(s), {k} km",
   "ts.s.book": "Fares {v}",
   "ts.s.svc": "Service charges {v}",
@@ -9995,4 +9995,16 @@ NS.addLang("doi", {
   "desk.kg_new": "New documents",
   "desk.k_what": "What it opens",
   "desk.k_key": "Key"
+});
+/* Strict business filter */
+NS.addLang("doi", {
+  "desk.offkey": "Switched off for your type of business. Turn it on in Settings › Additional features."
+});
+/* The App is called NSBiz */
+NS.addLang("doi", {
+  "nav.app": "NSBiz"
+});
+/* Shortcuts page link */
+NS.addLang("doi", {
+  "desk.k_full": "All keys explained (to print)"
 });

@@ -210,6 +210,7 @@
   }
   function fRun(what) {
     var app = A();
+    if (isOff(what)) { NS.toast(NS.t('desk.offkey')); return; }
     if (what === 'biz') { if (app && app.switchBiz) (app.whenReady || function (g) { g(); })(app.switchBiz); return; }
     if (SECKEY[what]) { goSec(what); return; }
     if (DOCKEY[what]) { newDoc(what); return; }
@@ -220,15 +221,15 @@
   function registry() {
     var app = A(), out = [];
     if (!app || !app.biz) return out;
-    FORMKEY.forEach(function (f) { out.push({ g: 'rec', t: app.T(f[0] === 'sale' ? 'qe_sale' : f[0]), k: f[2], c: f[1], run: function () { runForm(f[0]); } }); });
+    FORMKEY.forEach(function (f) { out.push({ g: 'rec', off: offForm(f[0]), t: app.T(f[0] === 'sale' ? 'qe_sale' : f[0]), k: f[2], c: f[1], run: function () { runForm(f[0]); } }); });
     out.push({ g: 'rec', t: NS.t('app.qe_title'), k: 'Alt+Q', c: 'QE', run: function () { if (app.quickEntry) app.quickEntry(); } });
     $$('#ns-side a[data-sec]').forEach(function (a) {
       var s = a.getAttribute('data-sec'), m = SECKEY[s] || [];
-      out.push({ g: 'go', t: (a.textContent || '').trim(), k: fName(s) || (m[1] ? 'Alt+' + m[1] : ''), c: m[0] || '', run: function () { goSec(s); } });
+      out.push({ g: 'go', off: offSec(s), t: (a.textContent || '').trim(), k: fName(s) || (m[1] ? 'Alt+' + m[1] : ''), c: m[0] || '', run: function () { goSec(s); } });
     });
     (app.newDocs ? app.newDocs() : []).forEach(function (n) {
       var m = DOCKEY[n[0]] || [];
-      out.push({ g: 'new', t: n[1], k: fName(n[0]) || (m[1] ? 'Alt+' + m[1] : ''), c: m[0] || '', run: function () { newDoc(n[0]); } });
+      out.push({ g: 'new', off: offSite(n[0]), t: n[1], k: fName(n[0]) || (m[1] ? 'Alt+' + m[1] : ''), c: m[0] || '', run: function () { newDoc(n[0]); } });
     });
     /* a screen or maker this table does not know yet still gets a code: its first free pair of letters */
     var used = {}; out.forEach(function (x) { if (x.c) used[x.c] = 1; });
@@ -239,7 +240,12 @@
     });
     return out;
   }
-  NS.deskKeys = registry;
+  /* switched off for this type of business (firstrun.js)? A screen, a form or a site (maker / feature site) */
+  function offSec(s) { var a = $('#ns-side a[data-sec="' + s + '"]'); return !!(a && NS.featHidden && NS.featHidden(a)); }
+  function offSite(s) { if (!NS.featHidden) return false; var a = document.createElement('a'); a.setAttribute('data-ic', 'd-' + s); return NS.featHidden(a); }
+  function offForm(f) { return !!(NS.featHidden && NS.featHidden(f)); }
+  function isOff(what) { return SECKEY[what] ? offSec(what) : DOCKEY[what] ? offSite(what) : what === 'biz' ? false : offForm(what); }
+  NS.deskKeys = function () { return registry().filter(function (x) { return !x.off; }); };
 
   /* ---------- command box (Ctrl+K) ---------- */
   var cmd, list, items = [], shown = [], at = 0;
@@ -356,7 +362,7 @@
     cmd.setAttribute('aria-label', T('find'));
     inp.placeholder = T(goMode ? 'go_ph' : 'ph'); inp.setAttribute('aria-label', T(goMode ? 'go_ph' : 'ph')); $('.cmd-ft', cmd).textContent = T(goMode ? 'go_ft' : 'cmdft');
     cmd.classList.toggle('cmd-go', goMode);
-    items = goMode ? registry().map(function (x) { return { g: x.g, t: x.t, s: x.k, e: x.c, k: x.c, code: x.c, run: x.run }; }) : collect(); inp.value = ''; at = 0; draw('');
+    items = goMode ? NS.deskKeys().map(function (x) { return { g: x.g, t: x.t, s: x.k, e: x.c, k: x.c, code: x.c, run: x.run }; }) : collect(); inp.value = ''; at = 0; draw('');
     back = from || (document.activeElement !== document.body ? document.activeElement : null);
     cmd.showModal(); inp.focus(); setTimeout(function () { if (cmd.open && document.activeElement !== inp) inp.focus(); }, 30);
     if (!goMode) dataItems().then(function (more) { items = items.concat(more); if (cmd.open && inp.value) draw(inp.value); });
@@ -370,7 +376,7 @@
     var hit = one ? items.filter(function (x) { return x.code && x.code.charAt(0) === one; }) :
       items.filter(function (x) { var h = (x.t + ' ' + (x.s || '') + ' ' + (x.e || '')).toLowerCase(); return words.every(function (w) { return h.indexOf(w) >= 0; }); });
     if (!words.length && !goMode) hit = hit.filter(function (x) { return !x.off && x.g !== 'doc' && x.g !== 'party' && x.g !== 'new' && x.g !== 'help'; });
-    else hit = hit.filter(function (x) { return !x.off; }).concat(hit.filter(function (x) { return x.off; }));   /* what is switched off comes last, so it never pushes the business's own tools down */
+    else hit = hit.filter(function (x) { return !x.off; });   /* strict (owner 2026-11-18): a tool switched off for this type of business is not offered */   /* what is switched off comes last, so it never pushes the business's own tools down */
     shown = []; var html = '';
     GROUPS.forEach(function (g) {
       var part = hit.filter(function (x) { return x.g === g; }).slice(0, goMode ? 99 : words.length ? 8 : 12);
@@ -399,9 +405,10 @@
   var keysDlg;
   function keysSheet() {
     if (!keysDlg) { keysDlg = NS.el('dialog', { id: 'desk-keys', class: 'desk-keys', 'aria-labelledby': 'desk-keys-h' }); document.body.appendChild(keysDlg); }
-    keysDlg.innerHTML = '<div class="dk-hd"><h2 id="desk-keys-h">' + esc(T('keys')) + '</h2><span>' + (registry().length ? '<button type="button" class="btn sm" data-dk-print>' + esc(NS.t('b.print')) + '</button> ' : '') + '<button type="button" class="icon-btn" aria-label="' + esc(NS.t('close')) + '" data-close>✕</button></span></div>' +
+    keysDlg.innerHTML = '<div class="dk-hd"><h2 id="desk-keys-h">' + esc(T('keys')) + '</h2><span><a class="btn sm" href="' + (A() ? '/keyboard-shortcuts/' : appUrl('').replace(/#$/, '') + 'keyboard-shortcuts/') + '" data-dk-full>' + esc(T('k_full')) + '</a> ' + (registry().length ? '<button type="button" class="btn sm" data-dk-print>' + esc(NS.t('b.print')) + '</button> ' : '') + '<button type="button" class="icon-btn" aria-label="' + esc(NS.t('close')) + '" data-close>✕</button></span></div>' +
       '<h3 class="dk-g">' + esc(T('kg_gen')) + '</h3><table class="dk-t"><tbody>' + KEYS.filter(function (k) { return k[1].charAt(0) !== '=' || A() && A().switchBiz && A().data().biz.length > 1; }).map(function (k) { return '<tr><th scope="row"><kbd>' + esc(k[0]) + '</kbd></th><td>' + esc(k[1].charAt(0) === '=' ? NS.t(k[1].slice(1)) : T(k[1])) + '</td></tr>'; }).join('') + '</tbody></table>' + toolTables() + '<p class="dk-note">' + esc(T('k_note')) + '</p>';
     $('[data-close]', keysDlg).onclick = function () { keysDlg.close(); };
+    $('[data-dk-full]', keysDlg).addEventListener('click', function () { keysDlg.close(); });
     var pb = $('[data-dk-print]', keysDlg);
     /* print: the sheet is copied into a plain block (a modal window does not print well), everything else is hidden */
     if (pb) pb.onclick = function () {
@@ -415,7 +422,7 @@
   }
   /* every tool: its key and its Go to code (Alt+G, then the 2 letters) */
   function toolTables() {
-    var reg = registry(); if (!reg.length) return '';
+    var reg = NS.deskKeys(); if (!reg.length) return '';
     return [['rec', 'kg_rec'], ['go', 'kg_go'], ['new', 'kg_new']].map(function (g) {
       var rows = reg.filter(function (x) { return x.g === g[0]; });
       return rows.length ? '<h3 class="dk-g">' + esc(T(g[1])) + '</h3><table class="dk-t dk-3"><thead><tr><th scope="col">' + esc(T('k_what')) + '</th><th scope="col">' + esc(T('k_key')) + '</th><th scope="col">Alt G +</th></tr></thead><tbody>' +
@@ -440,10 +447,10 @@
     }
     if (e.altKey && !e.ctrlKey && !e.metaKey) {
       var n = /^Digit([1-9])$/.exec(e.code || '');
-      if (n) { var a = $$('#ns-side a[data-sec]')[+n[1] - 1]; if (a) { e.preventDefault(); a.click(); a.focus(); } return; }
+      if (n) { var a = $$('#ns-side a[data-sec]').filter(function (x) { return !(NS.featHidden && NS.featHidden(x)); })[+n[1] - 1]; if (a) { e.preventDefault(); a.click(); a.focus(); } return; }
       var c = (e.code || '').replace('Key', '').toLowerCase();
       if (c === 'g' && app && app.biz) { e.preventDefault(); if (!e.repeat) palette(null, 'go'); return; }
-      if (app && app.biz && ALTKEY[c] && !/^[nrpbxsq]$/.test(c)) { e.preventDefault(); if (e.repeat) return; var to = ALTKEY[c]; (app.whenReady || function (f) { f(); })(function () { if (to.sec) goSec(to.sec); else newDoc(to.site); }); return; }
+      if (app && app.biz && ALTKEY[c] && !/^[nrpbxsq]$/.test(c)) { e.preventDefault(); if (e.repeat) return; var to = ALTKEY[c]; (app.whenReady || function (f) { f(); })(function () { if (isOff(to.sec || to.site)) NS.toast(NS.t('desk.offkey')); else if (to.sec) goSec(to.sec); else newDoc(to.site); }); return; }
       if (c === 'n') { e.preventDefault(); if (app && app.newDoc) app.newDoc('billing'); else goUrl(siteUrl('billing')); return; }
       if (c === 'q' && app && app.quickEntry) { e.preventDefault(); if (!e.repeat) app.quickEntry(); return; }   /* quick entry (app.js) */
       /* a key pressed while the App is still fetching its data is kept and runs the moment the data is in (it used to be dropped) */

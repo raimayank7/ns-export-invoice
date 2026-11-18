@@ -1,4 +1,4 @@
-/* NSBooks: the accounts underneath the Nivesh Sahayak App (Phase 2: money in and out).
+/* NSBooks: the accounts underneath NSBiz (Phase 2: money in and out).
    Nothing new is stored here: every saved document in the data home is turned into double-entry lines on the fly
    (party, sales, purchases, expenses, GST, cash, bank, TDS), so the ledgers can never drift from the documents.
    Pure functions: the page passes in the documents and gets balances, statements and bill-wise dues back.

@@ -802,9 +802,9 @@ NS.addLang('sat', {
   "rx.v.doc": "ᱱᱚᱶᱟ ᱵᱤᱞ ᱨᱮ ᱥᱮᱰᱭᱩᱞ ᱨᱟᱱ ᱢᱮᱱᱟᱜᱼᱟ: ᱰᱟᱠᱴᱚᱨ ᱧᱩᱛᱩᱢ ᱚᱞ ᱢᱮ᱾",
   "rx.v.pat": "Schedule H1 ᱟᱠᱟᱨᱤᱧ ᱞᱟᱹᱜᱤᱫ ᱨᱩᱣᱟᱹ ᱦᱚᱲ ᱧᱩᱛᱩᱢ ᱞᱟᱹᱠᱛᱤ᱾"
 });
-/* Nivesh Sahayak App (Phase 2) */
+/* NSBiz (Phase 2) */
 NS.addLang("sat", {
-  "app.title": "Nivesh Sahayak App",
+  "app.title": "NSBiz",
   "app.home": "ᱰᱮᱥᱵᱚᱨᱰ",
   "app.sales": "ᱟᱠᱨᱤᱧ",
   "app.buy": "ᱠᱤᱨᱤᱧ ᱟᱨ ᱠᱷᱚᱨᱚᱪ",
@@ -984,7 +984,7 @@ NS.addLang("sat", {
   "app.advh": "ᱵᱤᱞ ᱞᱟᱦᱟ ᱨᱮ ᱧᱟᱢ ᱥᱮ ᱮᱢ ᱟᱠᱟᱱ ᱴᱟᱠᱟ᱾",
   "app.intro": "ᱟᱢᱟᱜ ᱵᱤᱞ, ᱧᱟᱢ ᱟᱨ ᱮᱢ ᱟᱠᱟᱱ ᱴᱟᱠᱟ, ᱠᱤᱨᱤᱧ, ᱠᱷᱚᱨᱚᱪ ᱟᱨ ᱵᱟᱠᱤ, ᱡᱚᱛᱚ ᱢᱤᱫ ᱴᱷᱟᱶ ᱨᱮ᱾ ᱱᱚᱶᱟ ᱯᱷᱨᱤ ᱰᱚᱠᱭᱩᱢᱮᱱᱴ ᱢᱮᱠᱟᱨ (ᱵᱤᱞᱤᱝ, ᱠᱚᱴᱮᱥᱚᱱ, ᱨᱚᱥᱤᱫ ᱟᱨ ᱮᱴᱟᱜ) ᱨᱮᱭᱟᱜ ᱚᱱᱟ ᱜᱮ ᱥᱮᱣ ᱰᱮᱴᱟ ᱵᱮᱵᱷᱟᱨᱟ, ᱚᱱᱟᱛᱮ ᱚᱸᱰᱮ ᱵᱮᱱᱟᱣ ᱡᱚᱛᱚ ᱵᱤᱞ ᱱᱚᱸᱰᱮ ᱧᱮᱞᱚᱜᱼᱟ᱾ ᱯᱷᱨᱤ, ᱞᱚᱜᱤᱱ ᱵᱮᱜᱚᱨ, ᱟᱨ ᱰᱮᱴᱟ ᱱᱚᱶᱟ ᱵᱽᱨᱟᱣᱩᱡᱟᱨ ᱨᱮ ᱜᱮ ᱛᱟᱦᱮᱸᱱᱟ᱾",
   "app.ab.h": "ᱦᱩᱰᱤᱧ ᱵᱤᱡᱤᱱᱮᱥ ᱞᱟᱹᱜᱤᱫ ᱮᱯ ᱪᱮᱫ ᱮᱫᱟᱭ",
-  "app.ab.p": "ᱟᱹᱰᱤ ᱯᱷᱨᱤ ᱵᱤᱞ ᱢᱮᱠᱟᱨ ᱵᱤᱞ ᱵᱮᱱᱟᱣ ᱛᱟᱭᱚᱢ ᱛᱤᱝᱜᱩᱜᱼᱟ᱾ Nivesh Sahayak App ᱥᱟᱢᱟᱝ ᱪᱟᱞᱟᱜᱼᱟ: ᱡᱚᱛᱚ ᱯᱮᱢᱮᱱᱴ ᱚᱱᱟ ᱵᱤᱞ ᱠᱚ ᱥᱟᱶ ᱡᱚᱲᱟᱣᱟᱭ ᱡᱟᱦᱟᱸ ᱥᱩᱫᱷᱟᱹᱨᱟ, ᱡᱮᱢᱚᱱ ᱟᱢ ᱥᱟᱵᱟᱫ ᱵᱟᱰᱟᱭ ᱢᱮ ᱚᱠᱟ ᱜᱨᱟᱦᱚᱠ ᱴᱷᱮᱱ ᱛᱤᱱᱟᱹᱜ ᱟᱨ ᱛᱤᱦᱤᱧ ᱠᱷᱚᱱ ᱵᱟᱠᱤ, ᱟᱨ ᱟᱢ ᱠᱚᱭ ᱮᱢ ᱞᱟᱹᱜᱤᱫ᱾",
+  "app.ab.p": "ᱟᱹᱰᱤ ᱯᱷᱨᱤ ᱵᱤᱞ ᱢᱮᱠᱟᱨ ᱵᱤᱞ ᱵᱮᱱᱟᱣ ᱛᱟᱭᱚᱢ ᱛᱤᱝᱜᱩᱜᱼᱟ᱾ NSBiz ᱥᱟᱢᱟᱝ ᱪᱟᱞᱟᱜᱼᱟ: ᱡᱚᱛᱚ ᱯᱮᱢᱮᱱᱴ ᱚᱱᱟ ᱵᱤᱞ ᱠᱚ ᱥᱟᱶ ᱡᱚᱲᱟᱣᱟᱭ ᱡᱟᱦᱟᱸ ᱥᱩᱫᱷᱟᱹᱨᱟ, ᱡᱮᱢᱚᱱ ᱟᱢ ᱥᱟᱵᱟᱫ ᱵᱟᱰᱟᱭ ᱢᱮ ᱚᱠᱟ ᱜᱨᱟᱦᱚᱠ ᱴᱷᱮᱱ ᱛᱤᱱᱟᱹᱜ ᱟᱨ ᱛᱤᱦᱤᱧ ᱠᱷᱚᱱ ᱵᱟᱠᱤ, ᱟᱨ ᱟᱢ ᱠᱚᱭ ᱮᱢ ᱞᱟᱹᱜᱤᱫ᱾",
   "app.ab.1": "ᱰᱮᱥᱵᱚᱨᱰ: ᱛᱮᱦᱮᱧ ᱟᱨ ᱱᱚᱶᱟ ᱪᱟᱸᱫᱚ ᱨᱮᱭᱟᱜ ᱟᱠᱨᱤᱧ, ᱦᱟᱛᱟᱣ ᱟᱨ ᱮᱢ ᱞᱟᱹᱜᱤᱫ, ᱛᱤ ᱨᱮ ᱠᱮᱥ ᱟᱨ ᱵᱮᱝᱠ ᱨᱮ ᱴᱟᱠᱟ᱾",
   "app.ab.2": "ᱴᱟᱠᱟ ᱦᱮᱡ ᱟᱨ ᱪᱟᱞᱟᱜ: ᱯᱮᱢᱮᱱᱴ ᱢᱤᱫ ᱫᱷᱟᱣ ᱚᱞ ᱢᱮ ᱟᱨ ᱡᱟᱦᱟᱸ ᱵᱤᱞ ᱥᱩᱫᱷᱟᱹᱨᱟ ᱚᱱᱟ ᱨᱮ ᱴᱤᱠ ᱢᱮ᱾ ᱦᱩᱰᱤᱧ ᱦᱩᱰᱤᱧ ᱯᱮᱢᱮᱱᱴ ᱟᱨ ᱮᱰᱵᱷᱟᱱᱥ ᱟᱡ ᱛᱮ ᱥᱟᱢᱵᱽᱲᱟᱣᱚᱜᱼᱟ, ᱟᱨ ᱜᱨᱟᱦᱚᱠ ᱠᱟᱴᱟᱣ ᱟᱠᱟᱫ TDS ᱦᱚᱸ ᱞᱮᱠᱷᱟᱜᱼᱟ᱾",
   "app.ab.3": "ᱵᱟᱠᱤ ᱟᱨ ᱢᱟᱨᱮᱭᱟᱜ: ᱠᱚᱭ ᱴᱷᱮᱱ ᱛᱤᱱᱟᱹᱜ ᱵᱟᱠᱤ, 0–30, 31–60, 61–90 ᱟᱨ 90 ᱫᱤᱱ ᱠᱷᱚᱱ ᱵᱟᱹᱲᱛᱤ ᱨᱮ ᱦᱟᱹᱴᱤᱧ ᱠᱟᱛᱮ, ᱛᱮᱭᱟᱨ WhatsApp ᱨᱤᱢᱟᱭᱤᱱᱰᱟᱨ ᱥᱟᱶ᱾",
@@ -2260,9 +2260,9 @@ NS.addLang("sat", {
   "hs.i.save": "ᱥᱮᱵᱷ",
   "hs.i.saved": "{n} ᱥᱮᱵᱷ ᱮᱱᱟ᱾"
 });
-/* links to the Nivesh Sahayak App */
+/* links to NSBiz */
 NS.addLang("sat", {
-  "nav.app": "Nivesh Sahayak ᱮᱯ",
+  "nav.app": "NSBiz",
   "hub.app": "ᱵᱟᱠᱤ, ᱧᱟᱢ ᱟᱨ ᱮᱢ ᱴᱟᱠᱟ, ᱠᱤᱨᱤᱧ, ᱠᱷᱚᱨᱚᱪ ᱟᱨ ᱯᱟᱨᱴᱤ ᱥᱴᱮᱴᱢᱮᱱᱴ, ᱡᱚᱛᱚ ᱢᱤᱫ ᱴᱷᱟᱶ ᱨᱮ",
   /* the app shell: documents open inside the app */
   "app.newdoc": "ᱱᱟᱶᱟ ᱰᱚᱠᱩᱢᱮᱱᱴ",
@@ -2319,7 +2319,7 @@ NS.addLang("sat", {
   "prl.saved": "{n} ᱟᱭᱤᱴᱮᱢ ᱨᱮᱭᱟᱜ ᱨᱮᱴ ᱥᱮᱵᱷ ᱮᱱᱟ᱾",
   "prl.cost": "ᱠᱷᱟᱹᱞᱤ ᱠᱤᱨᱤᱧ ᱨᱮᱴ ᱠᱤᱨᱤᱧ ᱵᱤᱞ ᱠᱷᱚᱱ ᱯᱮᱨᱮᱡ ᱢᱮ",
   "prl.costed": "{n} ᱟᱭᱤᱴᱮᱢ ᱨᱮᱭᱟᱜ ᱠᱤᱨᱤᱧ ᱨᱮᱴ ᱯᱮᱨᱮᱡ ᱮᱱᱟ᱾ ᱪᱮᱠ ᱠᱟᱛᱮ ᱨᱮᱴ ᱥᱮᱵᱷ ᱢᱮ ᱚᱛᱟᱭ ᱢᱮ᱾",
-  "prl.nocost": "ᱢᱤᱞ ᱠᱤᱨᱤᱧ ᱵᱤᱞ ᱵᱟᱝ ᱧᱟᱢ ᱞᱮᱱᱟ᱾ Nivesh Sahayak App ᱨᱮ ᱥᱮᱵᱷ ᱠᱤᱨᱤᱧ ᱵᱤᱞ ᱱᱚᱸᱰᱮ ᱵᱮᱵᱷᱟᱨᱚᱜᱼᱟ᱾",
+  "prl.nocost": "ᱢᱤᱞ ᱠᱤᱨᱤᱧ ᱵᱤᱞ ᱵᱟᱝ ᱧᱟᱢ ᱞᱮᱱᱟ᱾ NSBiz ᱨᱮ ᱥᱮᱵᱷ ᱠᱤᱨᱤᱧ ᱵᱤᱞ ᱱᱚᱸᱰᱮ ᱵᱮᱵᱷᱟᱨᱚᱜᱼᱟ᱾",
   "prl.all": "ᱡᱚᱛᱚ ᱨᱮ ᱴᱤᱠ",
   "prl.nonesel": "ᱡᱚᱛᱚ ᱴᱤᱠ ᱚᱪᱚᱜ ᱢᱮ",
   "prl.h.add": "ᱟᱭᱤᱴᱮᱢ ᱥᱮᱞᱮᱫ ᱢᱮ",
@@ -2418,7 +2418,7 @@ NS.addLang("sat", {
   "b1.rep_no": "ᱫᱚᱦᱲᱟ ᱵᱟᱝ",
   "b1.rep_m": "ᱡᱚᱛᱚ ᱪᱟᱸᱫᱚ",
   "b1.rep_q": "ᱡᱚᱛᱚ ᱯᱮ ᱪᱟᱸᱫᱚ",
-  "b1.reph": "ᱟᱡ ᱛᱮ ᱪᱮᱫ ᱦᱚᱸ ᱵᱟᱝ ᱵᱮᱱᱟᱣᱚᱜᱼᱟ: Nivesh Sahayak ᱮᱯ ᱨᱮ ᱵᱮᱱᱟᱣ ᱞᱟᱹᱜᱤᱫ ᱠᱚᱯᱤ ᱨᱮᱭᱟᱜ ᱞᱤᱥᱴ ᱦᱤᱡᱩᱜᱼᱟ, ᱟᱢ ᱴᱮᱯ ᱠᱟᱛᱮ ᱵᱮᱱᱟᱣᱟᱢ᱾",
+  "b1.reph": "ᱟᱡ ᱛᱮ ᱪᱮᱫ ᱦᱚᱸ ᱵᱟᱝ ᱵᱮᱱᱟᱣᱚᱜᱼᱟ: NSBiz ᱨᱮ ᱵᱮᱱᱟᱣ ᱞᱟᱹᱜᱤᱫ ᱠᱚᱯᱤ ᱨᱮᱭᱟᱜ ᱞᱤᱥᱴ ᱦᱤᱡᱩᱜᱼᱟ, ᱟᱢ ᱴᱮᱯ ᱠᱟᱛᱮ ᱵᱮᱱᱟᱣᱟᱢ᱾",
   "b1.repuntil": "ᱪᱮᱫ ᱦᱟᱹᱵᱤᱡ",
   "b1.repuh": "ᱡᱟᱣᱜᱮ ᱫᱚᱦᱲᱟ ᱞᱟᱹᱜᱤᱫ ᱠᱷᱟᱹᱞᱤ ᱵᱟᱹᱜᱤᱭᱟᱢ᱾",
   "b1.rep_t": "ᱫᱚᱦᱲᱟ ᱵᱤᱞ",
@@ -2474,7 +2474,7 @@ NS.addLang("sat", {
   "b1.pin_t": "PIN ᱞᱚᱠ",
   "b1.pin_on": "ᱪᱟᱹᱞᱩ",
   "b1.pin_off": "ᱵᱚᱱᱫᱚ",
-  "b1.pin_p": "PIN ᱫᱚᱦᱚ ᱞᱮᱠᱷᱟᱱ ᱟᱢᱟᱜ ᱰᱟᱴᱟ ᱱᱚᱶᱟ ᱥᱠᱨᱤᱱ ᱟᱨ Nivesh Sahayak ᱮᱯ ᱨᱮ PIN ᱮᱢ ᱦᱟᱹᱵᱤᱡ ᱫᱟᱱᱟᱝ ᱛᱟᱦᱮᱸᱱᱟ᱾ ᱱᱚᱶᱟ ᱥᱠᱨᱤᱱ ᱞᱚᱠ ᱠᱟᱱᱟ, ᱮᱱᱠᱨᱤᱯᱥᱚᱱ ᱫᱚ ᱵᱟᱝ: ᱰᱟᱴᱟ ᱟᱡ ᱛᱮ ᱵᱟᱝ ᱵᱚᱫᱚᱞᱚᱜᱼᱟ, ᱟᱨ ᱰᱚᱠᱭᱩᱢᱮᱱᱴ ᱥᱟᱭᱤᱴ ᱵᱤᱞ ᱯᱮᱨᱮᱡ ᱞᱟᱹᱜᱤᱫ ᱚᱱᱟ ᱯᱟᱲᱦᱟᱣ ᱫᱟᱲᱮᱭᱟᱜᱼᱟ᱾ PIN ᱦᱤᱲᱤᱧ ᱞᱮᱠᱷᱟᱱ ᱨᱩᱣᱟᱹᱲ ᱦᱤᱡᱩᱜ ᱨᱮᱭᱟᱜ ᱢᱤᱫᱴᱟᱝ ᱜᱮ ᱦᱚᱨ: ᱱᱚᱶᱟ ᱵᱽᱨᱟᱣᱡᱟᱨ ᱨᱮᱭᱟᱜ ᱰᱟᱴᱟ ᱢᱮᱴᱟᱣ ᱢᱮ ᱟᱨ ᱵᱮᱠᱟᱯ ᱯᱷᱟᱭᱤᱞ ᱨᱤᱥᱴᱚᱨ ᱢᱮ᱾",
+  "b1.pin_p": "PIN ᱫᱚᱦᱚ ᱞᱮᱠᱷᱟᱱ ᱟᱢᱟᱜ ᱰᱟᱴᱟ ᱱᱚᱶᱟ ᱥᱠᱨᱤᱱ ᱟᱨ NSBiz ᱨᱮ PIN ᱮᱢ ᱦᱟᱹᱵᱤᱡ ᱫᱟᱱᱟᱝ ᱛᱟᱦᱮᱸᱱᱟ᱾ ᱱᱚᱶᱟ ᱥᱠᱨᱤᱱ ᱞᱚᱠ ᱠᱟᱱᱟ, ᱮᱱᱠᱨᱤᱯᱥᱚᱱ ᱫᱚ ᱵᱟᱝ: ᱰᱟᱴᱟ ᱟᱡ ᱛᱮ ᱵᱟᱝ ᱵᱚᱫᱚᱞᱚᱜᱼᱟ, ᱟᱨ ᱰᱚᱠᱭᱩᱢᱮᱱᱴ ᱥᱟᱭᱤᱴ ᱵᱤᱞ ᱯᱮᱨᱮᱡ ᱞᱟᱹᱜᱤᱫ ᱚᱱᱟ ᱯᱟᱲᱦᱟᱣ ᱫᱟᱲᱮᱭᱟᱜᱼᱟ᱾ PIN ᱦᱤᱲᱤᱧ ᱞᱮᱠᱷᱟᱱ ᱨᱩᱣᱟᱹᱲ ᱦᱤᱡᱩᱜ ᱨᱮᱭᱟᱜ ᱢᱤᱫᱴᱟᱝ ᱜᱮ ᱦᱚᱨ: ᱱᱚᱶᱟ ᱵᱽᱨᱟᱣᱡᱟᱨ ᱨᱮᱭᱟᱜ ᱰᱟᱴᱟ ᱢᱮᱴᱟᱣ ᱢᱮ ᱟᱨ ᱵᱮᱠᱟᱯ ᱯᱷᱟᱭᱤᱞ ᱨᱤᱥᱴᱚᱨ ᱢᱮ᱾",
   "b1.pin_cur": "ᱱᱤᱛᱚᱜ ᱨᱮᱭᱟᱜ PIN",
   "b1.pin_new": "ᱱᱟᱶᱟ PIN (4 ᱠᱷᱚᱱ 8 ᱮᱞ)",
   "b1.pin_new2": "ᱱᱟᱶᱟ PIN",
@@ -5040,7 +5040,7 @@ NS.addLang("sat", {
   "am.vis": "Service visits",
   "am.unp": "Unpaid",
   "am.all": "All contracts",
-  "am.invh": "Each billing period becomes one ordinary invoice, dated today. It shows in the Nivesh Sahayak App dues, GST and reports. Nothing is made until you tap.",
+  "am.invh": "Each billing period becomes one ordinary invoice, dated today. It shows in NSBiz dues, GST and reports. Nothing is made until you tap.",
   "am.make": "Make invoice",
   "am.makeall": "Make all {n} invoices",
   "am.made": "{n} invoice(s) made.",
@@ -5349,7 +5349,7 @@ NS.addLang("sat", {
   "mk.cust": "Customer",
   "mk.amount": "Amount",
   "mk.booksh": "Add this payout to your books (optional)",
-  "mk.booksp": "The marketplace is shown as a customer in the free Nivesh Sahayak App: the money received, the fees (as an expense), TCS and TDS clear what it owes you. Your invoices and credit notes must be in the books already.",
+  "mk.booksp": "The marketplace is shown as a customer in the free NSBiz: the money received, the fees (as an expense), TCS and TDS clear what it owes you. Your invoices and credit notes must be in the books already.",
   "mk.party": "Marketplace as a customer",
   "mk.mode": "Money came into",
   "mk.save": "Save this check",
@@ -6698,7 +6698,7 @@ NS.addLang("sat", {
   "ns.h.debit.p": "ᱥᱚᱯᱞᱟᱭᱟᱨ ᱟᱢ ᱴᱷᱮᱱ ᱠᱚᱢ ᱧᱟᱢᱟ: ᱡᱤᱱᱤᱥ ᱨᱩᱣᱟᱹᱲ, ᱫᱟᱢ ᱥᱮ ᱴᱮᱠᱥ ᱵᱟᱹᱲᱛᱤ ᱞᱟᱜᱟᱣ ᱞᱮᱱᱟ, ᱥᱮ ᱡᱤᱱᱤᱥ ᱠᱚᱢ ᱦᱮᱡ ᱞᱮᱱᱟ᱾ ᱥᱚᱯᱞᱟᱭᱟᱨ ᱠᱷᱚᱱ ᱠᱨᱮᱰᱤᱴ ᱱᱳᱴ ᱚᱞ ᱞᱟᱹᱜᱤᱫ ᱦᱚᱸ ᱱᱚᱶᱟ ᱵᱮᱵᱷᱟᱨ ᱢᱮ᱾",
   "rs.disc_p": "ᱠᱤᱨᱤᱧ ᱛᱟᱭᱚᱢ ᱪᱷᱩᱴ",
   "gf.ph": "Legal Name of Business … Trade Name … Principal Place of Business …",
-  "app.title": "Nivesh Sahayak ᱮᱯ",
+  "app.title": "NSBiz",
   "app.dr": "Dr",
   "app.cr": "Cr",
   "app.waupi": "\nUPI: {u}",
@@ -6998,7 +6998,7 @@ NS.addLang("sat", {
   "mk.cust": "ᱜᱨᱟᱦᱟᱠ",
   "mk.amount": "ᱴᱟᱠᱟ",
   "mk.booksh": "ᱱᱚᱶᱟ ᱯᱮᱟᱣᱩᱴ ᱟᱢᱟᱜ ᱠᱷᱟᱛᱟ ᱨᱮ ᱥᱮᱞᱮᱫ ᱢᱮ (ᱟᱯᱱᱟᱨ ᱢᱚᱱᱮ ᱛᱮ)",
-  "mk.booksp": "ᱯᱷᱨᱤ Nivesh Sahayak ᱮᱯ ᱨᱮ ᱢᱟᱨᱠᱮᱴᱯᱞᱮᱥ ᱫᱚ ᱜᱨᱟᱦᱟᱠ ᱞᱮᱠᱟ ᱧᱮᱞᱚᱜᱼᱟ: ᱧᱟᱢ ᱟᱠᱟᱱ ᱴᱟᱠᱟ, ᱯᱷᱤᱥ (ᱠᱷᱚᱨᱚᱪ ᱞᱮᱠᱟ), TCS ᱟᱨ TDS ᱛᱮ ᱚᱱᱟᱭ ᱵᱟᱠᱤ ᱥᱟᱯᱷᱟᱭᱚᱜᱼᱟ᱾ ᱟᱢᱟᱜ ᱤᱱᱵᱷᱚᱭᱮᱥ ᱟᱨ ᱠᱨᱮᱰᱤᱴ ᱱᱳᱴ ᱞᱟᱦᱟ ᱠᱷᱚᱱ ᱠᱷᱟᱛᱟ ᱨᱮ ᱛᱟᱦᱮᱸ ᱞᱟᱹᱠᱛᱤ᱾",
+  "mk.booksp": "ᱯᱷᱨᱤ NSBiz ᱨᱮ ᱢᱟᱨᱠᱮᱴᱯᱞᱮᱥ ᱫᱚ ᱜᱨᱟᱦᱟᱠ ᱞᱮᱠᱟ ᱧᱮᱞᱚᱜᱼᱟ: ᱧᱟᱢ ᱟᱠᱟᱱ ᱴᱟᱠᱟ, ᱯᱷᱤᱥ (ᱠᱷᱚᱨᱚᱪ ᱞᱮᱠᱟ), TCS ᱟᱨ TDS ᱛᱮ ᱚᱱᱟᱭ ᱵᱟᱠᱤ ᱥᱟᱯᱷᱟᱭᱚᱜᱼᱟ᱾ ᱟᱢᱟᱜ ᱤᱱᱵᱷᱚᱭᱮᱥ ᱟᱨ ᱠᱨᱮᱰᱤᱴ ᱱᱳᱴ ᱞᱟᱦᱟ ᱠᱷᱚᱱ ᱠᱷᱟᱛᱟ ᱨᱮ ᱛᱟᱦᱮᱸ ᱞᱟᱹᱠᱛᱤ᱾",
   "mk.party": "ᱜᱨᱟᱦᱟᱠ ᱞᱮᱠᱟ ᱢᱟᱨᱠᱮᱴᱯᱞᱮᱥ",
   "mk.mode": "ᱴᱟᱠᱟ ᱚᱠᱟᱨᱮ ᱦᱮᱡ ᱞᱮᱱᱟ",
   "mk.save": "ᱱᱚᱶᱟ ᱧᱮᱞ ᱥᱮᱣ ᱢᱮ",
@@ -7426,7 +7426,7 @@ NS.addLang("sat", {
   "am.vis": "ᱥᱟᱨᱵᱷᱤᱥ ᱦᱮᱡ",
   "am.unp": "ᱵᱟᱠᱤ",
   "am.all": "ᱡᱚᱛᱚ ᱠᱚᱱᱴᱨᱮᱠᱴ",
-  "am.invh": "ᱡᱷᱚᱛᱚ ᱵᱤᱞ ᱚᱠᱛᱚ ᱫᱚ ᱛᱮᱦᱮᱧ ᱛᱟᱨᱤᱠ ᱥᱟᱶ ᱢᱤᱫ ᱥᱟᱫᱷᱟᱨᱚᱬ ᱤᱱᱵᱷᱚᱭᱮᱥ ᱦᱩᱭᱩᱜᱼᱟ᱾ ᱚᱱᱟ ᱫᱚ Nivesh Sahayak ᱮᱯ ᱨᱮᱭᱟᱜ ᱵᱟᱠᱤ, GST ᱟᱨ ᱨᱤᱯᱚᱨᱴ ᱨᱮ ᱧᱮᱞᱚᱜᱼᱟ᱾ ᱟᱢ ᱵᱟᱝ ᱴᱮᱯ ᱦᱟᱹᱵᱤᱡ ᱪᱮᱫ ᱦᱚᱸ ᱵᱟᱝ ᱛᱮᱭᱟᱨᱚᱜᱼᱟ᱾",
+  "am.invh": "ᱡᱷᱚᱛᱚ ᱵᱤᱞ ᱚᱠᱛᱚ ᱫᱚ ᱛᱮᱦᱮᱧ ᱛᱟᱨᱤᱠ ᱥᱟᱶ ᱢᱤᱫ ᱥᱟᱫᱷᱟᱨᱚᱬ ᱤᱱᱵᱷᱚᱭᱮᱥ ᱦᱩᱭᱩᱜᱼᱟ᱾ ᱚᱱᱟ ᱫᱚ NSBiz ᱨᱮᱭᱟᱜ ᱵᱟᱠᱤ, GST ᱟᱨ ᱨᱤᱯᱚᱨᱴ ᱨᱮ ᱧᱮᱞᱚᱜᱼᱟ᱾ ᱟᱢ ᱵᱟᱝ ᱴᱮᱯ ᱦᱟᱹᱵᱤᱡ ᱪᱮᱫ ᱦᱚᱸ ᱵᱟᱝ ᱛᱮᱭᱟᱨᱚᱜᱼᱟ᱾",
   "am.make": "ᱤᱱᱵᱷᱚᱭᱮᱥ ᱛᱮᱭᱟᱨ ᱢᱮ",
   "am.makeall": "ᱡᱚᱛᱚ {n} ᱤᱱᱵᱷᱚᱭᱮᱥ ᱛᱮᱭᱟᱨ ᱢᱮ",
   "am.made": "{n} ᱤᱱᱵᱷᱚᱭᱮᱥ ᱛᱮᱭᱟᱨ ᱮᱱᱟ᱾",
@@ -8978,7 +8978,7 @@ NS.addLang("sat", {
 
 /* Auto save written by the App (15 Nov 2026) */
 NS.addLang("sat", {
-  "oa.away2": "Auto save is set up in the Nivesh Sahayak App: the button opens the App in a new tab. Choose the folder there once. While the App is open, every save on any Nivesh Sahayak tool updates the file, and the App catches up each time you open it.",
+  "oa.away2": "Auto save is set up in NSBiz: the button opens the App in a new tab. Choose the folder there once. While the App is open, every save on any Nivesh Sahayak tool updates the file, and the App catches up each time you open it.",
   "oa.here": "This page writes the file: keep it open (or open it now and then) and every save on any Nivesh Sahayak tool, in any tab, is added to the file.",
   "oa.by": "saved by {host}",
   "oa.open": "Open the App to change it",
@@ -8988,7 +8988,7 @@ NS.addLang("sat", {
 
 /* Safari and iPhone: one store per website, use the App (15 Nov 2026) */
 NS.addLang("sat", {
-  "wk.note": "On an iPhone, iPad or Mac Safari, each Nivesh Sahayak website keeps its own records. To keep all your bills, customers and accounts together, use this tool inside the Nivesh Sahayak App.",
+  "wk.note": "On an iPhone, iPad or Mac Safari, each Nivesh Sahayak website keeps its own records. To keep all your bills, customers and accounts together, use this tool inside NSBiz.",
   "wk.open": "Open it in the App",
   "wk.ok": "Got it"
 });
@@ -9556,7 +9556,7 @@ NS.addLang("sat", {
   "dy.adv": "Advance already given or taken (₹)",
   "dy.advh": "Shown on the statement. Record the advance itself as money paid or received in the App.",
   "dy.paid": "Paid (farmer) or received (customer) now (₹)",
-  "dy.paidh": "Booked in the Nivesh Sahayak App with this passbook.",
+  "dy.paidh": "Booked in NSBiz with this passbook.",
   "dy.pmode": "Mode",
   "dy.state": "Passbook",
   "dy.s.open": "Open",
@@ -9661,7 +9661,7 @@ NS.addLang("sat", {
   "sq.owedt": "{n} subscribers owe {v}",
   "sq.over": "{n} days overdue",
   "sq.openinv": "Open bill",
-  "sq.unph": "Payments recorded in the Nivesh Sahayak App are taken into account.",
+  "sq.unph": "Payments recorded in NSBiz are taken into account.",
   "sq.excelo": "Download list of unpaid bills",
   "sq.excel": "Download list of subscribers",
   "sq.nosub": "No subscribers yet.",
@@ -9810,7 +9810,7 @@ NS.addLang("sat", {
   "tp.r.drvh": "Cash with driver = cash given minus what he spent. A minus figure means you owe him. Batta is shown apart and is already a cost of the trip.",
   "tp.r.tripdue": "On trips",
   "tp.r.lrdue": "On lorry receipts",
-  "tp.r.partyh": "Trips: freight not yet received. Lorry receipts: the balance in your Nivesh Sahayak App books, so money you record there is taken off. A lorry receipt that is on a trip is counted once, through the trip.",
+  "tp.r.partyh": "Trips: freight not yet received. Lorry receipts: the balance in your NSBiz books, so money you record there is taken off. A lorry receipt that is on a trip is counted once, through the trip.",
   "tp.nodues": "No freight is due.",
   "tp.nodata": "Nothing in this period.",
   "tp.docsh2": "Vehicle papers and driver licences that are over or end within 30 days. The WhatsApp button gives a message you can send to the driver or keep for yourself.",
@@ -9888,7 +9888,7 @@ NS.addLang("sat", {
   "ts.p.n": "{n} sheet(s)",
   "ts.p.billed": "Billed",
   "ts.p.due": "Due",
-  "ts.p.h": "Due is from your Nivesh Sahayak App books, so money you record there is taken off. COD to hand over is from the sheets.",
+  "ts.p.h": "Due is from your NSBiz books, so money you record there is taken off. COD to hand over is from the sheets.",
   "ts.s.trips": "{n} trip(s), {k} km",
   "ts.s.book": "Fares {v}",
   "ts.s.svc": "Service charges {v}",
@@ -10045,4 +10045,16 @@ NS.addLang("sat", {
   "desk.kg_new": "New documents",
   "desk.k_what": "What it opens",
   "desk.k_key": "Key"
+});
+/* Strict business filter */
+NS.addLang("sat", {
+  "desk.offkey": "Switched off for your type of business. Turn it on in Settings › Additional features."
+});
+/* The App is called NSBiz */
+NS.addLang("sat", {
+  "nav.app": "NSBiz"
+});
+/* Shortcuts page link */
+NS.addLang("sat", {
+  "desk.k_full": "All keys explained (to print)"
 });

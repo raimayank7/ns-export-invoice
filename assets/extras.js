@@ -1,4 +1,4 @@
-/* NS extras (Batch 1): shared pieces for the document sites, the data home (my.) and the Nivesh Sahayak App.
+/* NS extras (Batch 1): shared pieces for the document sites, the data home (my.) and NSBiz.
      NS.showLog(filter)     edit history in a dialog (store 'log' of the data home, written by store.js; read only)
      NS.pin                 PIN screen lock on my. and app.: a lock on this screen, NOT encryption (the data itself stays readable to anyone with the browser or a backup)
      NS.sample              sample records (made by sample.js, sample: 1): is any there, the strip, one tap removes them all

@@ -802,9 +802,9 @@ NS.addLang('te', {
   "rx.v.doc": "ఈ బిల్లులో షెడ్యూల్ మందు ఉంది: డాక్టర్ పేరు రాయండి.",
   "rx.v.pat": "Schedule H1 అమ్మకానికి రోగి పేరు అవసరం."
 });
-/* Nivesh Sahayak App (Phase 2) */
+/* NSBiz (Phase 2) */
 NS.addLang("te", {
-  "app.title": "Nivesh Sahayak App",
+  "app.title": "NSBiz",
   "app.home": "డాష్‌బోర్డ్",
   "app.sales": "అమ్మకాలు",
   "app.buy": "కొనుగోళ్లు, ఖర్చులు",
@@ -984,7 +984,7 @@ NS.addLang("te", {
   "app.advh": "బిల్లు కంటే ముందు వచ్చిన లేదా ఇచ్చిన డబ్బు.",
   "app.intro": "మీ బిల్లులు, వచ్చిన, ఇచ్చిన డబ్బు, కొనుగోళ్లు, ఖర్చులు, బాకీలు అన్నీ ఒకే చోట. ఇది ఉచిత డాక్యుమెంట్ మేకర్ల (బిల్లింగ్, కొటేషన్, రసీదు మొదలైనవి) అదే సేవ్ చేసిన డేటాను వాడుతుంది, అందుకే అక్కడ చేసిన ప్రతి బిల్లు ఇక్కడ కనిపిస్తుంది. ఉచితం, లాగిన్ లేదు, డేటా ఈ బ్రౌజర్‌లోనే ఉంటుంది.",
   "app.ab.h": "చిన్న బిజినెస్‌కి యాప్ ఏం చేస్తుంది",
-  "app.ab.p": "చాలా ఉచిత బిల్ మేకర్లు బిల్లుతో ఆగిపోతాయి. Nivesh Sahayak App ముందుకు వెళ్తుంది: ప్రతి పేమెంట్‌ను అది చెల్లించే బిల్లులకు జోడిస్తుంది, కాబట్టి ఏ కస్టమర్ ఎంత, ఎంత కాలంగా బాకీ ఉన్నారో, మీరు ఎవరికి ఇవ్వాలో ఎప్పుడూ తెలుస్తుంది.",
+  "app.ab.p": "చాలా ఉచిత బిల్ మేకర్లు బిల్లుతో ఆగిపోతాయి. NSBiz ముందుకు వెళ్తుంది: ప్రతి పేమెంట్‌ను అది చెల్లించే బిల్లులకు జోడిస్తుంది, కాబట్టి ఏ కస్టమర్ ఎంత, ఎంత కాలంగా బాకీ ఉన్నారో, మీరు ఎవరికి ఇవ్వాలో ఎప్పుడూ తెలుస్తుంది.",
   "app.ab.1": "డాష్‌బోర్డ్: ఈరోజు, ఈ నెల అమ్మకాలు, రావాల్సింది, ఇవ్వాల్సింది, చేతిలో క్యాష్, బ్యాంక్‌లో డబ్బు.",
   "app.ab.2": "వచ్చిన డబ్బు, ఇచ్చిన డబ్బు: పేమెంట్ ఒకసారి రాసి, అది చెల్లించే బిల్లులను టిక్ చేయండి. కొంచెం-కొంచెం పేమెంట్లు, అడ్వాన్స్‌లు ఆటోమేటిక్‌గా చూసుకుంటుంది, కస్టమర్ కట్ చేసిన TDS కూడా లెక్కలోకి వస్తుంది.",
   "app.ab.3": "బాకీలు, వాటి వయసు: ఎవరు ఎంత బాకీ, 0–30, 31–60, 61–90, 90 రోజుల పైగా అని విభజించి, సిద్ధమైన WhatsApp రిమైండర్‌తో.",
@@ -2263,9 +2263,9 @@ NS.addLang("te", {
   "hs.i.save": "సేవ్",
   "hs.i.saved": "{n} సేవ్ అయింది."
 });
-/* links to the Nivesh Sahayak App */
+/* links to NSBiz */
 NS.addLang("te", {
-  "nav.app": "Nivesh Sahayak యాప్",
+  "nav.app": "NSBiz",
   "hub.app": "బాకీలు, వచ్చిన మరియు ఇచ్చిన డబ్బు, కొనుగోళ్లు, ఖర్చులు, పార్టీ స్టేట్‌మెంట్ అన్నీ ఒకే చోట",
   /* the app shell: documents open inside the app */
   "app.newdoc": "కొత్త డాక్యుమెంట్",
@@ -2322,7 +2322,7 @@ NS.addLang("te", {
   "prl.saved": "{n} ఐటమ్‌ల ధరలు సేవ్ అయ్యాయి.",
   "prl.cost": "ఖాళీ కొన్న ధరలను పర్చేస్ బిల్‌ల నుండి నింపండి",
   "prl.costed": "{n} ఐటమ్‌లకు కొన్న ధర నింపాం. చెక్ చేసి ధరలు సేవ్ చేయండి నొక్కండి.",
-  "prl.nocost": "సరిపోలే పర్చేస్ బిల్‌లు దొరకలేదు. Nivesh Sahayak App‌లో సేవ్ చేసిన పర్చేస్ బిల్‌లు ఇక్కడ వాడబడతాయి.",
+  "prl.nocost": "సరిపోలే పర్చేస్ బిల్‌లు దొరకలేదు. NSBiz‌లో సేవ్ చేసిన పర్చేస్ బిల్‌లు ఇక్కడ వాడబడతాయి.",
   "prl.all": "అన్నిటికీ టిక్",
   "prl.nonesel": "అన్ని టిక్‌లు తీసేయండి",
   "prl.h.add": "ఐటమ్ జోడించండి",
@@ -2421,7 +2421,7 @@ NS.addLang("te", {
   "b1.rep_no": "మళ్లీ వద్దు",
   "b1.rep_m": "ప్రతి నెల",
   "b1.rep_q": "ప్రతి త్రైమాసికం",
-  "b1.reph": "దానంతట ఏదీ తయారవదు: Nivesh Sahayak యాప్‌లో వేయాల్సిన కాపీల జాబితా వస్తుంది, మీరు ట్యాప్ చేసి వేస్తారు.",
+  "b1.reph": "దానంతట ఏదీ తయారవదు: NSBiz‌లో వేయాల్సిన కాపీల జాబితా వస్తుంది, మీరు ట్యాప్ చేసి వేస్తారు.",
   "b1.repuntil": "ఎప్పటి వరకు",
   "b1.repuh": "ఎప్పుడూ కొనసాగించాలంటే ఖాళీగా వదలండి.",
   "b1.rep_t": "మళ్లీ వచ్చే బిల్లులు",
@@ -2477,7 +2477,7 @@ NS.addLang("te", {
   "b1.pin_t": "PIN లాక్",
   "b1.pin_on": "ఆన్",
   "b1.pin_off": "ఆఫ్",
-  "b1.pin_p": "PIN పెడితే మీ డేటా ఈ స్క్రీన్‌పై, Nivesh Sahayak యాప్‌లో PIN వేసే వరకు దాగి ఉంటుంది. ఇది స్క్రీన్ లాక్, ఎన్‌క్రిప్షన్ కాదు: డేటా మారదు, డాక్యుమెంట్ సైట్లు బిల్ నింపడానికి దాన్ని చదవగలవు. PIN మర్చిపోతే తిరిగి రావడానికి ఒకటే దారి: ఈ బ్రౌజర్ డేటాను తుడిచి బ్యాకప్ ఫైల్ రీస్టోర్ చేయండి.",
+  "b1.pin_p": "PIN పెడితే మీ డేటా ఈ స్క్రీన్‌పై, NSBiz‌లో PIN వేసే వరకు దాగి ఉంటుంది. ఇది స్క్రీన్ లాక్, ఎన్‌క్రిప్షన్ కాదు: డేటా మారదు, డాక్యుమెంట్ సైట్లు బిల్ నింపడానికి దాన్ని చదవగలవు. PIN మర్చిపోతే తిరిగి రావడానికి ఒకటే దారి: ఈ బ్రౌజర్ డేటాను తుడిచి బ్యాకప్ ఫైల్ రీస్టోర్ చేయండి.",
   "b1.pin_cur": "ప్రస్తుత PIN",
   "b1.pin_new": "కొత్త PIN (4 నుండి 8 అంకెలు)",
   "b1.pin_new2": "కొత్త PIN",
@@ -5043,7 +5043,7 @@ NS.addLang("te", {
   "am.vis": "Service visits",
   "am.unp": "Unpaid",
   "am.all": "All contracts",
-  "am.invh": "Each billing period becomes one ordinary invoice, dated today. It shows in the Nivesh Sahayak App dues, GST and reports. Nothing is made until you tap.",
+  "am.invh": "Each billing period becomes one ordinary invoice, dated today. It shows in NSBiz dues, GST and reports. Nothing is made until you tap.",
   "am.make": "Make invoice",
   "am.makeall": "Make all {n} invoices",
   "am.made": "{n} invoice(s) made.",
@@ -5352,7 +5352,7 @@ NS.addLang("te", {
   "mk.cust": "Customer",
   "mk.amount": "Amount",
   "mk.booksh": "Add this payout to your books (optional)",
-  "mk.booksp": "The marketplace is shown as a customer in the free Nivesh Sahayak App: the money received, the fees (as an expense), TCS and TDS clear what it owes you. Your invoices and credit notes must be in the books already.",
+  "mk.booksp": "The marketplace is shown as a customer in the free NSBiz: the money received, the fees (as an expense), TCS and TDS clear what it owes you. Your invoices and credit notes must be in the books already.",
   "mk.party": "Marketplace as a customer",
   "mk.mode": "Money came into",
   "mk.save": "Save this check",
@@ -6687,7 +6687,7 @@ NS.addLang("te", {
 NS.addLang("te", {
   "sum.gst": "GST {v}",
   "gf.ph": "Legal Name of Business … Trade Name … Principal Place of Business …",
-  "app.title": "Nivesh Sahayak యాప్",
+  "app.title": "NSBiz",
   "app.dr": "Dr",
   "app.cr": "Cr",
   "app.waupi": "\nUPI: {u}",
@@ -6983,7 +6983,7 @@ NS.addLang("te", {
   "mk.cust": "కస్టమర్",
   "mk.amount": "మొత్తం",
   "mk.booksh": "ఈ పేఅవుట్‌ను మీ పుస్తకాలలో జోడించండి (ఐచ్ఛికం)",
-  "mk.booksp": "ఉచిత Nivesh Sahayak యాప్‌లో మార్కెట్‌ప్లేస్ ఒక కస్టమర్‌గా చూపబడుతుంది: వచ్చిన డబ్బు, ఫీజులు (ఖర్చుగా), TCS మరియు TDS అది మీకు ఇవ్వాల్సిన దాన్ని క్లియర్ చేస్తాయి. మీ ఇన్‌వాయిస్‌లు మరియు క్రెడిట్ నోట్‌లు ఇప్పటికే పుస్తకాలలో ఉండాలి.",
+  "mk.booksp": "ఉచిత NSBiz‌లో మార్కెట్‌ప్లేస్ ఒక కస్టమర్‌గా చూపబడుతుంది: వచ్చిన డబ్బు, ఫీజులు (ఖర్చుగా), TCS మరియు TDS అది మీకు ఇవ్వాల్సిన దాన్ని క్లియర్ చేస్తాయి. మీ ఇన్‌వాయిస్‌లు మరియు క్రెడిట్ నోట్‌లు ఇప్పటికే పుస్తకాలలో ఉండాలి.",
   "mk.party": "కస్టమర్‌గా మార్కెట్‌ప్లేస్",
   "mk.mode": "డబ్బు దేనిలోకి వచ్చింది",
   "mk.save": "ఈ చెక్ సేవ్ చేయండి",
@@ -7410,7 +7410,7 @@ NS.addLang("te", {
   "am.vis": "సర్వీస్ విజిట్‌లు",
   "am.unp": "చెల్లించనివి",
   "am.all": "అన్ని కాంట్రాక్ట్‌లు",
-  "am.invh": "ప్రతి బిల్లు కాలం ఈరోజు తేదీతో ఒక సాధారణ ఇన్‌వాయిస్ అవుతుంది. ఇది Nivesh Sahayak యాప్ బాకీలు, GST, రిపోర్ట్‌లలో కనిపిస్తుంది. మీరు ట్యాప్ చేసే వరకు ఏదీ తయారు కాదు.",
+  "am.invh": "ప్రతి బిల్లు కాలం ఈరోజు తేదీతో ఒక సాధారణ ఇన్‌వాయిస్ అవుతుంది. ఇది NSBiz బాకీలు, GST, రిపోర్ట్‌లలో కనిపిస్తుంది. మీరు ట్యాప్ చేసే వరకు ఏదీ తయారు కాదు.",
   "am.make": "ఇన్‌వాయిస్ చేయండి",
   "am.makeall": "అన్ని {n} ఇన్‌వాయిస్‌లు చేయండి",
   "am.made": "{n} ఇన్‌వాయిస్(లు) తయారయ్యాయి.",
@@ -8926,7 +8926,7 @@ NS.addLang("te", {
 
 /* Auto save written by the App (15 Nov 2026) */
 NS.addLang("te", {
-  "oa.away2": "Auto save is set up in the Nivesh Sahayak App: the button opens the App in a new tab. Choose the folder there once. While the App is open, every save on any Nivesh Sahayak tool updates the file, and the App catches up each time you open it.",
+  "oa.away2": "Auto save is set up in NSBiz: the button opens the App in a new tab. Choose the folder there once. While the App is open, every save on any Nivesh Sahayak tool updates the file, and the App catches up each time you open it.",
   "oa.here": "This page writes the file: keep it open (or open it now and then) and every save on any Nivesh Sahayak tool, in any tab, is added to the file.",
   "oa.by": "saved by {host}",
   "oa.open": "Open the App to change it",
@@ -8936,7 +8936,7 @@ NS.addLang("te", {
 
 /* Safari and iPhone: one store per website, use the App (15 Nov 2026) */
 NS.addLang("te", {
-  "wk.note": "On an iPhone, iPad or Mac Safari, each Nivesh Sahayak website keeps its own records. To keep all your bills, customers and accounts together, use this tool inside the Nivesh Sahayak App.",
+  "wk.note": "On an iPhone, iPad or Mac Safari, each Nivesh Sahayak website keeps its own records. To keep all your bills, customers and accounts together, use this tool inside NSBiz.",
   "wk.open": "Open it in the App",
   "wk.ok": "Got it"
 });
@@ -9504,7 +9504,7 @@ NS.addLang("te", {
   "dy.adv": "Advance already given or taken (₹)",
   "dy.advh": "Shown on the statement. Record the advance itself as money paid or received in the App.",
   "dy.paid": "Paid (farmer) or received (customer) now (₹)",
-  "dy.paidh": "Booked in the Nivesh Sahayak App with this passbook.",
+  "dy.paidh": "Booked in NSBiz with this passbook.",
   "dy.pmode": "Mode",
   "dy.state": "Passbook",
   "dy.s.open": "Open",
@@ -9609,7 +9609,7 @@ NS.addLang("te", {
   "sq.owedt": "{n} subscribers owe {v}",
   "sq.over": "{n} days overdue",
   "sq.openinv": "Open bill",
-  "sq.unph": "Payments recorded in the Nivesh Sahayak App are taken into account.",
+  "sq.unph": "Payments recorded in NSBiz are taken into account.",
   "sq.excelo": "Download list of unpaid bills",
   "sq.excel": "Download list of subscribers",
   "sq.nosub": "No subscribers yet.",
@@ -9758,7 +9758,7 @@ NS.addLang("te", {
   "tp.r.drvh": "Cash with driver = cash given minus what he spent. A minus figure means you owe him. Batta is shown apart and is already a cost of the trip.",
   "tp.r.tripdue": "On trips",
   "tp.r.lrdue": "On lorry receipts",
-  "tp.r.partyh": "Trips: freight not yet received. Lorry receipts: the balance in your Nivesh Sahayak App books, so money you record there is taken off. A lorry receipt that is on a trip is counted once, through the trip.",
+  "tp.r.partyh": "Trips: freight not yet received. Lorry receipts: the balance in your NSBiz books, so money you record there is taken off. A lorry receipt that is on a trip is counted once, through the trip.",
   "tp.nodues": "No freight is due.",
   "tp.nodata": "Nothing in this period.",
   "tp.docsh2": "Vehicle papers and driver licences that are over or end within 30 days. The WhatsApp button gives a message you can send to the driver or keep for yourself.",
@@ -9836,7 +9836,7 @@ NS.addLang("te", {
   "ts.p.n": "{n} sheet(s)",
   "ts.p.billed": "Billed",
   "ts.p.due": "Due",
-  "ts.p.h": "Due is from your Nivesh Sahayak App books, so money you record there is taken off. COD to hand over is from the sheets.",
+  "ts.p.h": "Due is from your NSBiz books, so money you record there is taken off. COD to hand over is from the sheets.",
   "ts.s.trips": "{n} trip(s), {k} km",
   "ts.s.book": "Fares {v}",
   "ts.s.svc": "Service charges {v}",
@@ -9993,4 +9993,16 @@ NS.addLang("te", {
   "desk.kg_new": "New documents",
   "desk.k_what": "What it opens",
   "desk.k_key": "Key"
+});
+/* Strict business filter */
+NS.addLang("te", {
+  "desk.offkey": "Switched off for your type of business. Turn it on in Settings › Additional features."
+});
+/* The App is called NSBiz */
+NS.addLang("te", {
+  "nav.app": "NSBiz"
+});
+/* Shortcuts page link */
+NS.addLang("te", {
+  "desk.k_full": "All keys explained (to print)"
 });

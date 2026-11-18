@@ -1,5 +1,5 @@
 /* NS Tally: saved documents (or an Excel register) become TallyPrime import files: ledgers (All Masters) and vouchers.
-   The entries come from NSBooks.postings (books.js), the same double entry the Nivesh Sahayak App shows, so Tally gets
+   The entries come from NSBooks.postings (books.js), the same double entry NSBiz shows, so Tally gets
    exactly our books. Only tags shown in TallyPrime's own help are used (help.tallysolutions.com: "Sample XML" and
    "XML Integration", read 5 Nov 2026): ENVELOPE / HEADER / TALLYREQUEST Import Data / IMPORTDATA / REQUESTDESC / REPORTNAME
    (All Masters | Vouchers) / REQUESTDATA / TALLYMESSAGE; LEDGER NAME, PARENT, MAILINGNAME.LIST, ADDRESS.LIST, PINCODE,

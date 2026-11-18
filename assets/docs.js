@@ -67,7 +67,7 @@
   function tcsNature(sec) { return TCS_NATURE.filter(function (n) { return n[0] === String(sec || '').trim(); })[0]; }
   function pk(v, kind) { return v && typeof v === 'object' ? v[kind] : v; }
   var BILLING = /^(localhost|127\.0\.0\.1)$/.test(location.hostname) ? 'http://localhost:8861/' : 'https://billing.niveshsahayak.in/';
-  /* to another maker: inside the Nivesh Sahayak App (inapp.js) the App opens it on its own screen */
+  /* to another maker: inside NSBiz (inapp.js) the App opens it on its own screen */
   function goTo(url) { if (!(NS.appGo && NS.appGo(url))) location.href = url; }
 
   /* words printed on the document (English only, readable by every buyer, bank and tax officer) */
@@ -1113,7 +1113,7 @@
     }).then(function () {
       var qs = new URLSearchParams(location.search), from = qs.get('from'), open = qs.get('open'), copy = qs.get('copy');
       if (NS.leaving) return;   /* this page is moving to the visitor's language page, which reads ?from= itself */
-      /* ?open=<id>: the Nivesh Sahayak App opens a saved document here to edit, print or share */
+      /* ?open=<id>: NSBiz opens a saved document here to edit, print or share */
       if (open) {
         history.replaceState(null, '', location.pathname + location.hash);
         return NSStore.get('doc', open).then(function (rec) { if (rec && (rec.type || 'invoice') === type && T.split && T.kinds.indexOf(rec.kind) < 0 && T.split[rec.kind]) { location.replace((NS.siteHref ? NS.siteHref(T.split[rec.kind]) : kindSite(T.split[rec.kind])) + '?open=' + encodeURIComponent(open)); return; } if (rec && (rec.type || 'invoice') === type) { openDoc(rec, false); render(); } else NS.toast(t('conv.none'), 'bad'); }).catch(function () {});
