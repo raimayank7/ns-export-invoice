@@ -126,7 +126,7 @@
         if (a === 'p:unknown') a = 'p:unknown payee';
         return { a: a, v: r2(l.dr - l.cr) };
       });
-      if (nm) parties[pk] = Object.assign(parties[pk] || {}, { name: nm.trim(), debtor: !!DEBTOR[R], from: d.buyer });
+      if (nm) parties[pk] = Object.assign(parties[pk] || {}, { name: nm.trim(), debtor: !!DEBTOR[R] || !!(parties[pk] && parties[pk].debtor), from: d.buyer });   /* F2-15: a customer stays under Sundry Debtors even when a later write-off or bounced cheque is not a sale */
       if (lines.some(function (l) { return l.a === 'p:cash customer'; })) parties['p:cash customer'] = { name: 'Cash Customer', debtor: true };
       if (lines.some(function (l) { return l.a === 'p:unknown payee'; })) parties['p:unknown payee'] = { name: 'Unknown Payee', debtor: false };
       var nl = net(lines);

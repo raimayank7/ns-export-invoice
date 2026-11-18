@@ -9763,3 +9763,8 @@ NS.addLang("ur",{
  "app.limits": "حدود کا مددگار"
 });
 NS.addLang("ur",{"c.inv2":"اس سے پہلے ہی انوائس {no} بن چکا ہے۔ اس سے ایک اور انوائس بنائیں؟"});
+NS.addLang("ur",{"w5.rentbiz":"Rent goes into your accounts only for one of your businesses. Choose the landlord from your businesses (My data › Businesses) or untick “Add to my accounts”. “{n}” is not one of them."});
+NS.addLang("ur",{"doc.expinv": "ایکسپورٹ انوائس", "docs.expinv": "ایکسپورٹ انوائس", "Doc.expinv": "ایکسپورٹ انوائس", "app.d_expinv": "ایکسپورٹ انوائس"});
+NS.addLang("ur",{"b1.resdup": "نمبر {no} اب اسی سیریز اور سال کے کسی اور دستاویز میں لگا ہے، اس لیے یہ دوسری کاپی بن کر واپس نہیں آ سکتا۔ پہلے اس دستاویز کا نمبر بدلیں، پھر اسے ریسٹور کریں۔"});
+NS.addLang("ur",{"ax.k_pf": "PF (پراویڈنٹ فنڈ) جمع کیا", "ax.k_esi": "ESI جمع کیا", "ax.k_pt": "پروفیشنل ٹیکس جمع کیا"});
+NS.addLang("ur",{"ax.kh_pf": "PF and EPS cut from salaries (and the employer share), paid by ECR challan on the EPFO portal.", "ax.kh_esi": "ESI cut from salaries and the employer share, paid on the ESIC portal.", "ax.kh_pt": "Professional tax cut from salaries, paid to the state."});

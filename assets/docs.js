@@ -134,7 +134,7 @@
   function blank() {
     var c = dset();
     return {
-      type: type, kind: T.kind0 || (T.kinds.indexOf(c.kind) >= 0 ? c.kind : T.kinds[0]), no: '', deliv: '', orig: { no: '', date: '' }, reason: T.kind0 === 'debit' && !/[?&]side=purchase/.test(location.search) ? 'price' : 'ret', side: type === 'note' ? (/[?&]side=purchase/.test(location.search) ? 'purchase' : 'sale') : undefined, tr: { veh: '', tname: '', lr: '' },
+      type: type === 'exp' ? 'expinv' : type, kind: T.kind0 || (T.kinds.indexOf(c.kind) >= 0 ? c.kind : T.kinds[0]), no: '', deliv: '', orig: { no: '', date: '' }, reason: T.kind0 === 'debit' && !/[?&]side=purchase/.test(location.search) ? 'price' : 'ret', side: type === 'note' ? (/[?&]side=purchase/.test(location.search) ? 'purchase' : 'sale') : undefined, tr: { veh: '', tname: '', lr: '' },
       paper: c.paper || T.paper || 'a4', design: c.design || 'classic', copies: 1, date: NS.today(), due: '', pos: '', rc: !!T.rcFixed, recv: '', ref: '',
       seller: { name: '', addr: '', city: '', pin: '', state: '', gstin: '', phone: '', email: '', logo: '', sign: '', bankName: '', bankAcc: '', bankIfsc: '', bankBranch: '', upi: '' },
       buyer: { name: '', addr: '', city: '', pin: '', state: '', gstin: '', phone: '' }, ship: null, einv: null, irn: null,
@@ -156,6 +156,7 @@
       if (!it.desc && !rate) return;
       var gross = q * rate, disc = gross * num(it.disc) / 100, taxable = r2(gross - disc);
       var g = noTax ? 0 : num(it.gst), tax = r2(taxable * g / 100);
+      if (intra && !noTax) tax = r2(r2(tax / 2) * 2);   /* CGST and SGST: two equal halves of the line's GST, each to the paisa (F3-6) */
       tt.rows.push({ it: it, taxable: taxable, g: g, tax: tax, amount: r2(taxable + tax) });
       tt.taxable += taxable;
       if (!noTax) {
@@ -171,6 +172,7 @@
     (d.charges || []).forEach(function (c) {
       var amt = r2(num(c.amt)); if (!amt) return;
       var own = !(c.gst === '' || c.gst == null || c.gst === 'main'), g = noTax ? 0 : own ? num(c.gst) : main ? main.g : 0, tax = r2(amt * g / 100);
+      if (intra && !noTax) tax = r2(r2(tax / 2) * 2);
       tt.charges.push({ c: c, amt: amt, g: g, tax: tax, amount: r2(amt + tax) });
       tt.taxable += amt;
       if (!noTax) {
@@ -180,9 +182,8 @@
         s2.taxable += amt; s2.tax += tax;
       }
     });
-    /* CGST + SGST add up to exactly the tax on the lines (round C: 31.23 + 31.23 against a line tax of 62.45) */
-    var txs = r2(tt.cgst + tt.sgst);
-    tt.taxable = r2(tt.taxable); tt.cgst = r2(txs / 2); tt.sgst = r2(txs - tt.cgst); tt.igst = r2(tt.igst);
+    /* each line's tax is already two equal halves (above), so CGST = SGST and they add up to the lines' tax */
+    tt.taxable = r2(tt.taxable); tt.cgst = r2(tt.cgst); tt.sgst = r2(tt.sgst); tt.igst = r2(tt.igst);
     tt.tcs = TCS_TYPES[type] && d.tcs && d.tcs.on ? r2((d.tcs.base === 'taxable' ? tt.taxable : tt.taxable + tt.cgst + tt.sgst + tt.igst) * NSBooks.tcsRate(d) / 100) : 0;
     var total = r2(tt.taxable + tt.cgst + tt.sgst + tt.igst + tt.tcs);
     tt.roundOff = d.round ? r2(Math.round(total) - total) : 0;
@@ -783,10 +784,11 @@
 
   /* ---------- save, masters ---------- */
   function key(s) { return String(s || '').trim().toLowerCase(); }
+  function keepFull(o) { var r = {}; Object.keys(o || {}).forEach(function (k) { if (o[k] !== '' && o[k] != null) r[k] = o[k]; }); return r; }   /* F6-4: an empty box on a document never wipes a saved value */
   function upsert(store, match, obj) {
     return NSStore.list(store).then(function (all) {
       var hit = all.filter(match)[0];
-      return NSStore.put(store, Object.assign(hit || {}, obj));
+      return NSStore.put(store, Object.assign(hit || {}, hit ? keepFull(obj) : obj));
     });
   }
   function regKind() {
@@ -844,7 +846,10 @@
     });
   }
   function maxUnit(tt, withGst) { return Math.max.apply(null, [0].concat(tt.rows.map(function (r) { return (withGst ? r.amount : r.taxable) / (num(r.it.qty) || 1); }))); }
-  function save() {
+  /* one save at a time: a double click or Ctrl+S pressed twice saved the document twice with one number (F3-1) */
+  var saving = null;
+  function save() { if (saving) return saving; saving = Promise.resolve(save0()); var free = function () { saving = null; }; saving.then(free, free); return saving; }
+  function save0() {
     var probs = validate();
     var tt0 = totals(doc);
     var tn0 = TCS_TYPES[type] && doc.tcs && doc.tcs.on && tcsNature(doc.tcs.sec), asks = [];
@@ -873,7 +878,7 @@
       var dup = all.filter(function (d) { return d.id !== editingId && d.type === doc.type && key(d.no) === key(doc.no) && NS.fy(d.date) === NS.fy(doc.date) && key(d.seller && d.seller.name) === key(doc.seller.name); })[0];
       if (dup && !editingId && doc.no === lastAuto) { renumMsg = NS.t('c.renum', { a: doc.no, b: '' }); var was = doc.no; return suggestNumber(true).then(function () { renumMsg = NS.t('c.renum', { a: was, b: doc.no }); }); }   /* P3-6 */
       /* a number typed by hand that another bill of this series already has: a tax invoice, cash memo or note must not repeat (Rule 46), so it is refused */
-      if (dup && /^(invoice|cashmemo|note)$/.test(doc.type)) { NS.toast(NS.t('app.qe_dup', { no: doc.no }), 'bad'); var ni = $('#d-no', root); if (ni) ni.focus(); throw new Error('cancel'); }
+      if (dup && /^(invoice|cashmemo|note|expinv)$/.test(doc.type)) { NS.toast(NS.t('app.qe_dup', { no: doc.no }), 'bad'); var ni = $('#d-no', root); if (ni) ni.focus(); throw new Error('cancel'); }
       if (dup) return askBox(tw(T.valid ? 'c.qdup' : 'c.dup', { no: doc.no })).then(function (ok) { if (!ok) throw new Error('cancel'); });
     }).then(function () {
       var s = doc.seller, b = doc.buyer, jobs = [];
@@ -890,7 +895,9 @@
         jobs.push(NSStore.list('item').then(function (all) {
           var hit = all.filter(function (x) { return key(x.desc) === key(it.desc); })[0], o = { desc: String(it.desc).trim(), hsn: it.hsn, unit: it.unit };
           if (!badGst(it.gst)) o.gst = it.gst;
-          if (buying()) { o.prate = it.rate; if (!hit) o.rate = ''; }
+          /* a credit or debit note's rate is a difference or a return price, never the item's price (F4-5) */
+          if (type === 'note') { if (!hit) { o.rate = ''; } }
+          else if (buying()) { o.prate = it.rate; if (!hit) o.rate = ''; }
           else if (!hit || (num(it.rate) !== num(hit.wrate) && num(it.rate) !== num(hit.prate))) o.rate = it.rate;
           return NSStore.put('item', Object.assign(hit || {}, o));
         }));
@@ -955,6 +962,7 @@
   window.addEventListener('focus', syncSaved);
   function openDoc(rec, asCopy) {
     doc = Object.assign(blank(), JSON.parse(JSON.stringify(rec)));
+    if (doc.type === 'exp') doc.type = 'expinv';
     delete doc.id; delete doc.created; delete doc.updated; delete doc.total;
     editingId = asCopy ? null : rec.id;
     if (asCopy) { doc.date = NS.today(); doc.due = ''; doc.valid = ''; doc.status = blank().status; doc.irn = null; doc.rec = null; delete doc.fromId; delete doc.invNo; delete doc.recOf; delete doc.recFor; delete doc.sample; }
@@ -1009,8 +1017,8 @@
           else if (act === 'paid') { rec.status = rec.status === 'paid' ? 'unpaid' : 'paid'; return NSStore.put('doc', rec).then(function () { if (editingId === id) { doc.status = rec.status; fillForm(); draw(); } renderHistory(); }); }
           else if (act === 'log') NS.showLog(id, t('b1.changesof', { no: rec.no }));
           else if (act === 'del' && NS.closedMsg && NS.closedMsg(rec.seller && rec.seller.name, rec.date)) NS.toast(NS.closedMsg(rec.seller && rec.seller.name, rec.date), 'bad');   /* closed year (docmore.js) */
-          else if (act === 'del' && confirm(t('b1.cdel', { x: rec.no }))) {
-            return NSStore.del('doc', id).then(function () { if (editingId === id) { editingId = null; setStatus(); } renderHistory(); NS.toast(t('b1.binned')); }, function (err) { NS.toast(err.message, 'bad'); });
+          else if (act === 'del') {
+            return (NS.ask ? NS.ask(t('b1.cdel', { x: rec.no })) : Promise.resolve(window.confirm(t('b1.cdel', { x: rec.no })))).then(function (ok) { if (ok) return NSStore.del('doc', id).then(function () { if (editingId === id) { editingId = null; setStatus(); } renderHistory(); NS.toast(t('b1.binned')); }, function (err) { NS.toast(err.message, 'bad'); }); });
           }
         });
       });
@@ -1109,6 +1117,8 @@
     root = $('#tool');
     if (!root) return;
     type = root.getAttribute('data-doc') || 'invoice';
+    /* F3-10: export invoices saved earlier as 'exp' (the App's expense type) move to 'expinv' once */
+    if (type === 'exp' && window.NSBooks) NSStore.list('doc').then(function (L) { (L || []).forEach(function (d) { if (d.type === 'exp' && NSBooks.isExpInv(d)) { d.type = 'expinv'; NSStore.put('doc', d); } }); }).catch(function () {});
     T = Object.assign({}, TYPES[type] || TYPES.invoice);
     /* one engine type can serve two sites: the estimate site opens the quotation type on its Estimate kind */
     var k0 = root.getAttribute('data-kind'); if (k0 && T.kinds.indexOf(k0) >= 0) T.kind0 = k0;

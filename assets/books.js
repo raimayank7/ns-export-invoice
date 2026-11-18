@@ -57,17 +57,30 @@
   function payAcct(d, out) { return d.mode === 'cheque' && d.chq && d.chq.st && d.chq.st !== 'ok' ? (out ? 'chq-out' : 'chq-in') : moneyAcct(d.mode); }
 
   /* tax split of an item document (same rules as docs.js totals) */
+  function isExpInv(d) { return !!d && (d.type === 'expinv' || d.type === 'exp' && Array.isArray(d.items) && !!d.seller && !d.app); }
+  var EXPSUP = { expwp: 'EXPWP', expwop: 'EXPWOP', sezwp: 'SEZWP', sezwop: 'SEZWOP' };
+  /* an export / SEZ invoice read as a tax invoice with its supply type (GSTR-1 6A / SEZ, GSTR-3B 3.1(b)) */
+  function asInvoice(d) {
+    if (!isExpInv(d)) return d;
+    var c = Object.assign({}, d, { type: 'invoice', kind: 'tax', expKind: d.kind });
+    c.einv = Object.assign({}, d.einv || {}, { sup: (d.einv && d.einv.sup && d.einv.sup !== 'B2B') ? d.einv.sup : EXPSUP[d.kind] || 'EXPWOP' });
+    if (/^exp/.test(d.kind || 'exp') && !c.pos) c.pos = '96';
+    return c;
+  }
+  /* money taken on a hotel stay, job card, garage job, bilty...: the advance, or the whole bill when it is marked paid (F6-9) */
+  function hotelPaid(d, total) { if (!d.type || /^(invoice|cashmemo|note)$/.test(d.type) || d.status === 'paid' || d.paidBy) return 0;   /* paid by the bill's own status or a linked receipt: counted there */ return d.paid === 'paid' || d.status2 === 'paid' ? r2(total) : r2(Math.min(num(d.adv), total)); }
   function itemTotals(d) {
     var noTax = d.kind === 'supply' || d.kind === 'plain' || d.withGst === false || d.type === 'pbill' && d.noGst;
     /* a purchase bill comes from the supplier (buyer field) to us (seller field) */
     var buy = d.type === 'pbill', origin = buy ? d.buyer && d.buyer.state : d.seller && d.seller.state;
     var dest = buy ? d.seller && d.seller.state : d.pos || d.buyer && d.buyer.state || origin;
     origin = origin || dest;
-    var intra = !origin || !dest || origin === dest, o = { taxable: 0, cgst: 0, sgst: 0, igst: 0 };
+    var intra = (!origin || !dest || origin === dest || d.type === 'hotel') && !isExpInv(d), o = { taxable: 0, cgst: 0, sgst: 0, igst: 0 };   /* hotel: place of supply is the hotel (F6-7) */
     (d.items || []).forEach(function (it) {
       var q = it.qty === '' || it.qty == null ? 1 : num(it.qty), rate = num(it.rate);
       if (!it.desc && !rate) return;
       var taxable = r2(q * rate - q * rate * num(it.disc) / 100), tax = noTax ? 0 : r2(taxable * num(it.gst) / 100);
+      if (intra) tax = r2(r2(tax / 2) * 2);   /* CGST = SGST = half the line's GST to the paisa: the same rule as the bill, GSTR-1 and the e-invoice (F3-6) */
       o.taxable += taxable;
       if (intra) { o.cgst += tax / 2; o.sgst += tax / 2; } else o.igst += tax;
     });
@@ -76,12 +89,12 @@
     (d.charges || []).forEach(function (c) {
       var amt = r2(num(c.amt)); if (!amt) return;
       var tax = noTax ? 0 : r2(amt * (c.gst === '' || c.gst == null || c.gst === 'main' ? main : num(c.gst)) / 100);
+      if (intra) tax = r2(r2(tax / 2) * 2);
       o.taxable += amt;
       if (intra) { o.cgst += tax / 2; o.sgst += tax / 2; } else o.igst += tax;
     });
     /* CGST + SGST add up to exactly the tax on the lines, split as the printed invoice splits it (docs.js totals): CGST rounded, SGST the rest (P1-21) */
-    var txs = r2(o.cgst + o.sgst);
-    o.taxable = r2(o.taxable); o.cgst = r2(txs / 2); o.sgst = r2(txs - o.cgst); o.igst = r2(o.igst);
+    o.taxable = r2(o.taxable); o.cgst = r2(o.cgst); o.sgst = r2(o.sgst); o.igst = r2(o.igst);
     /* TCS (income-tax, collected by the seller): on the total with GST or on the taxable value, as chosen on the bill */
     o.tcs = d.tcs && d.tcs.on ? r2((d.tcs.base === 'taxable' ? o.taxable : o.taxable + o.cgst + o.sgst + o.igst) * tcsRate(d) / 100) : 0;
     var total = r2(o.taxable + o.cgst + o.sgst + o.igst + o.tcs);
@@ -145,7 +158,8 @@
       case 'voucher': return d.forBill ? 'out' : 'outexp';
       case 'self': return 'buy';
       case 'pbill': return d.kind === 'return' ? 'pret' : 'buy';
-      case 'exp': return 'exp';
+      case 'expinv': return 'sale';   /* export / SEZ invoice (F3-10) */
+      case 'exp': return isExpInv(d) ? 'sale' : 'exp';
       case 'ob': return 'ob';
       case 'contra': return 'contra';
       case 'jv': return 'jv';
@@ -187,6 +201,7 @@
       var ex = R === 'sale' ? Math.min(num(d.exch), t.total) : 0;
       if (ex > 0) { dr('purchases', ex); cr(partyName(d) ? P : 'p:cash-customer', ex); }
       if (R === 'sale' && d.status === 'paid' && !d.paidBy) { dr(moneyAcct(d.payMode || 'cash'), r2(t.total - ex)); cr(partyName(d) ? P : 'p:cash-customer', r2(t.total - ex)); }
+      if (R === 'sale') { var ha = hotelPaid(d, t.total); if (ha > 0) { dr(moneyAcct(d.payMode || 'cash'), ha); cr(partyName(d) ? P : 'p:cash-customer', ha); } }   /* hotel: advance at booking / paid at check-out (F6-9) */
     } else if (R === 'in') {
       amt = num(d.amount); var tds = num(d.tds), dsc = num(d.disc);   /* disc: cash discount allowed when the customer paid (WP-3) */
       dr(payAcct(d), amt); dr('tds-receivable', tds); dr(DISC_A, dsc); cr(P, amt + tds + dsc);
@@ -290,7 +305,7 @@
     if (!d || d.type !== 'receipt' || d.kind !== 'adv' || !d.gstAdv || bounced(d)) return null;
     var rt = num(d.rate), tot = r2(num(d.amount));
     if (!rt || !tot) return null;
-    var st = d.seller && d.seller.state, pos = d.pos || st, intra = !d.pos || !st || d.pos === st, tax = r2(tot * rt / (100 + rt));
+    var p0 = (d.pos || (/^\d{2}[A-Z]/.test(String(d.buyer && d.buyer.gstin || '').toUpperCase()) ? String(d.buyer.gstin).slice(0, 2) : '')), st = d.seller && d.seller.state, pos = p0 || st, intra = !p0 || !st || p0 === st, tax = r2(tot * rt / (100 + rt));   /* payer's GSTIN when no place of supply is chosen (F4-6) */
     var o = { rate: rt, total: tot, tax: tax, taxable: r2(tot - tax), pos: pos, intra: intra, cgst: 0, sgst: 0, igst: 0 };
     if (intra) { o.cgst = r2(tax / 2); o.sgst = r2(tax - o.cgst); } else o.igst = tax;
     o.ut = !!(intra && UT[st || pos]);
@@ -425,7 +440,7 @@
     var L = [];
     function add(a, v) { v = r2(num(v)); if (v) L.push([a, v]); }
     if (d.kind === 'gst' || d.kind === 'gstref') GSTH.forEach(function (h) { var g = d.gst && d.gst[h] || {}; add('gstcash-' + h, MINOR.reduce(function (s, m) { return s + num(g[m]); }, 0)); });
-    else if (d.kind === 'tds' || d.kind === 'tcs') { add(d.kind + '-payable', d.tax); add(INTX, d['int']); add(FEEX, d.fee); }
+    else if (/^(tds|tcs|pf|esi|pt)$/.test(d.kind)) { add(d.kind + '-payable', d.tax); add(INTX, d['int']); add(FEEX, d.fee); }   /* pf / esi / pt: from salary slips (F2-17) */
     else add(d.to === 'oca' ? 'oca:advance income tax' : 'drw:drawings', d.amount);
     return { lines: L, total: r2(L.reduce(function (s, l) { return s + l[1]; }, 0)) };
   }
@@ -510,6 +525,8 @@
     var list = inBooks0(docs, biz).filter(function (d) { return !partyKey || partiesOf(d)[partyKey]; });
     var open = {}, byId = {}, credits = [];
     function pk(d) { return key(partyName(d)); }
+    /* F4-10: a refund names the advance receipt it pays back (rv): that advance settles the refund first, not the party's other bills */
+    var refundOf = {}; list.forEach(function (d) { if (role(d) === 'refund' && d.rv) refundOf[pk(d) + '|' + key(d.rv)] = d.id; });
     function bill(d, side, amt) {
       if (amt <= 0) return;
       var b = { id: d.id, no: d.no || d.billNo || '', date: d.date, due: d.due || '', side: side, total: r2(amt), left: r2(amt), type: d.type, kind: d.kind, party: partyName(d), by: [] };
@@ -533,6 +550,7 @@
       if (R === 'sale') {
         t = itemTotals(d).total; bill(d, 'recv', t);
         if (d.status === 'paid' && !d.paidBy) credits.push({ side: 'recv', amt: t, to: d.id, date: d.date });
+        else if (hotelPaid(d, t) > 0) credits.push({ side: 'recv', amt: hotelPaid(d, t), to: d.id, date: d.date });
         else if (num(d.exch) > 0) credits.push({ side: 'recv', amt: Math.min(num(d.exch), t), to: d.id, date: d.date });   /* old gold set off */
       }
       else if (R === 'sdeb') bill(d, 'recv', itemTotals(d).total);
@@ -542,7 +560,7 @@
       }
       else if (R === 'exp' && d.mode === 'credit') bill(d, 'pay', num(d.amount));
       else if (R === 'ob' && d.side !== 'cash' && d.side !== 'bank') bill(d, d.side === 'pay' ? 'pay' : 'recv', num(d.amount));
-      else if (R === 'in') credits.push({ side: 'recv', amt: num(d.amount) + num(d.tds) + num(d.disc), alloc: d.alloc, d: d });
+      else if (R === 'in') credits.push({ side: 'recv', amt: num(d.amount) + num(d.tds) + num(d.disc), alloc: d.alloc, d: d, first: refundOf[pk(d) + '|' + key(d.no)] });
       else if (R === 'wo') credits.push({ side: d.side === 'pay' ? 'pay' : 'recv', amt: num(d.amount), alloc: d.alloc, d: d });
       else if (R === 'refund') bill(d, 'recv', num(d.amount));   /* a refund paid out makes the customer "owe" it back against their advance */
       else if (R === 'sret') credits.push({ side: 'recv', amt: itemTotals(d).total, origNo: d.orig && d.orig.no, d: d });
@@ -555,6 +573,7 @@
       var left = r2(c.amt), p = c.d ? pk(c.d) : null, src = c.d ? { id: c.d.id, no: c.d.no || '', date: c.d.date, type: c.d.type, kind: c.d.kind } : { id: c.to, no: '', date: c.date, type: 'paid' };
       function take(b, max) { var x = r2(Math.min(b.left, max == null ? left : max, left)); if (x > 0) { b.left = r2(b.left - x); left = r2(left - x); b.by.push(Object.assign({ amt: x }, src)); } }
       if (c.to && byId[c.to]) { take(byId[c.to]); return; }
+      if (c.first && byId[c.first]) take(byId[c.first]);
       (c.alloc || []).forEach(function (a) { var b = byId[a.id]; if (b && b.side === c.side) take(b, num(a.amt)); });
       if (c.origNo) (open[p] || []).forEach(function (b) { if (b.side === c.side && key(b.no) === key(c.origNo)) take(b); });
       (open[p] || []).forEach(function (b) { if (left > 0 && b.side === c.side) take(b); });
@@ -746,7 +765,7 @@
   }
 
   var API = { num: num, r2: r2, key: key, role: role, itemTotals: itemTotals, postings: postings, inBooks: inBooks, parties: parties, accounts: accounts,
-    taxPay: taxPay, gstSet: gstSet, provision: provision, salSplit: salSplit, dedKind: dedKind, rentTotal: rentTotal, expAcct: expAcct, loanAcct: loanAcct, schedule: schedule, emiOf: emiOf, loanLeft: loanLeft, addMonths: addMonths, SADV: SADV, advTax: advTax, advAdjust: advAdjust, inBooks0: inBooks0, GADV: GADV, bills: bills, ageing: ageing, overdue: overdue, chargeLines: chargeLines, tcsRate: tcsRate, tcsPan: tcsPan, panOk: panOk, addDays: addDays, mainRate: mainRate, statement: statement, book: book, daysBetween: daysBetween, moneyAcct: moneyAcct, payAcct: payAcct, bounced: bounced, partyName: partyName, partiesOf: partiesOf, jvAcct: jvAcct,
+    taxPay: taxPay, gstSet: gstSet, provision: provision, salSplit: salSplit, dedKind: dedKind, rentTotal: rentTotal, expAcct: expAcct, loanAcct: loanAcct, schedule: schedule, emiOf: emiOf, loanLeft: loanLeft, addMonths: addMonths, SADV: SADV, advTax: advTax, advAdjust: advAdjust, inBooks0: inBooks0, GADV: GADV, bills: bills, ageing: ageing, overdue: overdue, chargeLines: chargeLines, tcsRate: tcsRate, tcsPan: tcsPan, panOk: panOk, addDays: addDays, mainRate: mainRate, statement: statement, book: book, isExpInv: isExpInv, asInvoice: asInvoice, daysBetween: daysBetween, moneyAcct: moneyAcct, payAcct: payAcct, bounced: bounced, partyName: partyName, partiesOf: partiesOf, jvAcct: jvAcct,
     vtype: vtype, ledger: ledger, billwise: billwise, groupsOf: groupsOf, groupChain: groupChain, partyGroup: partyGroup, inGroup: inGroup, groupTree: groupTree,
     partyMoves: partyMoves, groupSummary: groupSummary, groupDues: groupDues, topParties: topParties, BUILTIN: BUILTIN };
   if (typeof module !== 'undefined' && module.exports) module.exports = API; else G.NSBooks = API;

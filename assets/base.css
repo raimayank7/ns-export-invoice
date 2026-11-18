@@ -454,3 +454,9 @@ b.nsb-in:not(.ns-cl .nsb-in) .nsb-b{background:none!important;box-shadow:none!im
 :root[data-theme=dark] .stsheet:not(.lg-paper) .pb{border-top-color:#3A506A}
 :root[data-theme=dark] .stsheet:not(.lg-paper) .ns-cl .cl-by,:root[data-theme=dark] .stsheet:not(.lg-paper) .ns-cl .cl-ns{color:#C9D4E0}
 }
+/* Printed reports and vouchers: the NSBiz credit line sits at the bottom centre of EVERY printed page (owner, 18 Nov 2026).
+   A fixed line repeats on each page; each page of the sheet keeps 18 mm free at its foot for it (box-decoration-break: clone). Documents (.made) already sit at the foot of their sheet. */
+@media print{
+  .stsheet{padding-bottom:18mm!important;-webkit-box-decoration-break:clone;box-decoration-break:clone}
+  .stsheet .ns-cl{position:fixed!important;left:0;right:0;bottom:5mm;margin:0!important;justify-content:center}
+}

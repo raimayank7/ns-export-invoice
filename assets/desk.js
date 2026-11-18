@@ -396,6 +396,18 @@
       if (out.some(function (x) { return x.sec === s; })) return;
       out.push({ g: 'go', sec: s, off: false, t: (a.textContent || '').trim(), k: fName(s) || (m[1] ? 'Alt+' + m[1] : ''), c: m[0] || '', run: function () { location.hash = s; } });
     });
+    /* F1-6: every screen that has a Go to code on the Keyboard shortcuts page works, also when the side menu does not list it
+       (cash and bank books, stock, CA hand-over, e-books...). The account ledger code opens the Chart of Accounts to pick the account. */
+    var have = {}; out.forEach(function (x) { if (x.c) have[x.c] = 1; });
+    Object.keys(SECKEY).forEach(function (s) {
+      var m = SECKEY[s]; if (!m[0] || have[m[0]] || offSec(s)) return;
+      var a = $('#ns-side a[data-sec="' + s + '"]'), lk = 'app.' + s, lbl = a ? (a.textContent || '').trim() : NS.t(lk) !== lk ? NS.t(lk) : s;
+      /* screens that live on another site of ours (F1-6 re-check: they fell back to the Dashboard): open that site inside the App */
+      var OTHER = { stock: 'do/stock/', cadb: 'do/ca/#cadb', cadoc: 'do/ca/#cadoc', cagst: 'do/ca/#cagst' };
+      var to = s === 'acl' ? 'coa' : OTHER[s] || s;
+      have[m[0]] = 1;
+      out.push({ g: 'go', sec: s, off: false, t: s === 'acl' ? NS.t('desk.v_coa') : lbl, k: fName(s) || (m[1] ? 'Alt+' + m[1] : ''), c: m[0], run: function () { if (a && !OTHER[s]) goSec(s); else location.hash = to; } });
+    });
     (app.newDocs ? app.newDocs() : []).forEach(function (n) {
       var m = DOCKEY[n[0]] || [];
       out.push({ g: 'new', off: offSite(n[0]), t: n[1], k: fName(n[0]) || (m[1] ? 'Alt+' + m[1] : ''), c: m[0] || '', run: function () { newDoc(n[0]); } });
@@ -421,7 +433,7 @@
   var FORMS = [['min', 'F6'], ['mout', 'F5'], ['pbill', 'F9'], ['exp', 'F10'], ['pret', ''], ['ob', '']];
   var OWNSITE = { invoice: 'billing', quote: 'quotation', proforma: 'proforma', so: 'sales-order', challan: 'challan', po: 'purchase-order', self: 'self-invoice', note: 'credit-note', cashmemo: 'cash-memo', receipt: 'receipt', voucher: 'voucher', rent: 'rent-receipt', salary: 'salary-slip', petty: 'petty-cash' };
   var DOCWORD = { invoice: 'Doc.invoice', quote: 'Doc.quote', proforma: 'Doc.proforma', so: 'Doc.so', challan: 'Doc.challan', po: 'Doc.po', self: 'Doc.self', note: 'Doc.note', cashmemo: 'Doc.cashmemo', receipt: 'Doc.receipt', voucher: 'Doc.voucher', rent: 'Doc.rent', salary: 'Doc.salary', petty: 'Doc.petty' };
-  function formOf(d) { return d.type === 'contra' ? 'contra' : d.type === 'exp' ? 'exp' : d.type === 'ob' ? 'ob' : d.type === 'pbill' ? (d.kind === 'return' ? 'pret' : 'pbill') : d.type === 'receipt' ? 'min' : 'mout'; }
+  function formOf(d) { return d.type === 'jv' ? 'jv' : (d.type || 'invoice') === 'invoice' ? 'sale' : d.type === 'contra' ? 'contra' : d.type === 'exp' ? 'exp' : d.type === 'ob' ? 'ob' : d.type === 'pbill' ? (d.kind === 'return' ? 'pret' : 'pbill') : d.type === 'receipt' ? 'min' : 'mout'; }
   function siteUrl(site) {
     var a = $('#ns-side a[href*="//' + site + '.niveshsahayak.in"], #ns-side a[data-port][href*="localhost"]');
     var tools = (window.NS_CFG && NS_CFG.tools) || [], x = tools.filter(function (t) { return t[0] === site; })[0];
