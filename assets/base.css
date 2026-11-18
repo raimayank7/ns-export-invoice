@@ -39,6 +39,15 @@ h1,h2,h3,h4{font-family:var(--font-head);line-height:1.25;letter-spacing:-.01em}
 @media (prefers-color-scheme:dark){:root:not([data-theme=light]) .brand .mk-l{display:none}:root:not([data-theme=light]) .brand .mk-d{display:block}}
 :root[data-theme=dark] .brand .mk-l{display:none}:root[data-theme=dark] .brand .mk-d{display:block}
 .brand b{font-family:var(--font-head);font-weight:800;font-size:1.05rem;line-height:1.1;display:block}
+/* the NSBiz wordmark (owner 2026-11-18): style G lettering (Cinzel Decorative) for NS in the emblem's teal, style U: BIZ on a round gold pill (variant 2);
+   as tall as the NS emblem beside it */
+.brand b.nsb{font-family:'Cinzel Decorative',Georgia,'Times New Roman',serif;font-size:46px;font-weight:900;letter-spacing:0;line-height:1;display:inline-flex;align-items:center;white-space:nowrap;overflow-wrap:normal}
+.nsb-n{-webkit-background-clip:text;background-clip:text;color:transparent;padding-block:.06em;background-image:linear-gradient(170deg,#127F74 0%,#063F39 100%);filter:drop-shadow(0 1px 1px rgba(0,0,0,.15))}
+.nsb-b{margin-inline-start:.12em;border-radius:999px;padding:.1em .22em .14em;font-size:.7em;color:#fff;background:linear-gradient(170deg,#E9BC52,#B47F23);box-shadow:0 2px 6px rgba(142,100,25,.35),inset 0 1px 0 rgba(255,255,255,.4)}
+@media (prefers-color-scheme:dark){:root:not([data-theme=light]) .nsb-n{background-image:linear-gradient(170deg,#9AF5E8 0%,#1E9C8E 100%)}:root:not([data-theme=light]) .nsb-b{color:#0E1726;background:linear-gradient(170deg,#FBE29A,#D9A23A);box-shadow:0 2px 8px rgba(0,0,0,.5),inset 0 1px 0 rgba(255,255,255,.5)}}
+:root[data-theme=dark] .nsb-n{background-image:linear-gradient(170deg,#9AF5E8 0%,#1E9C8E 100%)}:root[data-theme=dark] .nsb-b{color:#0E1726;background:linear-gradient(170deg,#FBE29A,#D9A23A);box-shadow:0 2px 8px rgba(0,0,0,.5),inset 0 1px 0 rgba(255,255,255,.5)}
+@media (max-width:1099px){.brand b.nsb{font-size:42px}}@media (max-width:520px){.brand b.nsb{font-size:30px}}@media (max-width:380px){.brand b.nsb{font-size:24px}}
+@media (forced-colors:active){.nsb-n{color:CanvasText;background:none;filter:none}.nsb-b{border:1px solid CanvasText}}
 .brand-ic{display:inline-flex;vertical-align:-.2em;margin-inline-start:.15em;color:var(--accent)}
 .brand-ic::before{content:"";width:1.2em;height:1.2em;background:currentColor;-webkit-mask:var(--i) center/contain no-repeat;mask:var(--i) center/contain no-repeat}
 .vh{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap}

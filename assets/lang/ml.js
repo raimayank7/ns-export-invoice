@@ -10003,3 +10003,10 @@ NS.addLang("ml", {
 NS.addLang("ml", {
   "desk.k_full": "All keys explained (to print)"
 });
+/* Voucher screens */
+NS.addLang("ml", {
+  "app.vs_keys": "Enter: next box · Ctrl+S: save · Esc: back",
+  "app.vs_leave": "You have typed something here that is not saved. Leave without saving?",
+  "app.vs_discard": "Leave without saving",
+  "app.vs_stay": "Stay and finish"
+});

@@ -35,7 +35,7 @@
     $('#desk-ask-m', askDlg).textContent = msg;
     var ok = $('[data-ok]', askDlg), no = $('[data-no]', askDlg);
     ok.textContent = o.ok || T('ok'); no.textContent = o.no || T('cancel');
-    ok.classList.toggle('danger', !!o.danger);
+    ok.classList.toggle('danger', !!o.danger); ok.toggleAttribute('data-noic', !!o.danger); var oi = ok.querySelector('svg'); if (oi && o.danger) oi.remove();
     return new Promise(function (res) {
       var done = false;
       function fin(v) { if (done) return; done = true; ok.onclick = no.onclick = null; askDlg.onclose = null; if (askDlg.open) askDlg.close(); res(v); }
@@ -436,8 +436,16 @@
     if ((e.ctrlKey || e.metaKey) && !e.altKey && !e.shiftKey && k === 'k') { e.preventDefault(); if (cmd && cmd.open) cmd.close(); else palette(); return; }
     if ((e.ctrlKey || e.metaKey) && !e.altKey && k === 'b' && !typing(e)) { e.preventDefault(); toggleMenu(); return; }
     if (e.key === 'Escape' && root.classList.contains('side-open')) { drawer(false); var b = $('[data-side-btn]'); if (b) b.focus(); return; }
-    if ($('dialog[open]')) return;
+    var vs = $('dialog.vs[open]');
+    if ($('dialog[open]') && !(vs && $$('dialog[open]').length === 1)) return;
     var app = A();
+    if (vs) {   /* on a voucher screen: F keys switch to another entry, Alt+G and the Alt letters leave it (asking first) */
+      var fk2 = /^F([3-9]|10)$/.test(e.key) && !e.altKey && !e.shiftKey && !e.metaKey ? FKEY[(e.ctrlKey ? 'Ctrl+' : '') + e.key] : null;
+      var al = e.altKey && !e.ctrlKey && !e.metaKey ? (e.code || '').replace('Key', '').toLowerCase() : '';
+      if (fk2) { e.preventDefault(); if (!e.repeat) NS.vsLeave(function () { fRun(fk2); }); return; }
+      if (al === 'g' || ALTKEY[al] && !/^[nrpbxsq]$/.test(al)) { e.preventDefault(); if (!e.repeat) NS.vsLeave(function () { if (al === 'g') palette(null, 'go'); else { var to = ALTKEY[al]; if (isOff(to.sec || to.site)) NS.toast(NS.t('desk.offkey')); else if (to.sec) goSec(to.sec); else newDoc(to.site); } }); return; }
+      return;
+    }
     /* F keys, Tally style (F8 sale, F9 purchase, F6 receipt, F5 payment, F4 contra, F7 journal, F10 expense, F3 business,
        Ctrl+F8 credit note, Ctrl+F9 debit note): only inside the App, where they never type a letter, so they work in any box */
     if (app && app.biz && /^F([3-9]|10)$/.test(e.key) && !e.altKey && !e.shiftKey && !e.metaKey) {

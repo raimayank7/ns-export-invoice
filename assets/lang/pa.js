@@ -8889,3 +8889,10 @@ NS.addLang("pa", {
 NS.addLang("pa", {
   "desk.k_full": "ਸਾਰੀਆਂ ਕੀਆਂ ਦੀ ਜਾਣਕਾਰੀ (ਪ੍ਰਿੰਟ ਲਈ)"
 });
+/* Voucher screens */
+NS.addLang("pa", {
+  "app.vs_keys": "Enter: ਅਗਲਾ ਬਾਕਸ · Ctrl+S: ਸੇਵ · Esc: ਵਾਪਸ",
+  "app.vs_leave": "ਇੱਥੇ ਤੁਸੀਂ ਕੁਝ ਲਿਖਿਆ ਹੈ ਜੋ ਸੇਵ ਨਹੀਂ ਹੋਇਆ। ਬਿਨਾਂ ਸੇਵ ਕੀਤੇ ਬਾਹਰ ਜਾਣਾ ਹੈ?",
+  "app.vs_discard": "ਬਿਨਾਂ ਸੇਵ ਕੀਤੇ ਬਾਹਰ ਜਾਓ",
+  "app.vs_stay": "ਰੁਕੋ ਅਤੇ ਪੂਰਾ ਕਰੋ"
+});

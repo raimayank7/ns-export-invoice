@@ -8846,3 +8846,10 @@ NS.addLang("hi", {
 NS.addLang("hi", {
   "desk.k_full": "सभी की की जानकारी (प्रिंट के लिए)"
 });
+/* Voucher screens */
+NS.addLang("hi", {
+  "app.vs_keys": "Enter: अगला बॉक्स · Ctrl+S: सेव · Esc: वापस",
+  "app.vs_leave": "यहाँ आपने कुछ लिखा है जो सेव नहीं हुआ। बिना सेव किए बाहर जाएँ?",
+  "app.vs_discard": "बिना सेव किए बाहर जाएँ",
+  "app.vs_stay": "रुकें और पूरा करें"
+});

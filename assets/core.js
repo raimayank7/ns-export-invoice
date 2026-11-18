@@ -494,7 +494,7 @@
         (f.other ? '<p class="note">' + E(T('oa.other', { host: f.other.host || '' })) + '</p>' : '') +
         '<p class="soft">' + E(T('oa.all')) + ' ' + E(T(here ? 'oa.here' : 'oa.away2')) + '</p>';
       var restore = '<label class="btn sm">' + E(T('md.restore')) + '<input type="file" accept=".json,application/json" data-act="restore" hidden></label>';
-      var hub = location.origin === HOME.origin ? '' : '<a class="btn sm" href="https://my.niveshsahayak.in/" target="_blank" rel="noopener">' + E(T('md2.open')) + ' ↗</a>';   /* not on the full data page itself */
+      var inApp = !!(window.NSApp && NSApp.openUrl), hub = location.origin === HOME.origin ? '' : '<a class="btn sm" href="' + (inApp ? '#do/my/" data-close-box' : 'https://my.niveshsahayak.in/" target="_blank" rel="noopener"') + '>' + E(T('md2.open')) + (inApp ? '' : ' ↗') + '</a>';   /* in the App: the Data Manager opens on an App screen (owner 2026-11-18) */   /* not on the full data page itself */
       var tabs = [['ov', 'md2.ov'], ['bk', 'md2.bk'], ['af', 'md2.folder'], ['ac', 'b3.ac.t']];
       var cur = NS._mdTab && tabs.some(function (t) { return t[0] === NS._mdTab; }) ? NS._mdTab : 'ov';
       var pane = function (k, html) { return '<section class="md-pane" role="tabpanel" id="md-p-' + k + '" aria-labelledby="md-t-' + k + '" data-md-pane="' + k + '"' + (k === cur ? '' : ' hidden') + '>' + html + '</section>'; };
