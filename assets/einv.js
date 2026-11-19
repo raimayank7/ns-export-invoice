@@ -80,7 +80,8 @@
     need(NS.gstinCheck(s.gstin).ok && s.gstin.length === 15, 's-gstin', t(what === 'ewb' ? 'ev.ewbseller' : 'ev.sg'));
     need(!!s.name.trim(), 's-name', t('v.bname'));
     place(s, 's');
-    if (what === 'einv' && !exp) need(NS.gstinCheck(b.gstin).ok && b.gstin.length === 15, 'b-gstin', t('ev.bg'));
+    var bgc = NS.gstinCheck(b.gstin);
+    if (what === 'einv' && !exp) need(bgc.ok && b.gstin.length === 15, 'b-gstin', b.gstin && !bgc.ok ? t('ev.bgbad', { g: b.gstin }) + ' ' + (bgc.msg || '') : t('ev.bg'));   /* typed but wrong: say so (F3-11) */
     if (what === 'einv' && s.gstin && s.gstin === b.gstin) bad.push(['b-gstin', t('ev.same')]);
     need(!!b.name.trim(), 'b-name', t('ev.bname'));
     if (!(what === 'einv' && exp)) place(b, 'b');
@@ -318,7 +319,7 @@
       done();
     });
     $('#ei-rm', box).addEventListener('click', function () {
-      if (!confirm(t('ei.c.rm'))) return;
+      if (!NS.okSync(t('ei.c.rm'))) return;
       api.doc().irn = null; fill(); api.changed();
       NS.toast(t('ei.rmnote'));
     });

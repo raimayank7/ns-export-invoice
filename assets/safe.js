@@ -13,7 +13,8 @@
 (function (G) {
   'use strict';
   /* ---------- the merge (pure, also run by node in scripts/test_sync.js) ---------- */
-  var SKIPMETA = /^(gd|lastBackup$|pin|lock)/i;   /* device-only settings are never synced */
+  var SKIPMETA = /^(gd|lastBackup$|pin|lock|logHead$)/i;   /* device-only settings are never synced */
+  var ADDONLY = { log: 1, ver: 1 };   /* ERP Round 1, A-1: the edit history and earlier versions are only ever added to, never deleted by a sync */
   function upd(r) { return r && r.updated || 0; }
   function merge(L, R, seen) {
     var stores = {}, out = { local: { put: {}, del: {} }, remote: {}, seen: {}, clashes: [], changed: 0 };
@@ -36,7 +37,7 @@
             if (win === b) out.local.put[s].push(b);
           }
         } else if (a) {
-          if (was != null && upd(a) <= was) { out.local.del[s].push(id); return; }   /* deleted on the other device */
+          if (was != null && upd(a) <= was && !ADDONLY[s]) { out.local.del[s].push(id); return; }   /* deleted on the other device */
           win = a;
         } else {
           if (was != null && upd(b) <= was) return;   /* deleted here */
@@ -153,7 +154,7 @@
       }
       return attempt(1).then(function (b) {
         if (!b || b.app !== 'Nivesh Sahayak' || !b.data) throw new Error(T('bk.notours'));
-        return NSStore.importAll(b.data, false);
+        return NSStore.importAll(b.data, false, { file: f && f.name || '' });
       }).then(function (n) { NS.toast(n ? T('bk.restored', { n: n }) : T('bk.nothing')); return n; },
         function (e) { NS.toast(e.message || T('bk.unread'), e.quiet ? '' : 'bad'); throw e; });
     });
@@ -295,7 +296,7 @@
         var a = b.getAttribute('data-gd-act');
         if (a === 'on') run(GD.connect());
         else if (a === 'sync') run(GD.syncNow());
-        else if (a === 'off' && confirm(T('b3.gd.offc'))) run(GD.disconnect());
+        else if (a === 'off' && NS.okSync(T('b3.gd.offc'))) run(GD.disconnect());
         else if (b.hasAttribute('data-gd-use') || b.hasAttribute('data-gd-drop')) {
           var i = +(b.getAttribute('data-gd-use') || b.getAttribute('data-gd-drop')), k = cl[i];
           var p = b.hasAttribute('data-gd-use') ? NSStore.put(k.store, Object.assign({}, k.rec)) : Promise.resolve();

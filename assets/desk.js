@@ -18,7 +18,7 @@
   function ic(d) { return '<svg class="ic" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="' + d + '"/></svg>'; }
   /* icons for the App's own screens (the other side-menu icons are CSS masks in desk.css, by data-ic) */
   var SECIC = { home: 'home', sales: 'doc', money: 'money', dues: 'clock', buy: 'cart', parties: 'people', cash: 'bank', chq: 'cheque', books: 'book', khata: 'book', preg: 'cart', ebook: 'cart',
-    day: 'calendar', tools: 'layers', repeat: 'repeat', reports: 'chart', b2jv: 'journal', b2fa: 'asset', b2gd: 'box', b2make: 'factory', b2profit: 'trend', b2sman: 'badge', b2year: 'calendar', grp: 'layers', fin: 'scale', fam: 'factory', capl: 'coins', b2job: 'wrench', ledger: 'book', move: 'trend', st: 'list', stf: 'badge', acx: 'tax', features: 'toggle', bimp: 'bimport', itx: 'itax', msme: 'coins', limits: 'scale', trust: 'coins', warr: 'wrench', fees: 'cap', packs: 'pack', cadb: 'dash', cadoc: 'folder', cagst: 'tax', cacom: 'chat', saved: 'save',
+    day: 'calendar', tools: 'layers', repeat: 'repeat', reports: 'chart', b2jv: 'journal', b2fa: 'asset', b2gd: 'box', b2make: 'factory', b2profit: 'trend', b2sman: 'badge', b2year: 'calendar', grp: 'layers', fin: 'scale', fam: 'factory', capl: 'coins', b2job: 'wrench', ledger: 'book', move: 'trend', st: 'list', stf: 'badge', acx: 'tax', tdsr: 'tax', features: 'toggle', bimp: 'bimport', itx: 'itax', msme: 'coins', limits: 'scale', trust: 'coins', warr: 'wrench', fees: 'cap', packs: 'pack', cadb: 'dash', cadoc: 'folder', cagst: 'tax', cacom: 'chat', saved: 'save',
     entries: 'list', low: 'alert', biz: 'shop', party: 'people', pgroups: 'list', item: 'box', igroups: 'list', doc: 'doc', settings: 'set', backup: 'data', bin: 'trash', log: 'clock' };
   /* screen lists that stay inside the page (my., the stock site...) get the same icons */
   function secIcons() { $$('.hub-nav a[data-sec]:not([data-ic])').forEach(function (a) { var k = SECIC[a.getAttribute('data-sec')]; if (k) a.setAttribute('data-ic', k); }); }
@@ -43,6 +43,27 @@
       askDlg.onclose = function () { fin(false); };
       askDlg.showModal(); (o.danger ? no : ok).focus();
     });
+  };
+
+  /* ---------- NS.okSync(message): for code that asked the browser's confirm() and goes on at once (F6-2, F7-13, F3-7).
+     The first call shows the App's own box and answers "no"; on "yes" the same button is pressed (or form sent) again and
+     this time the call answers "yes". So every old question looks like the software and works where confirm() is blocked. ---------- */
+  var lastAct = null, okPass = {};
+  document.addEventListener('click', function (e) { lastAct = { el: e.target }; }, true);
+  document.addEventListener('submit', function (e) { lastAct = { form: e.target, sub: e.submitter || null }; }, true);
+  NS.okSync = function (msg, o) {
+    if (okPass[msg]) { delete okPass[msg]; return true; }
+    var act = lastAct;
+    if (!act) return window.confirm(msg);
+    NS.ask(msg, o).then(function (yes) {
+      if (!yes) return;
+      okPass[msg] = 1; NS.okRetry = true;   /* the double-save guards let this second press through */
+      try {
+        if (act.form && act.form.isConnected) { if (act.form.requestSubmit) act.form.requestSubmit(act.sub && act.sub.isConnected ? act.sub : undefined); else act.form.submit(); }
+        else if (act.el && act.el.isConnected) act.el.click();
+      } finally { NS.okRetry = false; setTimeout(function () { delete okPass[msg]; }, 0); }
+    });
+    return false;
   };
 
   /* ---------- side menu ---------- */
@@ -85,11 +106,25 @@
     root.classList.add('has-hub');
     /* phones: the first four screens also sit in a tab bar at the bottom, the rest are under More (the side menu) */
     if (!$('.tabbar')) {
+      var TABSHORT = { home: 'Dashboard', sales: 'Sales', money: 'Receipts', dues: 'Dues', parties: 'Parties', day: 'My day', buy: 'Purchases', books: 'Day Book' };
       var tb = NS.el('nav', { class: 'tabbar', 'aria-label': T('menu') });
-      tb.innerHTML = $$('a[data-sec]', hub).slice(0, 4).map(function (a) { return a.outerHTML.replace(/\s(aria-keyshortcuts|title|id)="[^"]*"/g, ''); }).join('') +
-        '<button type="button" data-side-btn data-ic="more" aria-expanded="false"><span data-i18n="desk.more">' + esc(T('more')) + '</span></button>';
       document.body.appendChild(tb);
-      $$('a', tb).forEach(function (a) { a.addEventListener('click', function () { var o = $('#ns-side a[data-sec="' + a.getAttribute('data-sec') + '"]'); if (o) { a.blur(); } }); });
+      var fillTab = function () {
+        var PREF = ['home', 'sales', 'money', 'dues', 'parties', 'day'], all = $$('a[data-sec]', hub).filter(function (x) { return x.getAttribute('data-sec') !== 'features' && !(NS.featHidden && NS.featHidden(x)); }), pick = [];
+        PREF.forEach(function (k) { var a = all.filter(function (x) { return x.getAttribute('data-sec') === k; })[0]; if (a && pick.length < 4) pick.push(a); });
+        all.forEach(function (a) { if (pick.length < 4 && pick.indexOf(a) < 0) pick.push(a); });   /* F1-19 */
+        var sig = pick.map(function (a) { return a.getAttribute('data-sec'); }).join();
+        if (tb.getAttribute('data-sig') === sig) return;
+        tb.setAttribute('data-sig', sig);
+        tb.innerHTML = pick.map(function (a) { return a.outerHTML.replace(/\s(aria-keyshortcuts|title|id|aria-current)="[^"]*"/g, ''); }).join('') +
+          '<button type="button" data-side-btn data-ic="more" aria-expanded="false"><span data-i18n="desk.more">' + esc(T('more')) + '</span></button>';
+        $$('a', tb).forEach(function (a) { a.addEventListener('click', function () { a.blur(); }); });
+        /* the bottom bar is narrow: the App's long accounting names (Outstandings (Receivable and Payable)) get one short word there (19 Nov 2026) */
+        if (window.NSApp && NSApp.data) $$('a[data-sec]', tb).forEach(function (a) { var v = TABSHORT[a.getAttribute('data-sec')], s = $('span', a); if (v && s) { s.removeAttribute('data-i18n'); s.setAttribute('data-erp', '1'); s.textContent = v; } });
+      };
+      fillTab();
+      /* the App adds Sales, Money and Dues to its screen list a moment later (they were missing from the bar): fill it again when the list changes */
+      var tabT = 0; new MutationObserver(function () { clearTimeout(tabT); tabT = setTimeout(fillTab, 80); }).observe(hub, { childList: true, subtree: true });
     }
   }
   /* ---------- the umbrella (owner 2026-11-18, after showing Tally, Busy, ZEEFA and Evershine): the App's menu by accounting job,
@@ -100,15 +135,16 @@
      A screen this list does not know goes under More. No new keys: every item shows the key it already had. ---------- */
   var SG = [
     ['top', ['home', 'day']],
-    ['masters', [{ h: 'coa', t: 'v_coa', ic: 'layers' }, 'parties', { my: 'item', t: 'v_items', ic: 'box' }, { my: 'pgroups', t: 'v_groups', ic: 'layers' }, { my: 'biz', t: 'v_biz', ic: 'shop' }, 'b2gd', 'stf', 'b2sman', { f: 'ob', t: 'v_ob', ic: 'scale' }, 'trust', 'fees', 'warr']],
-    ['trans', [{ f: 'sale', t: 'v_sale', ic: 'doc' }, { f: 'pbill', t: 'v_pbill', ic: 'cart' }, { f: 'min', t: 'v_min', ic: 'money' }, { f: 'mout', t: 'v_mout', ic: 'money' }, { f: 'contra', t: 'v_contra', ic: 'bank' }, 'b2jv', { f: 'exp', t: 'v_exp', ic: 'cart' }, { f: 'pret', t: 'v_pret', ic: 'repeat' },
-      'sales', 'buy', 'money', 'chq', 'capl', 'b2fa', 'b2make', 'b2job', 'repeat', 'khata', 'preg']],
-    ['reports', [{ fin: 'bs', t: 'v_bs', ic: 'scale' }, { fin: 'pl', t: 'v_pl', ic: 'chart' }, { fin: 'tb', t: 'v_tb', ic: 'list' }, { h: 'dlist', t: 'v_dlist', ic: 'people' }, { h: 'clist', t: 'v_clist', ic: 'people' }, { h: 'ssum', t: 'v_ssum', ic: 'chart' }, { h: 'psum', t: 'v_psum', ic: 'chart' }, { h: 'vreg', t: 'v_vreg', ic: 'list' }, { h: 'cbsum', t: 'v_cbsum', ic: 'bank' }, 'fin', 'books', 'dues', 'grp', 'msme', 'stock', 'b2profit', 'reports', 'cadb', 'ebook']],
-    ['tax', ['acx', { site: 'gstr1' }, { site: 'gstr3b' }, { site: 'gstr2b' }, { site: 'cmp08' }, { site: 'tds' }, 'cagst', 'itx', 'limits', 'cacom', 'cadoc']],
-    ['util', [{ h: 'mprint', t: 'v_mprint', ic: 'doc' }, 'bimp', 'b2year', { my: 'backup', t: 'v_backup', ic: 'data' }, { my: 'settings', t: 'v_settings', ic: 'set' }, 'features', 'packs', 'tools']]];
+    ['masters', [{ h: 'masters', t: 'v_masters', ic: 'layers' }, { h: 'masters/led', t: 'v_ledgers', ic: 'book' }, { h: 'masters/bank', t: 'v_banks', ic: 'bank' }, { h: 'masters/vt', t: 'v_vtypes', ic: 'list' }, { h: 'masters/igrp', t: 'v_sgroups', ic: 'layers' }, { h: 'masters/unit', t: 'v_units', ic: 'box' }, { h: 'masters/trn', t: 'v_trn', ic: 'truck' }, { h: 'masters/veh', t: 'v_veh', ic: 'truck' },
+      { h: 'coa', t: 'v_coa', ic: 'layers' }, 'parties', { h: 'masters/item', t: 'v_items', ic: 'box' }, { h: 'masters/grp', t: 'v_groups', ic: 'layers' }, { h: 'masters/biz', t: 'v_biz', ic: 'shop' }, 'b2gd', 'stf', 'b2sman', { f: 'ob', t: 'v_ob', ic: 'scale' }, { h: 'bw', t: 'v_bw', ic: 'list' }, 'trust', 'fees', 'warr']],
+    ['trans', [{ f: 'sale', t: 'v_sale', ic: 'doc' }, { f: 'pbill', t: 'v_pbill', ic: 'cart' }, { f: 'min', t: 'v_min', ic: 'money' }, { f: 'mout', t: 'v_mout', ic: 'money' }, { f: 'contra', t: 'v_contra', ic: 'bank' }, 'b2jv', { f: 'genr', t: 'v_genr', ic: 'money' }, { f: 'genp', t: 'v_genp', ic: 'money' }, { f: 'exp', t: 'v_exp', ic: 'cart' }, { f: 'pret', t: 'v_pret', ic: 'repeat' },
+      'sales', 'buy', { h: 'ord', t: 'v_ord', ic: 'list' }, 'money', 'chq', 'capl', 'b2fa', 'b2make', 'b2job', 'repeat', 'khata', 'preg']],
+    ['reports', [{ fin: 'bs', t: 'v_bs', ic: 'scale' }, { fin: 'pl', t: 'v_pl', ic: 'chart' }, { fin: 'tb', t: 'v_tb', ic: 'list' }, { h: 'dlist', t: 'v_dlist', ic: 'people' }, { h: 'clist', t: 'v_clist', ic: 'people' }, { h: 'ssum', t: 'v_ssum', ic: 'chart' }, { h: 'psum', t: 'v_psum', ic: 'chart' }, { h: 'vreg', t: 'v_vreg', ic: 'list' }, { h: 'cbsum', t: 'v_cbsum', ic: 'bank' }, { h: 'os', t: 'v_os', ic: 'clock' }, { h: 'int', t: 'v_int', ic: 'clock' }, { h: 'exc', t: 'v_exc', ic: 'flag' }, 'fin', 'books', 'dues', 'grp', 'msme', 'stock', 'b2profit', 'reports', 'cadb', 'ebook']],
+    ['tax', ['acx', 'tdsr', { site: 'gstr1' }, { site: 'gstr3b' }, { site: 'gstr2b' }, { site: 'cmp08' }, { site: 'tds' }, 'cagst', 'itx', 'limits', 'cacom', 'cadoc']],
+    ['util', [{ h: 'mprint', t: 'v_mprint', ic: 'doc' }, 'bimp', 'b2year', { my: 'backup', t: 'v_backup', ic: 'data' }, { h: 'config', t: 'v_config', ic: 'set' }, { my: 'settings', t: 'v_settings', ic: 'set' }, 'features', 'packs', 'tools']]];
   var SGOF = {}; SG.forEach(function (g) { g[1].forEach(function (s) { if (typeof s === 'string') SGOF[s] = g[0]; }); });
   SGOF.st = 'masters';
-  function sgName(g) { return g === 'docs' ? NS.t('desk.sg_new') : NS.t('desk.um_' + g); }
+  function sgName(g) { var v = window.NSApp && NSApp.data && ERPG[g === 'docs' ? 'x-docs' : g]; if (v) return v; return g === 'docs' ? NS.t('desk.sg_new') : NS.t('desk.um_' + g); }   /* the App's menu bar uses the accounting names too */
   function myUrl(part) { var a = $('#ns-side a[data-ic=set]'); return (a ? a.href.split('#')[0] : 'https://my.niveshsahayak.in/') + '#' + part; }
   function formKey(f) { var r = FORMKEY.filter(function (x) { return x[0] === f; })[0]; return r ? r[2] || 'Alt+G ' + r[1] : ''; }
   function secKey(s) { var m = SECKEY[s], fk = m && fName(s); return fk || (m && m[1] ? 'Alt+' + m[1] : m ? 'Alt+G ' + m[0] : ''); }
@@ -206,7 +242,7 @@
         try { host = new URL(a.href, location.href).hostname.split('.')[0]; } catch (e) {}
         if (door[host] || (port && door[':' + port])) a.hidden = true;
       });
-      if (id === 'docs') { var sp = $('span', h); if (sp) { sp.setAttribute('data-i18n', 'desk.sg_new'); sp.textContent = NS.t('desk.sg_new'); } }
+      if (id === 'docs') { var sp = $('span', h); if (sp && !sp.hasAttribute('data-erp')) { sp.setAttribute('data-i18n', 'desk.sg_new'); sp.textContent = NS.t('desk.sg_new'); } }
       var b = NS.el('button', { type: 'button', 'class': 'sg-h', 'aria-expanded': 'true' }); b.innerHTML = h.innerHTML; h.replaceWith(b);
       var box = NS.el('div', { 'class': 'sg-b' }); while (b.nextSibling) box.appendChild(b.nextSibling); g.appendChild(box);
       g.classList.add('sg'); g.setAttribute('data-sg', 'x-' + id);
@@ -221,6 +257,69 @@
     var tr = $('.sg[data-sg="trans"]', side), dg = $('.side-g[data-g="docs"]', side); if (tr && dg) tr.parentNode.insertBefore(dg, tr.nextSibling);
     menuBar();
   }
+
+  /* ---------- accounting names in the App's menus (owner 2026-11-19: "rename them to fit a real ERP accounting software"). The App is English
+     only, so the menu words are set here by what each link opens (section, form, maker), not through the language packs; the standalone
+     sites keep their own names. Keys and Alt+G codes do not change. ---------- */
+  var ERPN = {
+    'h:masters': 'All Masters', 'h:masters/led': 'Ledgers', 'h:masters/bank': 'Bank Accounts', 'h:masters/biz': 'Companies', 'h:masters/grp': 'Account Groups',
+    'h:masters/item': 'Stock Items', 'h:masters/igrp': 'Stock Groups', 'h:masters/unit': 'Units of Measure', 'h:masters/trn': 'Transporters', 'h:masters/veh': 'Vehicles',
+    'h:masters/vt': 'Voucher Types', 'h:coa': 'Chart of Accounts', 's:parties': 'Party Accounts', 's:b2gd': 'Godowns and Stock Transfer', 's:stf': 'Employees and Payroll',
+    's:b2sman': 'Salesmen and Agents', 'f:ob': 'Opening Balances', 's:trust': 'Donors and Members', 's:fees': 'Students and Fees', 's:warr': 'Warranty and Service Register',
+    'f:sale': 'Sales Voucher', 'f:pbill': 'Purchase Voucher', 'f:min': 'Receipt Voucher', 'f:mout': 'Payment Voucher', 'f:contra': 'Contra Voucher', 'f:exp': 'Expense Voucher',
+    'f:pret': 'Purchase Return', 's:b2jv': 'Journal Vouchers', 's:capl': 'Capital and Loans', 's:chq': 'Cheque Register', 's:b2fa': 'Fixed Asset Register',
+    's:b2job': 'Job Work (In and Out)', 's:b2make': 'Manufacturing Journal', 's:money': 'Receipts and Payments List', 's:buy': 'Purchases and Expenses List',
+    's:sales': 'Sales List', 's:repeat': 'Recurring Vouchers', 's:khata': 'Khata (Party Book)', 's:preg': 'Purchase Book',
+    'k:nav.billing': 'Tax Invoice', 'k:nav.cashmemo': 'Cash Memo', 'k:nav.challan': 'Delivery Challan', 'k:nav.note': 'Credit Note', 'k:nav.dnote': 'Debit Note',
+    'k:nav.petty': 'Petty Cash Book', 'k:nav.proforma': 'Proforma Invoice', 'k:nav.po': 'Purchase Order', 'k:nav.quote': 'Quotation and Estimate',
+    'k:nav.receipt': 'Money Receipt (print)', 'k:nav.rent': 'Rent Receipt', 'k:nav.salary': 'Salary Slip', 'k:nav.so': 'Sales Order', 'k:nav.self': 'Self Invoice (RCM)',
+    'k:nav.voucher': 'Payment Voucher (print)',
+    'k:desk.v_bs': 'Balance Sheet', 'k:desk.v_pl': 'Profit and Loss A/c', 'k:desk.v_tb': 'Trial Balance', 'h:os': 'Bills Outstanding', 's:books': 'Day Book, Cash and Bank Books',
+    'h:cbsum': 'Cash and Bank Summary', 'h:clist': 'Sundry Creditors', 'h:dlist': 'Sundry Debtors', 's:dues': 'Outstandings (Receivable and Payable)', 's:fin': 'Final Accounts',
+    's:grp': 'Group Summary', 's:msme': 'MSME Payables (45 days)', 's:b2profit': 'Bill-wise Gross Profit', 's:reports': 'Export Reports to Excel', 'h:ssum': 'Sales Register',
+    'h:psum': 'Purchase Register', 'h:exc': 'Exception Reports', 'h:vreg': 'Voucher Registers',
+    's:cacom': 'Auditor Comments', 'k:nav.cmp08': 'CMP-08 Statement', 'k:nav.gstr1': 'GSTR-1 Return', 'k:nav.gstr2b': 'GSTR-2B Reconciliation', 'k:nav.gstr3b': 'GSTR-3B Return',
+    's:itx': 'Income Tax Computation', 's:limits': 'Statutory Limits', 's:acx': 'Other Income and Tax Payments', 'k:nav.tds': 'TDS and TCS',
+    's:features': 'Feature Settings', 's:tools': 'All Tools', 'k:desk.v_backup': 'Backup and Restore', 's:bimp': 'Bank Statement Import', 'h:mprint': 'Print Many Vouchers',
+    'k:desk.v_settings': 'Configuration', 's:packs': 'Trade Packs', 's:b2year': 'Year-End Closing'
+  };
+  var ERPG = { trans: 'Transactions (Vouchers)', reports: 'Display and Reports', tax: 'Statutory (GST and Tax)', 'x-docs': 'Other Documents' };
+  function erpKey(a) { var s = a.querySelector('span'), k = s && s.getAttribute('data-i18n'); return a.getAttribute('data-hsec') ? 'h:' + a.getAttribute('data-hsec') : a.getAttribute('data-dform') ? 'f:' + a.getAttribute('data-dform') : a.getAttribute('data-sec') ? 's:' + a.getAttribute('data-sec') : k ? 'k:' + k : ''; }
+  function erpNames(box) {
+    if (!(window.NSApp && NSApp.data)) return;   /* the App only */
+    $$('.sg-b > a, .side-g a', box).forEach(function (a) {
+      var v = ERPN[erpKey(a)], s = a.querySelector('span'); if (!v || !s || s.textContent === v) return;
+      s.removeAttribute('data-i18n'); s.setAttribute('data-erp', '1'); s.textContent = v; var kh = a.getAttribute('data-kh'); a.title = v + (kh ? '  ·  ' + kh : '');
+    });
+    $$('.sg[data-sg]', box).forEach(function (g) { var v = ERPG[g.getAttribute('data-sg')], h = $('.sg-h span', g); if (v && h && h.textContent !== v) { h.removeAttribute('data-i18n'); h.setAttribute('data-erp', '1'); h.textContent = v; } });
+  }
+
+  /* screen and voucher headings use the same accounting names as the menus (owner 2026-11-19: "rename the screen headings too").
+     The old words are swapped at the start of each heading of the App's screens and entry boxes, so the screens' own code stays as it is. */
+  var ERPH = [['Other income and taxes', 'Other Income and Tax Payments'], ['Fixed assets', 'Fixed Asset Register'], ['Godowns and stock transfer', 'Godowns and Stock Transfer'],
+    ['Job work', 'Job Work (In and Out)'], ['Journal entries', 'Journal Vouchers'], ['Production', 'Manufacturing Journal'], ['Profit report', 'Bill-wise Gross Profit'],
+    ['Salesmen', 'Salesmen and Agents'], ['Year end', 'Year-End Closing'], ['Bank statement import', 'Bank Statement Import'], ['Cash and bank books', 'Day Book, Cash and Bank Books'],
+    ['Purchases and expenses', 'Purchases and Expenses List'], ['CA comments', 'Auditor Comments'], ['Cash and bank summary', 'Cash and Bank Summary'], ['Cheques', 'Cheque Register'],
+    ['Creditors list', 'Sundry Creditors'], ['Debtors list', 'Sundry Debtors'], ['Dues', 'Outstandings (Receivable and Payable)'], ['Things to check', 'Exception Reports'],
+    ['Cash and bank transfer', 'Contra Voucher'], ['Expense', 'Expense Voucher'], ['Money received', 'Receipt Voucher'], ['Money paid', 'Payment Voucher'], ['Opening balance', 'Opening Balance'],
+    ['Purchase bill', 'Purchase Voucher'], ['Purchase return', 'Purchase Return'], ['Sale bill', 'Sales Voucher'], ['Additional features', 'Feature Settings'], ['Student fees', 'Students and Fees'],
+    ['Balance sheet', 'Balance Sheet'], ['Profit and loss', 'Profit and Loss A/c'], ['Trial balance', 'Trial Balance'], ['Group reports', 'Group Summary'], ['Income tax planner', 'Income Tax Computation'],
+    ['Limits helper', 'Statutory Limits'], ['Money in and out', 'Receipts and Payments List'], ['Print many vouchers', 'Print Many Vouchers'], ['MSME payables', 'MSME Payables (45 days)'],
+    ['Parties', 'Party Accounts'], ['Purchase summary', 'Purchase Register'], ['Sales summary', 'Sales Register'], ['Repeating bills', 'Recurring Vouchers'], ['Reports to Excel', 'Export Reports to Excel'],
+    ['Sales', 'Sales List'], ['Staff, salary and loans', 'Employees and Payroll'], ['All tools by job', 'All Tools'], ['Donations and members', 'Donors and Members'], ['Voucher registers', 'Voucher Registers'],
+    ['Warranty and service due', 'Warranty and Service Register'], ['Bill-wise outstanding', 'Bills Outstanding'], ['Capital and loans', 'Capital and Loans'], ['Journal entry', 'Journal Voucher'],
+    ['Delivery challan', 'Delivery Challan'], ['Credit note', 'Credit Note'], ['Debit note', 'Debit Note'], ['Cash memo', 'Cash Memo'], ['Sales order', 'Sales Order'], ['Purchase order', 'Purchase Order'],
+    ['Proforma invoice', 'Proforma Invoice'], ['Self invoice', 'Self Invoice (RCM)'], ['Export invoice', 'Export Invoice']]
+    .sort(function (a, b) { return b[0].length - a[0].length; });   /* longest first: "Sales summary" before "Sales" */
+  function erpHead(h) {
+    var n = h.firstChild; while (n && !(n.nodeType === 3 && n.nodeValue.trim()) && !(n.nodeType === 1 && n.tagName === 'SPAN' && n.textContent.trim())) n = n.nextSibling;
+    if (!n) return; var t = n.nodeType === 3 ? n.nodeValue : n.textContent, lead = t.match(/^\s*/)[0], tt = t.slice(lead.length);
+    if (ERPH.some(function (x) { return tt.indexOf(x[1]) === 0 && (tt.length === x[1].length || /^[\s·:(\d?]/.test(tt.slice(x[1].length))); })) return;   /* already an accounting name ("Sales Voucher" is not "Sales" + Voucher) */
+    for (var i = 0; i < ERPH.length; i++) { var o = ERPH[i][0]; if (tt === o || tt.indexOf(o) === 0 && /^[\s·:(\d]/.test(tt.slice(o.length))) { if (tt.indexOf(ERPH[i][1]) === 0) return; var v = lead + ERPH[i][1] + tt.slice(o.length); if (n.nodeType === 3) n.nodeValue = v; else n.textContent = v; return; } }
+  }
+  var erpQ = false;
+  function erpHeads() { erpQ = false; $$('[data-pane] h2, dialog[open] .dlg-hd h2, dialog[open] .dlg-h h2, dialog[open] > h2, #app-form h2').forEach(erpHead); }
+  if (window.NSApp && NSApp.data) new MutationObserver(function () { if (!erpQ) { erpQ = true; setTimeout(erpHeads, 20); } }).observe(document.body, { childList: true, subtree: true });
   function groupHub(hub) {
     var made = {}, fold = sgFolded(), done = {};
     function box(k) {
@@ -247,9 +346,14 @@
         });
       });
       $$(':scope > a[data-sec]', hub).forEach(function (a) { box('more').appendChild(a); });
+      /* every group (Masters, Transactions, Reports, GST and tax, Utilities...) in A to Z order of the names on screen (owner 19 Nov); Dashboard and My day stay on top */
+      erpNames(side || document);   /* accounting names first, so the A to Z order uses them */
+      $$('.sg[data-sg="x-docs"] .sg-b, .sg[data-sg="x-more"] .sg-b', side || document).forEach(abcSort);
+      Object.keys(made).forEach(function (k) { if (k !== 'top') abcSort(made[k]); });
       var cur = $('a[aria-current="page"]', hub); if (cur) { var g = cur.closest('.sg'); if (g && g.classList.contains('shut')) { g.classList.remove('shut'); var h = $('.sg-h', g); if (h) h.setAttribute('aria-expanded', 'true'); } }
     }
     sort();
+    document.addEventListener('ns-lang', function () { setTimeout(sort, 60); });   /* another language: another A to Z */
     new MutationObserver(function () { if ($(':scope > a[data-sec]', hub)) sort(); }).observe(hub, { childList: true });
     window.addEventListener('hashchange', function () { setTimeout(sort, 50); });
   }
@@ -315,7 +419,8 @@
   }
   function status() {
     if (!sbar) return;
-    $('[data-s-fy]', sbar).textContent = T('fy', { y: NS.fy(NS.today()) });
+    var pp = A() && A().biz && NS.period && NS.period();
+    $('[data-s-fy]', sbar).textContent = pp ? NS.fmtDate(pp.from) + ' – ' + NS.fmtDate(pp.to) : T('fy', { y: NS.fy(NS.today()) });
     net();
     if (!window.NSStore) return;
     clearTimeout(sbizP); sbizP = setTimeout(function () {
@@ -352,14 +457,15 @@
     msme: ['MS'], limits: ['LH'], buy: ['PE', 'W'], parties: ['PA', 'Y'], grp: ['GR'], chq: ['CQ'], books: ['CB', 'K'], cash: ['CK'], repeat: ['RB'],
     reports: ['RE'], day: ['MD'], tools: ['AT', 'T'], fin: ['FA', 'A'], capl: ['CL'], b2jv: ['JE', 'J'], b2fa: ['FX'], b2gd: ['GD'], b2make: ['PR'],
     b2job: ['JW'], b2profit: ['PF'], b2sman: ['SM'], b2year: ['YE'], features: ['AF'], packs: ['TP'], trust: ['DM'], warr: ['WS'], cacom: ['CC'],
-    fees: ['FE'], stock: ['SK'], fam: ['MA'], cadb: ['CD'], cadoc: ['CA'], cagst: ['CG'], ebook: ['EB'], khata: ['KH'], preg: ['PG'], dlist: ['DR'], clist: ['CR'], ssum: ['SY'], psum: ['PY'], vreg: ['VR'], cbsum: ['CS'], mprint: ['MV'], coa: ['AC'], acl: ['LA'] };
+    fees: ['FE'], stock: ['SK'], fam: ['MA'], cadb: ['CD'], cadoc: ['CA'], cagst: ['CG'], ebook: ['EB'], khata: ['KH'], preg: ['PG'], dlist: ['DR'], clist: ['CR'], ssum: ['SY'], psum: ['PY'], vreg: ['VR'], cbsum: ['CS'], mprint: ['MV'], coa: ['AC'], acl: ['LA'], masters: ['MT'], tdsr: ['TQ'], config: ['CF'],
+    gsum: ['GS'], gvch: ['GV'], os: ['OS'], exc: ['TC'], int: ['IR'], bw: ['BW'], ord: ['OU'] };   /* ord: orders.js (ERP round 2) */   /* billwise.js (ERP Round 2): interest report, bill-wise settings */   /* reports.js (ERP review round 1): group summary, group vouchers, bill-wise outstanding, things to check */
   var DOCKEY = { billing: ['IN', 'N'], quotation: ['QT', 'O'], proforma: ['PI'], 'sales-order': ['SO'], challan: ['DC', 'C'], 'purchase-order': ['PO'],
     'credit-note': ['CN'], 'debit-note': ['DN'], 'cash-memo': ['CM'], receipt: ['RC'], voucher: ['VC'], 'self-invoice': ['SI'], 'rent-receipt': ['RR'],
     'salary-slip': ['SS'], 'petty-cash': ['PC'], pos: ['PS'], pharmacy: ['PH'], restaurant: ['RT'], bilty: ['LR'], 'job-card': ['JC'], hotel: ['HT'],
     rent: ['RN'], 'contractor-bill': ['CT'], 'fee-receipt': ['FR'], clinic: ['CV'], salon: ['SN'], jewellery: ['JL'], garment: ['GM'], mandi: ['MI'],
     petrol: ['PP'], dairy: ['DY'], subscribers: ['SU'], tripsheet: ['TS'] };
   /* new entries: [form, 2-letter code, F key] (the App's own forms) */
-  var FORMKEY = [['sale', 'SB', 'F8'], ['min', 'MR', 'F6'], ['mout', 'MP', 'F5'], ['pbill', 'PB', 'F9'], ['exp', 'EX', 'F10'], ['contra', 'CO', 'F4'], ['pret', 'PT', ''], ['ob', 'OB', '']];
+  var FORMKEY = [['sale', 'SB', 'F8'], ['min', 'MR', 'F6'], ['mout', 'MP', 'F5'], ['pbill', 'PB', 'F9'], ['exp', 'EX', 'F10'], ['contra', 'CO', 'F4'], ['pret', 'PT', ''], ['ob', 'OB', ''], ['genr', 'RV', ''], ['genp', 'PM', '']];   /* A-10: Receipt / Payment with any ledgers */
   var FKEY = { F3: 'biz', F4: 'contra', F5: 'mout', F6: 'min', F7: 'b2jv', F8: 'sale', F9: 'pbill', F10: 'exp', 'Ctrl+F8': 'credit-note', 'Ctrl+F9': 'debit-note' };
   var ALTKEY = {};   /* letter -> what it opens (filled from SECKEY / DOCKEY) */
   Object.keys(SECKEY).forEach(function (s) { if (SECKEY[s][1]) ALTKEY[SECKEY[s][1].toLowerCase()] = { sec: s }; });
@@ -471,17 +577,22 @@
     var app = A();
     var getP = app && app.data ? Promise.resolve({ party: app.data().party, doc: app.mine ? app.mine() : app.data().doc }) :
       window.NSStore ? Promise.all([NSStore.list('party'), NSStore.list('doc')]).then(function (r) { return { party: r[0], doc: r[1] }; }) : Promise.resolve({ party: [], doc: [] });
-    return getP.then(function (C) {
-      var out = [], seen = {};
+    var getI = app && app.data && app.data().item ? Promise.resolve(app.data().item) : window.NSStore ? NSStore.list('item').catch(function () { return []; }) : Promise.resolve([]);
+    return Promise.all([getP, getI]).then(function (R) {
+      var C = R[0], out = [], seen = {}, seenI = {};
+      (R[1] || []).forEach(function (it) {   /* items (F1-16) */
+        var k = key(it.desc || it.name); if (!k || seenI[k] || it.sample) return; seenI[k] = 1;
+        out.push({ g: 'item', e: NS.cfText ? NS.cfText(it) : '', t: it.desc || it.name, s: [it.hsn ? 'HSN ' + it.hsn : '', it.rate ? NS.money(it.rate) : '', it.gst !== '' && it.gst != null ? it.gst + '%' : ''].filter(Boolean).join(' · '), run: function () { if (app && app.biz) location.hash = 'do/my/#item'; else location.href = myUrl('item'); } });
+      });
       C.party.forEach(function (p) {
         var k = key(p.name); if (!k || seen[k]) return; seen[k] = 1;
-        out.push({ g: 'party', t: p.name, s: [p.gstin, p.phone, p.city].filter(Boolean).join(' · '), run: function () { if (app && app.biz) location.hash = 'st/' + encodeURIComponent(k); else location.href = appUrl('st/' + encodeURIComponent(k)); } });
+        out.push({ g: 'party', e: NS.cfText ? NS.cfText(p) : '', t: p.name, s: [p.gstin, p.phone, p.city].filter(Boolean).join(' · '), run: function () { if (app && app.biz) location.hash = 'st/' + encodeURIComponent(k); else location.href = appUrl('st/' + encodeURIComponent(k)); } });
       });
       C.doc.slice().sort(function (a, b) { return (b.updated || 0) - (a.updated || 0); }).slice(0, 400).forEach(function (d) {
         var site = (d.type === 'note' && d.kind === 'debit' ? 'debit-note' : OWNSITE[d.type]), appRec = d.app || /^(pbill|exp|ob|contra)$/.test(d.type);
         if (!site && !appRec) return;
         var who = (d.buyer && d.buyer.name) || '', name = app && app.docName ? app.docName(d) : NS.t(d.type === 'note' && (d.kind === 'credit' || d.kind === 'debit') ? 'k.' + d.kind : DOCWORD[d.type] || '') || d.type;
-        out.push({ g: 'doc', t: name + (d.no ? ' ' + d.no : '') + (who ? ' · ' + who : ''), s: (d.date ? NS.fmtDate(d.date) : '') + (d.total ? ' · ' + NS.money(d.total) : ''),
+        out.push({ g: 'doc', e: NS.cfText ? NS.cfText(d) : '', t: name + (d.no ? ' ' + d.no : '') + (who ? ' · ' + who : ''), s: (d.date ? NS.fmtDate(d.date) : '') + (d.total ? ' · ' + NS.money(d.total) : ''),
           run: function () {
             if (appRec) { if (app && app.openForm) app.openForm(formOf(d), { rec: d }); else location.href = appUrl(''); return; }
             goUrl(app && app.docUrl && app.docUrl(d) || siteUrl(site) + '?open=' + encodeURIComponent(d.id));
@@ -550,13 +661,13 @@
     /* other files add their own results (helppanel.js: help articles), each a function giving items or a promise of them */
     if (!goMode) (NS.cmdMore || []).forEach(function (f) { Promise.resolve().then(f).then(function (more) { items = items.concat(more || []); if (cmd.open && inp.value) draw(inp.value); }).catch(function () {}); });
   }
-  var GROUPS = ['go', 'rec', 'new', 'party', 'doc', 'help', 'act'];
+  var GROUPS = ['go', 'rec', 'new', 'party', 'item', 'doc', 'help', 'act'];
   function draw(qs) {
     var words = qs.toLowerCase().split(/\s+/).filter(Boolean);
     var one = goMode && /^[a-z]$/i.test(qs.trim()) ? qs.trim().toUpperCase() : '';
     var hit = one ? items.filter(function (x) { return x.code && x.code.charAt(0) === one; }) :
       items.filter(function (x) { var h = (x.t + ' ' + (x.s || '') + ' ' + (x.e || '')).toLowerCase(); return words.every(function (w) { return h.indexOf(w) >= 0; }); });
-    if (!words.length && !goMode) hit = hit.filter(function (x) { return !x.off && x.g !== 'doc' && x.g !== 'party' && x.g !== 'new' && x.g !== 'help'; });
+    if (!words.length && !goMode) hit = hit.filter(function (x) { return !x.off && x.g !== 'doc' && x.g !== 'party' && x.g !== 'item' && x.g !== 'new' && x.g !== 'help'; });
     else hit = hit.filter(function (x) { return !x.off; });   /* strict (owner 2026-11-18): a tool switched off for this type of business is not offered */   /* what is switched off comes last, so it never pushes the business's own tools down */
     shown = []; var html = '';
     GROUPS.forEach(function (g) {
@@ -617,7 +728,7 @@
       if ((e.ctrlKey || e.metaKey) && !e.altKey && k === 's') { e.preventDefault(); if (f.requestSubmit) f.requestSubmit(sb); else sb.click(); return; }
       if (k !== 'enter' || e.shiftKey || e.ctrlKey || !t || !/^(INPUT|SELECT)$/.test(t.tagName) || /^(checkbox|radio|file|submit|button)$/.test(t.type)) return;
       var all = $$('input,select', f).filter(function (x) { return !x.disabled && x.type !== 'hidden' && x.type !== 'file' && x.type !== 'checkbox' && x.offsetParent !== null && !x.closest('details:not([open])'); });
-      var i = all.indexOf(t); if (i >= 0 && i < all.length - 1) { e.preventDefault(); all[i + 1].focus(); }
+      var i = all.indexOf(t); if (i >= 0 && i < all.length - 1) { e.preventDefault(); NS.focusSel(all[i + 1]); }   /* the text is selected: typing 3 replaces a default 1 (F4-13) */
     });
     d.addEventListener('cancel', function (e) { if (d.getAttribute('data-dirty')) { e.preventDefault(); NS.vsLeave(null, d); } });
     d.addEventListener('close', function () { if (!d._parking) d.removeAttribute('data-dirty'); });
@@ -654,6 +765,8 @@
     if ($('.mb-drop')) return;
     var t = e.target; if (t && (t.isContentEditable || /^(INPUT|TEXTAREA|SELECT)$/.test(t.tagName))) { t.blur(); return; }
     var h = location.hash.replace(/^#/, ''); if (!h || h === 'home') return;
+    var tr = A().trail && A().trail();   /* ERP review R-1: one level up = the screen the user came from (reports.js puts the row back) */
+    if (tr && tr.length > 1 && !/^do\//.test(h)) { e.preventDefault(); history.back(); return; }
     var vis = function (n) { return n && n.offsetParent !== null; };
     var bk = $$('[data-fback]').filter(vis)[0] || $$('#main a.link[href^="#"]').filter(function (a) { return vis(a) && /^\s*‹|back/i.test(a.textContent); })[0];
     e.preventDefault();
@@ -852,4 +965,8 @@
     });
   }
   if (document.readyState === 'complete') setTimeout(note, 2500); else window.addEventListener('load', function () { setTimeout(note, 2500); });
+  /* opened from the App (it shows inside the App's frame, #do/page/whats-new/): seen (F1-14) */
+  function seenNow() { put(SEEN); put(NOTE); [].forEach.call(document.querySelectorAll('#ns-side a.wn-new'), function (a) { a.classList.remove('wn-new'); }); var nb = document.getElementById('ns-wnnote'); if (nb) nb.remove(); }
+  document.addEventListener('click', function (e) { var a = e.target.closest && e.target.closest('a[href*="whats-new"]'); if (a) seenNow(); }, true);
+  window.addEventListener('hashchange', function () { if (/whats-new/.test(location.hash)) seenNow(); });
 })();

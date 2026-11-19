@@ -292,6 +292,14 @@ html.pin-wait #my-app,html.pin-wait #app,html.pin-wait .hero{visibility:hidden}
 #ns-lock [hidden]{display:none!important}
 #ns-lock .lk-msg{min-height:1.2em;margin:0;color:var(--bad);font-weight:600}
 #ns-lock .lk-forgot{text-align:start;border-top:1px solid var(--line);padding-top:10px;display:flex;flex-direction:column;gap:8px;font-size:.92rem}
+.au-x{display:flex;flex-wrap:wrap;gap:4px 10px;margin-top:4px;font-size:.88em}
+.au-x .au-why{font-style:italic}
+.au-tools{display:flex;flex-wrap:wrap;align-items:center;gap:8px 12px;margin:8px 0}
+.au-cxnote{margin:0 0 10px;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.pill.cx{background:#FEE2E2;color:#991B1B}
+.au-res{flex-basis:100%;margin:0}.au-res.ok{color:var(--ok,#15803D)}.au-res.bad{color:var(--bad,#B91C1C)}
+.au-vd{display:grid;grid-template-columns:minmax(120px,max-content) 1fr;gap:2px 12px;margin:10px 0;font-size:.92em}.au-vd dt{color:var(--muted,#64748B)}.au-vd dd{margin:0;overflow-wrap:anywhere}
+.au-g textarea{width:100%}.au-g .au-err{min-height:1.2em;margin:4px 0}
 .b1-log{list-style:none;padding:0;margin:10px 0 0;display:flex;flex-direction:column;gap:8px}
 .b1-log>li{border:1px solid var(--line);border-radius:10px;padding:8px 10px;background:var(--surface)}
 .b1-lh{display:flex;flex-wrap:wrap;gap:4px 8px;align-items:baseline}
@@ -460,3 +468,20 @@ b.nsb-in:not(.ns-cl .nsb-in) .nsb-b{background:none!important;box-shadow:none!im
   .stsheet{padding-bottom:18mm!important;-webkit-box-decoration-break:clone;box-decoration-break:clone}
   .stsheet .ns-cl{position:fixed!important;left:0;right:0;bottom:5mm;margin:0!important;justify-content:center}
 }
+
+/* minor items 19 Nov (F1-20, F7-10, F7-11, F7-12) */
+@media (prefers-color-scheme:dark){:root:not([data-theme=light]) .hm-tabs a[aria-selected=true]{color:#0E1726}}
+:root[data-theme=dark] .hm-tabs a[aria-selected=true]{color:#0E1726}
+b.nsb,b.nsb-in,.nsb-n,.nsb-b{direction:ltr;unicode-bidi:isolate}
+fieldset,.card{min-width:0}.tbl-wrap{max-width:100%}
+b.nsb-in:not(.ns-cl .nsb-in):not(.side-h .nsb-in):not(.sg-h .nsb-in):not(.brand .nsb-in):not(.dash-logo .nsb-in){font-family:inherit!important;font-weight:inherit!important;font-size:inherit!important;display:inline!important;vertical-align:baseline}
+b.nsb-in:not(.ns-cl .nsb-in):not(.side-h .nsb-in):not(.sg-h .nsb-in):not(.brand .nsb-in):not(.dash-logo .nsb-in) .nsb-b{font-size:inherit!important}
+/* software screens are English only (owner 2026-11-19): no language picker there; guides and help keep theirs */
+html[data-en-only] [data-lang-pick],html[data-en-only] [data-lang-set],html[data-en-only] .f:has(> [data-lang-set]),html[data-en-only] label:has(> [data-lang-set]){display:none!important}
+
+/* ERP r2-config A-7: the Series choice under a number box when the business has voucher sub-types */
+.subpick { display: flex; align-items: center; gap: 6px; margin-top: 4px; font-size: .9em; }
+.subpick select { min-height: 32px; }
+/* ERP r2-config: numbering and printing folded under each My data document card */
+.dc-more{border-top:1px dashed var(--line);padding-top:6px;font-size:.88rem}.dc-more summary{cursor:pointer;color:var(--soft)}
+.dc-more[open]{display:grid;gap:6px}.dc-f{display:grid;gap:2px}.dc-f span{font-size:.82rem;color:var(--soft)}.dc-f input,.dc-f select{min-height:34px;width:100%}

@@ -69,6 +69,8 @@
     }
     if (parts.length > 1) {
       d.city = parts.pop();
+      /* "5, Okhla Phase 2, New Delhi, South Delhi": the last part is the district; the town is the part before it (F3-8) */
+      if (parts.length > 1) { d.district = d.city; d.city = parts.pop(); }
       while (parts.length > 1 && low(parts[parts.length - 1]) === low(d.city)) parts.pop();
     }
     d.addr = parts.join(', ');

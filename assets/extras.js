@@ -31,26 +31,176 @@
 
   /* ---------- edit history ---------- */
   var ACT = { add: 'a_add', edit: 'a_edit', del: 'a_del', restore: 'a_restore', 'import': 'a_import' };
+  /* ERP Round 1 (A-1..A-4, C-1, C-18): actions written by store.js; their words are 'au.<key>' */
+  var AU = { cancel: 'a_cancel', uncancel: 'a_uncancel', 'restore-file': 'a_restorefile', wipe: 'a_wipe', lock: 'a_lock', meta: 'a_meta', link: 'a_link', binempty: 'a_binempty' };
+  function actName(a) { return AU[a] ? NS.t('au.' + AU[a]) : tt(ACT[a] || 'a_edit'); }
+  function extraHtml(e) {
+    var o = [];
+    if (e.why) o.push('<span class="au-why">' + esc(NS.t('au.why')) + ': ' + esc(e.why) + '</span>');
+    if (e.file) o.push('<span>' + esc(NS.t('au.file')) + ': ' + esc(e.file) + '</span>');
+    if (e.counts) o.push('<span>' + esc(Object.keys(e.counts).filter(function (k) { return e.counts[k]; }).map(function (k) { return k + ' ' + e.counts[k]; }).join(', ') || '0') + '</span>');
+    if (e.fileHash) o.push('<span class="mono soft" title="SHA-256">' + esc(e.fileHash.slice(0, 16)) + '…</span>');
+    if (e.ver) o.push('<button type="button" class="link" data-au-ver="' + esc(e.ver) + '">' + esc(NS.t('au.seever')) + '</button>');
+    return o.length ? '<div class="au-x">' + o.join(' · ') + '</div>' : '';
+  }
   function field(f) { return String(f).replace(/^items\.(\d+)\./, function (m, i) { return tt('itemn', { n: +i + 1 }) + ' · '; }).replace(/^charges\.(\d+)\./, function (m, i) { return tt('chargen', { n: +i + 1 }) + ' · '; }); }
   NS.logHtml = function (rows, withRecord) {
     if (!rows.length) return '<p class="soft">' + esc(tt('nolog')) + '</p>';
     return '<ul class="b1-log">' + rows.map(function (e) {
-      return '<li><div class="b1-lh"><b>' + esc(tt(ACT[e.act] || 'a_edit')) + '</b>' + (withRecord && (e.no || e.name) ? ' · ' + esc([e.no, e.name].filter(Boolean).join(' · ')) : '') +
-        (e.act === 'import' ? ' · ' + esc(tt('nrec', { n: e.n || 0 })) : '') +
+      return '<li><div class="b1-lh"><b>' + esc(actName(e.act)) + '</b>' + (withRecord && (e.no || e.name) ? ' · ' + esc([e.no, e.name].filter(Boolean).join(' · ')) : '') +
+        (e.act === 'import' || e.act === 'restore-file' || e.act === 'link' ? ' · ' + esc(tt('nrec', { n: e.n || 0 })) : '') +
         '<span class="soft">' + esc(when(e.at)) + ' · ' + esc(e.who || tt('thisdev')) + ' · ' + esc(e.site || '') + '</span></div>' +
         (e.ch && e.ch.length ? '<ul class="b1-ch">' + e.ch.slice(0, 30).map(function (c) {
-          return '<li><span>' + esc(field(c[0])) + '</span> <s>' + esc(c[1] || '—') + '</s> → <b>' + esc(c[2] || '—') + '</b></li>'; }).join('') + (e.ch.length > 30 ? '<li>…</li>' : '') + '</ul>' : '') + '</li>';
+          return '<li><span>' + esc(field(c[0])) + '</span> <s>' + esc(c[1] || '—') + '</s> → <b>' + esc(c[2] || '—') + '</b></li>'; }).join('') + (e.ch.length > 30 ? '<li>…</li>' : '') + '</ul>' : '') + extraHtml(e) + '</li>';
     }).join('') + '</ul>';
   };
-  /* filter: a record id (one document's history) or nothing (everything) */
+  /* filter: a record id (one document's history) or nothing (everything: with the seal check and the auditor's filters, C-18) */
   NS.showLog = function (rid, title) {
     var b = box('ns-log', title || tt('hist'));
     b.innerHTML = '<p class="soft">' + esc(NS.t('md.loading')) + '</p>';
-    return NSStore.list('log').then(function (rows) {
-      rows = rows.filter(function (e) { return !rid || e.rid === rid; }).sort(function (a, c) { return c.at - a.at; });
-      b.innerHTML = '<p class="soft">' + esc(tt('logp')) + '</p>' + NS.logHtml(rows.slice(0, 300), !rid);
+    return Promise.all([NSStore.list('log'), rid ? null : NSStore.lockDate({}).catch(function () { return ''; })]).then(function (r) {
+      var all = r[0].filter(function (e) { return !rid || e.rid === rid; }).sort(function (a, c) { return c.at - a.at; });
+      b.innerHTML = '<p class="soft">' + esc(tt('logp')) + '</p><div></div>';
+      NS.logView(b.lastChild, all, r[1] || '', !rid);
     });
   };
+  /* the history list with the auditor's filters and "Check edit history" (all: the history, newest first; lk: the period lock date) */
+  NS.logView = function (el, all, lk, full) {
+    function draw(f) {
+      var rows = all.filter(function (e) { return !f || (f === 'lock' ? e.date && lk && e.date < lk && e.act !== 'add' : f === 'back' ? NS.backDated(e) : f === 'set' ? e.store === 'meta' || /^(lock|meta|wipe|binempty|restore-file|link)$/.test(e.act) : f === 'cx' ? /cancel/.test(e.act) : true); });
+      $('.au-list', el).innerHTML = NS.logHtml(rows.slice(0, 300), full) + (rows.length > 300 ? '<p class="soft">' + esc(tt('logmore', { n: rows.length })) + '</p>' : '');
+    }
+    el.innerHTML = (full ? '<div class="au-tools"><label>' + esc(NS.t('au.show')) + ' <select data-au-f><option value="">' + esc(NS.t('au.f_all')) + '</option>' +
+      (lk ? '<option value="lock">' + esc(NS.t('au.f_lock', { d: NS.fmtDate(lk) })) + '</option>' : '') + '<option value="back">' + esc(NS.t('au.f_back')) + '</option><option value="cx">' + esc(NS.t('au.f_cx')) + '</option><option value="set">' + esc(NS.t('au.f_set')) + '</option></select></label>' +
+      ' <button type="button" class="btn sm" data-au-check>' + esc(NS.t('au.check')) + '</button><p class="au-res" role="status"></p></div>' : '') + '<div class="au-list"></div>';
+    draw('');
+    var sel = $('[data-au-f]', el); if (sel) sel.addEventListener('change', function () { draw(sel.value); });
+    var ck = $('[data-au-check]', el); if (ck) ck.addEventListener('click', function () { NS.checkLog($('.au-res', el)); });
+  };
+  /* an entry made more than 7 days after the voucher's own date (C-18: back-dated entries) */
+  NS.backDated = function (e) { if (!e || !e.date || e.act !== 'add') return false; var t = Date.parse(e.date + 'T00:00:00'); return isFinite(t) && e.at - t > 8 * 864e5; };
+  /* "Check edit history": the data home walks the seal chain (A-1) */
+  NS.checkLog = function (out) {
+    out.textContent = NS.t('md.loading'); out.className = 'au-res';
+    return NSStore.logCheck().then(function (r) {
+      if (!r) { out.textContent = NS.t('au.ck_local'); return r; }
+      if (r.ok) { out.textContent = NS.t('au.ck_ok', { n: r.sealed }) + (r.unsealed ? ' ' + NS.t('au.ck_old', { n: r.unsealed }) : ''); out.className = 'au-res ok'; return r; }
+      out.className = 'au-res bad';
+      out.innerHTML = esc(NS.t('au.ck_bad', { n: r.bad.length })) + '<ul>' + r.bad.slice(0, 20).map(function (x) {
+        return '<li>' + esc(x.kind === 'changed' ? NS.t('au.ck_changed', { d: when(x.at) }) : x.kind === 'tail' ? NS.t('au.ck_tail', { d: when(x.at) }) : NS.t('au.ck_missing', { a: x.after ? when(x.after) : '—', b: when(x.at) })) + '</li>';
+      }).join('') + '</ul>';
+      return r;
+    }, function () { out.textContent = NS.t('au.ck_local'); });
+  };
+  /* A-2: an earlier version of a record, read only */
+  NS.showVersion = function (verId) {
+    var b = box('ns-ver', NS.t('au.vert'));
+    b.innerHTML = '<p class="soft">' + esc(NS.t('md.loading')) + '</p>';
+    return NSStore.get('ver', verId).then(function (v) {
+      if (!v || !v.rec) { b.innerHTML = '<p class="soft">' + esc(NS.t('au.vergone')) + '</p>'; return; }
+      var d = v.rec, items = Array.isArray(d.items) ? d.items : Array.isArray(d.lines) ? d.lines : [];
+      var flat = [];
+      (function walk(o, pre) { Object.keys(o || {}).forEach(function (k) { if (!pre && /^(id|created|updated|items|lines)$/.test(k)) return; var x = o[k], p = pre ? pre + '.' + k : k; if (x && typeof x === 'object') walk(x, p); else if (x !== '' && x != null) flat.push([p, /^data:/.test(String(x)) ? '[picture]' : String(x)]); }); })(d, '');
+      b.innerHTML = '<p class="soft">' + esc(NS.t('au.verp', { d: when(v.at), w: v.who || tt('thisdev'), a: actName(v.act) })) + '</p>' +
+        (items.length ? '<div class="tbl-wrap"><table class="tbl au-vt"><thead><tr><th>#</th><th>' + esc(NS.t('au.v_desc')) + '</th><th class="n">' + esc(NS.t('au.v_qty')) + '</th><th class="n">' + esc(NS.t('au.v_rate')) + '</th><th class="n">GST %</th><th class="n">' + esc(NS.t('au.v_amt')) + '</th></tr></thead><tbody>' +
+          items.map(function (l, i) { return '<tr><td>' + (i + 1) + '</td><td>' + esc(l.desc || l.nm || l.a || l.head || '') + '</td><td class="n">' + esc(l.qty == null ? '' : l.qty) + '</td><td class="n">' + esc(l.rate == null ? '' : l.rate) + '</td><td class="n">' + esc(l.gst == null ? '' : l.gst) + '</td><td class="n">' + esc(l.amt != null ? l.amt : l.amount != null ? l.amount : l.qty != null && l.rate != null ? NS.r2(num(l.qty) * num(l.rate) * (1 - num(l.disc) / 100)) : '') + '</td></tr>'; }).join('') + '</tbody></table></div>' : '') +
+        '<dl class="au-vd">' + flat.slice(0, 120).map(function (f) { return '<dt>' + esc(field(f[0])) + '</dt><dd>' + esc(f[1].length > 200 ? f[1].slice(0, 197) + '...' : f[1]) + '</dd>'; }).join('') + '</dl>';
+    });
+  };
+  document.addEventListener('click', function (e) {
+    var v = e.target.closest && e.target.closest('[data-au-ver]');
+    if (v) { e.preventDefault(); NS.showVersion(v.getAttribute('data-au-ver')); }
+  });
+
+  /* ---------- PIN and reason for the safety switches (A-4, C-18) ----------
+     NS.guard({ title, msg, why: 'need'|'ask'|false }) -> Promise<{ why }> (rejects with .quiet when closed). Asks the PIN when one is set. */
+  NS.guard = function (o) {
+    o = o || {};
+    return NSStore.meta('pin').catch(function () { return null; }).then(function (pin) {
+      if (o.nopin) pin = null;
+      if (!pin && !o.why) return { why: '' };
+      return new Promise(function (res, rej) {
+        var d = NS.el('dialog', { 'class': 'b1-dlg au-g', 'aria-labelledby': 'au-g-h' });
+        d.innerHTML = '<form method="dialog" novalidate><div class="dlg-h"><h2 id="au-g-h"></h2></div><div class="dlg-b">' + (o.msg ? '<p class="au-msg"></p>' : '') +
+          (pin ? '<div class="f"><label for="au-g-pin">' + esc(tt('pin')) + '</label><input id="au-g-pin" type="password" inputmode="numeric" autocomplete="off" maxlength="8" dir="ltr"></div>' : '') +
+          (o.why ? '<div class="f"><label for="au-g-why">' + esc(NS.t(o.why === 'need' ? 'au.whyneed' : 'au.whyask')) + '</label><textarea id="au-g-why" rows="2" maxlength="300"></textarea></div>' : '') +
+          '<p class="au-err bad" aria-live="assertive"></p><div class="quick"><button type="submit" class="btn ' + (o.danger ? 'danger' : 'primary') + '" value="ok"></button> <button type="button" class="btn" data-no></button></div></div></form>';
+        $('h2', d).textContent = o.title || NS.t('au.confirm');
+        if (o.msg) $('.au-msg', d).textContent = o.msg;
+        $('[type=submit]', d).textContent = o.ok || NS.t('au.ok');
+        $('[data-no]', d).textContent = NS.t('au.no');
+        document.body.appendChild(d);
+        var done = false;
+        function close(v, err) { if (done) return; done = true; d.close(); d.remove(); if (err) { var e = new Error('closed'); e.quiet = true; rej(e); } else res(v); }
+        $('[data-no]', d).addEventListener('click', function () { close(null, true); });
+        d.addEventListener('cancel', function () { close(null, true); });
+        $('form', d).addEventListener('submit', function (ev) {
+          ev.preventDefault();
+          var w = $('#au-g-why', d), why = w ? w.value.trim() : '', err = $('.au-err', d);
+          if (o.why === 'need' && !why) { err.textContent = NS.t('au.whyreq'); w.focus(); return; }
+          (pin ? NS.pin.check($('#au-g-pin', d).value) : Promise.resolve(true)).then(function (ok) {
+            if (!ok) { err.textContent = tt('pin_wrong'); $('#au-g-pin', d).value = ''; $('#au-g-pin', d).focus(); return; }
+            close({ why: why });
+          });
+        });
+        if (d.showModal) d.showModal(); else d.setAttribute('open', '');
+        setTimeout(function () { var f = $('input,textarea', d); if (f) f.focus(); }, 30);
+      });
+    });
+  };
+
+  /* ---------- cancel a voucher (A-3) ---------- */
+  NS.cancelDoc = function (d, o) {
+    o = o || {};
+    if (!d || !d.id) return Promise.resolve(null);
+    var nm = [d.no, d.buyer && d.buyer.name].filter(Boolean).join(' · ');
+    if (d.cancelled) return NS.uncancelDoc(d);
+    return NS.guard({ title: NS.t('au.cxt', { n: nm }), msg: NS.t(o.fromDelete ? 'au.cxdel' : 'au.cxp'), why: 'need', ok: NS.t('au.cxok'), danger: 1, nopin: 1 }).then(function (r) {
+      return NSStore.cancel(d.id, r.why);
+    }).then(function (x) { NS.toast(NS.t('au.cxdone', { n: d.no || '' })); document.dispatchEvent(new CustomEvent('ns-data')); return x; },
+      function (e) { if (!e.quiet) NS.toast(e.message, 'bad'); return null; });
+  };
+  /* bring a cancelled voucher back: the owner only (PIN when set), logged */
+  NS.uncancelDoc = function (d) {
+    return NS.guard({ title: NS.t('au.uncxt', { n: d.no || '' }), msg: NS.t('au.uncxp'), why: 'need', ok: NS.t('au.uncxok') }).then(function (r) {
+      return NSStore.uncancel(d.id, r.why);
+    }).then(function (x) { NS.toast(NS.t('au.uncxdone', { n: d.no || '' })); document.dispatchEvent(new CustomEvent('ns-data')); return x; },
+      function (e) { if (!e.quiet) NS.toast(e.message, 'bad'); return null; });
+  };
+  /* small pieces the lists use */
+  NS.cxPill = function (d) { return d && d.cancelled ? ' <span class="pill cx" title="' + esc(d.cancelled.why || '') + '">' + esc(NS.t('au.cxpill')) + '</span>' : ''; };
+  NS.cxBtn = function (d, cls) {   /* class 'ib': an icon button with the words on hover, like the other row buttons */
+    if (!d || !d.id) return '';
+    var lbl = NS.t(d.cancelled ? 'au.uncxb' : 'au.cxb'), ib = /(^|\s)ib(\s|$)/.test(cls || '') && NS.icSvg;
+    return '<button type="button" class="' + (cls || 'btn sm') + '" data-au-cx="' + esc(d.id) + '" title="' + esc(lbl) + '" aria-label="' + esc(lbl) + '">' + (ib ? NS.icSvg(d.cancelled ? 'reset' : 'x') : esc(lbl)) + '</button>';
+  };
+  document.addEventListener('click', function (e) {
+    var c = e.target.closest && e.target.closest('[data-au-cx]');
+    if (!c) return;
+    e.preventDefault(); e.stopPropagation();
+    var dl = c.hasAttribute('data-close-box') && c.closest('dialog'); if (dl) dl.close();
+    NSStore.get('doc', c.getAttribute('data-au-cx')).then(function (d) { if (d) NS.cancelDoc(d); });
+  }, true);
+  /* the App's entry screen of a saved voucher (app.js openForm, and the voucher screens of vdocs.js through NSApp.vh().cur()):
+     Cancel voucher / Undo cancel in its foot, which closes the screen once done (its copy of the voucher is old then);
+     a cancelled voucher shows the stamp and cannot be saved until the cancel is undone */
+  function entryCx() {
+    var dl = document.querySelector('dialog#app-form[open]'), A = window.NSApp, F = dl && A && A.vh && A.vh().cur(), r = F && F.rec;
+    var ft = dl && dl.querySelector('.dlg-foot'); if (!ft || ft.querySelector('[data-au-cxf]') || !r || !r.id || !r.no) return;
+    if (!r.cancelled && !(window.NSBooks && NSBooks.role(r)) && !/^(challan|note|cashmemo|self|expinv)$/.test(r.type || '')) return;
+    var b = NS.el('button', { type: 'button', 'class': 'btn' + (r.cancelled ? '' : ' danger'), 'data-au-cxf': r.id }, esc(NS.t(r.cancelled ? 'au.uncxb' : 'au.cxb')));
+    ft.insertBefore(b, ft.querySelector('[data-close]'));
+    if (r.cancelled) {
+      Array.prototype.forEach.call(ft.querySelectorAll('[type=submit]'), function (s) { s.disabled = true; });
+      var p = NS.el('p', { 'class': 'au-cxnote', role: 'note' }, '<span class="pill cx">' + esc(NS.t('au.cxpill')) + '</span> ' + esc(r.cancelled.why || ''));
+      var fm = ft.parentNode; fm.insertBefore(p, fm.firstChild);
+    }
+    b.addEventListener('click', function () {
+      NSStore.get('doc', r.id).then(function (d) { return d && NS.cancelDoc(d); }).then(function (x) { if (x) { dl.removeAttribute('data-dirty'); if (NS.vsLeave) NS.vsLeave(null, dl); else dl.close(); } });
+    });
+  }
+  var cxT = 0;
+  new MutationObserver(function () { if (!cxT) cxT = setTimeout(function () { cxT = 0; entryCx(); }, 30); }).observe(document.documentElement, { subtree: true, childList: true, attributes: true, attributeFilter: ['open'] });
 
   /* ---------- PIN lock ---------- */
   function b64(buf) { return btoa(String.fromCharCode.apply(null, new Uint8Array(buf))); }
@@ -98,9 +248,9 @@
     });
     $('[data-forgot]', o).addEventListener('click', function () { $('.lk-forgot', o).hidden = false; });
     $('[data-erase]', o).addEventListener('click', function () {
-      if (!confirm(tt('erase_c1'))) return;
+      if (!NS.okSync(tt('erase_c1'))) return;
       if (prompt(NS.t('my.wipe.c2')) !== 'DELETE') return;
-      NSStore.importAll({}, true).then(function () {
+      NSStore.importAll({}, true, { wipe: true }).then(function () {   /* the edit history stays (A-1) */
         ls(HINT, null); ss(SKEY, String(Date.now()));
         $('[data-erase]', o).hidden = true; $('[data-rest]', o).hidden = false;
         msg.textContent = tt('erased');
@@ -174,20 +324,13 @@
   };
   document.addEventListener('click', function (e) {
     var b = e.target.closest && e.target.closest('[data-sample-rm]');
-    if (!b || !confirm(tt('samp_rmc'))) return;
+    if (!b || !NS.okSync(tt('samp_rmc'))) return;
     NS.sample.remove().then(function (n) { NS.toast(tt('samp_gone', { n: n })); document.dispatchEvent(new CustomEvent('ns-data')); });
   });
 
   /* ---------- next invoice number (docs.js rule) ---------- */
-  NS.nextInvNo = function (all, sellerName, date, CFG) {
-    var c = (CFG || {}).invoice || {}, fy = NS.fy(date), short = fy.slice(2, 4) + '-' + fy.slice(5);
-    var pre = String(c.prefix != null ? c.prefix : 'INV').trim().replace(/[^A-Za-z0-9\/\-]/g, ''), digits = Math.min(6, Math.max(1, +c.digits || 3));
-    var prefix = (pre ? pre + '/' : '') + (c.fy === false ? '' : short + '/'), max = 0, k = key(sellerName);
-    all.forEach(function (d) {
-      if ((d.type || 'invoice') !== 'invoice' || d.counter || NS.fy(d.date) !== fy || key(d.seller && d.seller.name) !== k) return;
-      var m = String(d.no || '').match(/(\d+)\s*$/); if (m) max = Math.max(max, +m[1]);
-    });
-    return prefix + String(max + 1).padStart(digits, '0');
+  NS.nextInvNo = function (all, sellerName, date, CFG, sub) {   /* one numbering engine (core.js NS.nextNo, ERP A-6); sub = an invoice sub-type id (A-7) */
+    return NS.nextNo(all, { type: 'invoice', seller: sellerName || '', date: date, cfg: CFG || {}, def: 'INV', sub: sub || '' }).no;
   };
 
   /* ---------- recurring bills: which copies are due (nothing is made without a tap) ---------- */
@@ -227,7 +370,8 @@
     ['id', 'created', 'updated', 'rec', 'irn', 'einv', 'paidBy', 'invNo', 'nextNo', 'nextType', 'fromId'].forEach(function (k) { delete d[k]; });
     d.date = item.date; d.due = tpl.due ? NSBooks.addDays(item.date, gap) : ''; d.status = 'unpaid'; d.recOf = tpl.id; d.recFor = item.period;
     d.no = NS.nextInvNo(all, tpl.seller && tpl.seller.name, item.date, CFG);
-    return NSStore.put('doc', d);
+    /* A-15 (ERP Round 2): the copy is a credit sale, so the party's credit limit and late bills are checked (warn asks, stop refuses: Error 'cancel') */
+    return (NS.creditAskDoc ? NS.creditAskDoc(d) : Promise.resolve()).then(function () { return NSStore.put('doc', d); });
   };
 
   /* ---------- Excel ---------- */

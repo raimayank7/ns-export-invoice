@@ -10,8 +10,8 @@
    Sample records (sample: true, getting-started wizard) are left out of the history and skip the bin when removed. */
 (function () {
   'use strict';
-  var STORES = ['biz', 'party', 'item', 'doc', 'meta', 'bin', 'log'];
-  var KEPT = { biz: 1, party: 1, item: 1, doc: 1 }, BIN_DAYS = 30;
+  var STORES = ['biz', 'party', 'item', 'doc', 'meta', 'bin', 'log', 'ver'];   /* ver: full earlier versions (ERP Round 1, A-2) */
+  var KEPT = { biz: 1, party: 1, item: 1, doc: 1 }, BIN_DAYS = 30, KEEPS = { log: 1, ver: 1 };
   var cfg = window.NS_CFG || {};
   var VAULT = cfg.vault || 'https://my.niveshsahayak.in/vault.html';
   var VAULT_ORIGIN = new URL(VAULT, location.href).origin;
@@ -22,7 +22,7 @@
   function ldb() {
     if (ldbp) return ldbp;
     ldbp = new Promise(function (res, rej) {
-      var r = indexedDB.open('ns-local', 2);
+      var r = indexedDB.open('ns-local', 3);
       r.onupgradeneeded = function () { STORES.forEach(function (s) { if (!r.result.objectStoreNames.contains(s)) r.result.createObjectStore(s, { keyPath: 'id' }); }); };
       r.onblocked = blockedNote;
       var slow = setTimeout(blockedNote, 4000);   /* "blocked" reaches only the first waiting page; later ones just wait */
@@ -60,14 +60,16 @@
       var data = a.data || {}, n = 0;
       return Promise.all(STORES.map(function (s) {
         var rows = (data[s] || []).filter(function (r) { return r && r.id; });
-        return (a.replace ? LOCAL.clear({ store: s }) : Promise.resolve()).then(function () { return LOCAL.list({ store: s }); }).then(function (have) {
+        return (a.replace && !KEEPS[s] ? LOCAL.clear({ store: s }) : Promise.resolve()).then(function () { return LOCAL.list({ store: s }); }).then(function (have) {
           var map = {}; have.forEach(function (h) { map[h.id] = h; });
-          var put = rows.filter(function (r) { return !map[r.id] || (r.updated || 0) > (map[r.id].updated || 0); });
+          var put = rows.filter(function (r) { return !map[r.id] || !KEEPS[s] && (r.updated || 0) > (map[r.id].updated || 0); });   /* history: add only */
           n += put.length;
           return put.length ? LOCAL.put({ store: s, value: put }) : 0;
         });
       })).then(function () { return n; });
     },
+    logAdd: function (a) { return LOCAL.importAll({ data: { log: [].concat(a.value) } }); },   /* sealed when it moves into the data home */
+    logCheck: function () { return Promise.resolve(null); },
     persist: function () { return navigator.storage && navigator.storage.persist ? navigator.storage.persist() : Promise.resolve(false); },
     estimate: function () { return navigator.storage && navigator.storage.estimate ? navigator.storage.estimate() : Promise.resolve(null); }
   };
@@ -209,17 +211,90 @@
     Object.keys(Object.assign({}, A, B)).forEach(function (k) { var x = short(A[k]), y = short(B[k]); if (x !== y) ch.push([k, x, y]); });
     return ch;
   }
+  /* ERP Round 1, A-1: the data home seals each entry onto a hash chain ('logAdd'); an older data home just stores it */
+  function logEntry(e) { return call('logAdd', { value: e }).catch(function (err) { if (/Unknown operation/.test(err && err.message)) return call('put', { store: 'log', value: e }); throw err; }); }
   function addLog(store, act, rec, ch, extra) {
-    if (!KEPT[store] || rec && rec.sample) return Promise.resolve();
+    if (!KEPT[store] && store !== 'meta' || rec && rec.sample) return Promise.resolve();
     return whoName().then(function (w) {
       var e = Object.assign({ id: uid(), at: Date.now(), who: w, site: location.hostname, store: store, rid: rec && rec.id, act: act,
         no: rec && (rec.no || rec.billNo) || '', type: rec && rec.type || '', name: rec && (rec.name || rec.desc || rec.buyer && rec.buyer.name) || '', ch: (ch || []).slice(0, 60) }, extra || {});
-      return call('put', { store: 'log', value: e });
+      if (rec && rec.date && store === 'doc') e.date = rec.date;   /* the voucher's own date: "changes to entries dated before the lock" (C-18) */
+      Object.keys(e).forEach(function (k) { if (e[k] === undefined) delete e[k]; });
+      return logEntry(e);
     }).catch(function () {});   /* an older data home without the log store: the record itself is still saved */
+  }
+  /* ERP Round 1, A-2: the full record as it was before a change or delete, kept for good in store 'ver' (never purged) */
+  function keepVersion(store, old, act) {
+    if (!old || old.sample) return Promise.resolve('');
+    return whoName().then(function (w) {
+      var v = { id: uid(), rid: old.id, store: store, at: Date.now(), who: w, act: act, rec: old };
+      return call('put', { store: 'ver', value: v }).then(function () { return v.id; });
+    }).catch(function () { return ''; });
+  }
+
+  /* ---------- the business of a document by id (ERP Round 1, C-1) ----------
+     d.bizId links a voucher to its business record. Read back, a voucher of a renamed business shows the current name, so every
+     report that still matches by name keeps it; a voucher with no bizId is matched by name as before. */
+  var bizC = null, bizT = 0;
+  function bizList() {
+    if (bizC && Date.now() - bizT < 3000) return Promise.resolve(bizC);
+    return call('list', { store: 'biz' }).then(function (l) { bizC = l || []; bizT = Date.now(); return bizC; }, function () { return []; });
+  }
+  function nk(s) { return String(s || '').trim().toLowerCase().replace(/\s+/g, ' '); }
+  /* the id of the business a seller copy belongs to: its current name first, then a name it had before; '' when none or several */
+  function bizIdFor(seller, list) {
+    var k = nk(seller && seller.name); if (!k) return '';
+    var now = list.filter(function (b) { return b && b.id && nk(b.name) === k; });
+    if (now.length) return now.length === 1 ? now[0].id : '';
+    var was = list.filter(function (b) { return b && b.id && (b.oldNames || []).some(function (n) { return nk(n) === k; }); });
+    return was.length === 1 ? was[0].id : '';
+  }
+  function showBiz(d, map) {
+    var b = d && d.bizId && map[d.bizId];
+    if (b && d.seller && nk(d.seller.name) !== nk(b.name)) d.seller.name = b.name;
+    return d;
+  }
+  function withBizNames(rows) {
+    if (!rows || !(Array.isArray(rows) ? rows : [rows]).some(function (d) { return d && d.bizId; })) return Promise.resolve(rows);
+    return bizList().then(function (l) { var m = {}; l.forEach(function (b) { m[b.id] = b; }); (Array.isArray(rows) ? rows : [rows]).forEach(function (d) { showBiz(d, m); }); return rows; });
+  }
+  /* each App / My data start (cheap): vouchers with no bizId whose seller matches exactly one business get it; one history entry */
+  function linkBiz() {
+    bizC = null;
+    return Promise.all([bizList(), call('list', { store: 'doc' })]).then(function (r) {
+      var l = r[0], fix = [];
+      (r[1] || []).forEach(function (d) { if (d && !d.bizId && d.seller) { var id = bizIdFor(d.seller, l); if (id) { d.bizId = id; fix.push(d); } } });
+      if (!fix.length) return 0;
+      return call('put', { store: 'doc', value: fix }).then(function () {
+        var by = {}; fix.forEach(function (d) { by[d.bizId] = (by[d.bizId] || 0) + 1; });
+        return whoName().then(function (w) { return logEntry({ id: uid(), at: Date.now(), who: w, site: location.hostname, store: 'doc', act: 'link', n: fix.length,
+          ch: Object.keys(by).map(function (id) { var b = l.filter(function (x) { return x.id === id; })[0]; return ['bizId', b ? b.name : id, String(by[id])]; }) }); }).catch(function () {});
+      }).then(function () { return fix.length; });
+    }).catch(function () { return 0; });
+  }
+  /* Masters > Businesses: the unlinked vouchers whose seller name is `name` (every unlinked one when name is null) go to business bizId; one history entry */
+  function linkTo(name, bizId, why) {
+    bizC = null;
+    return Promise.all([bizList(), call('list', { store: 'doc' })]).then(function (r) {
+      var b = r[0].filter(function (x) { return x && x.id === bizId; })[0]; if (!b) throw new Error('No such business');
+      var fix = (r[1] || []).filter(function (d) { return d && !d.bizId && d.seller && (name == null || nk(d.seller.name) === nk(name)); });
+      if (!fix.length) return 0;
+      fix.forEach(function (d) { d.bizId = bizId; });
+      return call('put', { store: 'doc', value: fix }).then(function () {
+        return whoName().then(function (w) { return logEntry({ id: uid(), at: Date.now(), who: w, site: location.hostname, store: 'doc', act: 'link', n: fix.length, why: why || '',
+          ch: [['bizId', name == null ? '' : String(name), b.name + ' (' + fix.length + ')']] }); }).catch(function () {});
+      }).then(function () { return fix.length; });
+    });
+  }
+  /* vouchers no business claims: seller name -> how many (Masters > Businesses) */
+  function unlinked(docs) {
+    var o = {};
+    (docs || []).forEach(function (d) { if (d && !d.bizId && d.seller && !d.sample) { var n = String(d.seller.name || '').trim(), k = nk(n); o[k] = o[k] || { name: n, n: 0 }; o[k].n++; } });
+    return Object.keys(o).map(function (k) { return o[k]; }).sort(function (a, b) { return b.n - a.n; });
   }
 
   /* ---------- period lock ---------- */
-  var LOCK_FREE = { status: 1, paidBy: 1, invNo: 1, nextNo: 1, nextType: 1, chq: 1, rec: 1 };   /* payment status (and stopping a repeat) may still change on a locked document */
+  var LOCK_FREE = { status: 1, paidBy: 1, invNo: 1, nextNo: 1, nextType: 1, chq: 1, rec: 1, bizId: 1 };   /* payment status (and stopping a repeat) may still change on a locked document */
   /* the lock date of the document's business (settings per business, core.js NS.cfgFor), else the shared one */
   function lockDate(d) {
     return call('get', { store: 'meta', id: 'settings' }).then(function (r) {
@@ -261,38 +336,103 @@
   }
   function sfErr() { var e = new Error(window.NS && NS.t ? NS.t('sfd.denied') : 'Staff cannot do this. Ask the owner.'); e.denied = true; return Promise.reject(e); }
 
-  function put(store, obj) {
+  /* opts.act / opts.why: the history entry's action and reason (cancel, uncancel) */
+  function put(store, obj, opts) {
     if (sfDenied('put', store, obj && obj.id)) return sfErr();
+    if (store === 'log' || store === 'ver') return call('put', { store: store, value: obj });   /* the data home adds these, never overwrites */
     if (!obj.id) obj.id = uid();
-    var old;
+    var old, verId = '';
+    opts = opts || {};
     return (KEPT[store] ? call('get', { store: store, id: obj.id }) : Promise.resolve()).then(function (o) {
       old = o;
       return checkLock(store, old, obj);
+    }).then(function () {
+      if (store === 'doc' && obj.seller) return bizList().then(function (l) { var id = bizIdFor(obj.seller, l); if (id) obj.bizId = id; else if (!obj.bizId && old && old.bizId) obj.bizId = old.bizId; });
+      if (store === 'biz' && old && nk(old.name) && nk(old.name) !== nk(obj.name)) {   /* a renamed business keeps its vouchers (C-1) */
+        obj.oldNames = (obj.oldNames || old.oldNames || []).filter(function (n) { return nk(n) !== nk(obj.name); });
+        if (obj.oldNames.map(nk).indexOf(nk(old.name)) < 0) obj.oldNames.push(old.name);
+        return linkBiz();   /* vouchers still without a bizId are linked under the old name first */
+      }
+    }).then(function () {
+      if (old && !old.sample && KEPT[store] && diff(old, obj).length) return keepVersion(store, old, opts.act || 'edit').then(function (v) { verId = v; });
     }).then(function () {
       if (!obj.created) obj.created = Date.now();
       obj.updated = Date.now();
       return call('put', { store: store, value: obj });
     }).then(function () {
-      if (KEPT[store]) { var ch = diff(old, obj); if (!old || ch.length) addLog(store, old ? 'edit' : 'add', obj, old ? ch : []); }
+      if (store === 'biz') bizC = null;
+      if (KEPT[store]) { var ch = diff(old, obj); if (!old || ch.length) addLog(store, opts.act || (old ? 'edit' : 'add'), obj, old ? ch : [], { ver: verId || undefined, why: opts.why || undefined }); }
       return obj;
     });
   }
-  /* opts.hard: no bin and no history (removing sample records) */
+
+  /* ---------- cancel a voucher (ERP Round 1, A-3) ----------
+     d.cancelled = { at, who, why }: the number and date stay, nothing posts (books.js role, stock, GST returns), the print says
+     CANCELLED and GSTR-1 table 13 counts it as cancelled. A numbered voucher of a GST business can be deleted only while it is
+     the last number of its series or was saved today (mustCancel), unless My data › Settings allows deleting vouchers. */
+  var GSTDOC = { invoice: 1, cashmemo: 1, note: 1, receipt: 1, voucher: 1, self: 1, expinv: 1, pbill: 1, pharma: 1, jewel: 1, garment: 1, resto: 1, lr: 1, fee: 1 };
+  function dayOf(ms) { var d = new Date(ms); return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0'); }
+  function fyOf(iso) { var y = +String(iso).slice(0, 4), m = +String(iso).slice(5, 7); if (m < 4) y--; return y; }
+  function seriesOf(no) { return nk(String(no || '').replace(/\d+\s*$/, '')); }
+  function tailOf(no) { var m = String(no || '').match(/(\d+)\s*$/); return m ? +m[1] : NaN; }
+  /* '' = may be deleted; 'cancel' = only Cancel (a number in the middle of a GST series, saved before today) */
+  function mustCancel(rec, all, S, now) {
+    if (!rec || rec.sample || !GSTDOC[rec.type || 'invoice'] || !String(rec.no || '').trim()) return '';
+    if (!(rec.seller && String(rec.seller.gstin || '').trim())) return '';   /* not a GST business */
+    if (S && S.allowDel) return '';
+    if (rec.created && dayOf(rec.created) === dayOf(now || Date.now())) return '';
+    if ((rec.type || 'invoice') === 'pbill') return 'cancel';   /* the supplier's number: only a bill saved today may go */
+    var t = tailOf(rec.no), ser = seriesOf(rec.no), fy = fyOf(rec.date), me = rec.bizId || nk(rec.seller.name);
+    if (!isFinite(t)) return 'cancel';
+    var later = (all || []).some(function (d) {
+      return d && d.id !== rec.id && (d.type || 'invoice') === (rec.type || 'invoice') && (d.kind || '') === (rec.kind || '') && fyOf(d.date) === fy && seriesOf(d.no) === ser &&
+        (d.bizId || nk(d.seller && d.seller.name)) === me && tailOf(d.no) > t;
+    });
+    return later ? 'cancel' : '';
+  }
+  function cancelErr() {
+    var e = new Error(window.NS && NS.t ? NS.t('au.mustcancel') : 'This voucher has a number in a GST series. Cancel it instead of deleting it.');
+    e.mustCancel = true; return e;
+  }
+  /* undo: bring a cancelled voucher back (the screens ask for the PIN when one is set) */
+  function cancel(id, why, undo) {
+    return call('get', { store: 'doc', id: id }).then(function (d) {
+      if (!d) throw new Error('gone');
+      if (!undo && d.cancelled || undo && !d.cancelled) return d;
+      return whoName().then(function (w) {
+        var n = JSON.parse(JSON.stringify(d)), y = String(why || '').trim();
+        if (undo) delete n.cancelled; else n.cancelled = { at: Date.now(), who: w, why: y };
+        return put('doc', n, { act: undo ? 'uncancel' : 'cancel', why: y });
+      });
+    });
+  }
+  /* opts.hard: no bin and no history; only for sample records (A-1: any other caller still goes through the bin and the history) */
   function del(store, id, opts) {
     if (sfDenied('del', store, id)) return sfErr();
+    if (store === 'log' || store === 'ver') return Promise.reject(new Error('The edit history cannot be changed or removed'));
     if (!KEPT[store]) return call('del', { store: store, id: id });
-    var hard = opts && opts.hard, rec;
+    var hard = false, rec, verId = '';
     return call('get', { store: store, id: id }).then(function (r) {
       rec = r;
       if (!rec) return;
+      hard = !!(opts && opts.hard && rec.sample);
       return checkLock(store, rec, null).then(function () {
+        if (store !== 'doc' || rec.sample) return;
+        return Promise.all([call('list', { store: 'doc' }), call('get', { store: 'meta', id: 'settings' })]).then(function (x) {
+          var S = x[1] && x[1].v || {}, own = rec.bizId && S.byBiz && S.byBiz[rec.bizId];
+          if (mustCancel(rec, x[0], own && 'allowDel' in own ? own : S)) { if (!(opts && opts.quiet)) offerCancel(rec); throw cancelErr(); }
+        });
+      }).then(function () {
         if (hard || rec.sample) return;
-        return whoName().then(function (w) { return call('put', { store: 'bin', value: { id: store + ':' + id, store: store, rec: rec, at: Date.now(), who: w } }); }).catch(function () {});
+        return keepVersion(store, rec, 'del').then(function (v) { verId = v; return whoName(); })
+          .then(function (w) { return call('put', { store: 'bin', value: { id: store + ':' + id, store: store, rec: rec, at: Date.now(), who: w } }); }).catch(function () {});
       });
     }).then(function () {
-      return call('del', { store: store, id: id });
-    }).then(function () { if (rec && !hard) addLog(store, 'del', rec, []); });
+      if (rec) return call('del', { store: store, id: id });
+    }).then(function () { if (store === 'biz') bizC = null; if (rec && !hard) return addLog(store, 'del', rec, [], { ver: verId || undefined }); });
   }
+  /* a Delete button anywhere that hits such a voucher offers Cancel instead (extras.js NS.cancelDoc asks the reason) */
+  function offerCancel(rec) { setTimeout(function () { if (window.NS && NS.cancelDoc) NS.cancelDoc(rec, { fromDelete: true }); }, 0); }
   function restore(binId) {
     return call('get', { store: 'bin', id: binId }).then(function (b) {
       if (!b || !b.rec) throw new Error('gone');
@@ -307,24 +447,74 @@
     });
   }
 
+  /* ---------- settings that guard the books are logged too (ERP Round 1, A-4 / C-18) ----------
+     settings: only the period lock, closed years, number series and "allow deleting vouchers"; heads and groups: every change;
+     the PIN: switched on or off. Moving the lock earlier, reopening a year and emptying the bin ask for the PIN on the screens. */
+  var META_LOG = { settings: 1, heads: 1, groups: 1, pin: 1 };
+  var SET_KEEP = /(^|\.)(lockBefore|allowDel|prefix|digits)$|(^|\.)closed\./;
+  function metaCh(key, a, b) {
+    if (key === 'pin') return !a === !b ? (a && b && a.hash !== b.hash ? [['pin', 'on', 'changed']] : []) : [['pin', a ? 'on' : 'off', b ? 'on' : 'off']];
+    var ch = diff(a && typeof a === 'object' ? a : { v: a }, b && typeof b === 'object' ? b : { v: b });
+    return key === 'settings' ? ch.filter(function (c) { return SET_KEEP.test(c[0]); }) : ch;
+  }
+  function metaPut(key, val, opts) {
+    var rec = { id: key, v: val, updated: Date.now() };
+    if (!META_LOG[key]) return call('put', { store: 'meta', value: rec });
+    var old;
+    return call('get', { store: 'meta', id: key }).then(function (o) { old = o ? o.v : undefined; }, function () {}).then(function () {
+      return call('put', { store: 'meta', value: rec });
+    }).then(function (r) {
+      var ch = metaCh(key, old, val);
+      if (ch.length) addLog('meta', ch.some(function (c) { return /lockBefore|closed/.test(c[0]); }) ? 'lock' : 'meta', { id: key, name: key }, ch.slice(0, 60), { why: opts && opts.why || undefined });
+      return r;
+    });
+  }
+  function sha(s) {
+    try { return crypto.subtle.digest('SHA-256', new TextEncoder().encode(s)).then(function (b) { return Array.prototype.map.call(new Uint8Array(b), function (x) { return ('0' + x.toString(16)).slice(-2); }).join(''); }, function () { return ''; }); }
+    catch (e) { return Promise.resolve(''); }
+  }
+
   window.NSStore = {
     ready: function () { return ready().then(function (m) { if (!purged) { purged = true; purgeBin(); } return m; }); },
     mode: function () { return host ? host.mode() : mode; },
     _call: call, _send: send,   /* for the App's own copies of the makers (see host above) */
-    list: function (store) { return call('list', { store: store }).then(function (r) { return r || []; }, function (e) { if (store === 'bin' || store === 'log') return []; throw e; }); },
-    get: function (store, id) { return call('get', { store: store, id: id }); },
+    list: function (store) { return call('list', { store: store }).then(function (r) { r = r || []; return store === 'doc' ? withBizNames(r) : r; }, function (e) { if (store === 'bin' || store === 'log' || store === 'ver') return []; throw e; }); },
+    get: function (store, id) { return call('get', { store: store, id: id }).then(function (r) { return store === 'doc' && r ? withBizNames(r) : r; }); },
     put: put,
     del: del,
     restore: restore,
     binDays: BIN_DAYS,
     lockDate: lockDate,
     exportAll: function () { return call('exportAll'); },
-    importAll: function (data, replace) {
-      return call('importAll', { data: data, replace: !!replace }).then(function (n) {
-        if (n) whoName().then(function (w) { return call('put', { store: 'log', value: { id: uid(), at: Date.now(), who: w, site: location.hostname, act: 'import', n: n, ch: [] } }); }).catch(function () {});
+    /* info: { file } the backup file's name, { wipe } "Delete everything". A restore never clears or overwrites the edit history (A-1);
+       it adds one entry with the file name, how many records of each kind the file held and the file's SHA-256. */
+    importAll: function (data, replace, info) {
+      info = info || {};
+      var counts = {}; Object.keys(data || {}).forEach(function (s) { if (Array.isArray(data[s])) counts[s] = data[s].length; });
+      return Promise.all([call('importAll', { data: data, replace: !!replace }), sha(JSON.stringify(data || {}))]).then(function (r) {
+        var n = r[0], act = info.wipe ? 'wipe' : info.file || replace ? 'restore-file' : 'import';
+        if (n || act !== 'import') whoName().then(function (w) { return logEntry({ id: uid(), at: Date.now(), who: w, site: location.hostname, act: act, n: n || 0, file: info.file || '', replace: !!replace, counts: counts, fileHash: r[1], ch: [] }); }).catch(function () {});
         return n;
       });
     },
+    /* ERP Round 1: cancel / bring back a voucher (A-3), the delete rule, linking vouchers to their business (C-1),
+       checking the edit history seal (A-1), one history entry for a screen action such as emptying the bin (C-18) */
+    cancel: function (id, why) { return cancel(id, why, false); },
+    uncancel: function (id, why) { return cancel(id, why, true); },
+    mustCancel: mustCancel,
+    linkBiz: linkBiz,
+    linkTo: linkTo,
+    unlinked: unlinked,
+    bizIdFor: bizIdFor,
+    logCheck: function () { return call('logCheck'); },
+    /* "Delete everything": every business, party, item, document and the recycle bin go; the edit history and earlier versions stay (A-1) */
+    wipe: function (why) {
+      if (sfDenied('del', 'doc')) return sfErr();
+      var counts = {};
+      return Promise.all(['biz', 'party', 'item', 'doc', 'bin'].map(function (s) { return call('list', { store: s }).then(function (r) { counts[s] = (r || []).filter(function (x) { return !x.sample; }).length; return call('clear', { store: s }); }); }))
+        .then(function () { bizC = null; return window.NSStore.note('wipe', { counts: counts, why: why || undefined }); });
+    },
+    note: function (act, extra) { return whoName().then(function (w) { return logEntry(Object.assign({ id: uid(), at: Date.now(), who: w, site: location.hostname, act: act, ch: [] }, extra || {})); }).catch(function () {}); },
     persist: function () { return call('persist'); },
     estimate: function () { return call('estimate'); },
     /* one auto save for every site (vault.js afStatus / afWrite / afOff); null when the data home is not reachable */
@@ -333,7 +523,7 @@
       if (arguments.length < 2) return call('get', { store: 'meta', id: key }).then(function (r) { return r ? r.v : undefined; });
       if (sfDenied('put', 'meta', key)) return sfErr();
       if (key === 'who') who = val || '';
-      return call('put', { store: 'meta', value: { id: key, v: val, updated: Date.now() } });
+      return metaPut(key, val, arguments[2]);
     },
     /* shared folder mode: this computer's bill-number letter (sharedfolder.js keeps it here), '' when the mode is off */
     sfTag: function () {

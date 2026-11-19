@@ -10,7 +10,9 @@
    Groups (my.niveshsahayak.in › Groups): a party's own group becomes a Tally GROUP (PARENT Sundry Debtors / Sundry Creditors, or
    its top group for a sub-group) and the party ledger goes under it; items become STOCKITEM masters (BASEUNITS, a UNIT master per
    unit) under STOCKGROUP masters made from the item groups (empty PARENT = Primary). These master tags follow TallyPrime's
-   usual XML masters but have not been tried in a real TallyPrime yet. */
+   usual XML masters but have not been tried in a real TallyPrime yet.
+   Several banks (ERP masters step 3): every bank account of the business ('bank' = the default bank, 'bank:<name>' the others)
+   is its own ledger under Bank Accounts, named as in the bank master; an entry that touches any of them is a Receipt, Payment or Contra. */
 (function () {
   'use strict';
   var $ = NS.$, $$ = NS.$$, esc = NS.esc, num = NS.num, r2 = NS.r2, t = NS.t, B = window.NSBooks;
@@ -24,12 +26,13 @@
   /* accounts of journal entries, capital and loan forms and the fixed assets register (cap:ramesh, od:hdfc loan, fa:machine...):
      Tally's own group and a clean ledger name (the name as typed, from typedNames). Drawings sit under Capital Account, as Tally users keep them. */
   var PFX = { 'cap:': 'Capital Account', 'drw:': 'Capital Account', 'loan:': 'Loans (Liability)', 'od:': 'Loans (Liability)', 'given:': 'Loans & Advances (Asset)',
+    'sales:': 'Sales Accounts', 'purchases:': 'Purchase Accounts',   /* A-9: named sales / purchase ledgers */
     'fa:': 'Fixed Assets', 'inc:': 'Indirect Incomes', 'exp:': 'Indirect Expenses', 'ocl:': 'Provisions', 'oca:': 'Loans & Advances (Asset)', 'sadv:': 'Loans & Advances (Asset)' };
   var OTHER = { 'tcs-payable': ['TCS Payable', 'Duties & Taxes'], 'tcs-receivable': ['TCS Receivable', 'Loans & Advances (Asset)'], 'chq-in': ['Cheques in Hand', 'Current Assets'],
     'chq-out': ['Cheques Issued, Not Cleared', 'Current Liabilities'], 'gst-out-utgst': ['Output UTGST', 'Duties & Taxes'],
     pdd: ['Provision for Doubtful Debts', 'Sundry Debtors'],   /* WP-3: nets with the debtors */
     'sal-payable': ['Salary Payable', 'Current Liabilities'], 'pf-payable': ['PF Payable', 'Duties & Taxes'], 'esi-payable': ['ESI Payable', 'Duties & Taxes'], 'pt-payable': ['Professional Tax Payable', 'Duties & Taxes'],   /* WP-5 */
-    'gstcash-igst': ['GST Cash Ledger IGST', 'Current Assets'], 'gstcash-cgst': ['GST Cash Ledger CGST', 'Current Assets'], 'gstcash-sgst': ['GST Cash Ledger SGST', 'Current Assets'], 'gstcash-cess': ['GST Cash Ledger Cess', 'Current Assets'] };
+    'gstcash-igst': ['GST Cash Ledger IGST', 'Current Assets'], 'gstcash-cgst': ['GST Cash Ledger CGST', 'Current Assets'], 'gstcash-sgst': ['GST Cash Ledger SGST', 'Current Assets'], 'gstcash-cess': ['GST Cash Ledger Cess', 'Current Assets'], 'gst-itc-held': ['GST ITC Held Rule 37', 'Current Assets'] };
   var box, names = {}, src = 'saved', sheetRows = null, parties = {}, M = { party: [], item: [], groups: null }, typed = {}, DX = null;
   /* expense heads marked Direct (My data › Settings › Final accounts, settings.tf.dx of the business; else tfcore.js defaults)
      go to Tally's own group Direct Expenses, which TallyPrime shows in the Trading Account; the rest stay Indirect Expenses */
@@ -49,6 +52,8 @@
   function pfx(a) { return Object.keys(PFX).filter(function (x) { return String(a).indexOf(x) === 0; })[0]; }
   function ledName(a) {
     if (/^p:/.test(a)) return parties[a] ? parties[a].name : a.slice(2);
+    if (/^bank:/.test(a)) { var bn = names[a] || B.bankName(a); return String(/^Bank: /.test(bn) ? title(a.slice(5)) : bn).trim(); }
+    if (a === 'bank' && !String(names.bank || '').trim() && B.bankName('bank') !== 'Bank') return B.bankName('bank');   /* several banks: the default bank by its own name */
     var px = pfx(a);
     if (px) {
       var nm = String(typed[a] || title(a.slice(px.length))).trim().replace(/^./, function (c) { return c.toUpperCase(); });
@@ -69,6 +74,8 @@
     (docs || []).forEach(function (d) {
       if (d.type === 'jv') (d.lines || []).forEach(function (l) { if (l && l.a && l.a !== 'party') put(l.a, l.nm); });
       if (d.type === 'fa' && d.name) put('fa:' + B.key(d.name), d.name);
+      if (d.sl) put(B.ledAcct(d.sl, 'sales'), d.sl); if (d.pl) put(B.ledAcct(d.pl, 'purchases'), d.pl); (d.items || []).forEach(function (it) { if (it && it.sl) put(B.ledAcct(it.sl, 'sales'), it.sl); if (it && it.pl) put(B.ledAcct(it.pl, 'purchases'), it.pl); });   /* A-9 */
+      if (d.gen) (d.lines || []).forEach(function (l) { if (l && l.a && l.a !== 'party') put(l.a, l.nm); });   /* A-10: general receipt / payment */
       if (d.type === 'exp' && d.cat) { var eh = typeof NSHeads !== 'undefined' && NSHeads.find(d.cat); put('exp:' + B.key(d.cat), eh && !eh.custom ? eh.en : d.cat); }   /* English ledger name, never a code or another language */
       if (d.type === 'voucher') (d.lines || []).forEach(function (l) { if (l && l.head) put('exp:' + B.key(l.head), l.head); });
       if (d.type === 'oinc' && d.head) put('inc:' + B.key(d.head), d.head);   /* other income received (Accounts coverage WP-2) */
@@ -90,6 +97,7 @@
   function tallyTop(id) { return id === 'creditors' ? 'Sundry Creditors' : 'Sundry Debtors'; }
   function ledGroup(a) {
     if (/^p:/.test(a)) { var og = ownGroup(a); return og ? og.name : parties[a] && parties[a].debtor ? 'Sundry Debtors' : 'Sundry Creditors'; }
+    if (/^bank:/.test(a)) return 'Bank Accounts';
     var px = pfx(a);
     if (px === 'exp:' && direct(a)) return 'Direct Expenses';
     if (px === 'inc:' && window.NSHeads) { var hh = NSHeads.find(typed[a] || a); if (hh && hh.t === 'dinc') return 'Direct Incomes'; }   /* heads list (heads.js) */
@@ -103,7 +111,7 @@
   }
   /* Tally refuses Cash and Bank ledgers in a Journal by default: an entry that moves money is a Receipt or a Payment, money only = Contra */
   function moneyType(lines) {
-    var m = lines.filter(function (l) { return l.a === 'cash' || l.a === 'bank'; });
+    var m = lines.filter(function (l) { return l.a === 'cash' || B.isBank(l.a); });
     if (!m.length) return 'Journal';
     if (m.length === lines.length) return 'Contra';
     return m.reduce(function (s, l) { return s + l.v; }, 0) > 0 ? 'Receipt' : 'Payment';
@@ -127,13 +135,14 @@
         return { a: a, v: r2(l.dr - l.cr) };
       });
       if (nm) parties[pk] = Object.assign(parties[pk] || {}, { name: nm.trim(), debtor: !!DEBTOR[R] || !!(parties[pk] && parties[pk].debtor), from: d.buyer });   /* F2-15: a customer stays under Sundry Debtors even when a later write-off or bounced cheque is not a sale */
+      var pof = B.partiesOf(d); if (d.type === 'jv' || d.gen) Object.keys(pof).forEach(function (k) { var ln = (d.lines || []).filter(function (l) { return l.a === 'party' && B.key(l.party) === k; })[0]; parties['p:' + k] = Object.assign(parties['p:' + k] || {}, { name: pof[k], debtor: !!(parties['p:' + k] && parties['p:' + k].debtor) || !(ln && ln.side === 'pay') }); });   /* journal and general voucher parties by their own names (A-10) */
       if (lines.some(function (l) { return l.a === 'p:cash customer'; })) parties['p:cash customer'] = { name: 'Cash Customer', debtor: true };
       if (lines.some(function (l) { return l.a === 'p:unknown payee'; })) parties['p:unknown payee'] = { name: 'Unknown Payee', debtor: false };
       var nl = net(lines);
       var type = d.type === 'note' ? (d.kind === 'debit' ? 'Debit Note' : 'Credit Note') : VT[R] || moneyType(nl);
       /* a fixed asset's number is the SUPPLIER's bill no.: it goes in the narration, Tally numbers the payment itself (round C) */
       var isFa = d.type === 'fa' && d.kind !== 'sale';
-      out.push({ type: type, no: isFa ? '' : d.no || '', date: d.date, party: nm || '', lines: nl, bill: billInfo(d, R), narr: isFa && d.no ? (narration(d, R) + '; supplier bill ' + d.no).slice(0, 500) : narration(d, R) });
+      out.push({ type: type, no: isFa ? '' : d.no || '', date: d.date, party: nm || '', lines: nl, bill: billInfo(d, R), lbills: lineBills(d, R), narr: isFa && d.no ? (narration(d, R) + '; supplier bill ' + d.no).slice(0, 500) : narration(d, R) });
     });
     var r = { vouchers: out, skipped: skipped };
     if (want.stk) {   /* in date order with the other vouchers (production on a day before the sale of what it made) */
@@ -194,10 +203,26 @@
   function billInfo(d, R) {
     if (/^(sale|sdeb|buy)$/.test(R) && d.type !== 'note' || R === 'sdeb') return [{ type: 'New Ref', name: d.no }];
     if (d.type === 'note' && R === 'buy') return [{ type: (d.orig && d.orig.no) ? 'Agst Ref' : 'On Account', name: (d.orig && d.orig.no) || '' }];
+    if (/^(sret|pret)$/.test(R) && d.alloc && d.alloc.length) return d.alloc.map(function (a) { return { type: refType(a), name: a.no, amt: num(a.amt) }; }).concat([{ type: (d.orig && d.orig.no) ? 'Agst Ref' : 'On Account', name: (d.orig && d.orig.no) || '', rest: true }]);   /* A-12 */
     if (/^(sret|pret)$/.test(R)) return [{ type: (d.orig && d.orig.no) ? 'Agst Ref' : 'On Account', name: (d.orig && d.orig.no) || '' }];
     if (R === 'wo') return (d.alloc || []).map(function (a) { return { type: 'Agst Ref', name: a.no, amt: num(a.amt) }; });   /* write-off of a bill (WP-3) */
-    if (R === 'in' || R === 'out') return (d.alloc && d.alloc.length ? d.alloc.map(function (a) { return { type: 'Agst Ref', name: a.no, amt: num(a.amt) }; }) : []).concat([{ type: 'On Account', name: '', rest: true }]);
+    if (d.gen) return null;   /* general receipt / payment: bills per party line (lineBills) */
+    if (R === 'in' || R === 'out') return (d.alloc && d.alloc.length ? d.alloc.map(function (a) { return { type: refType(a), name: a.no, amt: num(a.amt) }; }) : []).concat([{ type: d.kind === 'adv' ? 'Advance' : 'On Account', name: d.kind === 'adv' ? d.no || '' : '', rest: true }]);   /* A-12: ref types; an advance receipt is Tally's Advance */
     return null;
+  }
+  /* A-12 (r2-billwise): Tally bill type of an allocation: Agst Ref (default), New Ref, Advance, On Account */
+  function refType(a) { return a && a.ref === 'new' ? 'New Ref' : a && a.ref === 'adv' ? 'Advance' : a && a.ref === 'onacc' ? 'On Account' : 'Agst Ref'; }
+  /* bill allocations of each party line of a journal or general receipt / payment: { 'p:<key>': [{ type, name, amt, rest }] } */
+  function lineBills(d, R) {
+    if (!(R === 'jv' || d.gen)) return null;
+    var o = null;
+    (d.lines || []).forEach(function (l) {
+      if (!l || l.a !== 'party' || !String(l.party || '').trim()) return;
+      var k = 'p:' + B.key(l.party), pay = l.side === 'pay', isNew = pay ? num(l.cr) > 0 : num(l.dr) > 0;
+      var L = isNew ? [{ type: 'New Ref', name: d.no || '', rest: true }] : (l.alloc || []).map(function (a) { return { type: refType(a), name: a.no, amt: num(a.amt) }; }).concat([{ type: 'On Account', name: '', rest: true }]);
+      o = o || {}; o[k] = (o[k] || []).concat(L);
+    });
+    return o;
   }
   function narration(d, R) {
     var bits = [];
@@ -206,6 +231,7 @@
     if (d.orig && d.orig.no) bits.push('Against invoice ' + d.orig.no);
     if (d.irn && d.irn.irn) bits.push('IRN ' + d.irn.irn);
     if (d.narr) bits.push(d.narr);
+    if (typeof NSCF !== 'undefined' && NSCF.narr) { var cfn = NSCF.narr(d); if (cfn) bits.push(cfn); }   /* custom fields: Tally has no matching field without a TDL, so they go into the narration (ERP Round 2) */
     if (d.gstAdv && d.type === 'receipt' && d.kind === 'adv') bits.push('Advance with GST ' + num(d.rate) + '% (receipt voucher)');
     if (d.type === 'fa') bits.push((d.kind === 'sale' ? 'Fixed asset sold: ' : 'Fixed asset bought: ') + (d.name || ''));
     if (R === 'sal') bits.push('Salary for ' + (d.month || '') + ' of ' + B.partyName(d));
@@ -332,9 +358,10 @@
         (v.narr ? '    <NARRATION>' + x(v.narr) + '</NARRATION>\n' : '') +
         v.lines.map(function (l) {
           var dr = l.v > 0, isParty = /^p:/.test(l.a), b = '';
-          if (bills && isParty && v.bill && l.a === party) {
+          var vb = v.lbills && v.lbills[l.a] || (l.a === party ? v.bill : null);   /* A-12: journal / general voucher party lines carry their own bills */
+          if (bills && isParty && vb) {
             var left = Math.abs(l.v);
-            b = v.bill.map(function (bi) {
+            b = vb.map(function (bi) {
               var a = bi.rest ? left : bi.amt != null ? Math.min(bi.amt, left) : left;
               left = r2(left - a);
               return a > 0 ? '     <BILLALLOCATIONS.LIST>\n      <NAME>' + x(bi.name) + '</NAME>\n      <BILLTYPE>' + bi.type + '</BILLTYPE>\n      <AMOUNT>' + amt(dr ? -a : a) + '</AMOUNT>\n     </BILLALLOCATIONS.LIST>\n' : '';
@@ -420,8 +447,9 @@
       : NSStore.list('doc').then(function (docs) {
         var w = { sale: $('#ty-w-sale', box).checked, buy: $('#ty-w-buy', box).checked, money: $('#ty-w-money', box).checked, stk: $('#ty-w-stk', box).checked };
         var from = $('#ty-from', box).value || '0000', to = $('#ty-to', box).value || '9999';
-        return Promise.all([NSStore.list('party'), NSStore.list('item'), NSStore.meta('groups'), NS.loadCfg ? NS.loadCfg().catch(function () {}) : null]).then(function (L) {
+        return Promise.all([NSStore.list('party'), NSStore.list('item'), NSStore.meta('groups'), NS.loadCfg ? NS.loadCfg().catch(function () {}) : null, NSStore.list('biz'), NSStore.meta('banks')]).then(function (L) {
           var ps = L[0]; useMasters(ps, L[1], L[2]);
+          var bz = (L[4] || []).filter(function (b) { return B.key(b.name) === B.key($('#ty-biz', box).value); })[0]; B.setBanks(B.bankList(bz, L[5] || {}));   /* several banks: their ledger names */
           DX = L[3] && NS.cfgFor ? (NS.cfgFor(L[3], { name: $('#ty-biz', box).value }).tf || {}).dx || null : null;   /* this business's Direct / Indirect choice */
           var r = fromDocs(docs, $('#ty-biz', box).value, from, to, w);
           ps.forEach(function (q) { var k = 'p:' + B.key(q.name); if (parties[k]) parties[k].from = Object.assign({}, parties[k].from || {}, q); });

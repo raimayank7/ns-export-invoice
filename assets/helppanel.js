@@ -16,13 +16,24 @@
   /* App sections and the articles that explain them, most useful first */
   var SEC = {
     home: ['dashboard', 'quick-entry', 'getting-started', 'search-and-shortcuts'], sales: ['sales-screen', 'new-document-inside-the-app', 'repeating-bills'],
-    money: ['money-received', 'money-paid', 'opening-balances'], dues: ['dues-and-reminders', 'party-ledger'], parties: ['party-ledger', 'group-reports'],
-    st: ['party-ledger'], grp: ['group-reports'], buy: ['purchase-bill', 'expenses'], exp: ['expenses'], cash: ['cash-and-bank-books', 'cheques'], books: ['cash-and-bank-books'],
-    chq: ['cheques'], stock: ['stock-in-the-app'], b2make: ['production'], b2job: ['job-work'], b2jv: ['journal-entries'], capl: ['capital-and-loans'],
+    money: ['money-received', 'money-paid', 'opening-balances'], dues: ['dues-and-reminders', 'party-ledger', 'interest-and-credit-limits'], parties: ['party-ledger', 'group-reports'],
+    st: ['party-ledger', 'bill-wise-and-adjust', 'interest-and-credit-limits'], grp: ['group-reports'], buy: ['purchase-bill', 'expenses'], exp: ['expenses'], cash: ['cash-and-bank-books', 'cheques'], books: ['cash-and-bank-books'],
+    chq: ['cheques'], stock: ['stock-in-the-app'], b2make: ['production'], b2job: ['job-work'], b2jv: ['journal-entries', 'receipt-payment-any-ledgers'], capl: ['capital-and-loans'],
     b2fa: ['fixed-assets'], fin: ['final-accounts', 'trial-balance'], fam: ['manufacturing-account', 'partnership-accounts', 'trust-income-expenditure'],
-    b2year: ['year-end'], reports: ['reports-to-excel', 'gst-from-the-app'], acx: ['gst-from-the-app'], stf: ['staff-salary-loans', 'attendance-pf-esi', 'capital-and-loans'], itx: ['income-tax-planner'], bimp: ['bank-statement-import'],
-    day: ['my-day', 'dues-and-reminders'], tools: ['all-tools-by-job', 'new-document-inside-the-app'], packs: ['trade-packs', 'additional-features'], features: ['additional-features'], settings: ['additional-features', 'where-data-is-kept']
+    b2year: ['year-end'], reports: ['reports-to-excel', 'gst-from-the-app'], acx: ['gst-from-the-app'], stf: ['process-salary', 'staff-salary-loans', 'attendance-pf-esi'], tdsr: ['tds-on-bills-returns'], itx: ['income-tax-planner'], bimp: ['bank-statement-import'],
+    day: ['my-day', 'dues-and-reminders'], tools: ['all-tools-by-job', 'new-document-inside-the-app'], packs: ['trade-packs', 'additional-features'], features: ['additional-features'], settings: ['additional-features', 'where-data-is-kept'],
+    coa: ['final-accounts', 'trial-balance'], acl: ['final-accounts', 'party-ledger'], dlist: ['dues-and-reminders', 'party-ledger'], clist: ['party-ledger', 'purchase-bill'], ssum: ['sales-screen', 'reports-to-excel'],
+    psum: ['purchase-bill', 'reports-to-excel'], vreg: ['money-received', 'money-paid'], cbsum: ['cash-and-bank-books'], mprint: ['sales-screen'], b2gd: ['stock-in-the-app'],
+    ord: ['orders-and-pending-goods', 'receipt-notes-and-returns'],   /* ERP round 2 (orders.js) */
+    int: ['interest-and-credit-limits', 'bill-wise-and-adjust'], bw: ['bill-wise-and-adjust', 'interest-and-credit-limits', 'sales-and-purchase-ledgers', 'receipt-payment-any-ledgers']   /* ERP Round 2 (r2-billwise) */
   };
+  SEC.masters = (SEC.masters || []).concat(['custom-fields']);   /* Masters › Custom fields and Remembered entries (ERP Round 2) */
+  /* the help written with the pictures (19 Nov 2026) on the screens it explains; existing lists keep their order, these come after */
+  [['masters', ['masters', 'bank-accounts', 'transporters-and-vehicles']], ['config', ['voucher-screens', 'custom-fields']], ['sales', ['voucher-screens', 'cancel-voucher']],
+   ['buy', ['voucher-screens', 'cancel-voucher']], ['money', ['voucher-screens', 'cancel-voucher']], ['fin', ['accounting-reports', 'working-period-and-drill-down']],
+   ['coa', ['accounting-reports']], ['os', ['bill-wise-and-adjust', 'dues-and-reminders']], ['exc', ['accounting-reports']], ['grp', ['accounting-reports']], ['vreg', ['accounting-reports']]]
+    .forEach(function (x) { var l = SEC[x[0]] || (SEC[x[0]] = []); x[1].forEach(function (s) { if (l.indexOf(s) < 0) l.push(s); }); });
+  SEC.masters.sort(function (a, b) { return (b === 'masters') - (a === 'masters'); });   /* the Masters article first on its own screen */
   var DO = { ifsc: ['ifsc-code-checker', 'pin-code-finder'], pincode: ['pin-code-finder', 'distance-calculator'], distance: ['distance-calculator', 'pin-code-finder'] };
   var IDX = null, loading = null;
   function base() { return location.origin; }
@@ -41,7 +52,7 @@
         (e.articles || []).forEach(function (a) { if (!have[(a.site || e.site) + '|' + a.slug]) j.articles.push(Object.assign({ site: e.site, siteName: e.name, lang: 'en' }, a)); });
         return j;
       }).catch(function () { return j; });
-    }).catch(function () { return get(name + '.json'); })).then(function (j) {
+    }).catch(function () { return get(name + '.json'); })).catch(function (e) { if (/all$/.test(name)) return get('/help/index.json'); throw e; }).then(function (j) {   /* F6-11 */
       var all = (j.articles || []).map(function (a) { return Object.assign({ site: j.site, siteName: j.name }, a); });
       all.forEach(function (a) { a.lang = a.lang || j.lang || 'en'; });
       IDX = { site: IN_APP || j.site || (isApp() ? 'app' : ''), name: j.name || '', topics: j.topics || [], all: all, lang: j.lang || 'en', want: L };

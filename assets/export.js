@@ -55,7 +55,8 @@
       var d = api.doc(), pos = $('#d-pos', ed);
       if (exportKind(d)) { d.pos = '96'; } else if (d.pos === '96') d.pos = '';
       if (pos) pos.value = d.pos;
-      if (/wop$/.test(d.kind)) d.items.forEach(function (it) { it.gst = 0; });
+      if (/wop$/.test(d.kind)) d.items.forEach(function (it) { if (+it.gst) it._g = it.gst; it.gst = 0; });
+      else { var back = 0; d.items.forEach(function (it) { if (!+it.gst && it._g) { it.gst = it._g; back++; } delete it._g; }); if (!back && d.items.some(function (it) { return (it.desc || it.rate) && !+it.gst; })) NS.toast(t('x.rateback')); }   /* F3-12 */
       show(); api.changed();
       var g = document.querySelectorAll('#items [data-k="gst"]'); Array.prototype.forEach.call(g, function (i, n) { i.value = d.items[n] ? d.items[n].gst : i.value; });
     });

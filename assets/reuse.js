@@ -2,6 +2,7 @@
      orderAgain      a new purchase bill draft with the same supplier and lines as the supplier's last bill (rates, HSN, GST as then, today's date)
      lastBill        the newest sale (invoice, cash memo) or purchase bill (pbill) of a party
      lastRates       the rate each item had on that party's newest bills (to fill a party's own price list)
+     rateHistory     the last 5 rates of one item to (or from) one party, lastPurchase the newest purchase rate (ERP Round 2, B-5)
      partyRate       a party's own rate for an item (party.prices = [{ item, rate }]), null when there is none
      parsePrices / pricesText   the price list as one line per item in a text box ("Cement OPC 53 = 380")
      dueDates        standing bills: the dates up to today for which no copy was made yet (weekly, fortnightly, monthly, quarterly,
@@ -49,6 +50,23 @@
     });
     return Object.keys(got).map(function (n) { return got[n]; }).sort(function (a, b) { return a.item.localeCompare(b.item); });
   }
+  /* ERP Round 2 (B-5): the rates of one item on this party's newest bills, newest first, net of the line discount:
+     [{ rate, date, no, type }] (at most n, default 5); cancelled bills are left out. Sale side: invoices, cash memos, shop bills,
+     export invoices; buy side: purchase bills (not returns) and self invoices */
+  function rateHistory(docs, biz, party, item, side, n) {
+    var k = key(party), ik = key(item), out = [];
+    if (!ik) return out;
+    (docs || []).forEach(function (d) {
+      var ty = d.type || 'invoice';
+      if (d.cancelled || !sellerOk(d, biz) || (k && key(partyOf(d)) !== k) || !d.items) return;
+      if (side === 'buy' ? !(ty === 'pbill' && d.kind !== 'return' || ty === 'self') : !(SALES[ty] || ty === 'expinv')) return;
+      d.items.forEach(function (l) { if (key(l.desc) !== ik || !num(l.rate)) return; out.push({ rate: r2(num(l.rate) - num(l.rate) * (num(l.disc) || 0) / 100), date: d.date || '', no: d.no || '', type: ty, party: partyOf(d) }); });
+    });
+    out.sort(function (a, b) { return String(b.date).localeCompare(String(a.date)); });
+    return out.slice(0, n || 5);
+  }
+  /* the newest purchase rate of an item from any supplier: { rate, date, no, party } or null */
+  function lastPurchase(docs, biz, item) { return rateHistory(docs, biz, '', item, 'buy', 1)[0] || null; }
   function partyRate(party, desc) {
     var k = key(desc), list = party && party.prices;
     if (!k || !list || !list.length) return null;
@@ -99,6 +117,6 @@
     return list.slice(-3);
   }
 
-  var API = { key: key, lastBill: lastBill, orderAgain: orderAgain, lastRates: lastRates, partyRate: partyRate, parsePrices: parsePrices, pricesText: pricesText, dueDates: dueDates, nth: nth, FREQ: FREQ, addMonths: addMonths, addDays: addDays };
+  var API = { key: key, lastBill: lastBill, orderAgain: orderAgain, lastRates: lastRates, rateHistory: rateHistory, lastPurchase: lastPurchase, partyRate: partyRate, parsePrices: parsePrices, pricesText: pricesText, dueDates: dueDates, nth: nth, FREQ: FREQ, addMonths: addMonths, addDays: addDays };
   if (typeof module !== 'undefined' && module.exports) module.exports = API; else G.NSReuse = API;
 })(this);

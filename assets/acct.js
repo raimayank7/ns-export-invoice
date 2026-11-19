@@ -63,8 +63,8 @@
         buys.push([NS.fmtDate(d.date), 'Expense: ' + (d.cat || 'Miscellaneous'), d.billNo || d.no || '', b.name || '', b.gstin || '', n2(a - itc), d.inter ? '0.00' : n2(itc / 2), d.inter ? '0.00' : n2(itc - r2(itc / 2)), d.inter ? n2(itc) : '0.00', n2(a), '', d.mode === 'credit' ? 'Not paid yet' : '']);
       } else if (R === 'in' || R === 'refund' || R === 'out' || R === 'outexp' || R === 'contra') {
         var amt = R === 'out' || R === 'outexp' ? (d.lines || []).reduce(function (s, l) { return s + num(l.amt); }, 0) : num(d.amount);
-        money.push([NS.fmtDate(d.date), R === 'contra' ? (d.to === 'bank' ? 'Cash deposited in bank' : 'Cash withdrawn from bank') : R === 'in' ? 'Money in' : R === 'refund' ? 'Refund paid' : R === 'out' ? 'Paid to supplier' : 'Expense paid',
-          d.no || '', b.name || '', d.mode || '', n2(amt), n2(R === 'in' ? num(d.tds) : r2(amt * num(d.tdsRate) / 100)), (d.alloc || []).map(function (x) { return x.no || ''; }).filter(Boolean).join(', ')]);
+        money.push([NS.fmtDate(d.date), R === 'contra' ? ({ dep: 'Cash deposited in bank', wd: 'Cash withdrawn from bank', xfer: 'Transfer between banks' })[NSBooks.contraKind(d)] : R === 'in' ? 'Money in' : R === 'refund' ? 'Refund paid' : R === 'out' ? 'Paid to supplier' : 'Expense paid',
+          d.no || '', b.name || '', (d.mode || '') + (B.isBank(d.bacct) && d.bacct !== 'bank' ? ' (' + B.bankName(d.bacct) + ')' : ''), n2(amt), n2(R === 'in' ? num(d.tds) : r2(amt * num(d.tdsRate) / 100)), (d.alloc || []).map(function (x) { return x.no || ''; }).filter(Boolean).join(', ')]);
       }
     });
     sales.push(['', '', '', 'Total', '', '', n2(tot.s[0]), n2(tot.s[1]), n2(tot.s[2]), n2(tot.s[3]), '', n2(tot.s[4]), '']);

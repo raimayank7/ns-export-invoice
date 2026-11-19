@@ -82,6 +82,37 @@
     return start + '-' + String(start + 1).slice(2);
   };
 
+  /* ---------- one working period for every report (ERP review R-3 / C-5, like Tally's Alt+F2) ----------
+     NS.period() = { from, to } kept in localStorage 'ns-period' (copied to the data home prefs like other tool settings, so the
+     App, the stock and profit-loss screens and every device follow it); default = this financial year to today.
+     NS.periodSet(from, to) saves it and fires 'ns-period'. NS.periodPresets(today) = the one list of presets every report offers. */
+  NS.periodPresets = function (today) {
+    today = today || NS.today();
+    var y = +today.slice(0, 4), m = +today.slice(5, 7), fs = NS.fy(today).slice(0, 4) + '-04-01', fy = +fs.slice(0, 4);
+    var last = function (yy, mm) { return yy + '-' + String(mm).padStart(2, '0') + '-' + String(new Date(yy, mm, 0).getDate()).padStart(2, '0'); };
+    var ly = m === 1 ? y - 1 : y, lm = m === 1 ? 12 : m - 1, qs = m >= 10 ? 10 : m >= 7 ? 7 : m >= 4 ? 4 : 1, lqy = qs === 1 ? y - 1 : y, lqs = qs === 1 ? 10 : qs - 3;
+    return { today: [today, today], month: [today.slice(0, 8) + '01', today], lmonth: [ly + '-' + String(lm).padStart(2, '0') + '-01', last(ly, lm)],
+      quarter: [y + '-' + String(qs).padStart(2, '0') + '-01', today], lquarter: [lqy + '-' + String(lqs).padStart(2, '0') + '-01', last(lqy, lqs + 2)],
+      fy: [fs, today], lfy: [(fy - 1) + '-04-01', fy + '-03-31'] };
+  };
+  NS.period = function () {
+    var p = null; try { p = JSON.parse(localStorage.getItem('ns-period') || 'null'); } catch (e) {}
+    var to = p && /^\d{4}-\d{2}-\d{2}$/.test(p.to || '') ? p.to : NS.today(), from = p && /^\d{4}-\d{2}-\d{2}$/.test(p.from || '') ? p.from : NS.fy(to).slice(0, 4) + '-04-01';
+    /* a preset follows the calendar: "This month" saved last week still means this month today */
+    if (p && p.pre && p.pre !== 'custom') { var q = NS.periodPresets()[p.pre]; if (q) { from = q[0]; to = q[1]; } }
+    return { from: from, to: to, pre: p && p.pre || '' };
+  };
+  NS.periodSet = function (from, to, pre) {
+    var o = NS.period(); from = from || o.from; to = to || o.to;
+    if (from > to) { var x = from; from = to; to = x; }
+    if (pre === undefined) { var P = NS.periodPresets(); pre = Object.keys(P).filter(function (k) { return P[k][0] === from && P[k][1] === to; })[0] || 'custom'; }
+    try { localStorage.setItem('ns-period', JSON.stringify({ from: from, to: to, pre: pre })); } catch (e) {}
+    try { window.dispatchEvent(new CustomEvent('ns-period', { detail: { from: from, to: to } })); } catch (e) {}
+    return [from, to];
+  };
+  /* the preset that matches a range, or 'custom' */
+  NS.periodPre = function (from, to) { var P = NS.periodPresets(); return Object.keys(P).filter(function (k) { return P[k][0] === from && P[k][1] === to; })[0] || 'custom'; };
+
   /* ---------- toast ---------- */
   NS.toast = function (msg, kind) {
     var t = NS.$('#ns-toast');
@@ -196,7 +227,7 @@
     var main = item
       ? f('qa-n', 'qa.iname', '<input id="qa-n" required>', 1) + f('qa-gr', 'qa.group', '<select id="qa-gr"></select>') + f('qa-k', 'qa.kind', '<select id="qa-k"><option value="goods">' + E(T('qa.goods')) + '</option><option value="service">' + E(T('qa.service')) + '</option></select>') +
         f('qa-u', 'qa.unit', '<input id="qa-u" value="Nos">') + f('qa-h', 'qa.hsn', '<input id="qa-h" inputmode="numeric">') +
-        f('qa-g', 'qa.gst', '<select id="qa-g">' + [0, 0.1, 0.25, 3, 5, 12, 18, 28, 40].map(function (r) { return '<option' + (r === 18 ? ' selected' : '') + '>' + r + '</option>'; }).join('') + '</select>') +
+        f('qa-g', 'qa.gst', '<select id="qa-g">' + [0, 0.1, 0.25, 1.5, 3, 5, 12, 18, 40].map(function (r) { return '<option' + (r === 18 ? ' selected' : '') + '>' + r + '</option>'; }).join('') + '</select>') +
         f('qa-r', 'qa.srate', '<input id="qa-r" inputmode="decimal">') + f('qa-p', 'qa.prate', '<input id="qa-p" inputmode="decimal">') + f('qa-o', 'qa.open', '<input id="qa-o" inputmode="decimal">')
       : f('qa-n', 'qa.pname', '<input id="qa-n" required>', 1) + f('qa-t', 'qa.role', '<select id="qa-t"><option value="customer">' + E(T('qa.cust')) + '</option><option value="supplier">' + E(T('qa.supp')) + '</option><option value="both">' + E(T('qa.both')) + '</option></select>') +
         f('qa-gr', 'qa.group', '<select id="qa-gr"></select>') +
@@ -243,7 +274,7 @@
         if (v('qa-code')) rec.code = v('qa-code'); if (n('qa-min')) rec.min = n('qa-min');
         var oq = n('qa-o');
         /* opening stock goes in as an opening stock entry of the business in use, like the Stock screen makes it */
-        if (oq && rec.kind === 'goods') extra = biz().then(function (b) { return b ? NSStore.put('doc', { type: 'stk', kind: 'open', date: NS.today(), no: '', seller: b, lines: [{ desc: nm, unit: rec.unit, qty: oq, rate: rec.prate || 0 }] }) : null; });
+        if (oq && rec.kind === 'goods') extra = biz().then(function (b) { return b ? NSStore.put('doc', { type: 'stk', kind: 'open', date: NS.fy(NS.today()).slice(0, 4) + '-04-01', no: '', seller: b, lines: [{ desc: nm, unit: rec.unit, qty: oq, rate: rec.prate || 0 }] }) : null; });
       } else {
         var g = v('qa-gs').toUpperCase(), ck = NS.gstinCheck(g), pan = v('qa-pan').toUpperCase();
         if (g && !ck.ok) return say(ck.msg || T('qa.badgst'));
@@ -294,7 +325,7 @@
     return file.text().then(function (txt) {
       var b = JSON.parse(txt);
       if (!b || b.app !== 'Nivesh Sahayak' || !b.data) throw new Error(NS.t('bk.notours'));
-      return NSStore.importAll(b.data, false);
+      return NSStore.importAll(b.data, false, { file: file.name || '' });
     }).then(function (n) { NS.toast(n ? NS.t('bk.restored', { n: n }) : NS.t('bk.nothing')); return n; },
       function (e) { NS.toast(e instanceof SyntaxError ? NS.t('bk.unread') : (e.message || NS.t('bk.unread')), 'bad'); throw e; });
   };
@@ -525,7 +556,7 @@
      Each change is also copied into the data home (meta 'prefs' = {key: {v, t}}), so it is in "Back up everything", the one auto save
      and on every site and device the backup is restored to. On load the newer side wins; values only on this site are carried in.
      Not copied: look and place (theme, language, side menu, chosen business, last screen) and unsaved drafts of a document. */
-  var PREF = /^ns-(aato|tally-led|prl|bc-set|gstcal|gstcal-told|gstcal-note|pl-draft-.+|hsn-band|stock-(sv|lv|mv)|gstin-recent|c8|g1|g3|td|dash|qe)$/;
+  var PREF = /^ns-(aato|tally-led|prl|bc-set|gstcal|gstcal-told|gstcal-note|pl-draft-.+|hsn-band|stock-(sv|lv|mv)|gstin-recent|c8|g1|g3|td|dash|qe|period|ageing|tb-style|lg-view|rep-col|rep-smby)$/;   /* ERP C-13: report choices (trial balance style, party ledger view, columnar, summary by) follow the data home too */
   var lsSet = Storage.prototype.setItem, lsDel = Storage.prototype.removeItem, prefDue = {}, prefT = 0;
   function prefStamps(v) {
     if (v) { try { lsSet.call(localStorage, 'ns-prefs-t', JSON.stringify(v)); } catch (e) {} return v; }
@@ -818,15 +849,42 @@
       return S;
     });
   };
-  NS.cfgEdit = function (who, fn) {
+  /* ---------- A-15 (ERP Round 2, r2-billwise): credit limit and overdue bills, checked before every credit sale ----------
+     party record: climit, cdays, cgrace (days after the due date before a bill counts as late), cpolicy 'warn' (ask) | 'block' (refuse).
+     NS.creditAsk(business name, party name, amount added, date, id of the record being changed) -> Promise (rejects Error('cancel'));
+     NS.creditAskDoc(record, id being changed): the same for any sale record, the amount = what the record puts on the party's account. */
+  NS.creditAsk = function (biz, party, addAmt, date, excludeId) {
+    var Bk = window.NSBooks;
+    if (!Bk || !Bk.creditCheck || !String(party || '').trim() || !window.NSStore) return Promise.resolve();
+    return Promise.all([NSStore.list('party'), NSStore.list('doc')]).then(function (r) {
+      var p = r[0].filter(function (x) { return Bk.key(x.name) === Bk.key(party); })[0];
+      if (!p || !(+p.climit > 0 || +p.cdays > 0 || p.cpolicy)) return;
+      var c = Bk.creditCheck(r[1], biz, p, addAmt, date || NS.today(), excludeId);
+      if (!c.any) return;
+      var m = [c.over ? NS.t('bw.cr_over', { name: p.name, limit: NS.money(c.limit), now: NS.money(Math.max(0, c.bal)), after: NS.money(c.after) }) : '',
+        c.late ? NS.t('bw.cr_late', { name: p.name, no: c.oldest.no || '', d: c.overdueDays, a: NS.money(c.oldest.left) }) : ''].filter(Boolean).join(' ');
+      if (c.block) { NS.toast(m + ' ' + NS.t('bw.cr_block', { name: p.name }), 'bad'); throw new Error('cancel'); }
+      return (NS.ask ? NS.ask(m + ' ' + NS.t('bw.cr_ask')) : Promise.resolve(window.confirm(m))).then(function (ok) { if (!ok) throw new Error('cancel'); });
+    });
+  };
+  NS.creditAskDoc = function (d, excludeId) {
+    var Bk = window.NSBooks, nm = d && d.buyer && String(d.buyer.name || '').trim();
+    if (!Bk || !nm) return Promise.resolve();
+    var pk = 'p:' + Bk.key(nm), net = 0;
+    try { Bk.postings(d).forEach(function (l) { if (l.a === pk) net += l.dr - l.cr; }); } catch (e) { return Promise.resolve(); }
+    return net > 0.004 ? NS.creditAsk(d.seller && d.seller.name, nm, Math.round(net * 100) / 100, d.date, excludeId) : Promise.resolve();
+  };
+  NS.cfgEdit = function (who, fn, opts) {   /* opts.why: the reason kept in the edit history (A-4) */
     return NS.loadCfg().then(function (S) {
       var id = NS.bizIdOf(who), v = NS.cfgFor(S, id);
       fn(v);
       NS.cfgSave(S, id, v);
-      return NSStore.meta('settings', S).then(function () { return S; });
+      return NSStore.meta('settings', S, opts).then(function () { return S; });
     });
   };
   /* customers, suppliers and items are shared by every business unless My data marks one "only for" a business (record.biz = id) */
+  /* masters switched to "No longer used" (record.inactive) are left out of the lists offered for new vouchers (owner 19 Nov) */
+  NS.active = function (list) { return (list || []).filter(function (x) { return !x || !x.inactive; }); };
   NS.forBiz = function (list, who) {
     var id = NS.bizIdOf(who);
     return (list || []).filter(function (x) { return !x || !x.biz || !id || x.biz === id; });
@@ -872,6 +930,62 @@
     if (!g && c) g = list.filter(function (x) { return String(x.name).trim().toLowerCase() === c; })[0];
     return g ? gOut(list, g, false) : { id: '', name: '', top: '', under: '' };
   };
+
+
+  /* ---------- dispatch masters (owner 19 Nov: "a Transporter master so dispatch details fill by themselves, and saved vehicle details reused
+     later, as Evershine does"). Data home meta 'dispatch' = { tr: [{ id, name, tid, phone, addr }], veh: [{ id, no, type, owner, driver, dphone, tr }] },
+     shared by every business like the other masters; made and changed in Masters (masters.js) or remembered by themselves.
+     Every dispatch box of every tool takes part without its own code, found by its id: vehicle  ...veh / dpveh, transporter  ...tname / dptname,
+     transporter ID  ...tid, driver  ...driver, driver phone  ...dphone. Typing offers the saved ones; picking a vehicle fills its transporter,
+     transporter ID and driver (only boxes still empty); a vehicle or transporter typed for the first time is saved for next time. ---------- */
+  var DSP = null, dspAsk = null;
+  NS.dispatch = function (fresh) { if (DSP && !fresh) return Promise.resolve(DSP); if (!window.NSStore) return Promise.resolve({ tr: [], veh: [] }); return (dspAsk = NSStore.meta('dispatch').then(function (m) { DSP = { tr: (m && m.tr) || [], veh: (m && m.veh) || [] }; return DSP; }, function () { return DSP || { tr: [], veh: [] }; })); };
+  NS.dispatchSave = function (fn) { return NS.dispatch(true).then(function (D) { fn(D); return NSStore.meta('dispatch', { tr: D.tr, veh: D.veh }).then(function () { DSP = D; return D; }); }); };
+  NS.vehNo = function (v) { return String(v || '').toUpperCase().replace(/[\s.\-]/g, ''); };
+  var DKIND = [['veh', /(^|-)(veh|dpveh)$/], ['tname', /(^|-)(tname|dptname)$/], ['tid', /(^|-)tid$/], ['driver', /(^|-)driver$/], ['dphone', /(^|-)dphone$/]];
+  function dKind(el) { var id = el && el.id || ''; for (var i = 0; i < DKIND.length; i++) if (DKIND[i][1].test(id)) return DKIND[i][0]; return ''; }
+  function dBox(el) { return el.closest('fieldset,details,.fg,form,dialog') || document; }
+  function dFind(box, kind) { var all = box.querySelectorAll('input'); for (var i = 0; i < all.length; i++) if (dKind(all[i]) === kind) return all[i]; return null; }
+  function dSet(x, v) { if (!x || !v || String(x.value || '').trim()) return; x.value = v; x.dispatchEvent(new Event('input', { bubbles: true })); x.dispatchEvent(new Event('change', { bubbles: true })); }
+  function dList(kind, D) {
+    var id = 'ns-dl-' + kind, dl = document.getElementById(id);
+    if (!dl) { dl = document.createElement('datalist'); dl.id = id; document.body.appendChild(dl); }
+    var opts = kind === 'veh' ? D.veh.map(function (v) { return [v.no, [v.type, v.driver].filter(Boolean).join(' · ')]; }) : kind === 'tname' ? D.tr.map(function (t) { return [t.name, t.tid || '']; }) :
+      kind === 'tid' ? D.tr.filter(function (t) { return t.tid; }).map(function (t) { return [t.tid, t.name]; }) : kind === 'driver' ? D.veh.filter(function (v) { return v.driver; }).map(function (v) { return [v.driver, v.no]; }) : [];
+    dl.innerHTML = opts.map(function (o) { return '<option value="' + NS.esc(o[0]) + '"' + (o[1] ? ' label="' + NS.esc(o[1]) + '"' : '') + '>'; }).join('');
+    return id;
+  }
+  document.addEventListener('focusin', function (e) {
+    var el = e.target, k = el && el.tagName === 'INPUT' && dKind(el); if (!k || k === 'dphone') return;
+    NS.dispatch().then(function (D) { var id = dList(k, D); if (!el.getAttribute('list')) el.setAttribute('list', id); });
+  });
+  document.addEventListener('change', function (e) {
+    var el = e.target, k = el && el.tagName === 'INPUT' && dKind(el), val = String(el && el.value || '').trim(); if (!k || !val || !window.NSStore) return;
+    var box = dBox(el);
+    NS.dispatch().then(function (D) {
+      if (k === 'veh') {
+        var no = NS.vehNo(val), v = D.veh.filter(function (x) { return NS.vehNo(x.no) === no; })[0];
+        if (el.value !== no && /^[A-Z]{2}\d/.test(no)) { el.value = no; el.dispatchEvent(new Event('input', { bubbles: true })); }
+        if (v) { var t = D.tr.filter(function (x) { return x.id === v.tr; })[0]; if (t) { dSet(dFind(box, 'tname'), t.name); dSet(dFind(box, 'tid'), t.tid); } dSet(dFind(box, 'driver'), v.driver); dSet(dFind(box, 'dphone'), v.dphone); return; }
+        if (!/^[A-Z]{2}\d{1,2}[A-Z]{0,3}\d{3,4}$|^(TR|BH)/.test(no)) return;   /* only a real vehicle number is remembered */
+        var tn = dFind(box, 'tname'), tr = tn && D.tr.filter(function (x) { return NS.key0(x.name) === NS.key0(tn.value); })[0], dr = dFind(box, 'driver'), dp = dFind(box, 'dphone');
+        return NS.dispatchSave(function (M) { if (!M.veh.some(function (x) { return NS.vehNo(x.no) === no; })) M.veh.push({ id: 'v' + Date.now().toString(36), no: no, tr: tr ? tr.id : '', driver: dr ? dr.value.trim() : '', dphone: dp ? dp.value.trim() : '' }); });
+      }
+      if (k === 'tname' || k === 'tid') {
+        var t2 = k === 'tname' ? D.tr.filter(function (x) { return NS.key0(x.name) === NS.key0(val); })[0] : D.tr.filter(function (x) { return String(x.tid || '').toUpperCase() === val.toUpperCase(); })[0];
+        if (t2) { dSet(dFind(box, 'tname'), t2.name); dSet(dFind(box, 'tid'), t2.tid); return; }
+        if (k !== 'tname') return;
+        var ti = dFind(box, 'tid');
+        var vi = dFind(box, 'veh'), vno = vi ? NS.vehNo(vi.value) : '';
+        return NS.dispatchSave(function (M) {
+          var t3 = M.tr.filter(function (x) { return NS.key0(x.name) === NS.key0(val); })[0];
+          if (!t3) { t3 = { id: 't' + Date.now().toString(36), name: val, tid: ti ? ti.value.trim().toUpperCase() : '' }; M.tr.push(t3); }
+          M.veh.forEach(function (v) { if (vno && NS.vehNo(v.no) === vno && !v.tr) v.tr = t3.id; });
+        });
+      }
+    });
+  });
+  NS.key0 = function (s) { return String(s || '').trim().toLowerCase().replace(/\s+/g, ' '); };
 
   /* ---------- one sponsor card (only where the page has a slot) ---------- */
   var RIVAL = /invoice|billing|bill\s?book|accounting|gst\s?software|vyapar|khatabook|zoho|tally|busy|marg|quickbooks|refrens|swipe/i;
@@ -1168,6 +1282,20 @@
      the hub's document cards use, so every tool and the App read it. ---------- */
   var serDlg;
   function val(v) { return typeof v === 'function' ? v() : v; }
+  /* focus a box and select what is in it, so typing replaces it (Enter flow, F4-13) */
+  NS.focusSel = function (x) { if (!x) return; x.focus(); try { if (x.select && /^(text|search|number|tel|email|url|)$/.test(x.type || '') && x.tagName === 'INPUT') x.select(); } catch (e) {} };
+  /* Enter in a box goes to the next box of the same part, like the App's entry forms (document makers, F4-1).
+     A handler that already used the key (preventDefault) wins; text areas, buttons and ticks keep their own Enter. */
+  NS.enterNext = function (box) {
+    if (!box || box._enterNext) return; box._enterNext = 1;
+    box.addEventListener('keydown', function (e) {
+      var t = e.target;
+      if (e.defaultPrevented || e.key !== 'Enter' || e.shiftKey || e.ctrlKey || e.metaKey || e.altKey || !t || !/^(INPUT|SELECT)$/.test(t.tagName) || /^(checkbox|radio|file|submit|button|color|range)$/.test(t.type)) return;
+      var all = Array.prototype.slice.call(box.querySelectorAll('input,select,textarea')).filter(function (x) { return !x.disabled && !x.readOnly && x.type !== 'hidden' && x.type !== 'file' && x.type !== 'checkbox' && x.type !== 'radio' && x.offsetParent !== null && !x.closest('details:not([open])') && !x.closest('[hidden]'); });
+      var i = all.indexOf(t); if (i < 0 || i >= all.length - 1) return;
+      e.preventDefault(); NS.focusSel(all[i + 1]);
+    });
+  };
   NS.seriesLink = function (inp, o) {
     if (!inp || !window.NSStore) return;
     var f = inp.closest('.f') || inp.parentNode;
@@ -1191,8 +1319,17 @@
           '<div class="btns"><button type="submit" class="btn primary">' + NS.esc(NS.t('sr.save')) + '</button></div></form>';
         var form = NS.$('[data-ser]', serDlg), p = NS.$('#ser-pre', serDlg);
         function clean() { return p.value.trim().toUpperCase().replace(/[^A-Z0-9\/\-]/g, ''); }
-        function pv() { var x = clean(); NS.$('[data-ser-pv]', serDlg).textContent = (x ? x + '/' : '') + (fy ? short + '/' : '') + String(1).padStart(digits, '0'); }
+        var nextN = 1;
+        function pv() { var x = clean(); NS.$('[data-ser-pv]', serDlg).textContent = (x ? x + '/' : '') + (fy ? short + '/' : '') + String(nextN).padStart(digits, '0'); }
         p.addEventListener('input', pv); pv();
+        /* the next number the maker will give (F4-4): its count runs over every saved document of this type, year and business */
+        var cn = /(\d+)\s*$/.exec(inp.value || '');
+        if (cn && !val(o.saved)) { nextN = +cn[1]; pv(); }
+        else NSStore.list('doc').then(function (all) {
+          var nm = String(who && who.name || '').trim().toLowerCase(), fyN = NS.fy(NS.today()), mx = 0;
+          all.forEach(function (d) { if (d.type !== type || NS.fy(d.date) !== fyN || String(d.seller && d.seller.name || '').trim().toLowerCase() !== nm) return; var m = /(\d+)\s*$/.exec(d.no || ''); if (m) mx = Math.max(mx, +m[1]); });
+          nextN = mx + 1; pv();
+        }).catch(function () {});
         form.addEventListener('submit', function (e) {
           e.preventDefault();
           NS.cfgEdit(who, function (V) {
@@ -1207,6 +1344,170 @@
         p.focus(); p.select();
       });
     });
+  };
+
+  /* ---------- ERP A-6 / A-7: one numbering engine for every voucher type (r2-config) ----------
+     Series settings live per business (NS.cfgFor view): the prefix stays where My data and the makers always kept it
+     (S[type].prefix, S[type].prefixes[kind], S.invoice.digits / fy), and the new fields sit in S.series[<type>|<type>.<kind>] =
+     { method: 'auto' (filled, can be changed) | 'fixed' (filled, cannot be changed) | 'manual' (typed), suffix, fy (true/false),
+       width (1-6), start (first number), restart: 'year' | 'month' | 'never', dup: 'block' | 'warn' }.
+     Sub-types (A-7): S.vsub = [{ id, base: <type>, kind, name, prefix, ...the same series fields, def: { voucher defaults } }];
+     a document made with one keeps d.vt = id and counts in its own series. With nothing set, every number stays exactly as before. */
+  var NX_ALIAS = { exp: 'expinv' };   /* Masters' "Export invoice" is saved as type expinv */
+  NS.VTYPES = [['invoice', '', 'INV', 'Doc.invoice'], ['cashmemo', '', 'CM', 'Doc.cashmemo'], ['quote', 'quote', 'QT', 'k.quote'], ['quote', 'estimate', 'EST', 'k.estimate'], ['proforma', '', 'PI', 'Doc.proforma'],
+    ['so', '', 'SO', 'Doc.so'], ['challan', '', 'DC', 'Doc.challan'], ['po', '', 'PO', 'Doc.po'], ['note', 'credit', 'CN', 'k.credit'], ['note', 'debit', 'DN', 'k.debit'], ['note', 'creditp', 'PCN', 'k.creditp'],
+    ['note', 'debitp', 'PDN', 'k.debitp'], ['self', '', 'SI', 'Doc.self'], ['exp', '', 'EXP', 'Doc.exp'], ['receipt', '', 'RCT', 'Doc.receipt'], ['voucher', '', 'PV', 'Doc.voucher'],
+    ['rent', '', 'RR', 'Doc.rent'], ['salary', '', 'SAL', 'Doc.salary'], ['petty', '', 'PCB', 'Doc.petty'], ['contra', '', 'CV', 'desk.v_contra'], ['jv', '', 'JV', 'app.d_jv']];
+  NS.nxDocType = function (type) { return NX_ALIAS[type] || type; };
+  /* the kind a saved document counts under (quotation / estimate, credit / debit note sale or purchase side) */
+  NS.nxKind = function (d) {
+    if (!d) return '';
+    if (d.type === 'note') return (d.kind || 'credit') + (d.side === 'purchase' ? 'p' : '');
+    if (d.type === 'quote') return d.kind || 'quote';
+    return '';
+  };
+  /* outward GST documents: Rule 46 / 49 / 50 / 51 / 53 numbers must be unique and at most 16 characters */
+  NS.nxOutward = function (d) {
+    if (!d) return false;
+    var t = d.type || 'invoice';
+    if (t === 'invoice' || t === 'cashmemo' || t === 'expinv' || t === 'exp' || t === 'self') return !d.counter || t === 'invoice';
+    if (t === 'note') return d.side !== 'purchase';
+    if (t === 'receipt') return !!(d.gstAdv || d.kind === 'ref');
+    return false;
+  };
+  NS.nxSubs = function (S, type) { return ((S && S.vsub) || []).filter(function (x) { return x && x.base === type && !x.off; }); };
+  NS.nxSub = function (S, id) { return id ? ((S && S.vsub) || []).filter(function (x) { return x && x.id === id; })[0] || null : null; };
+  function nxClean(x) { return String(x == null ? '' : x).trim().replace(/[^A-Za-z0-9\/\-]/g, ''); }
+  /* the series of one voucher type (+ kind, + sub-type) of a business view S. o.def = the default prefix, o.width / o.fy = the tool's own default */
+  NS.seriesOf = function (S, type, kind, sub, o) {
+    S = S || {}; o = o || {};
+    var c = S[type] || {}, inv = S.invoice || {}, sx = (S.series || {})[kind ? type + '.' + kind : type] || {}, sb = typeof sub === 'object' ? sub : NS.nxSub(S, sub);
+    var pre = kind ? (c.prefixes || {})[kind] : c.prefix;
+    if (type === 'invoice' && pre == null) pre = inv.prefix;
+    if (pre == null || (kind && pre === '')) pre = o.def != null ? o.def : '';
+    var r = {
+      key: sb ? 'sub:' + sb.id : kind ? type + '.' + kind : type,
+      method: sx.method || 'auto', prefix: nxClean(pre), suffix: nxClean(sx.suffix),
+      fy: sx.fy != null ? sx.fy !== false : o.fy != null ? !!o.fy : (c.fy != null ? c.fy : inv.fy) !== false,
+      width: Math.min(6, Math.max(1, +sx.width || +c.digits || +o.width || +inv.digits || 3)),
+      start: Math.max(1, Math.floor(+sx.start || 1)), restart: sx.restart || 'year', dup: sx.dup || 'block', sub: sb ? sb.id : ''
+    };
+    if (sb) ['method', 'fy', 'width', 'start', 'restart', 'dup'].forEach(function (k) { if (sb[k] != null && sb[k] !== '') r[k] = k === 'fy' ? sb.fy !== false : k === 'width' ? Math.min(6, Math.max(1, +sb.width || 3)) : k === 'start' ? Math.max(1, Math.floor(+sb.start || 1)) : sb[k]; });
+    if (sb) { r.prefix = nxClean(sb.prefix != null && sb.prefix !== '' ? sb.prefix : r.prefix); r.suffix = nxClean(sb.suffix || ''); r.start = Math.max(1, Math.floor(+sb.start || 1)); }   /* a sub-type counts on its own: from its own start, with its own suffix */
+    return r;
+  };
+  function nxKey(s) { return String(s || '').trim().toLowerCase(); }
+  function nxPeriod(date, restart) { return restart === 'never' ? '' : restart === 'month' ? String(date || '').slice(0, 7) : NS.fy(date); }
+  /* the part before the running number: PREFIX/YY-YY/(MM/)(shared folder letter) */
+  NS.nxHead = function (ser, date, tag) {
+    var fy = NS.fy(date || NS.today()), short = fy.slice(2, 4) + '-' + fy.slice(5);
+    return (ser.prefix ? ser.prefix + '/' : '') + (ser.fy ? short + '/' : '') + (ser.restart === 'month' ? String(date || '').slice(5, 7) + '/' : '') + (tag || '');
+  };
+  /* the running number at the end of a saved number (its suffix taken off first) */
+  NS.nxNum = function (no, suffix) {
+    var s = String(no || '').trim();
+    if (suffix && s.slice(-suffix.length).toUpperCase() === suffix.toUpperCase()) s = s.slice(0, -suffix.length);
+    var m = /(\d+)\s*$/.exec(s); return m ? +m[1] : 0;
+  };
+  /* does a saved document count in this series? */
+  NS.nxIn = function (d, o, ser) {
+    if (!d || (d.type || 'invoice') !== NS.nxDocType(o.type) || !!d.counter !== !!o.counter || (o.skip && d.id === o.skip)) return false;
+    if (o.kind && NS.nxKind(d) !== o.kind) return false;
+    if ((d.vt || '') !== (ser.sub || '')) return false;
+    if (o.seller != null && nxKey(d.seller && d.seller.name) !== nxKey(typeof o.seller === 'object' ? o.seller.name : o.seller)) return false;
+    if (o.match && !o.match(d)) return false;
+    return nxPeriod(d.date, ser.restart) === nxPeriod(o.date, ser.restart);
+  };
+  /* NS.nextNo(all docs, { type, kind, sub, seller, date, cfg (business view), def, width, fy, tag, skip, match })
+     = { no, head, width, suffix, nos, n, series, manual }. 'manual' series give no = '' (the reader types it). */
+  NS.nextNo = function (all, o) {
+    o = o || {};
+    var ser = o.series || NS.seriesOf(o.cfg, o.type, o.kind, o.sub, o), max = 0, nos = [];
+    (all || []).forEach(function (d) {
+      if (!NS.nxIn(d, o, ser)) return;
+      var n = NS.nxNum(d.no, ser.suffix); if (n) { max = Math.max(max, n); nos.push(d.no); }
+    });
+    var n = Math.max(max, ser.start - 1) + 1, head = NS.nxHead(ser, o.date, o.tag);
+    return { no: ser.method === 'manual' ? '' : head + String(n).padStart(ser.width, '0') + ser.suffix, head: head, width: ser.width, suffix: ser.suffix, nos: nos, n: n, series: ser, manual: ser.method === 'manual' };
+  };
+  /* checks before saving any voucher: '' when fine, else { code: 'empty' | 'dup' | 'len', other, msg, block }.
+     Duplicates: same type, same business, same financial year. Outward GST documents always refuse a repeat and a number over 16
+     characters; other types refuse a repeat unless the series says 'warn' (then block is false and the caller asks). */
+  NS.noProblem = function (all, d, o) {
+    o = o || {};
+    var no = String(d && d.no || '').trim(), ser = o.series || NS.seriesOf(o.cfg, o.type || d.type, o.kind != null ? o.kind : NS.nxKind(d), d.vt || '', o);
+    if (!no) return { code: 'empty', block: true, msg: NS.t('nx.empty') };
+    var out = NS.nxOutward(d);
+    if (out && no.length > 16) return { code: 'len', block: true, msg: NS.t('nx.len', { no: no }) };
+    var ty = d.type || 'invoice', k = nxKey(d.seller && d.seller.name), fy = NS.fy(d.date);
+    var other = (all || []).filter(function (x) { return x.id !== d.id && (o.skip == null || x.id !== o.skip) && (x.type || 'invoice') === ty && !x.counter === !d.counter && nxKey(x.no) === nxKey(no) && NS.fy(x.date) === fy && nxKey(x.seller && x.seller.name) === k; })[0];
+    if (other) return { code: 'dup', other: other, block: out || ser.dup !== 'warn', msg: NS.t(ty === 'invoice' ? 'app.qe_dup' : 'nx.dup', { no: no }) };
+    return '';
+  };
+  /* the number box follows the series method: 'fixed' = read only, 'manual' = empty with a hint */
+  NS.noBox = function (inp, ser) {
+    if (!inp || !ser) return;
+    inp.readOnly = ser.method === 'fixed';
+    if (ser.method === 'manual') inp.setAttribute('placeholder', NS.t('nx.typeno')); else inp.removeAttribute('placeholder');
+  };
+
+  /* a "Series" choice under the number box when the business has sub-types of this voucher type (A-7):
+     NS.subPick(numberInput, { type, cfg(), get(), set(id), saved() }); hidden when there are none; fixed once the document is saved */
+  NS.subPick = function (inp, o) {
+    if (!inp) return;
+    var f = inp.closest('.f') || inp.parentNode, L = NS.nxSubs(val(o.cfg), val(o.type)), w = f.querySelector('[data-subpick]');
+    if (!L.length) { if (w) w.remove(); return; }
+    if (!w) { w = NS.el('label', { 'class': 'subpick', 'data-subpick': '' }); f.appendChild(w); }
+    var cur = val(o.get) || '';
+    w.innerHTML = '<span>' + NS.esc(NS.t('nx.series')) + '</span> <select>' + ['<option value="">' + NS.esc(NS.t('nx.main')) + '</option>'].concat(L.map(function (x) {
+      return '<option value="' + NS.esc(x.id) + '"' + (x.id === cur ? ' selected' : '') + '>' + NS.esc(x.name || x.id) + '</option>'; })).join('') + '</select>';
+    var sel = w.querySelector('select'); sel.disabled = !!val(o.saved);
+    sel.addEventListener('change', function () { o.set(sel.value); });
+  };
+
+  /* ---------- ERP C-11 / C-14 / C-15: configuration per voucher type, per business: S.vt[<type>] (and S.vt['<type>.<kind>'] for a
+     kind, and a sub-type's own def) = { copies, design, paper, notes, terms, printAfter, shareAfter, afterSave: 'new' | 'list',
+     showBank, showSign }. A new document starts with these; a saved one keeps its own (reprints stay as made). ---------- */
+  NS.VT_FIELDS = ['copies', 'design', 'paper', 'notes', 'terms', 'printAfter', 'shareAfter', 'afterSave', 'showBank', 'showSign'];
+  NS.vtCfg = function (S, type, kind, sub) {
+    S = S || {}; var V = S.vt || {}, out = {};
+    [V[type], kind && /p$/.test(kind) ? V[type + '.' + kind.slice(0, -1)] : null, kind ? V[type + '.' + kind] : null, (NS.nxSub(S, typeof sub === 'object' && sub ? sub.id : sub) || {}).def].forEach(function (x) {
+      if (!x) return; NS.VT_FIELDS.forEach(function (f) { if (x[f] != null && x[f] !== '') out[f] = x[f]; });
+    });
+    return out;
+  };
+  /* fills the defaults of a NEW document from its voucher-type configuration (only fields the tool knows; never on a saved one) */
+  NS.vtApply = function (d, vc, allow) {
+    if (!d || !vc) return d;
+    ['copies', 'design', 'paper', 'notes', 'terms'].forEach(function (f) {
+      if (vc[f] == null || vc[f] === '' || (allow && allow.indexOf(f) < 0)) return;
+      if (f === 'copies') d.copies = Math.min(3, Math.max(1, +vc.copies || 1));
+      else if (f === 'paper' && allow && d.papers && d.papers.indexOf(vc.paper) < 0) return;
+      else d[f] = vc[f];
+    });
+    return d;
+  };
+  /* after a successful save: print and/or share when the voucher type asks for it (C-15) */
+  NS.vtAfterSave = function (vc, doPrint, doShare) {
+    if (!vc) return;
+    if (vc.printAfter && doPrint) setTimeout(doPrint, 150);
+    else if (vc.shareAfter && doShare) setTimeout(doShare, 150);
+  };
+
+  /* ---------- ERP C-9: feature switches that change what entry screens ask for ----------
+     NS.bizMode(business record, settings) = { inv: items with quantity (false = accounting mode: particulars + amount),
+     gst: GST columns (false for unregistered / composition or no GSTIN), comp: composition }. inv follows the feature switch
+     'inv' ("Items with quantity in vouchers", Features › Stock; on unless turned off, so nothing changes for anyone by itself);
+     godown, batch and billwise follow their switches the same way (all three need inv for godown and batch). */
+  /* the same for a document's seller copy (the makers): the business is found by id or name in NS.bizCache (NS.loadCfg fills it) */
+  NS.bizModeOf = function (seller, S) { return NS.bizMode(Object.assign({}, seller || {}, { id: NS.bizIdOf(seller) }), S); };
+  NS.bizMode = function (biz, S) {
+    biz = biz || {}; S = S || {};
+    var e = (S.features || {})[biz.id], sw = function (f) { return !(e && e.sw && f in e.sw && !e.sw[f]); }, inv = sw('inv');
+    var reg = biz.reg || '', gst = !/^(comp|unreg)$/.test(reg) && !!String(biz.gstin || '').trim();
+    /* godown: the godown choice on purchase bills; batch: batch / expiry / serial columns on item lines; billwise: the "Against bills" list
+       on money received / paid (off = settled against the oldest bills by itself, as the books already do) */
+    return { inv: inv, gst: gst, comp: reg === 'comp', godown: inv && sw('godown'), batch: inv && sw('batch'), billwise: sw('billwise') };
   };
 
   /* ---------- printed designs: one list for docs.js, slip.js and kit.js (thermal rolls keep their own look). The record field is a
@@ -1252,8 +1553,8 @@
      (parties, items, HSN). Every box and form gets autocomplete off; boxes that look like a name, address, phone, email,
      GSTIN or PIN get a token the browser does not know, because Chrome still fills addresses for a plain "off".
      A box that asks for its own value (search, a password, data-ac) is left alone. NSBiz's own datalist suggestions still show. */
-  var AC_SEL = 'input:not([type=hidden]):not([type=checkbox]):not([type=radio]):not([type=file]):not([type=submit]):not([type=button]):not([type=range]):not([type=color]):not([type=password]):not([data-ac]),textarea:not([data-ac])';
-  var AC_ADDR = /name|addr|city|pin|state|phone|mobile|tel|email|mail|gst|pan|party|cust|supp|payee|buyer|seller|ship|bank|ifsc|acc/i;
+  var AC_SEL = 'input:not([type=hidden]):not([type=checkbox]):not([type=radio]):not([type=file]):not([type=submit]):not([type=button]):not([type=range]):not([type=color]):not([type=password]):not([data-ac]),textarea:not([data-ac]),select:not([data-ac])';   /* the state list too: Chrome reads it as part of an address */
+  var AC_ADDR = /name|addr|city|town|district|pin|zip|postal|state|country|phone|mobile|tel|email|mail|upi|gst|pan|party|cust|supp|payee|buyer|seller|ship|consign|landlord|tenant|guest|patient|bank|ifsc|acc/i;
   function noAuto(el) {
     if (!el || el.nodeType !== 1) return;
     var list = el.matches && el.matches(AC_SEL) ? [el] : [];
@@ -1264,7 +1565,9 @@
       var a = x.getAttribute('autocomplete');
       if (a && a !== 'on' && a !== 'off') return;   /* the page asked for something on purpose (a plain off is made stronger below) */
       var lb = x.closest('label') || (x.id && document.querySelector('label[for="' + x.id + '"]')), hint = (x.id || '') + ' ' + (x.name || '') + ' ' + (x.getAttribute('list') || '') + ' ' + (x.type || '') + ' ' + (x.placeholder || '') + ' ' + (lb ? (NS.meaning ? NS.meaning(lb.textContent.trim()) + ' ' : '') + lb.textContent : '');   /* the label's key and English words, so it works in every language */
-      x.setAttribute('autocomplete', AC_ADDR.test(hint) ? 'nsbiz-nofill' : 'off');
+      /* "transaction-currency" is a type the browser knows and never fills or saves: it stops Chrome reading the box as part of an address and
+         offering "Save address?" after a voucher is saved (owner, 19 Nov: shown on every voucher with the party's address). An unknown word was not enough. */
+      x.setAttribute('autocomplete', AC_ADDR.test(hint) ? 'transaction-currency' : 'off');
     });
     if (el.tagName === 'FORM' && !el.getAttribute('autocomplete')) el.setAttribute('autocomplete', 'off');
     if (el.querySelectorAll) [].forEach.call(el.querySelectorAll('form:not([autocomplete])'), function (f) { f.setAttribute('autocomplete', 'off'); });

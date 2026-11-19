@@ -116,7 +116,9 @@
     docs.forEach(function (d) { if (d.buyer && d.buyer.name) names[key(d.buyer.name)] = 1; });
     var biz = (lists.biz || []).filter(function (b) { return key(b.name) === bk; }).map(function (b) { return scrub(b, kill); });
     var party = (lists.party || []).filter(function (p) { return p && !p.sample && names[key(p.name)]; }).map(function (p) { return scrub(p, kill); });
-    var item = o.items === false ? [] : (lists.item || []).filter(function (i) { return i && !i.sample; }).map(function (i) { return scrub(i, kill); });
+    var used = {}; docs.forEach(function (d) { (d.items || []).forEach(function (it) { if (it && it.desc) used[key(it.desc)] = 1; }); });
+    var bid = biz[0] && biz[0].id;
+    var item = o.items === false ? [] : (lists.item || []).filter(function (i) { return i && !i.sample && (used[key(i.name || i.desc)] || (bid && i.biz === bid)); }).map(function (i) { return scrub(i, kill); });   /* F3-15 */
     var meta = {}, M = lists.meta || {};
     Object.keys(M).forEach(function (id) {
       if (M[id] === undefined || M[id] === null) return;

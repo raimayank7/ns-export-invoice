@@ -124,6 +124,9 @@ details.more .fg{margin-top:8px}
 .signbox p{margin:0;color:#374151}
 .signbox p:last-child{border-top:1px solid #9CA3AF;padding-top:4px;font-size:11px}
 .made{position:absolute;left:44px;right:44px;bottom:14px;text-align:center;font-size:9.5px;color:#9CA3AF;margin:0}
+.stamp.cx-stamp{border-color:#B91C1C;color:#B91C1C;font-size:44px;top:40%;right:auto;left:50%;transform:translateX(-50%) rotate(-18deg);opacity:.45;mix-blend-mode:multiply;z-index:3;pointer-events:none}
+.cx-line{text-align:center;font-weight:800;letter-spacing:.08em;color:#B91C1C;margin:0 0 6px}
+.pill.cx{background:#FEE2E2;color:#991B1B}
 .stamp{position:absolute;top:150px;right:70px;transform:rotate(-14deg);border:3px solid #15803D;color:#15803D;font:800 26px var(--font-head);padding:4px 16px;border-radius:8px;opacity:.75;letter-spacing:.1em}
 
 @media print{
@@ -474,3 +477,15 @@ html:has(#tool .actions) body{padding-bottom:64px}
 }
 @media print{#tool .actions{display:none}}
 .dp-box{grid-column:1/-1;border:1px solid var(--line);border-radius:10px;padding:8px 12px}.dp-box summary{cursor:pointer;font-weight:600}.dp-box .fg{margin-top:8px}
+/* ERP round 2 (orderpick.js): open order lines on the makers */
+.or-hint{display:flex;flex-wrap:wrap;gap:.5rem;align-items:center;justify-content:space-between;margin:.5rem 0}
+dialog.or-pick{max-width:min(820px,96vw);width:100%}
+dialog.or-pick table{width:100%;border-collapse:collapse}
+dialog.or-pick th,dialog.or-pick td{padding:.3rem .4rem;border-bottom:1px solid var(--line,rgba(127,127,127,.25));text-align:left}
+dialog.or-pick .n{text-align:right}
+dialog.or-pick input[data-orq]{width:6em;text-align:right}
+dialog.or-pick .or-late{color:var(--bad,#b42318)}
+
+/* ERP r2-config C-9: accounting mode on the document makers (no quantity, unit or discount) */
+#items.nx-acct .it-qty, #items.nx-acct .it-unit, #items.nx-acct .it-disc { display: none !important; }
+[data-rows="items"].nx-acct .kr-qty, [data-rows="items"].nx-acct .kr-unit, [data-rows="items"].nx-acct .kr-disc { display: none !important; }
