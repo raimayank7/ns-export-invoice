@@ -1797,7 +1797,7 @@
     'desk.v_veh': "Vehicles",
     'ms.t_trn': "Transporters",
     'ms.t_veh': "Vehicles",
-    'ms.g_dsp': "Dispatch masters",
+    'ms.g_dsp': "Dispatch masters", 'ms.g_pay': "Payroll masters", 'ms.g_co': "Company and your own fields", 'ms.goto': "Go to master",
     'ms.tr_new': "Create transporter",
     'ms.tr_alter': "Alter transporter",
     'ms.veh_new': "Create vehicle",
