@@ -445,3 +445,48 @@ html.side-mini .side .side-v::after{display:none}
 @media (min-width:1100px) and (pointer:fine){html.mb-on.sc-on .dash-logo{width:100%;box-sizing:border-box}html.mb-on.sc-on [data-pane]{display:block}html.mb-on.sc-on .sponsor-slot,html.mb-on.sc-on .tell,html.mb-on.sc-on #ns-tell,html.mb-on.sc-on .ft{display:none!important}}
 @media (min-width:1100px) and (pointer:fine){.dash-logo .brand{flex:none!important;margin:0 auto!important;width:auto!important;min-width:0!important}html.mb-on.sc-on .dash-logo{justify-content:center!important}}
 .dash-logo .nsb-b{margin-inline-start:0!important}
+/* sub-headings inside a menu group, like Tally's Gateway (19 Nov 2026) */
+.side .sg-sub{font:600 .68rem/1 var(--font);color:var(--soft);opacity:.85;padding:10px 12px 4px 14px;letter-spacing:.02em}
+.side .sg-b > .sg-sub:first-child{padding-top:4px}
+html.side-mini .side .sg-sub{display:none}
+.mb-drop .mb-sub{font:700 .68rem/1 var(--font);letter-spacing:.06em;text-transform:uppercase;color:var(--soft);padding:10px 10px 4px}
+.mb-drop .mb-sub:first-child{padding-top:4px}
+/* key labels only when the mouse is over the item, or it has keyboard focus (owner 19 Nov 2026: "show it once mouse hover"); the item's tooltip names the key too */
+.side .side-v[data-kh]::after{display:none}.side .side-v[data-kh]:is(:hover,:focus-visible)::after{display:inline}
+.mb-t kbd,.mb-drop kbd,.sc-panel kbd{display:none}
+.mb-t:is(:hover,:focus-visible) kbd,.mb-drop a:is(:hover,:focus,:focus-visible) kbd,.sc-panel .sc-i:is(:hover,:focus-visible) kbd{display:inline-block}
+/* fewer choices on the left in the App on a computer (owner 19 Nov 2026): the long lists of free tools, Your software and the
+   Nivesh Sahayak pages leave the side menu; the tools are under Utilities > All Tools, Help is the Help button, the pages are in the footer */
+html.mb-on .side .side-g:not(.side-own){display:none}
+/* full screen entries (owner 19 Nov 2026): a voucher screen covers the side menu and the menu bar too, between the title bar and the status bar */
+dialog.vs{inset-inline:0 0!important;border-inline-start:0}
+/* a document maker inside the App: no side menu, menu bar or shortcuts panel while it is open; its Back row returns */
+html.app-maker .side,html.app-maker .mbar,html.app-maker .sc-panel,html.app-maker [data-side-btn]{display:none!important}
+html.app-maker main#main{margin-inline-start:0!important}
+html.app-maker .app-frame{height:calc(100dvh - var(--hd-h,64px) - var(--sbh,30px) - 64px)}
+/* the Gateway on the left, on a computer (owner 19 Nov 2026): company block, Dashboard / My day / Chart of Accounts, Recently opened, Pinned;
+   the menu groups are only in the top menu bar there */
+@media (min-width:901px){html.mb-on .side .sg:not(.sg-top){display:none}}
+.gw-co{margin:6px 8px 10px;padding:12px;border:1px solid var(--line);border-radius:10px;background:var(--surface2,rgba(127,127,127,.06));font-size:.8rem}
+.gw-co>b{display:block;font-size:.95rem}.gw-co small{display:block;color:var(--soft);margin-top:3px}
+.gw-co p{display:flex;justify-content:space-between;gap:8px;margin:6px 0 0}.gw-co p span{color:var(--soft)}
+.gw-co .linkish{background:none;border:0;padding:0;color:var(--accent);font:inherit;font-weight:600;cursor:pointer;text-align:end}
+.gw-h{font:700 .72rem var(--font);letter-spacing:.06em;text-transform:uppercase;color:var(--soft);padding:16px 12px 6px}
+.gw-row small{display:block;font-weight:400;color:var(--soft);font-size:.74rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.gw-row span{min-width:0;overflow:hidden;text-overflow:ellipsis}.gw-hint{font-size:.76rem;color:var(--soft);margin:0 12px}
+.gw-unpin,.mb-pin{flex:none;width:22px;height:22px;border:0;border-radius:6px;background:transparent;cursor:pointer;margin-inline-start:auto;opacity:.7}
+.gw-unpin::before,.mb-pin::before{content:"";display:block;width:14px;height:14px;margin:auto;background:currentColor;-webkit-mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M12 17v5M9 3h6l-1 6 4 4H6l4-4z'/%3E%3C/svg%3E") center/contain no-repeat;mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M12 17v5M9 3h6l-1 6 4 4H6l4-4z'/%3E%3C/svg%3E") center/contain no-repeat}
+.gw-unpin{color:var(--bad,#d9534f)}.gw-unpin:hover,.mb-pin:hover{background:var(--surface2)}
+.mb-pin{visibility:hidden}.mb-drop a:is(:hover,:focus,:focus-visible) .mb-pin,.mb-pin.on{visibility:visible}.mb-pin.on{color:var(--bad,#d9534f);opacity:1}
+html.side-mini .gw,html.side-mini .gw-co{display:none}
+/* the Shortcuts panel, customizable (owner 19 Nov 2026) */
+.sc-panel h3{display:flex;align-items:center;justify-content:space-between;gap:6px}.sc-cust{border:0;background:none;color:var(--accent);font:600 .72rem var(--font);cursor:pointer;text-transform:none;letter-spacing:0;padding:2px 4px;border-radius:5px}.sc-cust:hover{background:var(--surface2)}
+.sc-dlg{width:min(560px,94vw)}.sc-list{list-style:none;margin:8px 0;padding:0;max-height:52vh;overflow:auto}.sc-list li{display:flex;align-items:center;gap:6px;padding:5px 0;border-bottom:1px solid var(--line)}.sc-list li span{flex:1}
+.sc-add{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin:10px 0}.sc-add select{flex:1;min-width:200px}
+/* Add / Modify / List on each voucher line of the top menu (19 Nov 2026): small buttons, shown on the line under the mouse */
+.mb-aml{display:inline-flex;gap:4px;margin-inline-start:6px;visibility:hidden}.mb-drop a:is(:hover,:focus,:focus-visible) .mb-aml{visibility:visible}
+.mb-aml button{border:1px solid var(--line);background:var(--bg);color:var(--ink);border-radius:5px;font:600 .7rem var(--font);padding:2px 6px;cursor:pointer}.mb-aml button:hover{border-color:var(--accent);color:var(--accent)}
+/* where you are in the status bar, and the calculator (19 Nov 2026) */
+.s-path{font-weight:600;color:var(--ink);max-width:40vw;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.calc-dlg{width:min(420px,94vw)}.calc-b{padding:0 4px}.calc-b #calc-in{width:100%;font:600 1.2rem var(--mono,monospace);text-align:end}
+.calc-r{font:700 1.5rem var(--mono,monospace);text-align:end;margin:8px 0}.calc-a{display:flex;gap:8px;justify-content:flex-end}.calc-h{font:500 .85rem var(--mono,monospace);color:var(--soft);padding-inline-start:18px}

@@ -134,26 +134,51 @@
      Click a heading to open or fold it; the group of the screen in use opens; what is folded is remembered (ns-sg).
      A screen this list does not know goes under More. No new keys: every item shows the key it already had. ---------- */
   var SG = [
-    ['top', ['home', 'day']],
-    ['masters', [{ h: 'masters', t: 'v_masters', ic: 'layers' }, { h: 'masters/led', t: 'v_ledgers', ic: 'book' }, { h: 'masters/bank', t: 'v_banks', ic: 'bank' }, { h: 'masters/vt', t: 'v_vtypes', ic: 'list' }, { h: 'masters/igrp', t: 'v_sgroups', ic: 'layers' }, { h: 'masters/unit', t: 'v_units', ic: 'box' }, { h: 'masters/trn', t: 'v_trn', ic: 'truck' }, { h: 'masters/veh', t: 'v_veh', ic: 'truck' },
-      { h: 'coa', t: 'v_coa', ic: 'layers' }, 'parties', { h: 'masters/item', t: 'v_items', ic: 'box' }, { h: 'masters/grp', t: 'v_groups', ic: 'layers' }, { h: 'masters/biz', t: 'v_biz', ic: 'shop' }, 'b2gd', 'stf', 'b2sman', { f: 'ob', t: 'v_ob', ic: 'scale' }, { h: 'bw', t: 'v_bw', ic: 'list' }, 'trust', 'fees', 'warr']],
-    ['trans', [{ f: 'sale', t: 'v_sale', ic: 'doc' }, { f: 'pbill', t: 'v_pbill', ic: 'cart' }, { f: 'min', t: 'v_min', ic: 'money' }, { f: 'mout', t: 'v_mout', ic: 'money' }, { f: 'contra', t: 'v_contra', ic: 'bank' }, 'b2jv', { f: 'genr', t: 'v_genr', ic: 'money' }, { f: 'genp', t: 'v_genp', ic: 'money' }, { f: 'exp', t: 'v_exp', ic: 'cart' }, { f: 'pret', t: 'v_pret', ic: 'repeat' },
-      'sales', 'buy', { h: 'ord', t: 'v_ord', ic: 'list' }, 'money', 'chq', 'capl', 'b2fa', 'b2make', 'b2job', 'repeat', 'khata', 'preg']],
-    ['reports', [{ fin: 'bs', t: 'v_bs', ic: 'scale' }, { fin: 'pl', t: 'v_pl', ic: 'chart' }, { fin: 'tb', t: 'v_tb', ic: 'list' }, { h: 'dlist', t: 'v_dlist', ic: 'people' }, { h: 'clist', t: 'v_clist', ic: 'people' }, { h: 'ssum', t: 'v_ssum', ic: 'chart' }, { h: 'psum', t: 'v_psum', ic: 'chart' }, { h: 'vreg', t: 'v_vreg', ic: 'list' }, { h: 'cbsum', t: 'v_cbsum', ic: 'bank' }, { h: 'os', t: 'v_os', ic: 'clock' }, { h: 'int', t: 'v_int', ic: 'clock' }, { h: 'exc', t: 'v_exc', ic: 'flag' }, 'fin', 'books', 'dues', 'grp', 'msme', 'stock', 'b2profit', 'reports', 'cadb', 'ebook']],
-    ['tax', ['acx', 'tdsr', { site: 'gstr1' }, { site: 'gstr3b' }, { site: 'gstr2b' }, { site: 'cmp08' }, { site: 'tds' }, 'cagst', 'itx', 'limits', 'cacom', 'cadoc']],
-    ['util', [{ h: 'mprint', t: 'v_mprint', ic: 'doc' }, 'bimp', 'b2year', { my: 'backup', t: 'v_backup', ic: 'data' }, { h: 'config', t: 'v_config', ic: 'set' }, { my: 'settings', t: 'v_settings', ic: 'set' }, 'features', 'packs', 'tools']]];
+    ['top', ['home', 'day', { h: 'coa', t: 'v_coa', ic: 'layers' }]],   /* Chart of Accounts sits on top with Dashboard and My day (owner 19 Nov) */
+    ['masters', [{ h: 'masters', t: 'v_masters', ic: 'layers' },
+      '§acc', { h: 'masters/led', t: 'v_ledgers', ic: 'book' }, { h: 'masters/grp', t: 'v_groups', ic: 'layers' }, { h: 'masters/bank', t: 'v_banks', ic: 'bank' }, { h: 'masters/vt', t: 'v_vtypes', ic: 'list' }, { f: 'ob', t: 'v_ob', ic: 'scale' },
+      '§inv', { h: 'masters/item', t: 'v_items', ic: 'box' }, { h: 'masters/igrp', t: 'v_sgroups', ic: 'layers' }, { h: 'masters/unit', t: 'v_units', ic: 'box' }, 'b2gd',
+      '§pay', { h: 'stf/emp', t: 'v_emp', ic: 'people' }, { h: 'stf/heads', t: 'v_payheads', ic: 'list' }, 'b2sman',
+      '§dsp', { h: 'masters/trn', t: 'v_trn', ic: 'truck' }, { h: 'masters/veh', t: 'v_veh', ic: 'truck' },
+      '§co', { h: 'masters/biz', t: 'v_biz', ic: 'shop' }]],
+    ['trans', ['§vch', { f: 'sale', t: 'v_sale', ic: 'doc' }, { f: 'pbill', t: 'v_pbill', ic: 'cart' }, { f: 'min', t: 'v_min', ic: 'money' }, { f: 'mout', t: 'v_mout', ic: 'money' }, { f: 'contra', t: 'v_contra', ic: 'bank' }, 'b2jv', { f: 'genr', t: 'v_genr', ic: 'money' }, { f: 'genp', t: 'v_genp', ic: 'money' }, { f: 'exp', t: 'v_exp', ic: 'cart' }, { f: 'pret', t: 'v_pret', ic: 'repeat' }, 'repeat',
+      '§ivch', { h: 'ord', t: 'v_ord', ic: 'list' }, { or: 'grn', t: 'v_grn', ic: 'cart' }, { or: 'rejin', t: 'v_rejin', ic: 'repeat' }, { or: 'rejout', t: 'v_rejout', ic: 'repeat' }, { or: 'lc', t: 'v_lc', ic: 'truck' }, 'b2make', 'b2job',
+      '§payv', { h: 'stf/run', t: 'v_payrun', ic: 'money' }, { h: 'stf/att', t: 'v_att', ic: 'clock' }, { h: 'stf/leave', t: 'v_leave', ic: 'clock' }, { h: 'stf/adv', t: 'v_adv', ic: 'money' }, { h: 'stf/loan', t: 'v_sloan', ic: 'money' },
+      '§lists', 'sales', 'buy', 'money', 'chq', 'khata', 'preg',
+      '§assets', 'capl', 'b2fa',
+      '§trade', 'trust', 'fees', 'warr']],
+    ['reports', ['§final', { fin: 'bs', t: 'v_bs', ic: 'scale' }, { fin: 'pl', t: 'v_pl', ic: 'chart' }, { fin: 'tb', t: 'v_tb', ic: 'list' }, 'fin',
+      '§books', 'books', { h: 'ssum', t: 'v_ssum', ic: 'chart' }, { h: 'psum', t: 'v_psum', ic: 'chart' }, { h: 'vreg', t: 'v_vreg', ic: 'list' }, { h: 'cbsum', t: 'v_cbsum', ic: 'bank' }, 'grp',
+      '§os', { h: 'os', t: 'v_os', ic: 'clock' }, 'dues', { h: 'dlist', t: 'v_dlist', ic: 'people' }, { h: 'clist', t: 'v_clist', ic: 'people' }, 'parties', { h: 'int', t: 'v_int', ic: 'clock' }, 'msme',
+      '§irep', 'stock', 'b2profit',
+      '§payr', 'stf', { h: 'stf/year', t: 'v_bonus', ic: 'list' },
+      '§xrep', { h: 'exc', t: 'v_exc', ic: 'flag' }, 'reports', 'cadb', 'ebook']],
+    ['tax', ['§gst', { site: 'gstr1' }, { site: 'gstr3b' }, { site: 'gstr2b' }, { site: 'cmp08' }, 'cagst',
+      '§itax', 'tdsr', { site: 'tds' }, 'acx', 'itx', 'limits',
+      '§payst', { h: 'stf/pf', t: 'v_pf', ic: 'doc' }, { h: 'stf/esi', t: 'v_esi', ic: 'doc' }, { h: 'stf/tax', t: 'v_saltds', ic: 'doc' },
+      '§audit', 'cacom', 'cadoc']],
+    ['util', ['§data', { my: 'backup', t: 'v_backup', ic: 'data' }, 'bimp', { h: 'mprint', t: 'v_mprint', ic: 'doc' }, 'b2year',
+      '§setup', { h: 'config', t: 'v_config', ic: 'set' }, { h: 'bw', t: 'v_bw', ic: 'list' }, 'features', 'packs',   /* one Configuration (owner 19 Nov): it opens the My data settings itself */
+      '§tools', 'tools']]];
+  /* the sub-headings inside a group (accounting names; the App is English only) */
+  var SUBN = { acc: 'Accounting Masters', inv: 'Inventory Masters', pay: 'Payroll Masters', dsp: 'Dispatch Masters', co: 'Company',
+    vch: 'Accounting Vouchers', ivch: 'Inventory Vouchers', payv: 'Payroll Vouchers', payr: 'Payroll Reports', payst: 'Payroll Statutory', lists: 'Lists and Registers', assets: 'Assets and Loans', trade: 'Trade Registers',
+    final: 'Final Accounts', books: 'Books and Registers', os: 'Outstandings', irep: 'Inventory Reports', xrep: 'Exceptions and Export',
+    gst: 'GST', itax: 'TDS and Income Tax', audit: 'Audit', data: 'Data', setup: 'Configuration', tools: 'Tools' };
   var SGOF = {}; SG.forEach(function (g) { g[1].forEach(function (s) { if (typeof s === 'string') SGOF[s] = g[0]; }); });
   SGOF.st = 'masters';
   function sgName(g) { var v = window.NSApp && NSApp.data && ERPG[g === 'docs' ? 'x-docs' : g]; if (v) return v; return g === 'docs' ? NS.t('desk.sg_new') : NS.t('desk.um_' + g); }   /* the App's menu bar uses the accounting names too */
-  function myUrl(part) { var a = $('#ns-side a[data-ic=set]'); return (a ? a.href.split('#')[0] : 'https://my.niveshsahayak.in/') + '#' + part; }
+  function myUrl(part) { var ap = A(); if (ap && ap.myUrl) return ap.myUrl('#' + part);   /* the App's own data home address (a Configuration link also has the set icon) */
+    var a = $('#ns-side a[data-ic=set]'); return (a ? a.href.split('#')[0] : 'https://my.niveshsahayak.in/') + '#' + part; }
   function formKey(f) { var r = FORMKEY.filter(function (x) { return x[0] === f; })[0]; return r ? r[2] || 'Alt+G ' + r[1] : ''; }
-  function secKey(s) { var m = SECKEY[s], fk = m && fName(s); return fk || (m && m[1] ? 'Alt+' + m[1] : m ? 'Alt+G ' + m[0] : ''); }
+  function secKey(s) { if (CALBL[s]) return CALBL[s]; var m = SECKEY[s], fk = m && fName(s); return fk || (m && m[1] ? 'Alt+' + m[1] : m ? 'Alt+G ' + m[0] : ''); }
   /* an item of the list that is not one of the App's screens: drawn like a side link */
   function vItem(x) {
     var a = NS.el('a', { 'class': 'side-v', 'data-ic': x.ic || 'dot' }), key = '';
     if (x.f) { a.href = '#'; a.setAttribute('data-dform', x.f); key = formKey(x.f); if (offForm(x.f)) a.hidden = true; }
-    else if (x.my) a.href = myUrl(x.my);
-    else if (x.fin) a.href = '#fin/' + x.fin;
+    else if (x.or) { a.href = '#'; a.setAttribute('data-oract', x.or); if (ORKEY[x.or]) key = 'Alt+G ' + ORKEY[x.or]; }   /* an Inventory Vouchers entry of the Orders screen (orders.js) */
+    else if (x.my) { a.href = myUrl(x.my); a.setAttribute('data-my', x.my); if (MYKEY[x.my]) key = 'Alt+G ' + MYKEY[x.my]; }
+    else if (x.fin) { a.href = '#fin/' + x.fin; a.setAttribute('data-hsec', 'fin/' + x.fin); key = secKey('fin/' + x.fin); }
     else if (x.h) { a.href = '#' + x.h; a.setAttribute('data-hsec', x.h); key = secKey(x.h); }
     else if (x.site) { var o = $('#ns-side .side-g a[data-ic="t-' + x.site + '"]'); if (!o) return null; a.href = o.href; a.setAttribute('data-ic', 't-' + x.site); if (o.getAttribute('data-port')) a.setAttribute('data-port', o.getAttribute('data-port')); a.innerHTML = o.innerHTML; a.title = (o.textContent || '').trim(); o.hidden = true; return a; }   /* listed here, not twice */
     a.innerHTML = '<span data-i18n="desk.' + x.t + '">' + esc(NS.t('desk.' + x.t)) + '</span>';
@@ -163,6 +188,8 @@
   document.addEventListener('click', function (e) {
     var qn = e.target.closest && e.target.closest('[data-qnew]');   /* New party / New item open the quick add box right here, not My data */
     if (qn) { e.preventDefault(); closeDrops(); NS.quickAddNew(qn.getAttribute('data-qnew')); return; }
+    var oa = e.target.closest && e.target.closest('[data-oract]');
+    if (oa) { e.preventDefault(); closeDrops(); var ap = A(); if (ap && ap.orAct) (ap.whenReady || function (g) { g(); })(function () { if (ap.biz() && !$('dialog[open]')) ap.orAct(oa.getAttribute('data-oract')); }); return; }
     var a = e.target.closest && e.target.closest('[data-dform]'); if (!a) return;
     e.preventDefault(); closeDrops(); runForm(a.getAttribute('data-dform'));
   });
@@ -172,17 +199,72 @@
     return on ? scPanel() + '<div class="dash-logo" aria-hidden="true"><span class="brand"><img class="mk mk-l" src="/icons/mark-light-270.webp" alt=""><img class="mk mk-d" src="/icons/mark-dark-270.webp" alt=""><b class="nsb"><span class="nsb-b">Biz</span></b></span></div>' : '';
   };
   /* ---- 4. the Dashboard's shortcut panel (like Busy and Evershine): the usual entries and reports with their keys ---- */
-  function scPanel() {
-    var L = [['v_newparty', 'q:party', 'people', ''], ['v_newitem', 'q:item', 'box', '']].concat(
+  function scDefs() {   /* the standard items: [{ id, t, html }] */
+    var L = [['v_newparty', 'q:party', 'people', CALBL['q:party']], ['v_newitem', 'q:item', 'box', CALBL['q:item']]].concat(
       [['sale', 'v_sale'], ['pbill', 'v_pbill'], ['min', 'v_min'], ['mout', 'v_mout'], ['contra', 'v_contra'], ['b2jv', 'v_jv'], ['exp', 'v_exp']].map(function (x) { return [x[1], x[0] === 'b2jv' ? '#b2jv' : 'f:' + x[0], 'doc', x[0] === 'b2jv' ? secKey('b2jv') : formKey(x[0])]; }),
-      [['v_tb', '#fin/tb', 'list', ''], ['v_bs', '#fin/bs', 'scale', ''], ['v_pl', '#fin/pl', 'chart', ''], ['v_ledger', '#parties', 'people', secKey('parties')], ['v_dlist', '#dlist', 'people', secKey('dlist')], ['v_clist', '#clist', 'people', secKey('clist')], ['v_dues', '#dues', 'clock', secKey('dues')], ['v_stock', '#stock', 'box', secKey('stock')], ['v_books', '#books', 'book', secKey('books')]]);
-    return '<aside class="sc-panel" aria-label="' + esc(NS.t('desk.sc_t')) + '"><h3>' + esc(NS.t('desk.sc_t')) + '</h3>' + L.filter(function (x) {
+      [['v_tb', '#fin/tb', 'list', CALBL['fin/tb']], ['v_bs', '#fin/bs', 'scale', CALBL['fin/bs']], ['v_pl', '#fin/pl', 'chart', CALBL['fin/pl']], ['v_ledger', '#parties', 'people', secKey('parties')], ['v_dlist', '#dlist', 'people', secKey('dlist')], ['v_clist', '#clist', 'people', secKey('clist')], ['v_dues', '#dues', 'clock', secKey('dues')], ['v_stock', '#stock', 'box', secKey('stock')], ['v_books', '#books', 'book', secKey('books')]]);
+    return L.filter(function (x) {
       var h = x[1]; if (/^q:/.test(h)) return !!NS.quickAddNew; if (/^f:/.test(h)) return !offForm(h.slice(2)); if (/^#/.test(h)) { var s = h.slice(1).split('/')[0]; return s === 'fin' || /^(dlist|clist|ssum|psum|vreg|cbsum|coa)$/.test(s) || ($('#ns-side a[data-sec="' + s + '"]') && !isOff(s)); } return true;
     }).map(function (x) {
       var f = /^f:/.test(x[1]), q = /^q:/.test(x[1]);
-      return '<a class="sc-i" href="' + (f || q ? '#' : esc(x[1])) + '"' + (f ? ' data-dform="' + x[1].slice(2) + '"' : '') + (q ? ' data-qnew="' + x[1].slice(2) + '"' : '') + ' data-ic="' + x[2] + '"><span>' + esc(NS.t('desk.' + x[0])) + '</span>' + (x[3] ? '<kbd>' + esc(x[3]) + '</kbd>' : '') + '</a>';
-    }).join('') + '</aside>';
+      return { id: x[1], t: NS.t('desk.' + x[0]), html: '<a class="sc-i" href="' + (f || q ? '#' : esc(x[1])) + '"' + (f ? ' data-dform="' + x[1].slice(2) + '"' : '') + (q ? ' data-qnew="' + x[1].slice(2) + '"' : '') + ' data-ic="' + x[2] + '"><span>' + esc(NS.t('desk.' + x[0])) + '</span>' + (x[3] ? '<kbd>' + esc(x[3]) + '</kbd>' : '') + '</a>' };
+    });
   }
+
+  /* the user's own list (Customize): ids of the standard items and 'c:XX' = any screen, entry or document by its Go to code */
+  var SCP = 'ns-scp';
+  function scSaved() { try { var v = JSON.parse(localStorage.getItem(SCP) || 'null'); return Array.isArray(v) ? v : null; } catch (e) { return null; } }
+  function scSave(v) { try { if (v) localStorage.setItem(SCP, JSON.stringify(v)); else localStorage.removeItem(SCP); } catch (e) {} }
+  function scItems() {
+    var defs = scDefs(), byId = {}; defs.forEach(function (x) { byId[x.id] = x; });
+    var list = scSaved(); if (!list) return defs;
+    var reg = {}; registry().forEach(function (x) { if (x.c && !x.off) reg[x.c] = x; });
+    return list.map(function (id) {
+      if (byId[id]) return byId[id];
+      var x = /^c:/.test(id) && reg[id.slice(2)]; if (!x) return null;
+      var k = x.k || 'Alt+G ' + x.c;
+      return { id: id, t: x.t, html: '<a class="sc-i" href="#" data-sccode="' + esc(x.c) + '" data-ic="dot"><span>' + esc(x.t) + '</span><kbd>' + esc(k) + '</kbd></a>' };
+    }).filter(Boolean);
+  }
+  function scPanel() {
+    return '<aside class="sc-panel" aria-label="' + esc(NS.t('desk.sc_t')) + '"><h3><span>' + esc(NS.t('desk.sc_t')) + '</span><button type="button" class="sc-cust" data-sc-cust title="Customize the shortcuts" aria-label="Customize the shortcuts">Customize</button></h3>' +
+      scItems().map(function (x) { return x.html; }).join('') + '</aside>';
+  }
+  function scRedraw() { var o = $('.sc-panel'); if (!o) return; var t = document.createElement('div'); t.innerHTML = scPanel(); o.replaceWith(t.firstChild); }
+  var scDlg = null;
+  function scCustomize() {
+    if (!scDlg) { scDlg = NS.el('dialog', { 'class': 'sc-dlg', 'aria-labelledby': 'sc-dlg-h' }); document.body.appendChild(scDlg); }
+    var cur = scItems(), ids = cur.map(function (x) { return x.id; }), defs = scDefs();
+    var reg = registry().filter(function (x) { return x.c && !x.off; });
+    var have = {}; ids.forEach(function (i) { have[i] = 1; });
+    /* what can be added: the standard items not in the panel, then every screen, entry and document by name */
+    var add = defs.filter(function (x) { return !have[x.id]; }).map(function (x) { return [x.id, x.t]; })
+      .concat(reg.filter(function (x) { return !have['c:' + x.c] && !defs.some(function (d) { return d.t === x.t; }); }).sort(function (a, b) { return a.t.localeCompare(b.t); }).map(function (x) { return ['c:' + x.c, x.t]; }));
+    scDlg.innerHTML = '<div class="dlg-hd"><h2 id="sc-dlg-h">Customize the shortcuts</h2><button type="button" class="btn sm" data-sc-close>Done</button></div>' +
+      '<div class="sc-body"><p class="soft">The list on the right of the Dashboard. Kept in this browser.</p><ol class="sc-list">' + cur.map(function (x, i) {
+        return '<li><span>' + esc(x.t) + '</span><button type="button" class="btn sm" data-sc-up="' + i + '"' + (i ? '' : ' disabled') + ' aria-label="Move up">↑</button><button type="button" class="btn sm" data-sc-dn="' + i + '"' + (i < cur.length - 1 ? '' : ' disabled') + ' aria-label="Move down">↓</button><button type="button" class="btn sm danger" data-sc-rm="' + i + '" aria-label="Remove ' + esc(x.t) + '">Remove</button></li>';
+      }).join('') + '</ol>' +
+      '<div class="sc-add"><label for="sc-add">Add</label><select id="sc-add">' + add.map(function (a) { return '<option value="' + esc(a[0]) + '">' + esc(a[1]) + '</option>'; }).join('') + '</select><button type="button" class="btn primary" data-sc-add>+ Add</button></div>' +
+      '<p><button type="button" class="btn sm" data-sc-reset>Reset to the standard list</button></p></div>';
+    var put = function (v) { scSave(v); scRedraw(); scCustomize(); };
+    scDlg.onclick = function (e) {
+      var b = e.target.closest('button'); if (!b) return;
+      var i = +(b.getAttribute('data-sc-up') || b.getAttribute('data-sc-dn') || b.getAttribute('data-sc-rm') || -1), v = ids.slice();
+      if (b.hasAttribute('data-sc-close')) { scDlg.close(); return; }
+      if (b.hasAttribute('data-sc-reset')) { scSave(null); scRedraw(); scCustomize(); return; }
+      if (b.hasAttribute('data-sc-add')) { var s0 = $('#sc-add', scDlg); if (s0 && s0.value) { v.push(s0.value); put(v); } return; }
+      if (b.hasAttribute('data-sc-up') && i > 0) { v.splice(i - 1, 0, v.splice(i, 1)[0]); put(v); }
+      else if (b.hasAttribute('data-sc-dn') && i < v.length - 1) { v.splice(i + 1, 0, v.splice(i, 1)[0]); put(v); }
+      else if (b.hasAttribute('data-sc-rm')) { v.splice(i, 1); put(v); }
+    };
+    if (!scDlg.open) scDlg.showModal();
+  }
+  document.addEventListener('click', function (e) {
+    var c = e.target.closest && e.target.closest('[data-sc-cust], [data-sccode]'); if (!c) return;
+    e.preventDefault();
+    if (c.hasAttribute('data-sc-cust')) { scCustomize(); return; }
+    var x = registry().filter(function (r) { return r.c === c.getAttribute('data-sccode'); })[0]; if (x) x.run();
+  });
   /* ---- 2 + 3. the menu bar (Masters ▾ Transactions ▾ ...) and the voucher toolbar, App only, on computers ---- */
   var mbar = null;
   function closeDrops() { $$('.mb-drop').forEach(function (d) { d.remove(); }); $$('.mb-m[aria-expanded="true"]').forEach(function (b) { b.setAttribute('aria-expanded', 'false'); }); }
@@ -194,7 +276,7 @@
     menus.splice(2, 0, 'docs');
     mbar.innerHTML = '<div class="mb-menus">' + menus.map(function (k) { return '<button type="button" class="mb-m" role="menuitem" aria-haspopup="true" aria-expanded="false" data-mb="' + k + '"><span data-i18n="' + (k === 'docs' ? 'desk.sg_new' : 'desk.um_' + k) + '">' + esc(sgName(k)) + '</span> ▾</button>'; }).join('') + '</div>' +
       '<div class="mb-tools" role="toolbar" aria-label="' + esc(NS.t('desk.tb_t')) + '">' + [['sale', 'tb_sale'], ['pbill', 'tb_pur'], ['min', 'tb_rec'], ['mout', 'tb_pay'], ['contra', 'tb_contra'], ['#b2jv', 'tb_jv'], ['exp', 'tb_exp'], ['@challan', 'tb_challan'], ['@credit-note', 'tb_cn'], ['@debit-note', 'tb_dn']].map(function (t) {
-        var w = t[0], key = w.charAt(0) === '#' ? secKey(w.slice(1)) : w.charAt(0) === '@' ? (DOCKEY[w.slice(1)] ? (DOCKEY[w.slice(1)][1] ? 'Alt+' + DOCKEY[w.slice(1)][1] : 'Alt+G ' + DOCKEY[w.slice(1)][0]) : '') : formKey(w);
+        var w = t[0], key = w.charAt(0) === '#' ? secKey(w.slice(1)) : w.charAt(0) === '@' ? fName(w.slice(1)) || (DOCKEY[w.slice(1)] ? (DOCKEY[w.slice(1)][1] ? 'Alt+' + DOCKEY[w.slice(1)][1] : 'Alt+G ' + DOCKEY[w.slice(1)][0]) : '') : formKey(w);
         if (w.charAt(0) === '@' ? isOff(w.slice(1)) : w.charAt(0) === '#' ? isOff(w.slice(1)) : offForm(w)) return '';
         return '<button type="button" class="mb-t" data-mbt="' + esc(w) + '" title="' + esc(NS.t('desk.' + t[1]) + (key ? '  ·  ' + key : '')) + '"><span data-i18n="desk.' + t[1] + '">' + esc(NS.t('desk.' + t[1])) + '</span>' + (key ? '<kbd>' + esc(key.replace('Alt+G ', '')) + '</kbd>' : '') + '</button>';
       }).join('') + '</div>';
@@ -207,8 +289,20 @@
       var was = b.getAttribute('aria-expanded') === 'true'; closeDrops(); if (was) return;
       var k = b.getAttribute('data-mb'), src = k === 'docs' ? $('.side-g[data-g="docs"] .sg-b', side) : $('.sg[data-sg="' + k + '"] .sg-b', side);
       var d = NS.el('div', { 'class': 'mb-drop', role: 'menu' });
-      if (src) $$(':scope > a:not([hidden])', src).forEach(function (a) { var c = a.cloneNode(true); c.removeAttribute('id'); c.removeAttribute('aria-current'); c.setAttribute('role', 'menuitem'); c.classList.remove('on'); var kh = a.getAttribute('data-kh'); if (kh) c.insertAdjacentHTML('beforeend', '<kbd>' + esc(kh) + '</kbd>'); d.appendChild(c); });
+      if (src) $$(':scope > a:not([hidden])', src).forEach(function (a) { var sb = a.getAttribute('data-sub'); if (sb && d.lastSub !== sb) { d.lastSub = sb; var hh = $(':scope > .sg-sub[data-sub="' + sb + '"]', src); if (hh) d.appendChild(NS.el('div', { 'class': 'mb-sub', role: 'presentation' }, esc(hh.textContent))); } var c = a.cloneNode(true); c.removeAttribute('id'); c.removeAttribute('aria-current'); c.setAttribute('role', 'menuitem'); c.classList.remove('on'); var kh = a.getAttribute('data-kh'); if (kh) c.insertAdjacentHTML('beforeend', '<kbd>' + esc(kh) + '</kbd>'); d.appendChild(c); });
       if (!d.children.length) return;
+      var pk = pinned().map(function (x) { return x.k; });
+      if (src) $$(':scope > a:not([hidden])', src).forEach(function (a, i) { var k = linkKey(a), c = $$('a', d)[i]; if (!k || !c) return;   /* pin it to the left (owner 19 Nov 2026) */
+        c.insertAdjacentHTML('beforeend', '<button type="button" class="mb-pin' + (pk.indexOf(k) >= 0 ? ' on' : '') + '" data-pin="' + esc(k) + '" title="Pin to the left" aria-label="Pin ' + esc((a.textContent || '').trim()) + ' to the left"></button>'); });
+      /* Busy: Add / Modify / List under each voucher. The item is Add; Modify and List are small buttons on its line */
+      var VLIST = { sale: 'sales', pbill: 'buy', pret: 'buy', exp: 'buy', min: 'money', mout: 'money', contra: 'books' };
+      $$('a[data-dform]', d).forEach(function (c) { var f = c.getAttribute('data-dform'); if (!VLIST[f]) return;
+        c.insertAdjacentHTML('beforeend', '<span class="mb-aml"><button type="button" data-vmod="' + f + '" title="Modify: open the last saved one">Modify</button><button type="button" data-vlist="' + VLIST[f] + '" title="List of saved ones">List</button></span>'); });
+      d.addEventListener('click', function (ev) { var ml = ev.target.closest('[data-vmod],[data-vlist]'); if (!ml) return; ev.preventDefault(); ev.stopPropagation(); closeDrops();
+        var ap = A(); if (ml.hasAttribute('data-vlist')) { location.hash = ml.getAttribute('data-vlist'); return; }
+        if (ap && ap.vtModify) (ap.whenReady || function (g) { g(); })(function () { ap.vtModify(ml.getAttribute('data-vmod')); }); }, true);
+      d.addEventListener('click', function (ev) { var pb = ev.target.closest('.mb-pin'); if (!pb) return; ev.preventDefault(); ev.stopPropagation();
+        var a0 = pb.closest('a'), t0 = a0 ? ((a0.querySelector('span') || a0).textContent || '').trim() : ''; togglePin(pb.getAttribute('data-pin'), t0); pb.classList.toggle('on'); }, true);
       b.setAttribute('aria-expanded', 'true'); b.parentNode.appendChild(d);
       d.style.insetInlineStart = (b.offsetLeft) + 'px';
       var first = $('a', d); if (first) first.focus();
@@ -229,7 +323,17 @@
      folded, sit below the App's own groups, and leave out every tool that is already an App screen (Cash book = Cash and bank,
      Cheques, Khata...), so nothing shows twice. The makers' heading reads "Make a new document" (Billing makes an invoice; Sales lists them). */
   /* the document makers and the more tools in A to Z order of the names on screen (owner 2026-11-18) */
-  function abcSort(box) { var L = (NS.lang && NS.lang()) || 'en'; $$(':scope > a', box).sort(function (x, y) { return (x.textContent || '').trim().localeCompare((y.textContent || '').trim(), L, { sensitivity: 'base' }); }).forEach(function (x) { box.appendChild(x); }); }
+  function abcSort(box) {
+    var L = (NS.lang && NS.lang()) || 'en', cmp = function (x, y) { return (x.textContent || '').trim().localeCompare((y.textContent || '').trim(), L, { sensitivity: 'base' }); };
+    var links = $$(':scope > a', box), subs = $$(':scope > .sg-sub', box), put = function (x) { box.appendChild(x); };
+    if (!subs.length) { links.sort(cmp).forEach(put); return; }
+    links.filter(function (a) { return !a.getAttribute('data-sub'); }).sort(cmp).forEach(put);   /* the group's own first line (All Masters) stays on top */
+    subs.forEach(function (h) {
+      var mine = links.filter(function (a) { return a.getAttribute('data-sub') === h.getAttribute('data-sub'); }).sort(cmp);
+      box.appendChild(h); mine.forEach(put);
+      h.hidden = !mine.some(function (a) { return !a.hidden && getComputedStyle(a).display !== 'none'; });
+    });
+  }
   function foldOthers() {
     var map = (window.NS_CFG && NS_CFG.inapp) || {}, door = {};
     Object.keys(map).forEach(function (k) { var v = map[k] || []; if (/^#/.test(String(v[2] || ''))) { door[k] = 1; if (v[1]) door[':' + v[1]] = 1; } });
@@ -265,7 +369,7 @@
     'h:masters': 'All Masters', 'h:masters/led': 'Ledgers', 'h:masters/bank': 'Bank Accounts', 'h:masters/biz': 'Companies', 'h:masters/grp': 'Account Groups',
     'h:masters/item': 'Stock Items', 'h:masters/igrp': 'Stock Groups', 'h:masters/unit': 'Units of Measure', 'h:masters/trn': 'Transporters', 'h:masters/veh': 'Vehicles',
     'h:masters/vt': 'Voucher Types', 'h:coa': 'Chart of Accounts', 's:parties': 'Party Accounts', 's:b2gd': 'Godowns and Stock Transfer', 's:stf': 'Employees and Payroll',
-    's:b2sman': 'Salesmen and Agents', 'f:ob': 'Opening Balances', 's:trust': 'Donors and Members', 's:fees': 'Students and Fees', 's:warr': 'Warranty and Service Register',
+    's:b2sman': 'Salesmen and Agents', 's:stf': 'Salary Register', 'f:ob': 'Opening Balances', 's:trust': 'Donors and Members', 's:fees': 'Students and Fees', 's:warr': 'Warranty and Service Register',
     'f:sale': 'Sales Voucher', 'f:pbill': 'Purchase Voucher', 'f:min': 'Receipt Voucher', 'f:mout': 'Payment Voucher', 'f:contra': 'Contra Voucher', 'f:exp': 'Expense Voucher',
     'f:pret': 'Purchase Return', 's:b2jv': 'Journal Vouchers', 's:capl': 'Capital and Loans', 's:chq': 'Cheque Register', 's:b2fa': 'Fixed Asset Register',
     's:b2job': 'Job Work (In and Out)', 's:b2make': 'Manufacturing Journal', 's:money': 'Receipts and Payments List', 's:buy': 'Purchases and Expenses List',
@@ -281,7 +385,7 @@
     's:cacom': 'Auditor Comments', 'k:nav.cmp08': 'CMP-08 Statement', 'k:nav.gstr1': 'GSTR-1 Return', 'k:nav.gstr2b': 'GSTR-2B Reconciliation', 'k:nav.gstr3b': 'GSTR-3B Return',
     's:itx': 'Income Tax Computation', 's:limits': 'Statutory Limits', 's:acx': 'Other Income and Tax Payments', 'k:nav.tds': 'TDS and TCS',
     's:features': 'Feature Settings', 's:tools': 'All Tools', 'k:desk.v_backup': 'Backup and Restore', 's:bimp': 'Bank Statement Import', 'h:mprint': 'Print Many Vouchers',
-    'k:desk.v_settings': 'Configuration', 's:packs': 'Trade Packs', 's:b2year': 'Year-End Closing'
+    'k:desk.v_settings': 'Company Settings', 's:packs': 'Trade Packs', 's:b2year': 'Year-End Closing'
   };
   var ERPG = { trans: 'Transactions (Vouchers)', reports: 'Display and Reports', tax: 'Statutory (GST and Tax)', 'x-docs': 'Other Documents' };
   function erpKey(a) { var s = a.querySelector('span'), k = s && s.getAttribute('data-i18n'); return a.getAttribute('data-hsec') ? 'h:' + a.getAttribute('data-hsec') : a.getAttribute('data-dform') ? 'f:' + a.getAttribute('data-dform') : a.getAttribute('data-sec') ? 's:' + a.getAttribute('data-sec') : k ? 'k:' + k : ''; }
@@ -320,6 +424,124 @@
   var erpQ = false;
   function erpHeads() { erpQ = false; $$('[data-pane] h2, dialog[open] .dlg-hd h2, dialog[open] .dlg-h h2, dialog[open] > h2, #app-form h2').forEach(erpHead); }
   if (window.NSApp && NSApp.data) new MutationObserver(function () { if (!erpQ) { erpQ = true; setTimeout(erpHeads, 20); } }).observe(document.body, { childList: true, subtree: true });
+
+
+  /* ---------- the Gateway on the left (owner 19 Nov 2026): company, Dashboard / My day / Chart of Accounts, Recently opened, Pinned ---------- */
+  var PINK = 'ns-pins', RECK = 'ns-recent', KEYATTR = ['data-sec', 'data-hsec', 'data-dform', 'data-oract', 'data-my', 'data-qnew'];
+  function lsGet(k) { try { return JSON.parse(localStorage.getItem(k) || '[]') || []; } catch (e) { return []; } }
+  function lsSet(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} }
+  function linkKey(a) {
+    for (var i = 0; i < KEYATTR.length; i++) if (a.hasAttribute(KEYATTR[i])) return KEYATTR[i] + '=' + a.getAttribute(KEYATTR[i]);
+    var ic = a.getAttribute('data-ic'); return /^[td]-/.test(ic || '') ? 'data-ic=' + ic : '';
+  }
+  function linkByKey(k) { var p = k.split('='); return p[1] ? $('#ns-side a[' + p[0] + '="' + p.slice(1).join('=') + '"]:not(.gw-row)') : null; }
+  function gwClone(a, extra) {
+    var c = a.cloneNode(true); c.removeAttribute('id'); c.removeAttribute('aria-current'); c.classList.remove('on'); c.classList.add('gw-row'); c.hidden = false;
+    if (extra) c.insertAdjacentHTML('beforeend', extra); return c;
+  }
+  function gwBig() { return !!(window.matchMedia && matchMedia('(min-width: 901px)').matches) && root.classList.contains('mb-on'); }
+  function pinned() { return lsGet(PINK); }
+  function togglePin(k, t) {
+    var L = pinned(), at = L.map(function (x) { return x.k; }).indexOf(k);
+    if (at >= 0) L.splice(at, 1); else L.push({ k: k, t: t });
+    lsSet(PINK, L.slice(0, 12)); gateway();
+    NS.toast(at >= 0 ? 'Unpinned: ' + t : 'Pinned: ' + t);
+  }
+  /* screens used: kept per hash change (the Dashboard, My day and Chart of Accounts are on top anyway) */
+  function noteScreen() {
+    var h = location.hash.replace(/^#/, ''); if (!h || /^(home|day|coa)$/.test(h) || /^do\/(my|page|web)\b/.test(h)) return;
+    setTimeout(function () {
+      var a = $('#ns-side a[href="#' + h + '"]:not(.gw-row)') || $('#ns-side a[data-hsec="' + h + '"]:not(.gw-row)') || $('#ns-side a[data-sec="' + h.split('/')[0] + '"]:not(.gw-row)');
+      var t = a ? (a.textContent || '').trim() : (($('[data-pane]:not([hidden]) h2') || {}).textContent || '').replace(/\?$/, '').trim();
+      if (!t) return;
+      var L = lsGet(RECK).filter(function (x) { return x.h !== h; }); L.unshift({ h: h, t: t.slice(0, 60) }); lsSet(RECK, L.slice(0, 8)); gateway();
+    }, 700);
+  }
+  function gateway() {
+    var app = A(), hub = $('#ns-side .sg-top'); if (!app || !app.biz || !hub) return;
+    var box = $('#gw-box'); if (!box) { box = NS.el('div', { id: 'gw-box', 'class': 'gw' }); hub.parentNode.insertBefore(box, hub); var after = NS.el('div', { id: 'gw-after', 'class': 'gw' }); hub.parentNode.insertBefore(after, hub.nextSibling); }
+    var after2 = $('#gw-after'), b = app.biz() || {}, D = app.mine ? app.mine() : [], p = NS.period ? NS.period() : null;
+    if (!gwBig()) { box.innerHTML = ''; after2.innerHTML = ''; return; }
+    var last = D.reduce(function (m, d) { return d && d.date && !d.cancelled && d.date > m ? d.date : m; }, '');
+    var fy = p && p.from ? NS.fy(p.from) : NS.fy(NS.today());
+    box.innerHTML = '<div class="gw-co"><b>' + esc(b.name || '') + '</b>' + (b.gstin ? '<small>GSTIN ' + esc(b.gstin) + '</small>' : '') +
+      '<p><span>Financial year</span><b>' + esc(fy) + '</b></p>' +
+      '<p><span>Period</span><button type="button" class="linkish" data-gw-per>' + esc(p ? NS.fmtDate(p.from) + ' – ' + NS.fmtDate(p.to) : fy) + '</button></p>' +
+      (last ? '<p><span>Last entry</span><b>' + esc(NS.fmtDate(last)) + '</b></p>' : '') + '</div>';
+    /* Recently opened: the last screens used, then the entries saved last (newest first), six in all */
+    var rec = lsGet(RECK).slice(0, 4), rows = [];
+    rec.forEach(function (x) { var a = $('#ns-side a[href="#' + x.h + '"]:not(.gw-row)') || $('#ns-side a[data-hsec="' + x.h + '"]:not(.gw-row)'); var c = a ? gwClone(a) : NS.el('a', { href: '#' + x.h, 'class': 'side-v gw-row', 'data-ic': 'dot' }, '<span>' + esc(x.t) + '</span>'); if (!a) c.title = x.t; rows.push(c); });
+    D.filter(function (d) { return d && d.no && d.id && !d.cancelled && d.type !== 'ob'; }).sort(function (x, y) { return (y.updated || y.created || 0) - (x.updated || x.created || 0); }).slice(0, 6 - rows.length).forEach(function (d) {
+      var party = d.buyer && d.buyer.name || d.party || '', amt = app.amountOf ? app.amountOf(d) : d.total;
+      var c = NS.el('a', { href: '#', 'class': 'side-v gw-row gw-doc', 'data-ic': 'doc', 'data-gwdoc': d.id, title: (app.docName ? app.docName(d) : d.type) + ' ' + d.no },
+        '<span>' + esc((app.docName ? app.docName(d) : d.type) + ' ' + d.no) + (party || amt ? '<small>' + esc(party) + (party && amt ? ' · ' : '') + (amt ? esc(NS.money ? NS.money(amt) : String(amt)) : '') + '</small>' : '') + '</span>');
+      rows.push(c);
+    });
+    after2.innerHTML = rows.length ? '<div class="gw-h">Recently opened</div>' : '';
+    rows.forEach(function (c) { after2.appendChild(c); });
+    var pins = pinned().map(function (x) { var a = linkByKey(x.k); return a ? gwClone(a, '<button type="button" class="gw-unpin" data-gw-unpin="' + esc(x.k) + '" title="Unpin" aria-label="Unpin ' + esc(x.t) + '"></button>') : null; }).filter(Boolean);
+    if (pins.length) { after2.insertAdjacentHTML('beforeend', '<div class="gw-h">Pinned</div>'); pins.forEach(function (c) { after2.appendChild(c); }); }
+    else after2.insertAdjacentHTML('beforeend', '<div class="gw-h">Pinned</div><p class="gw-hint">Point at any item in the top menu and press its pin to keep it here.</p>');
+  }
+  document.addEventListener('click', function (e) {
+    var t = e.target.closest && e.target.closest('[data-gw-unpin],[data-gw-per],[data-gwdoc]'); if (!t) return;
+    e.preventDefault(); e.stopPropagation();
+    if (t.hasAttribute('data-gw-unpin')) { var k = t.getAttribute('data-gw-unpin'); togglePin(k, (pinned().filter(function (x) { return x.k === k; })[0] || {}).t || ''); }
+    else if (t.hasAttribute('data-gw-per')) { if (NS.periodBox) NS.periodBox(); }
+    else { var ap = A(); if (ap && ap.viewDoc) ap.viewDoc(t.getAttribute('data-gwdoc')); }
+  }, true);
+  window.addEventListener('hashchange', noteScreen);
+  var gwT = 0, gwSoon = function () { clearTimeout(gwT); gwT = setTimeout(gateway, 250); };
+  document.addEventListener('ns-saved', gwSoon); document.addEventListener('ns-data', gwSoon); window.addEventListener('resize', gwSoon);
+  NS.gateway = gateway;
+
+  /* ---------- where you are, in the status bar (Busy: 'Transactions -> Sales') ---------- */
+  function sbPath() {
+    var sb = $('[data-sbar] .s-l'); if (!sb || !A() || !A().biz) return;
+    var el = $('[data-s-path]', sb); if (!el) { el = NS.el('span', { 'class': 's-path', 'data-s-path': '' }); var fy = $('[data-s-fy]', sb); sb.insertBefore(el, fy ? fy.nextSibling : null); }
+    var f = $('#app-form[open]'), out = [];
+    var h = location.hash.replace(/^#/, ''), a = h ? ($('#ns-side a[href="#' + h + '"]:not(.gw-row)') || $('#ns-side a[data-hsec="' + h + '"]:not(.gw-row)') || $('#ns-side a[data-sec="' + h.split('/')[0] + '"]:not(.gw-row)')) : null;
+    if (f) { var t = (($('h2', f) || {}).textContent || '').split(' · ')[0].trim(); var fa = $('#ns-side a[data-dform="' + f.getAttribute('data-kind') + '"]:not(.gw-row)'); out = [fa ? grpOf(fa) : 'Transactions (Vouchers)', subOf(fa), t]; }
+    else if (!h || h === 'home') out = ['Gateway'];
+    else if (a) out = [grpOf(a), subOf(a), (a.textContent || '').trim().split('\n')[0]];
+    else { var t2 = (($('[data-pane]:not([hidden]) h2') || {}).textContent || '').replace(/\?$/, '').trim(); out = t2 ? [t2] : []; }
+    el.textContent = out.filter(Boolean).join(' › ');
+  }
+  function grpOf(a) { var g = a && a.closest('.sg'); if (!g) return ''; var k = g.getAttribute('data-sg'); return k === 'top' ? '' : sgName(k); }
+  function subOf(a) { var k = a && a.getAttribute('data-sub'); return k && SUBN[k] || ''; }
+  window.addEventListener('hashchange', function () { setTimeout(sbPath, 300); });
+  new MutationObserver(function (m) { if (m.some(function (x) { return x.target && x.target.id === 'app-form'; })) setTimeout(sbPath, 60); })
+    .observe(document.documentElement, { subtree: true, attributes: true, attributeFilter: ['open'] });
+  /* ---------- calculator (Ctrl+Alt+C): type a sum, Enter works it out; Use puts the answer in the box you were in ---------- */
+  var calcDlg = null, calcFrom = null, calcHist = [];
+  function calcVal(x) {
+    var e = String(x || '').replace(/,/g, '').replace(/×/g, '*').replace(/÷/g, '/').replace(/(\d+(?:\.\d+)?)%/g, '($1/100)');
+    if (!/^[\d\s.+\-*/()]+$/.test(e) || !/\d/.test(e)) return null;
+    try { var v = Function('"use strict";return (' + e + ')')(); return typeof v === 'number' && isFinite(v) ? Math.round(v * 1e6) / 1e6 : null; } catch (er) { return null; }
+  }
+  function calc() {
+    calcFrom = document.activeElement && /^(INPUT|TEXTAREA)$/.test(document.activeElement.tagName) ? document.activeElement : null;
+    if (!calcDlg) {
+      calcDlg = NS.el('dialog', { 'class': 'calc-dlg', 'aria-labelledby': 'calc-h' });
+      calcDlg.innerHTML = '<div class="dlg-hd"><h2 id="calc-h">Calculator</h2><button type="button" class="btn sm" data-calc-x>Close</button></div><div class="calc-b">' +
+        '<input id="calc-in" type="text" inputmode="decimal" autocomplete="off" aria-label="Sum to work out" placeholder="For example 1250*18% or (450+120)*3">' +
+        '<p class="calc-r" aria-live="polite">= <b data-calc-r>0</b></p><div class="calc-a"><button type="button" class="btn sm" data-calc-copy>Copy</button><button type="button" class="btn sm primary" data-calc-use>Use in the box</button></div>' +
+        '<ol class="calc-h" data-calc-hist></ol><p class="soft">+ − × ÷ and %: 18% of 1250 is 1250*18%. Enter keeps the line below.</p></div>';
+      document.body.appendChild(calcDlg);
+      var inp = $('#calc-in', calcDlg), out = $('[data-calc-r]', calcDlg), hist = $('[data-calc-hist]', calcDlg);
+      var show = function () { var v = calcVal(inp.value); out.textContent = v === null ? (inp.value.trim() ? '…' : '0') : NS.money ? String(v) : v; return v; };
+      inp.addEventListener('input', show);
+      inp.addEventListener('keydown', function (e) { if (e.key !== 'Enter') return; e.preventDefault(); var v = show(); if (v === null) return; calcHist.unshift(inp.value + ' = ' + v); calcHist = calcHist.slice(0, 6); hist.innerHTML = calcHist.map(function (x) { return '<li>' + esc(x) + '</li>'; }).join(''); inp.value = String(v); });
+      calcDlg.addEventListener('click', function (e) {
+        var b = e.target.closest('button'); if (!b) return; var v = calcVal(inp.value);
+        if (b.hasAttribute('data-calc-x')) calcDlg.close();
+        else if (b.hasAttribute('data-calc-copy') && v !== null) { try { navigator.clipboard.writeText(String(v)); NS.toast('Copied ' + v); } catch (er) {} }
+        else if (b.hasAttribute('data-calc-use') && v !== null) { calcDlg.close(); if (calcFrom && calcFrom.isConnected) { calcFrom.value = String(v); calcFrom.dispatchEvent(new Event('input', { bubbles: true })); calcFrom.dispatchEvent(new Event('change', { bubbles: true })); calcFrom.focus(); } }
+      });
+    }
+    calcDlg.showModal(); var i0 = $('#calc-in', calcDlg); i0.focus(); i0.select();
+  }
+  NS.calc = calc;
   function groupHub(hub) {
     var made = {}, fold = sgFolded(), done = {};
     function box(k) {
@@ -333,23 +555,36 @@
         hub.insertBefore(g, next);
         var h = $('.sg-h', g);
         if (h) h.addEventListener('click', function () { var f = sgFolded(), shut = !g.classList.contains('shut'); g.classList.toggle('shut', shut); this.setAttribute('aria-expanded', String(!shut)); f['u-' + k] = shut; try { localStorage.setItem('ns-sg', JSON.stringify(f)); } catch (e) {} });
-        if (h && fold['u-' + k]) { g.classList.add('shut'); h.setAttribute('aria-expanded', 'false'); }
+        var big = window.matchMedia && matchMedia('(min-width: 901px)').matches;   /* a computer: the top menu bar has every group, so the left side starts folded (owner 19 Nov 2026) */
+        if (h && (('u-' + k) in fold ? fold['u-' + k] : big)) { g.classList.add('shut'); h.setAttribute('aria-expanded', 'false'); }
       }
       return (made[k] = $('.sg-b', g));
     }
     function sort() {
       SG.forEach(function (g) {
-        var b = box(g[0]);
+        var b = box(g[0]), sub = '';
         g[1].forEach(function (x) {
-          if (typeof x === 'string') { var a = $(':scope > a[data-sec="' + x + '"]', hub) || $('.sg-b > a[data-sec="' + x + '"]', hub); if (a) b.appendChild(a); return; }
-          var id = JSON.stringify(x); if (!done[id]) { var v = vItem(x); done[id] = v || 1; } if (done[id] && done[id] !== 1) b.appendChild(done[id]);
+          if (typeof x === 'string' && x.charAt(0) === '§') {   /* a sub-heading: what follows sits under it */
+            sub = x.slice(1); if (!$(':scope > .sg-sub[data-sub="' + sub + '"]', b) && SUBN[sub]) b.appendChild(NS.el('div', { 'class': 'sg-sub', 'data-sub': sub }, esc(SUBN[sub])));
+            return;
+          }
+          if (typeof x === 'string') { var a = $(':scope > a[data-sec="' + x + '"]', hub) || $('.sg-b > a[data-sec="' + x + '"]', hub); if (a) { b.appendChild(a); if (sub) a.setAttribute('data-sub', sub); else a.removeAttribute('data-sub'); } return; }
+          var id = JSON.stringify(x); if (!done[id]) { var v = vItem(x); done[id] = v || 1; } if (done[id] && done[id] !== 1) { b.appendChild(done[id]); if (sub) done[id].setAttribute('data-sub', sub); }
         });
       });
       $$(':scope > a[data-sec]', hub).forEach(function (a) { box('more').appendChild(a); });
       /* every group (Masters, Transactions, Reports, GST and tax, Utilities...) in A to Z order of the names on screen (owner 19 Nov); Dashboard and My day stay on top */
       erpNames(side || document);   /* accounting names first, so the A to Z order uses them */
       $$('.sg[data-sg="x-docs"] .sg-b, .sg[data-sg="x-more"] .sg-b', side || document).forEach(abcSort);
+      $$('#ns-side a[data-ic^="t-"], #ns-side a[data-ic^="d-"]').forEach(function (a) {
+        var id = a.getAttribute('data-ic').replace(/^[td]-/, ''), m = DOCKEY[id], c = SITEKEY[id] || (SECKEY[id] && SECKEY[id][0]), k = m ? (m[1] ? 'Alt+' + m[1] : 'Alt+G ' + m[0]) : c ? 'Alt+G ' + c : '';
+        if (k && !a.getAttribute('data-kh')) { a.setAttribute('data-kh', k); a.title = (a.textContent || '').trim() + '  ·  ' + k; }
+      });
+      var stfOn = window.NSApp && NSApp.stfTabs ? NSApp.stfTabs() : null;   /* payroll parts that are switched off stay out of the menu */
+      if (stfOn) $$('a[data-hsec^="stf/"]', side || document).forEach(function (a) { a.hidden = stfOn.indexOf(a.getAttribute('data-hsec').slice(4)) < 0; });
+      $$('a[data-oract]', side || document).forEach(function (a) { a.hidden = !(window.NSApp && NSApp.orAct); });
       Object.keys(made).forEach(function (k) { if (k !== 'top') abcSort(made[k]); });
+      gwSoon(); setTimeout(sbPath, 50);
       var cur = $('a[aria-current="page"]', hub); if (cur) { var g = cur.closest('.sg'); if (g && g.classList.contains('shut')) { g.classList.remove('shut'); var h = $('.sg-h', g); if (h) h.setAttribute('aria-expanded', 'true'); } }
     }
     sort();
@@ -458,7 +693,30 @@
     reports: ['RE'], day: ['MD'], tools: ['AT', 'T'], fin: ['FA', 'A'], capl: ['CL'], b2jv: ['JE', 'J'], b2fa: ['FX'], b2gd: ['GD'], b2make: ['PR'],
     b2job: ['JW'], b2profit: ['PF'], b2sman: ['SM'], b2year: ['YE'], features: ['AF'], packs: ['TP'], trust: ['DM'], warr: ['WS'], cacom: ['CC'],
     fees: ['FE'], stock: ['SK'], fam: ['MA'], cadb: ['CD'], cadoc: ['CA'], cagst: ['CG'], ebook: ['EB'], khata: ['KH'], preg: ['PG'], dlist: ['DR'], clist: ['CR'], ssum: ['SY'], psum: ['PY'], vreg: ['VR'], cbsum: ['CS'], mprint: ['MV'], coa: ['AC'], acl: ['LA'], masters: ['MT'], tdsr: ['TQ'], config: ['CF'],
-    gsum: ['GS'], gvch: ['GV'], os: ['OS'], exc: ['TC'], int: ['IR'], bw: ['BW'], ord: ['OU'] };   /* ord: orders.js (ERP round 2) */   /* billwise.js (ERP Round 2): interest report, bill-wise settings */   /* reports.js (ERP review round 1): group summary, group vouchers, bill-wise outstanding, things to check */
+    gsum: ['GS'], gvch: ['GV'], os: ['OS'], exc: ['TC'], int: ['IR'], bw: ['BW'], ord: ['OU'],
+    /* menu entries that had no key (owner 19 Nov 2026): masters, payroll parts and the final account views */
+    'masters/led': ['LD'], 'masters/grp': ['AG'], 'masters/bank': ['BK'], 'masters/vt': ['VT'], 'masters/item': ['IM'], 'masters/igrp': ['IG'], 'masters/unit': ['UM'],
+    'masters/trn': ['TN'], 'masters/veh': ['VH'], 'masters/biz': ['CY'], 'stf/emp': ['EP'], 'stf/heads': ['HD'], 'stf/run': ['RS'], 'stf/att': ['AD'], 'stf/leave': ['LV'],
+    'stf/adv': ['AV'], 'stf/loan': ['LN'], 'stf/year': ['BG'], 'stf/pf': ['EF'], 'stf/esi': ['EI'], 'stf/tax': ['SD'], 'fin/bs': ['BS'], 'fin/pl': ['PL'], 'fin/tb': ['TB'] };
+  /* other menu entries with fixed codes: the Inventory Vouchers entries of the Orders screen, the GST and TDS sites, My data parts */
+  var ORKEY = { grn: 'GN', rejin: 'GI', rejout: 'GO', lc: 'LC' };
+  var SITEKEY = { gstr1: 'GA', gstr3b: 'GB', gstr2b: 'GC', cmp08: 'CP', tds: 'TD',
+    /* the free tools under More free tools (owner 19 Nov 2026); Stock keeps the code SK of its screen */
+    ca: 'AW', amc: 'AM', 'bank-reco': 'BR', barcode: 'BC', calc: 'CU', declaration: 'DF', distance: 'DS', 'e-invoice': 'EV', 'eway-bill': 'EW', 'export-invoice': 'XI',
+    garage: 'GG', 'gst-calendar': 'DD', gstin: 'GK', hsn: 'HS', ifsc: 'IF', learn: 'LG', marketplace: 'MK', compare: 'NC', pincode: 'PN', 'price-list': 'LP',
+    'profit-loss': 'PK', share: 'SH', tally: 'TL', file: 'WF' };
+  var MYKEY = { backup: 'BU' };
+  var QAKEY = { party: 'NP', item: 'NI' };   /* Go to codes of New party / New item (quick add) */
+  /* Ctrl+Alt + a letter (owner 19 Nov 2026): the Shortcuts panel's items that had no simple key. A letter -> what it opens. */
+  var CAKEY = { p: 'q:party', i: 'q:item', t: 'fin/tb', b: 'fin/bs', l: 'fin/pl', d: 'dlist', r: 'clist', s: 'stock', c: 'calc' };
+  var CALBL = {}; Object.keys(CAKEY).forEach(function (l) { CALBL[CAKEY[l]] = 'Ctrl+Alt+' + l.toUpperCase(); });
+  function simpleKey(s) { return CALBL[s] || fName(s); }
+  function caRun(job) {
+    if (/^q:/.test(job)) { if (NS.quickAddNew) NS.quickAddNew(job.slice(2)); return; }
+    if (job === 'calc') { calc(); return; }
+    if (job === 'stock') { var st = $('#ns-side a[data-sec="stock"]'); if (st) st.click(); else location.hash = 'do/stock/'; return; }
+    location.hash = job;
+  }   /* ord: orders.js (ERP round 2) */   /* billwise.js (ERP Round 2): interest report, bill-wise settings */   /* reports.js (ERP review round 1): group summary, group vouchers, bill-wise outstanding, things to check */
   var DOCKEY = { billing: ['IN', 'N'], quotation: ['QT', 'O'], proforma: ['PI'], 'sales-order': ['SO'], challan: ['DC', 'C'], 'purchase-order': ['PO'],
     'credit-note': ['CN'], 'debit-note': ['DN'], 'cash-memo': ['CM'], receipt: ['RC'], voucher: ['VC'], 'self-invoice': ['SI'], 'rent-receipt': ['RR'],
     'salary-slip': ['SS'], 'petty-cash': ['PC'], pos: ['PS'], pharmacy: ['PH'], restaurant: ['RT'], bilty: ['LR'], 'job-card': ['JC'], hotel: ['HT'],
@@ -494,13 +752,13 @@
     out.push({ g: 'rec', t: NS.t('app.qe_title'), k: 'Alt+Q', c: 'QE', run: function () { if (app.quickEntry) app.quickEntry(); } });
     $$('#ns-side a[data-sec]').forEach(function (a) {
       var s = a.getAttribute('data-sec'), m = SECKEY[s] || [];
-      out.push({ g: 'go', off: offSec(s), t: (a.textContent || '').trim(), k: fName(s) || (m[1] ? 'Alt+' + m[1] : ''), c: m[0] || '', run: function () { goSec(s); } });
+      out.push({ g: 'go', off: offSec(s), t: (a.textContent || '').trim(), k: simpleKey(s) || (m[1] ? 'Alt+' + m[1] : ''), c: m[0] || '', run: function () { goSec(s); } });
     });
     /* report screens that sit in the side menu as plain links (Debtors list, Chart of Accounts...): Alt+G codes and Ctrl K find them too (P2-10) */
     $$('#ns-side a[data-hsec]').forEach(function (a) {
       var s = a.getAttribute('data-hsec'), m = SECKEY[s] || [];
       if (out.some(function (x) { return x.sec === s; })) return;
-      out.push({ g: 'go', sec: s, off: false, t: (a.textContent || '').trim(), k: fName(s) || (m[1] ? 'Alt+' + m[1] : ''), c: m[0] || '', run: function () { location.hash = s; } });
+      out.push({ g: 'go', sec: s, off: false, t: (a.textContent || '').trim(), k: simpleKey(s) || (m[1] ? 'Alt+' + m[1] : ''), c: m[0] || '', run: function () { location.hash = s; } });
     });
     /* F1-6: every screen that has a Go to code on the Keyboard shortcuts page works, also when the side menu does not list it
        (cash and bank books, stock, CA hand-over, e-books...). The account ledger code opens the Chart of Accounts to pick the account. */
@@ -512,12 +770,17 @@
       var OTHER = { stock: 'do/stock/', cadb: 'do/ca/#cadb', cadoc: 'do/ca/#cadoc', cagst: 'do/ca/#cagst' };
       var to = s === 'acl' ? 'coa' : OTHER[s] || s;
       have[m[0]] = 1;
-      out.push({ g: 'go', sec: s, off: false, t: s === 'acl' ? NS.t('desk.v_coa') : lbl, k: fName(s) || (m[1] ? 'Alt+' + m[1] : ''), c: m[0], run: function () { if (a && !OTHER[s]) goSec(s); else location.hash = to; } });
+      out.push({ g: 'go', sec: s, off: false, t: s === 'acl' ? NS.t('desk.v_coa') : lbl, k: simpleKey(s) || (m[1] ? 'Alt+' + m[1] : ''), c: m[0], run: function () { if (a && !OTHER[s]) goSec(s); else location.hash = to; } });
     });
     (app.newDocs ? app.newDocs() : []).forEach(function (n) {
       var m = DOCKEY[n[0]] || [];
       out.push({ g: 'new', off: offSite(n[0]), t: n[1], k: fName(n[0]) || (m[1] ? 'Alt+' + m[1] : ''), c: m[0] || '', run: function () { newDoc(n[0]); } });
     });
+    var byLink = function (sel, code) { var a = $(sel); if (!a || a.hidden) return; out.push({ g: 'go', off: false, t: (a.textContent || '').trim(), k: '', c: code, run: function () { a.click(); } }); };
+    Object.keys(ORKEY).forEach(function (k) { byLink('#ns-side a[data-oract="' + k + '"]', ORKEY[k]); });
+    Object.keys(SITEKEY).forEach(function (k) { byLink('#ns-side .sg a[data-ic="t-' + k + '"]', SITEKEY[k]); });
+    Object.keys(MYKEY).forEach(function (k) { byLink('#ns-side a[data-my="' + k + '"]', MYKEY[k]); });
+    if (NS.quickAddNew) Object.keys(QAKEY).forEach(function (k) { out.push({ g: 'rec', off: false, t: NS.t('desk.v_new' + k), k: CALBL['q:' + k], c: QAKEY[k], run: function () { NS.quickAddNew(k); } }); });
     /* a screen or maker this table does not know yet still gets a code: its first free pair of letters */
     var used = {}; out.forEach(function (x) { if (x.c) used[x.c] = 1; });
     out.forEach(function (x) {
@@ -613,7 +876,7 @@
       { g: 'act', t: NS.t('mydata'), run: function () { click('[data-act="my-data"]'); } },
       { g: 'act', t: NS.t('md.save'), run: function () { var b = NS.el('button', { 'data-act': 'backup', hidden: '' }); document.body.appendChild(b); b.click(); b.remove(); } },
       { g: 'act', t: T('mini'), k: 'Ctrl+B', run: toggleMenu },
-      { g: 'act', t: T('keys'), k: '?', run: keysSheet },
+      { g: 'act', t: T('keys'), k: 'Ctrl /', run: keysSheet },
     ].concat(bizActs()).concat([
       { g: 'act', t: T('lang'), run: function () { var s = $('[data-lang-pick]'); if (s && !s.offsetParent && A() && root.classList.contains('installed')) { location.hash = '#features'; return; } if (s) { s.focus(); if (s.showPicker) try { s.showPicker(); } catch (e) {} } } }
     ]).concat(deferredInstall ? [{ g: 'act', t: T('install'), run: install }] : []);
@@ -854,7 +1117,7 @@
 
   /* ---------- keyboard ---------- */
   var KEYS = [['Alt G', 'k_go'], ['Ctrl K', 'k_cmd'], ['Ctrl B', 'k_menu'], ['Alt 1 … 9', 'k_secs'], ['F3 / Alt S', '=app.biz'],
-    ['/', 'k_find'], ['F1', 'k_hlp'], ['?', 'k_help'], ['Ctrl S', 'k_save'], ['F2', 'k_qadd'], ['Ctrl P', 'k_print'], ['Esc', 'k_esc']];
+    ['Ctrl Shift F', 'k_find'], ['F1', 'k_hlp'], ['Ctrl /', 'k_help'], ['Ctrl S', 'k_save'], ['F2', 'k_qadd'], ['Ctrl P', 'k_print'], ['Esc', 'k_esc']];
   var keysDlg;
   function keysSheet() {
     if (!keysDlg) { keysDlg = NS.el('dialog', { id: 'desk-keys', class: 'desk-keys', 'aria-labelledby': 'desk-keys-h' }); document.body.appendChild(keysDlg); }
@@ -892,6 +1155,16 @@
     var vs = $('dialog.vs[open]');
     if ($('dialog[open]') && !(vs && $$('dialog[open]').length === 1)) return;
     var app = A();
+    if (app && app.biz && e.ctrlKey && e.altKey && !e.shiftKey && !e.metaKey) {
+      var cj = CAKEY[(e.code || '').replace('Key', '').toLowerCase()];
+      /* AltGr (some Indian layouts) is Ctrl+Alt: while typing in a box, an AltGr letter stays a letter */
+      if (cj && !(typing(e) && e.getModifierState && e.getModifierState('AltGraph'))) {
+        e.preventDefault(); if (e.repeat) return;
+        if (isOff(cj)) { NS.toast(NS.t('desk.offkey')); return; }
+        if (vs) NS.vsPark(function () { caRun(cj); }); else caRun(cj);
+        return;
+      }
+    }
     if (vs) {   /* on a voucher screen: F keys switch to another entry, Alt+G and the Alt letters leave it (asking first) */
       var fk2 = /^F([3-9]|10)$/.test(e.key) && !e.altKey && !e.shiftKey && !e.metaKey ? FKEY[(e.ctrlKey ? 'Ctrl+' : '') + e.key] : null;
       var al = e.altKey && !e.ctrlKey && !e.metaKey ? (e.code || '').replace('Key', '').toLowerCase() : '';
@@ -920,9 +1193,9 @@
       else if (app && app.switchBiz && c === 's') { e.preventDefault(); if (!e.repeat) (app.whenReady || function (f) { f(); })(app.switchBiz); }
       return;
     }
-    if (typing(e) || e.ctrlKey || e.metaKey) return;
-    if (e.key === '/') { var q = $('[data-q], main input[type=search]'); if (q) { e.preventDefault(); q.focus(); q.select(); } }
-    else if (e.key === '?') { e.preventDefault(); keysSheet(); }
+    /* combinations only, never a bare key (owner 19 Nov 2026): Ctrl+Shift+F searches the list on the screen, Ctrl+/ shows the keys */
+    if ((e.ctrlKey || e.metaKey) && !e.altKey && e.shiftKey && (e.code === 'KeyF' || (e.key || '').toLowerCase() === 'f')) { var q = $('[data-q], main input[type=search]'); if (q) { e.preventDefault(); q.focus(); q.select(); } return; }
+    if ((e.ctrlKey || e.metaKey) && !e.altKey && !e.shiftKey && (e.key === '/' || e.code === 'Slash')) { e.preventDefault(); keysSheet(); return; }
   });
 
   window.addEventListener('online', net); window.addEventListener('offline', net);

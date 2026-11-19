@@ -331,6 +331,7 @@
       doc.buyer = { name: p.name, addr: p.addr || '', city: p.city || '', pin: p.pin || '', state: p.state || '', gstin: p.gstin || '', phone: p.phone || '', legal: p.gst && p.gst.legal || '', reg: window.NSGst ? NSGst.partyReg(p) : p.reg || '' };   /* reg: r1-gst S-2 (SEZ rows in GSTR-1, 3.2) */
       if (p.ship && p.ship.addr) doc.ship = { name: p.ship.name || p.name, addr: p.ship.addr, city: p.ship.city || '', pin: p.ship.pin || '', state: p.ship.state || p.state || '' };
       buyerType = p.ptype || '';
+      if (num(p.km) > 0) { doc.buyer.km = num(p.km); if (doc.einv && (!+doc.einv.dist)) doc.einv.dist = String(num(p.km)); }   /* distance saved on the party: the e-way bill's default */
       /* credit days of the party give the due date (only when the bill has none yet, or still has the one set this way) */
       if (T.due && num(p.cdays) > 0 && (!doc.due || doc.due === autoDue)) { doc.cdays = num(p.cdays); doc.due = autoDue = NSBooks.addDays(doc.date, doc.cdays); }
       fillForm(); draw(); saveDraft();

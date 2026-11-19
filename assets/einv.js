@@ -23,7 +23,7 @@
   /* words printed on the invoice (English, like the rest of the printout) */
   var P = { irn: 'IRN', ack: 'Ack No.', ackdt: 'Ack Date', ewb: 'E-Way Bill No.', ewbdt: 'E-Way Bill Date', till: 'Valid till', qr: 'e-Invoice QR' };
 
-  function ex(d) { var e = d.einv || (d.einv = { sup: 'B2B', dist: '0', mode: '1', veh: '', vtype: 'R', tid: '', tname: '', tdoc: '', tdate: '', withEwb: false }); if (e.aato == null) e.aato = (d.seller && d.seller.aato) || savedAato(); if (d.type === 'exp' && d.kind) e.sup = d.kind.toUpperCase();
+  function ex(d) { var e = d.einv || (d.einv = { sup: 'B2B', dist: String(d.buyer && +d.buyer.km > 0 ? +d.buyer.km : 0), mode: '1', veh: '', vtype: 'R', tid: '', tname: '', tdoc: '', tdate: '', withEwb: false }); if (e.aato == null) e.aato = (d.seller && d.seller.aato) || savedAato(); if (d.type === 'exp' && d.kind) e.sup = d.kind.toUpperCase();
     /* the bill's own Dispatch details (owner 2026-11-18) fill the e-way part when it is still empty */
     var dp = d.disp || {}; if (!e.veh && dp.veh) e.veh = dp.veh; if (!e.tname && dp.tname) e.tname = dp.tname; if (!e.tdoc && dp.lr) e.tdoc = dp.lr; if (!e.tdate && dp.lrdate) e.tdate = dp.lrdate;
     if (dp.mode && (!e.mode || e.mode === '1')) e.mode = { Road: '1', Rail: '2', Air: '3', Ship: '4' }[dp.mode] || e.mode;
