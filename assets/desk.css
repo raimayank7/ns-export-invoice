@@ -492,3 +492,15 @@ html.side-mini .gw,html.side-mini .gw-co{display:none}
 .calc-r{font:700 1.5rem var(--mono,monospace);text-align:end;margin:8px 0}.calc-a{display:flex;gap:8px;justify-content:flex-end}.calc-h{font:500 .85rem var(--mono,monospace);color:var(--soft);padding-inline-start:18px}
 /* entry screens open at once in the App, like the screens around them (owner 19 Nov) */
 html.ns-soft dialog.vs[open],html.ns-soft dialog.vs[open]::backdrop{animation:none!important}
+/* Customize the shortcuts: tick on the left, drag on the right (20 Nov 2026) */
+.sc-dlg .dlg-hd{display:flex;align-items:center;gap:8px}.sc-dlg .dlg-hd h2{margin-inline-end:auto}
+.sc-help{margin:4px 0 10px}.sc-cols{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:16px;min-height:0;flex:1}
+.sc-all,.sc-mine{display:flex;flex-direction:column;min-height:0;border:1px solid var(--line);border-radius:10px;padding:10px}
+.sc-q{width:100%;margin-bottom:8px}.sc-opts{overflow:auto;max-height:58vh}.sc-g{margin:10px 0 4px;font:600 .72rem/1.2 inherit;letter-spacing:.06em;text-transform:uppercase;color:var(--soft)}
+.sc-o{display:flex;align-items:center;gap:8px;padding:5px 4px;border-radius:6px}.sc-o:hover{background:var(--surface2)}
+.sc-mine h3{margin:0 0 8px;font-size:1rem}.sc-mine .sc-list{list-style:none;margin:0;padding:0;overflow:auto;max-height:58vh}
+.sc-mine .sc-list li{display:flex;align-items:center;gap:8px;padding:6px 8px;border:1px solid var(--line);border-radius:8px;margin-bottom:6px;background:var(--surface);cursor:grab}
+.sc-mine .sc-list li:focus-visible{outline:2px solid var(--accent,#0e746a)}.sc-grip{color:var(--soft);font-size:1.1rem;line-height:1}.sc-t{flex:1}
+.sc-mine .sc-list li.sc-drag{opacity:.45}.sc-mine .sc-list li.sc-over-a{box-shadow:0 -3px 0 var(--accent,#0e746a)}.sc-mine .sc-list li.sc-over-b{box-shadow:0 3px 0 var(--accent,#0e746a)}
+.sc-x{min-width:32px;font-size:1.1rem;line-height:1}
+@media (max-width:760px){.sc-cols{grid-template-columns:1fr}}

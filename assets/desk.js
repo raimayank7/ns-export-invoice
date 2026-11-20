@@ -234,30 +234,72 @@
   var scDlg = null;
   function scCustomize() {
     if (!scDlg) { scDlg = NS.el('dialog', { 'class': 'sc-dlg', 'aria-labelledby': 'sc-dlg-h' }); document.body.appendChild(scDlg); }
-    var cur = scItems(), ids = cur.map(function (x) { return x.id; }), defs = scDefs();
-    var reg = registry().filter(function (x) { return x.c && !x.off; });
-    var have = {}; ids.forEach(function (i) { have[i] = 1; });
-    /* what can be added: the standard items not in the panel, then every screen, entry and document by name */
-    var add = defs.filter(function (x) { return !have[x.id]; }).map(function (x) { return [x.id, x.t]; })
-      .concat(reg.filter(function (x) { return !have['c:' + x.c] && !defs.some(function (d) { return d.t === x.t; }); }).sort(function (a, b) { return a.t.localeCompare(b.t); }).map(function (x) { return ['c:' + x.c, x.t]; }));
-    scDlg.innerHTML = '<div class="dlg-hd"><h2 id="sc-dlg-h">Customize the shortcuts</h2><button type="button" class="btn sm" data-sc-close>Done</button></div>' +
-      '<div class="sc-body"><p class="soft">The list on the right of the Dashboard. Kept in this browser.</p><ol class="sc-list">' + cur.map(function (x, i) {
-        return '<li><span>' + esc(x.t) + '</span><button type="button" class="btn sm" data-sc-up="' + i + '"' + (i ? '' : ' disabled') + ' aria-label="Move up">↑</button><button type="button" class="btn sm" data-sc-dn="' + i + '"' + (i < cur.length - 1 ? '' : ' disabled') + ' aria-label="Move down">↓</button><button type="button" class="btn sm danger" data-sc-rm="' + i + '" aria-label="Remove ' + esc(x.t) + '">Remove</button></li>';
-      }).join('') + '</ol>' +
-      '<div class="sc-add"><label for="sc-add">Add</label><select id="sc-add">' + add.map(function (a) { return '<option value="' + esc(a[0]) + '">' + esc(a[1]) + '</option>'; }).join('') + '</select><button type="button" class="btn primary" data-sc-add>+ Add</button></div>' +
-      '<p><button type="button" class="btn sm" data-sc-reset>Reset to the standard list</button></p></div>';
-    var put = function (v) { scSave(v); scRedraw(); scCustomize(); };
+    var defs = scDefs(), reg = registry().filter(function (x) { return x.c && !x.off; }), name = {}, all = [];
+    defs.forEach(function (x) { name[x.id] = x.t; all.push({ id: x.id, t: x.t, g: 'Common' }); });
+    reg.filter(function (x) { return !defs.some(function (d) { return d.t === x.t; }); }).sort(function (a, b) { return a.t.localeCompare(b.t); })
+      .forEach(function (x) { name['c:' + x.c] = x.t; all.push({ id: 'c:' + x.c, t: x.t, g: 'All screens, entries and documents' }); });
+    var ids = scItems().map(function (x) { return x.id; });
+    scDlg.innerHTML = '<div class="dlg-hd"><h2 id="sc-dlg-h">Customize the shortcuts</h2><button type="button" class="btn sm" data-sc-reset>Reset to the standard list</button><button type="button" class="btn sm primary" data-sc-close>Done</button></div>' +
+      '<p class="soft sc-help">Tick what you want on the right of the Dashboard. Drag the list on the right into your order (or Alt+Up / Alt+Down). Saved at once in this browser.</p>' +
+      '<div class="sc-cols"><section class="sc-all" aria-label="Every screen"><input type="search" class="sc-q" placeholder="Search every screen…" aria-label="Search every screen"><div class="sc-opts" data-sc-opts></div></section>' +
+      '<section class="sc-mine" aria-label="Your shortcuts"><h3>Your shortcuts <span class="soft" data-sc-n></span></h3><ol class="sc-list" data-sc-list></ol></section></div>';
+    var opts = $('[data-sc-opts]', scDlg), list = $('[data-sc-list]', scDlg), q = $('.sc-q', scDlg);
+    function save() { scSave(ids.slice()); scRedraw(); $('[data-sc-n]', scDlg).textContent = '(' + ids.length + ')'; }
+    function drawList(focusId) {
+      list.innerHTML = ids.map(function (id, i) {
+        return '<li draggable="true" tabindex="0" data-id="' + esc(id) + '"><span class="sc-grip" aria-hidden="true">⠿</span><span class="sc-t">' + esc(name[id] || id) + '</span>' +
+          '<button type="button" class="btn sm" data-sc-top' + (i ? '' : ' disabled') + ' title="Move to the top">Top</button><button type="button" class="btn sm sc-x" data-sc-rm title="Remove" aria-label="Remove ' + esc(name[id] || id) + '">×</button></li>';
+      }).join('');
+      $('[data-sc-n]', scDlg).textContent = '(' + ids.length + ')';
+      if (focusId) { var f = $('li[data-id="' + focusId.replace(/"/g, '') + '"]', list); if (f) f.focus(); }
+    }
+    function drawOpts() {
+      var w = q.value.trim().toLowerCase(), g0 = '';
+      opts.innerHTML = all.filter(function (x) { return !w || x.t.toLowerCase().indexOf(w) >= 0; }).map(function (x) {
+        var h = x.g !== g0 ? '<p class="sc-g">' + esc(x.g) + '</p>' : ''; g0 = x.g;
+        return h + '<label class="chk sc-o"><input type="checkbox" data-sc-pick="' + esc(x.id) + '"' + (ids.indexOf(x.id) >= 0 ? ' checked' : '') + '> ' + esc(x.t) + '</label>';
+      }).join('') || '<p class="soft">Nothing found.</p>';
+    }
+    function tick(id, on) { var k = $('[data-sc-pick="' + id.replace(/"/g, '') + '"]', opts); if (k) k.checked = on; }
+    function move(from, to, focusId) { if (to < 0 || to >= ids.length || from === to) return; ids.splice(to, 0, ids.splice(from, 1)[0]); save(); drawList(focusId); }
+    drawList(); drawOpts();
+    q.addEventListener('input', drawOpts);
+    opts.addEventListener('change', function (e) {
+      var k = e.target.closest('[data-sc-pick]'); if (!k) return; var id = k.getAttribute('data-sc-pick'), at = ids.indexOf(id);
+      if (k.checked && at < 0) ids.push(id); else if (!k.checked && at >= 0) ids.splice(at, 1);
+      save(); drawList();
+    });
     scDlg.onclick = function (e) {
       var b = e.target.closest('button'); if (!b) return;
-      var i = +(b.getAttribute('data-sc-up') || b.getAttribute('data-sc-dn') || b.getAttribute('data-sc-rm') || -1), v = ids.slice();
       if (b.hasAttribute('data-sc-close')) { scDlg.close(); return; }
-      if (b.hasAttribute('data-sc-reset')) { scSave(null); scRedraw(); scCustomize(); return; }
-      if (b.hasAttribute('data-sc-add')) { var s0 = $('#sc-add', scDlg); if (s0 && s0.value) { v.push(s0.value); put(v); } return; }
-      if (b.hasAttribute('data-sc-up') && i > 0) { v.splice(i - 1, 0, v.splice(i, 1)[0]); put(v); }
-      else if (b.hasAttribute('data-sc-dn') && i < v.length - 1) { v.splice(i + 1, 0, v.splice(i, 1)[0]); put(v); }
-      else if (b.hasAttribute('data-sc-rm')) { v.splice(i, 1); put(v); }
+      if (b.hasAttribute('data-sc-reset')) { scSave(null); scRedraw(); ids = scItems().map(function (x) { return x.id; }); drawList(); drawOpts(); return; }
+      var li = b.closest('li'); if (!li) return; var id = li.getAttribute('data-id'), i = ids.indexOf(id);
+      if (b.hasAttribute('data-sc-top')) move(i, 0, id);
+      else if (b.hasAttribute('data-sc-rm')) { ids.splice(i, 1); save(); drawList(); tick(id, false); }
+    };
+    /* drag and drop: the row shows where it will land */
+    var dragId = null;
+    list.ondragstart = function (e) { var li = e.target.closest('li'); if (!li) return; dragId = li.getAttribute('data-id'); li.classList.add('sc-drag'); try { e.dataTransfer.effectAllowed = 'move'; e.dataTransfer.setData('text/plain', dragId); } catch (er) {} };
+    list.ondragover = function (e) {
+      if (!dragId) return; e.preventDefault(); var li = e.target.closest('li'); $$('.sc-over-a,.sc-over-b', list).forEach(function (x) { x.classList.remove('sc-over-a', 'sc-over-b'); });
+      if (li && li.getAttribute('data-id') !== dragId) { var r = li.getBoundingClientRect(); li.classList.add(e.clientY < r.top + r.height / 2 ? 'sc-over-a' : 'sc-over-b'); }
+    };
+    list.ondrop = function (e) {
+      e.preventDefault(); var li = e.target.closest('li'); if (!dragId || !li) return;
+      var from = ids.indexOf(dragId), r = li.getBoundingClientRect(), to = ids.indexOf(li.getAttribute('data-id')) + (e.clientY < r.top + r.height / 2 ? 0 : 1);
+      if (from < to) to--; var id = dragId; dragId = null; move(from, to, id); drawList(id);
+    };
+    list.ondragend = function () { dragId = null; $$('.sc-drag,.sc-over-a,.sc-over-b', list).forEach(function (x) { x.classList.remove('sc-drag', 'sc-over-a', 'sc-over-b'); }); };
+    list.onkeydown = function (e) {
+      var li = e.target.closest('li'); if (!li || e.target !== li) return; var id = li.getAttribute('data-id'), i = ids.indexOf(id);
+      if (e.altKey && e.key === 'ArrowUp') { e.preventDefault(); move(i, i - 1, id); }
+      else if (e.altKey && e.key === 'ArrowDown') { e.preventDefault(); move(i, i + 1, id); }
+      else if (e.key === 'ArrowUp' && li.previousElementSibling) { e.preventDefault(); li.previousElementSibling.focus(); }
+      else if (e.key === 'ArrowDown' && li.nextElementSibling) { e.preventDefault(); li.nextElementSibling.focus(); }
+      else if (e.key === 'Delete') { e.preventDefault(); ids.splice(i, 1); save(); drawList(ids[i] || ids[i - 1]); tick(id, false); }
     };
     if (!scDlg.open) scDlg.showModal();
+    q.focus();
   }
   document.addEventListener('click', function (e) {
     var c = e.target.closest && e.target.closest('[data-sc-cust], [data-sccode]'); if (!c) return;
