@@ -425,7 +425,7 @@ b.nsb-in .nsb-n,b.nsb-in .nsb-b{font:inherit!important;font-size:inherit}b.nsb-i
 .ns-cl img{height:1.6em;width:auto}.ns-cl b.nsb-in{font-size:1.45em}.ns-cl .cl-by{color:#6B7280}
 .ns-cl .nsb-n{background-image:linear-gradient(170deg,#127F74 0%,#063F39 100%)!important;filter:none!important}
 .ns-cl .nsb-b{color:#fff!important;background:linear-gradient(170deg,#E9BC52,#B47F23)!important;box-shadow:none!important}
-.made.ns-cl{font-size:11px}
+.made.ns-cl{font-size:11px}.dc-cl.ns-cl{margin-top:18px;padding-top:6px;border-top:1px solid #E5E7EB}
 .ns-cl .cl-by,.ns-cl .cl-ns{font-weight:700;color:#374151}.ns-cl .cl-by{margin-inline-start:2px}
 /* NSBiz inside text: only the lettering of the header's name, no gold pill or colours (owner 2026-11-18: "repeated too many
    times"). The header logo, the credit line on documents (.ns-cl) and the Dashboard logo keep the full mark. */
@@ -525,6 +525,8 @@ html.appdoc-pv .tool[data-tab=preview] .ed-col,html.appdoc-pv .tool:not([data-ta
 html.appdoc-pv .tool[data-tab=preview] .pv-col{display:block!important;position:static;max-width:960px;margin:0 auto}
 html.appdoc-pv .dc-grid:not(.pv-on) .dc-res,html.appdoc-pv .dc-grid.pv-on .dc-in{display:none!important}
 html.appdoc-pv .dc-grid.pv-on .dc-res{max-width:960px;margin:0 auto}
-html.appdoc-pv .pv-on :not(:has([data-prl-sheet])):not([data-prl-sheet]):not([data-prl-sheet] *){display:none!important}html.appdoc-pv .pv-on :has([data-prl-sheet]){display:block!important}
+html.appdoc-pv .pv-sheet :not(:has([data-prl-sheet])):not([data-prl-sheet]):not([data-prl-sheet] *){display:none!important}html.appdoc-pv .pv-sheet :has([data-prl-sheet]){display:block!important}
 html.appdoc-pv .appdoc-bar{position:sticky;bottom:0;z-index:20;display:flex;gap:8px;flex-wrap:wrap;padding:10px 0;background:var(--bg);border-top:1px solid var(--line)}
 @media print{html.appdoc .appdoc-bar,html.appdoc .appdoc-pvb{display:none!important}}
+.dn-nav{display:flex;align-items:center;gap:4px;flex-wrap:wrap;margin:0 0 10px}.dn-nav .btn{min-width:34px}.dn-nav .vt-find{width:120px;min-height:32px;padding:4px 8px}.dn-nav .vt-pos{font-size:.8rem;padding:0 6px;white-space:nowrap}
+@media print{.dn-nav{display:none!important}}

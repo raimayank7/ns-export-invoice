@@ -154,12 +154,12 @@
       '§payr', 'stf', { h: 'stf/year', t: 'v_bonus', ic: 'list' },
       '§xrep', { h: 'exc', t: 'v_exc', ic: 'flag' }, 'reports', 'cadb', 'ebook']],
     ['tax', ['§gst', { site: 'gstr1' }, { site: 'gstr3b' }, { site: 'gstr2b' }, { site: 'cmp08' }, 'gststk', 'gtds', 'isd', 'cagst',
-      '§itax', 'tdsr', { site: 'tds' }, 'acx', 'itx', 'limits',
+      '§itax', 'tdsr', 'acx', 'itx', 'limits',
       '§payst', { h: 'stf/pf', t: 'v_pf', ic: 'doc' }, { h: 'stf/esi', t: 'v_esi', ic: 'doc' }, { h: 'stf/tax', t: 'v_saltds', ic: 'doc' },
       '§audit', 'cacom', 'cadoc']],
     ['util', ['§data', { my: 'backup', t: 'v_backup', ic: 'data' }, 'bimp', { h: 'mprint', t: 'v_mprint', ic: 'doc' }, 'b2year',
       '§setup', { h: 'config', t: 'v_config', ic: 'set' }, { h: 'bw', t: 'v_bw', ic: 'list' }, 'features', 'packs',   /* one Configuration (owner 19 Nov): it opens the My data settings itself */
-      '§tools', 'tools']]];
+      '§tools', { site: 'tds' }, { site: 'declaration' }, 'tools']]];   /* TDS and TCS calculator and Declarations under Utilities (owner 20 Nov) */
   /* the sub-headings inside a group (accounting names; the App is English only) */
   var SUBN = { acc: 'Accounting Masters', inv: 'Inventory Masters', pay: 'Payroll Masters', dsp: 'Dispatch Masters', co: 'Company',
     vch: 'Accounting Vouchers', ivch: 'Inventory Vouchers', payv: 'Payroll Vouchers', payr: 'Payroll Reports', payst: 'Payroll Statutory', lists: 'Lists and Registers', assets: 'Assets and Loans', trade: 'Trade Registers',
@@ -427,7 +427,7 @@
     's:grp': 'Group Summary', 's:msme': 'MSME Payables (45 days)', 's:b2profit': 'Bill-wise Gross Profit', 's:reports': 'Export Reports to Excel', 'h:ssum': 'Sales Register',
     'h:psum': 'Purchase Register', 'h:exc': 'Exception Reports', 'h:vreg': 'Voucher Registers',
     's:cacom': 'Auditor Comments', 'k:nav.cmp08': 'CMP-08 Statement', 'k:nav.gstr1': 'GSTR-1 Return', 'k:nav.gstr2b': 'GSTR-2B Reconciliation', 'k:nav.gstr3b': 'GSTR-3B Return',
-    's:itx': 'Income Tax Computation', 's:limits': 'Statutory Limits', 's:acx': 'Other Income and Tax Payments', 'k:nav.tds': 'TDS and TCS',
+    's:itx': 'Income Tax Computation', 's:limits': 'Statutory Limits', 's:acx': 'Other Income and Tax Payments', 'k:nav.tds': 'TDS and TCS Calculator',
     's:features': 'Feature Settings', 's:tools': 'All Tools', 'k:desk.v_backup': 'Backup and Restore', 's:bimp': 'Bank Statement Import', 'h:mprint': 'Print Many Vouchers',
     'k:desk.v_settings': 'Company Settings', 's:packs': 'Trade Packs', 's:b2year': 'Year-End Closing'
   };
@@ -505,6 +505,7 @@
   function gateway() {
     var app = A(), hub = $('#ns-side .sg-top'); if (!app || !app.biz || !hub) return;
     var box = $('#gw-box'); if (!box) { box = NS.el('div', { id: 'gw-box', 'class': 'gw' }); hub.parentNode.insertBefore(box, hub); var after = NS.el('div', { id: 'gw-after', 'class': 'gw' }); hub.parentNode.insertBefore(after, hub.nextSibling); }
+    if (!app.biz()) return;   /* data not read yet: keep what is there; app.js calls this again after every load */
     var after2 = $('#gw-after'), b = app.biz() || {}, D = app.mine ? app.mine() : [], p = NS.period ? NS.period() : null;
     if (!gwBig()) { box.innerHTML = ''; after2.innerHTML = ''; return; }
     var last = D.reduce(function (m, d) { return d && d.date && !d.cancelled && d.date > m ? d.date : m; }, '');

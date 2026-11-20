@@ -489,3 +489,4 @@ dialog.or-pick .or-late{color:var(--bad,#b42318)}
 /* ERP r2-config C-9: accounting mode on the document makers (no quantity, unit or discount) */
 #items.nx-acct .it-qty, #items.nx-acct .it-unit, #items.nx-acct .it-disc { display: none !important; }
 [data-rows="items"].nx-acct .kr-qty, [data-rows="items"].nx-acct .kr-unit, [data-rows="items"].nx-acct .kr-disc { display: none !important; }
+.sh .tot th.tcs-dl,.sh .kv th.tcs-dl{font-weight:400;font-size:.82em;text-align:left;white-space:normal;line-height:1.35}

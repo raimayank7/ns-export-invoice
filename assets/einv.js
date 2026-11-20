@@ -9,6 +9,7 @@
   'use strict';
   var $ = NS.$, $$ = NS.$$, esc = NS.esc, num = NS.num, r2 = NS.r2, t = NS.t;
 
+  var EI_GO = /[?&]ei=1(&|$)/.test(NS.startQuery || location.search);   /* read at load: the maker clears ?open=...&ei=1 from the address right after opening the bill */
   var EWB_VERSION = '1.0.0621';   /* copy from the portal's Help > Bulk Generation Tools sample when it changes */
   /* e-way bill limit for movement inside the state, where a state has raised it above Rs 50,000 (advice only, never blocks).
      Reported state notifications (Tax research area 4); inter-state is always Rs 50,000. Rajasthan: Rs 2 lakh within one city. */
@@ -28,6 +29,20 @@
     var dp = d.disp || {}; if (!e.veh && dp.veh) e.veh = dp.veh; if (!e.tname && dp.tname) e.tname = dp.tname; if (!e.tdoc && dp.lr) e.tdoc = dp.lr; if (!e.tdate && dp.lrdate) e.tdate = dp.lrdate;
     if (dp.mode && (!e.mode || e.mode === '1')) e.mode = { Road: '1', Rail: '2', Air: '3', Ship: '4' }[dp.mode] || e.mode;
     return e; }
+  /* which document is on screen (owner 20 Nov: the files from every sales-side document, not only the invoice):
+     'inv' tax invoice / bill of supply / export invoice, 'cn' credit note to a customer, 'dn' debit note to a customer,
+     'dc' delivery challan, 'cm' cash memo; '' = nothing to make (notes against purchases: the supplier makes those files). */
+  function what(d) {
+    if (d.type === 'note') return d.side === 'purchase' ? '' : d.kind === 'debit' ? 'dn' : 'cn';
+    if (d.type === 'challan') return 'dc';
+    if (d.type === 'cashmemo') return 'cm';
+    return 'inv';
+  }
+  function gstOn(d) { return d.withGst !== false && !(d.seller && d.seller.reg === 'comp'); }
+  function canEinv(d) { var w = what(d); return w === 'inv' ? d.kind === 'tax' || d.type === 'exp' : (w === 'cn' || w === 'dn') && gstOn(d); }
+  function canEwb(d) { var w = what(d); return !!w && w !== 'dn'; }
+  /* e-way bill sub-type of a challan (portal codes: 4 job work, 5 own use, 8 others) */
+  var DC_SUB = { job: 4, transfer: 5, approval: 8, sale: 8, other: 8 }, DC_DESC = { approval: 'Supply on approval', sale: 'Sale, invoice to follow', other: 'Others' };
   function days(from) { return Math.round((Date.parse(NS.today()) - Date.parse(from)) / 864e5); }
   function dmy(iso) { var m = String(iso || '').match(/^(\d{4})-(\d\d)-(\d\d)/); return m ? m[3] + '/' + m[2] + '/' + m[1] : ''; }
   function digits(s) { return String(s || '').replace(/\D/g, ''); }
@@ -76,7 +91,10 @@
       need(/^[1-9]\d{5}$/.test(digits(who.pin)), pre + '-pin', w + t('ev.pin'));
       need(!!who.state, pre + '-state', w + t('ev.state'));
     }
-    if (what === 'einv' && d.kind !== 'tax' && d.type !== 'exp') bad.push(['d-kind', t('ev.tax')]);
+    var wd = window.NSEinvWhat ? window.NSEinvWhat(d) : 'inv';
+    if (what === 'einv' && !canEinv(d)) bad.push(['d-kind', wd === 'inv' ? t('ev.tax') : 'An e-invoice is made only for a note with GST, by a registered business.']);
+    if (what === 'einv' && (wd === 'cn' || wd === 'dn') && !(d.orig && d.orig.no && d.orig.date)) bad.push(['d-ono', 'Type the number and date of the original invoice: the e-invoice of a credit or debit note must name it.']);
+    if (what === 'ewb' && !canEwb(d)) bad.push([null, 'A debit note moves no goods, so it needs no e-way bill.']);
     need(NS.gstinCheck(s.gstin).ok && s.gstin.length === 15, 's-gstin', t(what === 'ewb' ? 'ev.ewbseller' : 'ev.sg'));
     need(!!s.name.trim(), 's-name', t('v.bname'));
     place(s, 's');
@@ -138,7 +156,7 @@
     var out = {
       Version: '1.1',
       TranDtls: { TaxSch: 'GST', SupTyp: e.sup, RegRev: d.rc ? 'Y' : 'N', IgstOnIntra: 'N' },
-      DocDtls: { Typ: 'INV', No: String(d.no).toUpperCase(), Dt: dmy(d.date) },
+      DocDtls: { Typ: what(d) === 'cn' ? 'CRN' : what(d) === 'dn' ? 'DBN' : 'INV', No: String(d.no).toUpperCase(), Dt: dmy(d.date) },
       SellerDtls: seller, BuyerDtls: buyer
     };
     if (d.ship && d.ship.addr) {
@@ -162,6 +180,8 @@
     var x = d.exp;
     if (exp && x) out.ExpDtls = put(put(put(put(put({ RefClm: x.refund === 'Y' ? 'Y' : 'N' }, 'ShipBNo', clip(x.sbNo, 20)), 'ShipBDt', dmy(x.sbDate)), 'Port', clip(x.port, 10).toUpperCase()), 'ForCur', clip(x.cur, 3).toUpperCase()), 'CntCode', clip(x.country, 2).toUpperCase());
     if (e.withEwb) out.EwbDtls = ewbPart(e, true);
+    /* credit / debit note: the invoice it is against (INV-01 RefDtls.PrecDocDtls) */
+    if ((what(d) === 'cn' || what(d) === 'dn') && d.orig && d.orig.no) out.RefDtls = { PrecDocDtls: [{ InvNo: clip(String(d.orig.no).toUpperCase(), 16), InvDt: dmy(d.orig.date) }] };
     return [out];
   }
   function ewbPart(e, forIrp) {
@@ -183,7 +203,7 @@
     var e = ex(d), s = d.seller, b = d.buyer, rows = itemRows(d, tt, false), sa = lines(s.addr), ba = lines(b.addr), to = d.ship && d.ship.addr ? d.ship : null;
     var ta = to ? lines(to.addr) : ba, main = rows.slice().sort(function (x, y) { return y.ass - x.ass; })[0];
     var bill = {
-      userGstin: s.gstin, supplyType: 'O', subSupplyType: +e.sub || (/^EXP/.test(e.sup) ? 3 : 1), subSupplyDesc: +e.sub === 8 ? clip(e.subDesc || 'Others', 20) : '', docType: e.dtype || (d.kind === 'tax' || d.type === 'exp' ? 'INV' : 'BIL'),
+      userGstin: s.gstin, supplyType: 'O', subSupplyType: +e.sub || (/^EXP/.test(e.sup) ? 3 : 1), subSupplyDesc: +e.sub === 8 ? clip(e.subDesc || 'Others', 20) : '', docType: e.dtype || (d.kind === 'tax' || d.type === 'exp' || (d.type === 'cashmemo' && gstOn(d)) ? 'INV' : 'BIL'),
       docNo: String(d.no).toUpperCase(), docDate: dmy(d.date),
       fromGstin: s.gstin, fromTrdName: clip(s.name, 100), fromAddr1: sa[0], fromAddr2: sa[1], fromPlace: clip(s.city, 50), fromPincode: +digits(s.pin),
       actualFromStateCode: +s.state, fromStateCode: +s.state,
@@ -204,6 +224,24 @@
   }
 
   /* ---------- the portal's reply: a JSON file (any shape) or typed numbers ---------- */
+  /* the e-way bill of a challan or of a credit note for goods coming back, from the invoice's own e-way bill:
+     challan = document type CHL, sub-type by its purpose; credit note = inward, sub-type 7 (sales return), document type OTH (the bulk file has no credit-note type),
+     goods move from the customer to the business (from / to swapped). */
+  function ewayFor(d, tt) {
+    var file = ewaybill(d, tt), bill = file.billLists ? file.billLists[0] : file, w = what(d), e = ex(d);   /* the file holds the bill in billLists */
+    if (w === 'dc') {
+      bill.docType = 'CHL';
+      if (!(+e.sub > 1)) { var k = DC_SUB[d.kind] || 8; bill.subSupplyType = k; bill.subSupplyDesc = k === 8 ? clip(DC_DESC[d.kind] || 'Others', 20) : ''; }
+    }
+    if (w === 'cn') {
+      var F = ['Gstin', 'TrdName', 'Addr1', 'Addr2', 'Place', 'Pincode', 'StateCode'], o = {};
+      F.forEach(function (f) { o['from' + f] = bill['to' + f]; o['to' + f] = bill['from' + f]; });
+      Object.keys(o).forEach(function (k) { bill[k] = o[k]; });
+      var af = bill.actualFromStateCode; bill.actualFromStateCode = bill.actualToStateCode; bill.actualToStateCode = af;
+      bill.supplyType = 'I'; bill.subSupplyType = 7; bill.subSupplyDesc = ''; bill.docType = 'OTH';   /* the bulk file allows INV, CHL, BIL, BOE, OTH only (no credit-note type): OTH, the credit note number as document no. */
+    }
+    return file;
+  }
   function b64json(part) {
     try {
       var s = atob(part.replace(/-/g, '+').replace(/_/g, '/') + '==='.slice((part.length + 3) % 4));
@@ -267,6 +305,7 @@
       '</div></details>' +
       '<div class="ei-do"><button type="button" class="btn" id="ei-einv">' + esc(t('ei.b.einv')) + '</button><button type="button" class="btn" id="ei-ewb">' + esc(t('ei.b.ewb')) + '</button>' +
         '<label class="btn" for="ei-file">' + esc(t('ei.b.load')) + '</label><input id="ei-file" type="file" accept=".json,application/json" hidden></div>' +
+      '<p class="hint" id="ei-dnnote" hidden>A debit note moves no goods, so it needs no e-way bill. The e-invoice names the original invoice.</p>' +
       '<div class="ei-msg" id="ei-msg" aria-live="polite" hidden></div>' +
       '<div class="ei-have" id="ei-have" hidden></div>' +
       '<details class="more" id="ei-man"><summary>' + esc(t('ei.manual')) + '</summary><div class="fg">' +
@@ -332,6 +371,8 @@
   }
   function fill() {
     if (!box) return;
+    /* opened from the App's Sale voucher (&ei=1): show this panel once the bill has been opened (opening scrolls to the top) */
+    if (EI_GO && performance.now() < 15000) { clearTimeout(fill.t); fill.t = setTimeout(function () { if (!box) return; var tr = $('#ei-trd', box); if (tr) tr.open = true; box.scrollIntoView({ block: 'start' }); }, 900); }
     var d = api.doc(), x = ex(d), irn = d.irn || {};
     Object.keys(MAP).forEach(function (id) { var el = $('#' + id, box); if (el) { el.value = x[MAP[id]] == null ? '' : x[MAP[id]]; if (el.tagName === 'SELECT' && el.selectedIndex < 0) el.selectedIndex = 0; } });
     $('#ei-with', box).checked = !!x.withEwb;
@@ -341,8 +382,9 @@
   function status() {
     if (!box || !document.contains(box)) return;
     var d = api.doc(), irn = d.irn || {};
-    $('#ei-einv', box).hidden = d.kind !== 'tax';
-    box.hidden = !!(d.seller && d.seller.reg === 'unreg') && !irn.irn && !irn.ewb;   /* a seller not registered under GST makes neither file (round C) */
+    $('#ei-einv', box).hidden = !canEinv(d); $('#ei-ewb', box).hidden = !canEwb(d);
+    var dnn = $('#ei-dnnote', box); if (dnn) dnn.hidden = what(d) !== 'dn';
+    box.hidden = !what(d) || (!!(d.seller && d.seller.reg === 'unreg') && !irn.irn && !irn.ewb);   /* a seller not registered under GST makes neither file (round C) */
     var have = $('#ei-have', box), h = [];
     if (irn.irn) h.push(esc(t('ei.have', { irn: irn.irn.slice(0, 12) + '…', ack: irn.ack || '—' })));
     if (irn.ewb) h.push(esc(t('ei.haveewb', { no: irn.ewb })));
@@ -372,7 +414,7 @@
   function make(what) {
     var d = api.doc(), tt = api.totals(), r = check(d, tt, what);
     if (r.bad.length) { msg(r.bad, r.note); var g = $('[data-go]', box); if (g) g.focus(); return; }
-    var data = what === 'einv' ? einvoice(d, tt) : ewaybill(d, tt), name = fileName(what === 'einv' ? 'e-invoice' : 'e-way-bill', d.no);
+    var data = what === 'einv' ? einvoice(d, tt) : ewayFor(d, tt), name = fileName(what === 'einv' ? 'e-invoice' : 'e-way-bill', d.no);
     var a = document.createElement('a');
     a.href = URL.createObjectURL(new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' }));
     a.download = name; document.body.appendChild(a); a.click();
@@ -396,5 +438,6 @@
   }
 
   (NS.docExt = NS.docExt || []).push({ editor: editor, wire: wire, fill: fill, sheet: sheet, drawn: drawn });
-  NS.einv = { einvoice: einvoice, ewaybill: ewaybill, check: check, findAll: findAll, qrInfo: qrInfo, unit: unit, lines: lines };
+  window.NSEinvWhat = what;
+  NS.einv = { einvoice: einvoice, ewaybill: ewayFor, check: check, findAll: findAll, qrInfo: qrInfo, unit: unit, lines: lines };
 })();

@@ -2,6 +2,7 @@
 (function () {
   'use strict';
   var NS = window.NS = window.NS || {};
+  NS.startQuery = location.search;   /* the page's address as it opened (makers clear ?open=… right after reading it) */
 
   /* ---------- small DOM helpers ---------- */
   NS.$ = function (s, r) { return (r || document).querySelector(s); };
@@ -305,6 +306,49 @@
   };
 
 
+  /* ---------- First / Back / Next / Last, Find by number and List on every document maker (owner 20 Nov: "necessary in
+     any voucher"), like the App's own entry screens (vtools.js). o = { mine(d): this kind and business, current(): id on
+     screen, open(rec), list(): the Saved list with its search }. Oldest first; drawn again at every save, open and new. ---------- */
+  NS.docNav = function (root, o) {
+    if (!root || !window.NSStore) return;
+    var all = function () { return NSStore.list('doc').then(function (a) { return a.filter(function (d) { return d && d.id && o.mine(d); })
+      .sort(function (x, y) { return String(x.date || '').localeCompare(String(y.date || '')) || String(x.no || '').localeCompare(String(y.no || ''), undefined, { numeric: true }) || (x.created || 0) - (y.created || 0); }); }); };
+    var bar = root.querySelector('#dn-nav');
+    if (!bar) {
+      bar = document.createElement('div'); bar.id = 'dn-nav'; bar.className = 'dn-nav'; bar.setAttribute('role', 'group'); bar.setAttribute('aria-label', 'Saved documents');
+      var top = root.querySelector('.tool-top'); if (top && top.parentNode) top.parentNode.insertBefore(bar, top.nextSibling); else root.insertBefore(bar, root.firstChild);
+      bar.addEventListener('click', function (e) {
+        var b = e.target.closest('[data-dnav]'); if (!b || b.disabled) return;
+        var w = b.getAttribute('data-dnav'); if (w === 'list') { bar._o.list(); return; }
+        all().then(function (L) {
+          var at = L.map(function (d) { return d.id; }).indexOf(bar._o.current()); if (at < 0) at = L.length;
+          var i = w === 'first' ? 0 : w === 'last' ? L.length - 1 : w === 'back' ? at - 1 : at + 1;
+          if (i >= 0 && i < L.length) bar._o.open(L[i]);
+        });
+      });
+      bar.addEventListener('keydown', function (e) {
+        if (e.key !== 'Enter' || !e.target.classList.contains('vt-find')) return;
+        e.preventDefault(); var v = String(e.target.value || '').trim().toLowerCase(); if (!v) return;
+        all().then(function (L) {
+          var hit = L.filter(function (d) { return String(d.no || '').toLowerCase() === v; })[0] || L.filter(function (d) { return String(d.no || '').toLowerCase().indexOf(v) >= 0; }).slice(-1)[0];
+          if (hit) { e.target.value = ''; bar._o.open(hit); } else NS.toast('Nothing saved with number ' + e.target.value, 'bad');
+        });
+      });
+    }
+    bar._o = o;
+    all().then(function (L) {
+      var at = L.map(function (d) { return d.id; }).indexOf(o.current()), n = L.length, cur = at >= 0;
+      var btn = function (k, label, title, off) { return '<button type="button" class="btn sm" data-dnav="' + k + '" title="' + NS.esc(title) + '" aria-label="' + NS.esc(title) + '"' + (off ? ' disabled' : '') + '>' + label + '</button>'; };
+      var f = bar.querySelector('.vt-find'), typed = f ? f.value : '', had = f && document.activeElement === f;
+      bar.innerHTML = btn('first', '|◀', 'First', !n || at === 0) + btn('back', '◀', 'Back: the one before', !n || at === 0) +
+        '<span class="vt-pos soft">' + (cur ? (at + 1) + ' of ' + n : 'New · ' + n + ' saved') + '</span>' +
+        btn('next', '▶', 'Next', !cur || at >= n - 1) + btn('last', '▶|', 'Last', !n || at === n - 1) +
+        '<input class="vt-find" type="search" placeholder="Find no." aria-label="Find a saved one by its number" autocomplete="off">' +
+        btn('list', 'List', 'List of saved ones, with search');
+      var nf = bar.querySelector('.vt-find'); if (typed) nf.value = typed; if (had) nf.focus();
+    }, function () {});
+  };
+
   /* ---------- inside the App / Windows program (html.embed): software screens, not a website ----------
      Every tool page drops its website parts (heading, intro, guides, FAQ). A maker with a form and a printed sheet (invoice-type
      makers, slips, trade kits: .grid2 with .ed-col/.pv-col; the declarations maker: .dc-grid) shows the form full width and gets
@@ -354,9 +398,9 @@
     var pv = document.createElement('button'); pv.type = 'button'; pv.className = 'btn appdoc-pvb'; bar.appendChild(pv);
     var p2 = document.createElement('button'); p2.type = 'button'; p2.className = 'btn primary'; p2.setAttribute('data-ic', 'print'); p2.textContent = NS.t('b.print');
     p2.addEventListener('click', function () { var pr = root.querySelector('[data-prl-print]'); if (pr) pr.click(); }); bar.appendChild(p2);
-    var on = function () { return root.classList.contains('pv-on'); };
+    var on = function () { return root.classList.contains('pv-sheet'); };   /* its own class: a plain pv-on rule also hid the declarations sheet */
     var label = function () { pv.textContent = NS.t(on() ? 'tab.edit' : 'tab.preview'); pv.setAttribute('data-ic', on() ? 'edit' : 'eye'); pv.setAttribute('aria-pressed', String(on())); };
-    var show = function (p) { root.classList.toggle('pv-on', p); label(); window.scrollTo(0, 0); };
+    var show = function (p) { root.classList.toggle('pv-sheet', p); label(); window.scrollTo(0, 0); };
     pv.addEventListener('click', function () { show(!on()); });
     document.addEventListener('keydown', function (e) { if (e.key === 'Escape' && on() && !document.querySelector('dialog[open]')) { e.preventDefault(); e.stopImmediatePropagation(); show(false); } }, true);
     document.addEventListener('ns-lang', label); label();

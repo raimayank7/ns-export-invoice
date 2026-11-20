@@ -125,7 +125,8 @@
       var cols = (rows[0] || []).map(function (h, c) { return '<col min="' + (c + 1) + '" max="' + (c + 1) + '" width="' + (w[c] || Math.min(40, Math.max(10, String(h).length + 2))) + '" style="2" customWidth="1"/>'; }).join('');
       f['xl/worksheets/sheet' + (i + 1) + '.xml'] = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?><worksheet ' + ns + '><sheetViews><sheetView workbookViewId="0"><pane ySplit="1" topLeftCell="A2" activePane="bottomLeft" state="frozen"/></sheetView></sheetViews>' +
         (cols ? '<cols>' + cols + '</cols>' : '') + '<sheetData>' +
-        rows.map(function (r, ri) { return '<row r="' + (ri + 1) + '">' + r.map(function (v, ci) { return '<c r="' + colName(ci) + (ri + 1) + '" t="inlineStr" s="' + (ri === 0 && s[3] !== false ? 1 : s[3] === 'wrap' ? 3 : 2) + '"><is><t xml:space="preserve">' + x(v) + '</t></is></c>'; }).join('') + '</row>'; }).join('') +
+        rows.map(function (r, ri) { return '<row r="' + (ri + 1) + '">' + r.map(function (v, ci) { if (ri > 0 && typeof v === 'number' && isFinite(v) && Math.abs(v) < 1e11) return '<c r="' + colName(ci) + (ri + 1) + '" s="0"><v>' + v + '</v></c>';   /* real numbers (amounts) stay numbers so Excel can add them; text keeps leading zeros (20 Nov) */
+          return '<c r="' + colName(ci) + (ri + 1) + '" t="inlineStr" s="' + (ri === 0 && s[3] !== false ? 1 : s[3] === 'wrap' ? 3 : 2) + '"><is><t xml:space="preserve">' + x(v) + '</t></is></c>'; }).join('') + '</row>'; }).join('') +
         '</sheetData></worksheet>';
     });
     return zip(f);

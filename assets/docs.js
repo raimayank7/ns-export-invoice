@@ -35,7 +35,7 @@
   /* TCS rates: Income-tax Act 2025, section 394(1) Table, as amended by the Finance Act 2026 (official text, incometaxindia.gov.in, read 5 Nov 2026).
      [label, rate %, Sl. No.]; Sl. 6 only when the sale consideration is over Rs 10 lakh. Sl. 1-5: no TCS if the buyer gives the s.394(2) declaration
      (goods used for manufacturing, processing, producing or power, not trading). There is no TCS on sale of other goods (old 206C(1H) is not in the 2025 Act). */
-  var TCS_NATURE = [['394(1) Sl.1: Alcoholic liquor for human consumption', 2, 1], ['394(1) Sl.2: Tendu leaves', 2, 2], ['394(1) Sl.3: Timber or other forest produce', 2, 3],
+  var TCS_NATURE = [['394(1) Sl.1: Alcoholic liquor for human consumption', 2, 1], ['394(1) Sl.2: Tendu leaves', 2, 2], ['394(1) Sl.3: Timber obtained under a forest lease', 2, 3], ['394(1) Sl.3: Timber obtained by any other mode', 2, 3], ['394(1) Sl.3: Other forest produce (not timber or tendu leaves) under a forest lease', 2, 3],
     ['394(1) Sl.4: Scrap', 2, 4], ['394(1) Sl.5: Coal, lignite or iron ore', 2, 5], ['394(1) Sl.6(a): Motor vehicle over Rs 10 lakh', 1, 6],
     /* Sl.6(b) goods: CBDT Notification 36/2025 (S.O. 1825(E), 22 Apr 2025, under old s.206C(1F)), still in force through s.536(2)(j) of the 2025 Act */
     ['394(1) Sl.6(b): Wrist watch over Rs 10 lakh', 1, 6], ['394(1) Sl.6(b): Art piece (antique, painting, sculpture) over Rs 10 lakh', 1, 6],
@@ -43,7 +43,31 @@
     ['394(1) Sl.6(b): Sunglasses over Rs 10 lakh', 1, 6], ['394(1) Sl.6(b): Bag (handbag, purse) over Rs 10 lakh', 1, 6], ['394(1) Sl.6(b): Shoes over Rs 10 lakh', 1, 6],
     ['394(1) Sl.6(b): Sportswear or equipment (golf kit, ski-wear) over Rs 10 lakh', 1, 6], ['394(1) Sl.6(b): Home theatre system over Rs 10 lakh', 1, 6],
     ['394(1) Sl.6(b): Horse for racing in race clubs or for polo over Rs 10 lakh', 1, 6],
-    ['394(1) Sl.8: Overseas tour programme package', 2, 8], ['394(1) Sl.9: Parking lot, toll plaza, mine or quarry (licence or lease)', 2, 9]];
+    ['394(1) Sl.8: Overseas tour programme package', 2, 8], ['394(1) Sl.9: Parking lot (licence or lease)', 2, 9], ['394(1) Sl.9: Toll plaza (licence or lease)', 2, 9], ['394(1) Sl.9: Mine or quarry (licence or lease)', 2, 9]];
+  /* goods of Sl. 1 to 5 of the section 394(1) Table, found from the HSN code or the item's name (owner 20 Nov): on such a bill the
+     seller either collects TCS or keeps the buyer's declaration in Form No. 127 (section 394(2)). [Sl., HSN starts, name words] */
+  var TCS_GOODS = [[1, /^(2203|2204|2205|2206|2208)/, /\b(liquor|whisky|whiskey|rum|vodka|gin|brandy|beer|wine)\b/i], [2, /^140490/, /\btendu\b/i],
+    [3, /^(4401|4403)/, /\b(timber|forest produce)\b/i],
+    [4, /^(7204|7404|7503|7602|7802|7902|8002|8548|8549|3915|4004|4707)/, /\bscrap\b/i], [5, /^(2601|2701|2702)/, /\b(coal|lignite|iron ore)\b/i]];
+  function tcsGoods(d) {
+    var hit = 0;
+    (d.items || []).some(function (it) {
+      var h = String(it.hsn || '').replace(/\s/g, ''), n = String(it.desc || '');
+      var g = TCS_GOODS.filter(function (x) { return (h && x[1].test(h)) || x[2].test(n); })[0];
+      if (g) hit = g[0]; return !!g;
+    });
+    return hit;
+  }
+  function tcsSl(d) { var n = tcsNature((d.tcs || {}).sec); return n && n[2] <= 5 ? n[2] : tcsGoods(d); }
+  /* the note in the TCS box: what the bill's goods need, and the Form 127 choice shown only for goods 1 to 5 */
+  function needNote() {
+    var box = $('#tcs-box', root); if (!box) return;
+    var c = doc.tcs || {}, sl = tcsSl(doc), n = $('#tcs-need', root), w = $('#tcs-declw', root);
+    if (w) w.hidden = !sl;
+    var dt = $('#tcs-decldt', root); if (dt && dt.closest('.f')) dt.closest('.f').hidden = !sl || !c.decl;
+    if (n) { var show = sl && !c.on && !c.decl; n.hidden = !show; n.textContent = show ? t('b1.tcsneed', { sl: sl }) : ''; if (show) box.open = true; }
+    if ($('#tcs-decl', root)) { $('#tcs-decl', root).checked = !!c.decl; $('#tcs-decldt', root).value = c.declOn || ''; }
+  }
   /* without the buyer's PAN the higher TCS rate applies (s.397(2)): say so next to the fields */
   function panNote() {
     var n = $('#tcs-pannote', root); if (!n) return;
@@ -284,7 +308,10 @@
         '<h3 class="chg-h">' + esc(t('b1.charges')) + '</h3><div id="chg-list"></div><button type="button" class="btn sm" id="add-chg">+ ' + esc(t('b1.addchg')) + '</button>' +
         '<p class="hint">' + esc(t('b1.chgh')) + '</p><datalist id="dl-chg">' + CHG_NAMES.map(function (u) { return '<option value="' + u + '">'; }).join('') + '</datalist>' +
         (TCS_TYPES[type] ? '<details class="more" id="tcs-box"><summary>' + esc(t('b1.tcs')) + '</summary><div class="fg">' +
+          '<p class="hint wide b1-warn" id="tcs-need" hidden></p>' +
           '<div class="f wide"><label class="chk"><input id="tcs-on" type="checkbox"> ' + esc(t('b1.tcson')) + '</label><small class="hint">' + esc(t('b1.tcsh')) + '</small></div>' +
+          '<div class="f wide" id="tcs-declw" hidden><label class="chk"><input id="tcs-decl" type="checkbox"> ' + esc(t('b1.tcsdecl')) + '</label><small class="hint">' + esc(t('b1.tcsdeclh')) + ' <a href="https://declaration.niveshsahayak.in/?form=f127" target="_blank" rel="noopener">' + esc(t('b1.tcsdeclmk')) + '</a></small></div>' +
+          field('tcs-decldt', t('b1.tcsdecldt'), { type: 'date' }) +
           '<div class="f wide"><label for="tcs-sec">' + esc(t('b1.tcssec')) + '</label><input id="tcs-sec" list="dl-tcs" dir="ltr"><datalist id="dl-tcs">' + TCS_NATURE.map(function (u) { return '<option value="' + esc(u[0]) + '">' + u[1] + '%</option>'; }).join('') + '</datalist></div>' +
           field('tcs-rate', t('b1.tcsrate'), { mode: 'decimal', ltr: 1, hint: t('b1.tcsrh') }) +
           field('tcs-pan', t('b1.tcspan'), { max: 10, ltr: 1, ph: 'ABCDE1234F', hint: t('b1.tcspanh') }) +
@@ -523,7 +550,12 @@
     else if (el.getAttribute('data-ck')) { var ci = +el.closest('.chg').getAttribute('data-ci'); doc.charges[ci][el.getAttribute('data-ck')] = el.value; }
     else if (/^tcs-/.test(id)) {
       doc.tcs = doc.tcs || {};
-      if (id === 'tcs-on') doc.tcs.on = el.checked; else if (id === 'tcs-nopanok') doc.tcs.nopanOk = el.checked;
+      if (id === 'tcs-on') { doc.tcs.on = el.checked; if (el.checked) doc.tcs.decl = false;
+        var sl0 = tcsGoods(doc), n0 = el.checked && !doc.tcs.sec && sl0 && TCS_NATURE.filter(function (x) { return x[2] === sl0; })[0];   /* ticking TCS on such goods picks their line of the Table */
+        if (n0) { doc.tcs.sec = n0[0]; $('#tcs-sec', root).value = n0[0]; if (!doc.tcs.rate) { doc.tcs.rate = doc.tcs.auto = String(n0[1]); $('#tcs-rate', root).value = doc.tcs.rate; } } }
+      else if (id === 'tcs-decl') { doc.tcs.decl = el.checked; if (el.checked) { doc.tcs.on = false; $('#tcs-on', root).checked = false; if (!doc.tcs.declOn) doc.tcs.declOn = doc.date || NS.today(); } }
+      else if (id === 'tcs-decldt') doc.tcs.declOn = el.value;
+      else if (id === 'tcs-nopanok') doc.tcs.nopanOk = el.checked;
       else doc.tcs[id.slice(4)] = id === 'tcs-pan' ? (el.value = el.value.toUpperCase().replace(/\s/g, '')) : el.value;
       panNote();
       /* picking a nature from the list fills its rate from the Act (only when the rate is empty or was filled this way) */
@@ -657,7 +689,7 @@
         (!buying() && type !== 'challan' && (s.bankAcc || s.bankName) ? bankHtml(s) : '') +
       '</div><div class="foot-r">' + (tt.grand || !T.purpose ? '<table class="tot"><tr><th>' + colLbl(tax, d) + '</th><td>' + NS.money(tt.taxable) + '</td></tr>' +
         (tax ? (tt.intra ? '<tr><th>' + P.cgst + '</th><td>' + NS.money(tt.cgst) + '</td></tr><tr><th>' + SG + '</th><td>' + NS.money(tt.sgst) + '</td></tr>' : '<tr><th>' + P.igst + '</th><td>' + NS.money(tt.igst) + '</td></tr>') : '') +
-        (tt.tcs ? '<tr><th>' + tcsLbl(d) + '</th><td>' + NS.money(tt.tcs) + '</td></tr>' : '') +
+        (tt.tcs ? '<tr><th>' + tcsLbl(d) + '</th><td>' + NS.money(tt.tcs) + '</td></tr>' : '') + (tcsDeclRow(d) ? '<tr><th colspan="2" class="tcs-dl">' + tcsDeclRow(d) + '</th></tr>' : '') +
         (tt.roundOff ? '<tr><th>' + P.round + '</th><td>' + (tt.roundOff > 0 ? '+' : '−') + NS.money(Math.abs(tt.roundOff)) + '</td></tr>' : '') +
         '<tr class="grand"><th>' + P.total + '</th><td>' + NS.money(tt.grand) + '</td></tr></table>' : '') +
         (T.qr && s.upi && tt.grand > 0 && d.status !== 'paid' ? '<div class="qr"><div class="qr-img" data-qr></div><small>' + P.upi + '<br><b class="mono">' + esc(s.upi) + '</b></small></div>' : '') +
@@ -667,6 +699,8 @@
       '<div class="signbox"><p>' + P['for'] + ' <b>' + esc(s.name || '') + '</b></p>' + (s.sign ? '<img src="' + s.sign + '" alt="">' : '<div class="sp"></div>') + '<p>' + P.sign + '</p></div>' + (T.purpose ? '</div>' : '') +
       made() + '</div>';
   }
+  /* printed when the buyer's Form No. 127 is kept instead of collecting TCS (English, like every printed bill) */
+  function tcsDeclRow(d) { var c = d.tcs || {}; return TCS_TYPES[type] && c.decl && !c.on ? 'No TCS collected: buyer\'s declaration in Form No. 127 under section 394(2) received' + (c.declOn ? ' on ' + esc(NS.fmtDate(c.declOn)) : '') + '.' : ''; }
   /* printed: section, the rate that applied, and the buyer's PAN (s.397(2)(h): the PAN is shown on bills) */
   function tcsLbl(d) {
     var c = d.tcs || {}, sec = String(c.sec || '').split(':')[0].trim(), pan = NSBooks.tcsPan(d), r = NSBooks.tcsRate(d);
@@ -692,7 +726,7 @@
       tt.charges.map(function (c) { return '<tr class="q"><td class="l">' + esc(c.c.name || 'Charges') + (tax ? ' +' + c.g + '%' : '') + '</td><td class="n">' + NS.money(c.amount, false) + '</td></tr>'; }).join('') + '</tbody></table>' +
       (tt.grand ? '<table class="kv tot">' + line(colLbl(tax, d), NS.money(tt.taxable)) +
         (tax ? (tt.intra ? line(P.cgst, NS.money(tt.cgst)) + line(SG, NS.money(tt.sgst)) : line(P.igst, NS.money(tt.igst))) : '') +
-        (tt.tcs ? line(tcsLbl(d), NS.money(tt.tcs)) : '') + (tt.roundOff ? line(P.round, (tt.roundOff > 0 ? '+' : '−') + NS.money(Math.abs(tt.roundOff))) : '') + line(P.total, NS.money(tt.grand), 'grand') + '</table>' +
+        (tt.tcs ? line(tcsLbl(d), NS.money(tt.tcs)) : '') + (tcsDeclRow(d) ? '<tr><th colspan="2" class="tcs-dl">' + tcsDeclRow(d) + '</th></tr>' : '') + (tt.roundOff ? line(P.round, (tt.roundOff > 0 ? '+' : '−') + NS.money(Math.abs(tt.roundOff))) : '') + line(P.total, NS.money(tt.grand), 'grand') + '</table>' +
         '<p class="words">' + NS.inWords(tt.grand) + '</p>' : '') +
       (T.pay && d.status === 'paid' ? '<p class="paidline">' + P.paid + '</p>' : '') +
       (T.qr && s.upi && tt.grand > 0 && d.status !== 'paid' ? '<div class="qr"><div class="qr-img" data-qr></div><small>' + P.upi + '<br><b class="mono">' + esc(s.upi) + '</b></small></div>' : '') +
@@ -729,7 +763,7 @@
     pageStyle(d.paper);
     $$('[data-qr]', sheet).forEach(function (q) { drawQr(q, s, d, tt.grand); });
     ext('drawn', sheet);
-    panNote(); cnTcs();
+    panNote(); cnTcs(); needNote();
     var es = $('#ed-sums', root);
     if (es) es.innerHTML = '<span>' + esc(t('sum.items', { n: tt.rows.length })) + '</span><span>' + esc(t('sum.taxable', { v: NS.money(tt.taxable) })) + '</span>' +
       (tax ? '<span>' + esc(t('sum.gst', { v: NS.money(tt.cgst + tt.sgst + tt.igst) })) + (tt.intra ? ' (CGST + ' + SG + ')' : ' (IGST)') + '</span>' : '') + (tt.tcs ? '<span>' + esc(t('b1.sumtcs', { v: NS.money(tt.tcs) })) + '</span>' : '') + '<b>' + esc(t('sum.total', { v: NS.money(tt.grand) })) + '</b>';
@@ -870,6 +904,7 @@
     if (!probs.length && taxOn(doc) && doc.date >= '2026-02-01' && type !== 'note' && tt0.rows.some(function (r) { return r.g === 28; })) asks.push(t('c.r28'));
     if (!probs.length && taxOn(doc) && doc.date >= '2025-09-22' && type !== 'note' && tt0.rows.some(function (r) { return r.g === 12 && !/^99/.test(String(r.it.hsn || '').trim()); })) asks.push(t('c.r12'));   /* F3-4 */
     if (!probs.length && type === 'note' && doc.orig && doc.orig.date && doc.date && doc.date < doc.orig.date) asks.push(t('c.nbefore'));   /* F3-3 */
+    if (!probs.length && TCS_TYPES[type] && !(doc.tcs && (doc.tcs.on || doc.tcs.decl)) && tcsGoods(doc)) asks.push(t('b1.c_tcsneed', { sl: tcsGoods(doc) }));
     if (!probs.length && type === 'cashmemo' && tt0.grand >= 200000) asks.push(t('c.cash2l'));
     if (!probs.length && type === 'self' && doc.recv && (new Date(doc.date) - new Date(doc.recv)) / 864e5 > 30) asks.push(t('c.si30'));
     if (!probs.length && type === 'note' && doc.kind === 'credit' && !pur() && doc.orig && doc.orig.date && doc.date > (+NS.fy(doc.orig.date).slice(0, 4) + 1) + '-11-30') asks.push(t('c.cn30'));
@@ -945,6 +980,8 @@
     }).catch(function (e) { if (e.message !== 'cancel') NS.toast(t('nosave', { e: e.message }), 'bad'); throw e; });
   }
   function setStatus() {
+    NS.docNav && NS.docNav(root, { current: function () { return editingId; }, open: function (r) { openDoc(r); }, list: openHistory,
+      mine: function (d) { var me = key(doc.seller && doc.seller.name), tp = type === 'exp' ? 'expinv' : type; return (d.type || 'invoice') === tp && (!T.split || T.kinds.indexOf(d.kind || T.kinds[0]) >= 0) && (!me || !d.seller || key(d.seller.name) === me); } });
     var st = $('#tool-status', root);
     if (st) st.textContent = editingId ? tw('st.edit', { no: doc.no }) : tw('st.new');
     /* shared folder mode: another computer has this bill open right now */
