@@ -1156,6 +1156,7 @@
     }
     new MutationObserver(function (ms) {
       if (calm && calm.matches) return;
+      if (document.documentElement.classList.contains('ns-soft')) return;   /* the App switches screens at once, like desktop software (owner 19 Nov: the fade looked like a glitch) */
       var now = Date.now(), user = now - tap < 1500 && now - key > 700;
       ms.forEach(function (m) {
         if (m.type === 'attributes') { if (user && m.oldValue !== null && !m.target.hidden && fit(m.target)) add(m.target); return; }
@@ -1274,6 +1275,7 @@
         if (m.target.nodeType === 1 && m.target.matches(ICSEL)) add(m.target);   /* its words were replaced (language change) */
         [].forEach.call(m.addedNodes, add);
       });
+      if (queued) run();   /* at once, before the screen is painted: an icon added later widened buttons and moved the screen (owner 19 Nov: glitches) */
     }).observe(document.body, { subtree: true, childList: true });
   };
 

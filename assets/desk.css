@@ -490,3 +490,5 @@ html.side-mini .gw,html.side-mini .gw-co{display:none}
 .s-path{font-weight:600;color:var(--ink);max-width:40vw;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .calc-dlg{width:min(420px,94vw)}.calc-b{padding:0 4px}.calc-b #calc-in{width:100%;font:600 1.2rem var(--mono,monospace);text-align:end}
 .calc-r{font:700 1.5rem var(--mono,monospace);text-align:end;margin:8px 0}.calc-a{display:flex;gap:8px;justify-content:flex-end}.calc-h{font:500 .85rem var(--mono,monospace);color:var(--soft);padding-inline-start:18px}
+/* entry screens open at once in the App, like the screens around them (owner 19 Nov) */
+html.ns-soft dialog.vs[open],html.ns-soft dialog.vs[open]::backdrop{animation:none!important}

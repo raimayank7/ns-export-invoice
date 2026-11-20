@@ -280,7 +280,7 @@
         if (w.charAt(0) === '@' ? isOff(w.slice(1)) : w.charAt(0) === '#' ? isOff(w.slice(1)) : offForm(w)) return '';
         return '<button type="button" class="mb-t" data-mbt="' + esc(w) + '" title="' + esc(NS.t('desk.' + t[1]) + (key ? '  ·  ' + key : '')) + '"><span data-i18n="desk.' + t[1] + '">' + esc(NS.t('desk.' + t[1])) + '</span>' + (key ? '<kbd>' + esc(key.replace('Alt+G ', '')) + '</kbd>' : '') + '</button>';
       }).join('') + '</div>';
-    main.insertBefore(mbar, $('#app', main) || main.firstChild); root.classList.add('mb-on');
+    var ap0 = $('#app', main); while (ap0 && ap0.parentNode !== main) ap0 = ap0.parentNode; main.insertBefore(mbar, ap0 || main.firstChild);   /* the App screen may sit deeper on a tool page (cheque, fees) */ root.classList.add('mb-on');
     var setH = function () { root.style.setProperty('--mb-h', (mbar.offsetHeight || 0) + 'px'); }; setH(); window.addEventListener('resize', setH);
     mbar.addEventListener('click', function (e) {
       var t = e.target.closest('[data-mbt]');
@@ -464,7 +464,8 @@
     if (!gwBig()) { box.innerHTML = ''; after2.innerHTML = ''; return; }
     var last = D.reduce(function (m, d) { return d && d.date && !d.cancelled && d.date > m ? d.date : m; }, '');
     var fy = p && p.from ? NS.fy(p.from) : NS.fy(NS.today());
-    box.innerHTML = '<div class="gw-co"><b>' + esc(b.name || '') + '</b>' + (b.gstin ? '<small>GSTIN ' + esc(b.gstin) + '</small>' : '') +
+    /* drawn again only when something in it changed: redrawing the same left panel after every screen change made it flicker (owner 19 Nov) */
+    var boxH = '<div class="gw-co"><b>' + esc(b.name || '') + '</b>' + (b.gstin ? '<small>GSTIN ' + esc(b.gstin) + '</small>' : '') +
       '<p><span>Financial year</span><b>' + esc(fy) + '</b></p>' +
       '<p><span>Period</span><button type="button" class="linkish" data-gw-per>' + esc(p ? NS.fmtDate(p.from) + ' – ' + NS.fmtDate(p.to) : fy) + '</button></p>' +
       (last ? '<p><span>Last entry</span><b>' + esc(NS.fmtDate(last)) + '</b></p>' : '') + '</div>';
@@ -477,11 +478,14 @@
         '<span>' + esc((app.docName ? app.docName(d) : d.type) + ' ' + d.no) + (party || amt ? '<small>' + esc(party) + (party && amt ? ' · ' : '') + (amt ? esc(NS.money ? NS.money(amt) : String(amt)) : '') + '</small>' : '') + '</span>');
       rows.push(c);
     });
+    if (box._h !== boxH) { box.innerHTML = boxH; box._h = boxH; }
+    var A2 = after2; after2 = document.createElement('div');
     after2.innerHTML = rows.length ? '<div class="gw-h">Recently opened</div>' : '';
     rows.forEach(function (c) { after2.appendChild(c); });
     var pins = pinned().map(function (x) { var a = linkByKey(x.k); return a ? gwClone(a, '<button type="button" class="gw-unpin" data-gw-unpin="' + esc(x.k) + '" title="Unpin" aria-label="Unpin ' + esc(x.t) + '"></button>') : null; }).filter(Boolean);
     if (pins.length) { after2.insertAdjacentHTML('beforeend', '<div class="gw-h">Pinned</div>'); pins.forEach(function (c) { after2.appendChild(c); }); }
     else after2.insertAdjacentHTML('beforeend', '<div class="gw-h">Pinned</div><p class="gw-hint">Point at any item in the top menu and press its pin to keep it here.</p>');
+    if (A2.innerHTML !== after2.innerHTML) A2.replaceChildren.apply(A2, [].slice.call(after2.childNodes));
   }
   document.addEventListener('click', function (e) {
     var t = e.target.closest && e.target.closest('[data-gw-unpin],[data-gw-per],[data-gwdoc]'); if (!t) return;
@@ -498,13 +502,13 @@
   /* ---------- where you are, in the status bar (Busy: 'Transactions -> Sales') ---------- */
   function sbPath() {
     var sb = $('[data-sbar] .s-l'); if (!sb || !A() || !A().biz) return;
-    var el = $('[data-s-path]', sb); if (!el) { el = NS.el('span', { 'class': 's-path', 'data-s-path': '' }); var fy = $('[data-s-fy]', sb); sb.insertBefore(el, fy ? fy.nextSibling : null); }
+    var el = $('[data-s-path]', sb); if (!el) { el = NS.el('span', { 'class': 's-path', 'data-s-path': '' }); var fy = $('[data-s-fy]', sb); if (fy && fy.parentNode) fy.parentNode.insertBefore(el, fy.nextSibling); else sb.appendChild(el); }
     var f = $('#app-form[open]'), out = [];
     var h = location.hash.replace(/^#/, ''), a = h ? ($('#ns-side a[href="#' + h + '"]:not(.gw-row)') || $('#ns-side a[data-hsec="' + h + '"]:not(.gw-row)') || $('#ns-side a[data-sec="' + h.split('/')[0] + '"]:not(.gw-row)')) : null;
     if (f) { var t = (($('h2', f) || {}).textContent || '').split(' · ')[0].trim(); var fa = $('#ns-side a[data-dform="' + f.getAttribute('data-kind') + '"]:not(.gw-row)'); out = [fa ? grpOf(fa) : 'Transactions (Vouchers)', subOf(fa), t]; }
-    else if (!h || h === 'home') out = ['Gateway'];
+    else if (!h || h === 'home' || $('#ns-side a[data-sec="home"][aria-current="page"]')) out = ['Gateway'];
     else if (a) out = [grpOf(a), subOf(a), (a.textContent || '').trim().split('\n')[0]];
-    else { var t2 = (($('[data-pane]:not([hidden]) h2') || {}).textContent || '').replace(/\?$/, '').trim(); out = t2 ? [t2] : []; }
+    else { var h2 = $('[data-pane]:not([hidden]) h2'), t2 = h2 ? [].slice.call(h2.childNodes).filter(function (n) { return n.nodeType === 3; }).map(function (n) { return n.textContent; }).join(' ').replace(/\?$/, '').trim() : ''; out = t2 ? [t2] : []; }   /* the heading's own words, not its buttons */
     el.textContent = out.filter(Boolean).join(' › ');
   }
   function grpOf(a) { var g = a && a.closest('.sg'); if (!g) return ''; var k = g.getAttribute('data-sg'); return k === 'top' ? '' : sgName(k); }

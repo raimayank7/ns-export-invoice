@@ -485,3 +485,18 @@ html[data-en-only] [data-lang-pick],html[data-en-only] [data-lang-set],html[data
 /* ERP r2-config: numbering and printing folded under each My data document card */
 .dc-more{border-top:1px dashed var(--line);padding-top:6px;font-size:.88rem}.dc-more summary{cursor:pointer;color:var(--soft)}
 .dc-more[open]{display:grid;gap:6px}.dc-f{display:grid;gap:2px}.dc-f span{font-size:.82rem;color:var(--soft)}.dc-f input,.dc-f select{min-height:34px;width:100%}
+/* Settings and saved data: groups on the left, one group on the right (19 Nov 2026) */
+.set-wrap{display:grid;grid-template-columns:240px minmax(0,1fr);gap:18px;align-items:start}
+.set-nav{position:sticky;top:8px;display:flex;flex-direction:column;gap:2px;background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:8px}
+.set-nh{margin:8px 8px 2px;font:600 .72rem/1.2 inherit;letter-spacing:.06em;text-transform:uppercase;color:var(--soft)}
+.set-ni{all:unset;cursor:pointer;padding:8px 10px;border-radius:7px;font-weight:600;line-height:1.25}.set-ni.sub{padding-inline-start:18px;font-weight:500}
+.set-ni:hover{background:var(--line)}.set-ni.on{background:var(--accent,#0e746a);color:#fff}.set-ni:focus-visible{outline:2px solid var(--accent,#0e746a);outline-offset:2px}
+.set-body>form.set>fieldset.card,.set-body>.card{margin-top:0}
+@media (max-width:760px){.set-wrap{grid-template-columns:1fr}.set-nav{position:static;flex-direction:row;flex-wrap:wrap}.set-nh{flex-basis:100%}.set-ni.sub{padding-inline-start:10px}}
+/* the App switches screens at once (owner 19 Nov) */
+html.ns-soft #main>*,html.ns-soft [data-pane],html.ns-soft #main [data-pane]>*{animation:none!important}
+/* one font in the whole App (owner 19 Nov: headings, amounts, codes and text alike); numbers keep their columns with tabular figures.
+   The printed invoice designs keep their own look (they are the customer's paper, not the software) */
+html.ns-soft{--font-head:var(--font);--mono:var(--font)}
+html.ns-soft :is(.n,.mono,.amt,kbd,code,td,th){font-variant-numeric:tabular-nums}
+html.ns-soft .sh:not(.stsheet){--font-head:'Plus Jakarta Sans',var(--font);--mono:'IBM Plex Mono',ui-monospace,Consolas,monospace}   /* the printed invoice designs keep their own fonts */

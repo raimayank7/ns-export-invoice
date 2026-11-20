@@ -721,8 +721,9 @@
     var n = +d.copies || 1;
     return T.copy && d.copyLabel && all && n > 1 ? COPIES[copyKey()].slice(0, n) : [d.copyLabel];
   }
+  var paHold = false;   /* Print many vouchers: the page holds many documents until the print window is closed; nothing redraws over them (owner 19 Nov) */
   function draw(all) {
-    if (!sheet) return;
+    if (!sheet || paHold) return;
     var d = doc, s = d.seller, tt = totals(d), tax = taxOn(d), SG = sgstName(d);
     sheet.innerHTML = labelsFor(d, all === true).map(function (l) { return sheetHtml(d, l); }).join('');
     pageStyle(d.paper);
@@ -1058,12 +1059,12 @@
       var list = all.filter(function (x) { return (x.type || 'invoice') === (type === 'exp' ? 'expinv' : type) && (!T.split || !T.kinds || T.kinds.indexOf(x.kind) >= 0) && (x.date || '') >= r[0] && (x.date || '') <= (r[1] || r[0]) && (!me || String(x.seller && x.seller.name || '').trim().toLowerCase() === me); })
         .sort(function (a, b) { return (a.date || '').localeCompare(b.date || '') || String(a.no || '').localeCompare(String(b.no || '')); });
       if (!list.length) { NS.toast(t('conv.none'), 'bad'); return; }
-      showTab('preview', true);
+      showTab('preview', true); paHold = true;
       sheet.innerHTML = list.map(function (d, i) { return '<div class="pa-doc" data-pa="' + i + '">' + labelsFor(d, true).map(function (l) { return sheetHtml(d, l); }).join('') + '</div>'; }).join('');
       list.forEach(function (d, i) { $$('[data-qr]', $('[data-pa="' + i + '"]', sheet)).forEach(function (q) { drawQr(q, d.seller, d, totals(d).grand); }); });
       pageStyle(list[0].paper); fit();
       var old = document.title; document.title = docName() + ' ' + r[0] + ' to ' + (r[1] || r[0]);
-      setTimeout(function () { window.print(); document.title = old; setTimeout(function () { draw(); }, 300); }, 500);
+      setTimeout(function () { window.print(); document.title = old; setTimeout(function () { paHold = false; draw(); }, 300); }, 500);
     });
   }
   function printDoc() {
@@ -1172,6 +1173,7 @@
     redraw = render;
     /* NSBiz prints and shares a document from its own voucher screen through this page in a hidden frame (vdocs.js): what it needs */
     window.NSDocOut = { id: function () { return editingId; }, nodes: function () { showTab('preview', true); fit(); return $$('.sh', sheet); }, paper: function () { return doc.paper; },
+      show: function (d) { doc = Object.assign(blank(), JSON.parse(JSON.stringify(d))); delete doc.total; editingId = d.id || '(preview)'; draw(); showTab('preview', true); fit(); return $$('.sh', sheet); },
       file: fileName, title: function () { return docName() + ' ' + doc.no; }, text: shareText, phone: function () { return doc.buyer && doc.buyer.phone; } };
     /* "Change number series" under the number box: the prefix of this document (each kind for quotation and note) */
     function series() { NS.seriesLink($('#d-no', root), { type: type, saved: function () { return !!editingId; }, biz: function () { return doc.seller; }, kind: function () { return T.prefixes ? sk(doc) : ''; }, def: function () { return T.prefixes ? T.prefixes[sk(doc)] : T.prefix; },
