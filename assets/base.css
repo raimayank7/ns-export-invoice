@@ -503,3 +503,13 @@ html.ns-soft .sh:not(.stsheet){--font-head:'Plus Jakarta Sans',var(--font);--mon
 /* drag a row into its place (NS.dragSort) */
 li.ds-row{cursor:grab}li.ds-drag{opacity:.45}li.ds-a{box-shadow:0 -3px 0 var(--accent,#0e746a)}li.ds-b{box-shadow:0 3px 0 var(--accent,#0e746a)}
 .set-wrap.set-win{align-items:stretch;overflow:hidden}.set-win .set-nav{position:static;overflow:auto;min-height:0}.set-win .set-body{overflow:auto;min-height:0;padding-inline-end:4px}
+/* GST and TDS tools in the official format (gstform.js). Inside the App: no website pitch or guides, the official sheet first */
+html.gst-app main>.hero,html.gst-app main>.prose,html.gst-app main .prose,html.gst-app [id$="-status"],html.gst-app main>.cta-box,html.gst-app main>section:not(.tool){display:none!important}
+.off-box{margin:14px 0}.off-sheet{background:#fff;color:#111;border:1px solid #bbb;border-radius:6px;padding:18px 20px;font:13px/1.4 var(--font,system-ui,sans-serif);max-width:1100px}
+.off-hd{text-align:center;margin-bottom:10px}.off-hd .off-form{display:block;font-size:17px;letter-spacing:.04em}.off-hd .off-rule{display:block;font-size:12px}.off-hd .off-title{display:block;font-weight:600;margin-top:2px}
+.off-t{width:100%;border-collapse:collapse;margin:4px 0 12px;font-variant-numeric:tabular-nums}.off-t th,.off-t td{border:1px solid #9aa3ad;padding:5px 7px;text-align:start;vertical-align:top;color:#111;background:#fff}
+.off-t thead th{background:#eef1f4;font-weight:600}.off-t .n{text-align:end;white-space:nowrap}.off-t .off-sub th{background:#f6f7f9;font-weight:600}.off-t .off-tot td{font-weight:700;background:#f6f7f9}
+.off-t .off-nil{text-align:center;color:#555}.off-id th{width:46%;font-weight:500}.off-id .off-no{width:52px}.off-per{width:auto;margin-inline:auto}.off-per th{background:#eef1f4}
+.off-cap{margin:12px 0 2px;font-size:13px;font-weight:700;color:#111}.off-cap span{display:inline-block;min-width:34px}.off-ver p{margin:4px 0 8px}.off-sign{width:auto;min-width:60%}.off-note{color:#555;font-size:11px;margin-top:10px}
+details.off-work{margin:10px 0}details.off-work>summary{list-style:none;cursor:pointer;display:inline-flex}details.off-work>summary::-webkit-details-marker{display:none}
+@media print{html.gst-app body *{visibility:hidden}html.gst-app .off-sheet,html.gst-app .off-sheet *{visibility:visible}html.gst-app .off-sheet{position:absolute;left:0;top:0;border:0;max-width:none;width:100%}}

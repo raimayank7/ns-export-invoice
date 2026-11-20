@@ -199,9 +199,10 @@
     return on ? scPanel() + '<div class="dash-logo" aria-hidden="true"><span class="brand"><img class="mk mk-l" src="/icons/mark-light-270.webp" alt=""><img class="mk mk-d" src="/icons/mark-dark-270.webp" alt=""><b class="nsb"><span class="nsb-b">Biz</span></b></span></div>' : '';
   };
   /* ---- 4. the Dashboard's shortcut panel (like Busy and Evershine): the usual entries and reports with their keys ---- */
+  var VIC = { sale: 'shop', pbill: 'cart', min: 'money', mout: 'send', contra: 'bank', b2jv: 'journal', exp: 'coins', challan: 'truck', credit: 'repeat', debit: 'repeat', note: 'repeat' };
   function scDefs() {   /* the standard items: [{ id, t, html }] */
     var L = [['v_newparty', 'q:party', 'people', CALBL['q:party']], ['v_newitem', 'q:item', 'box', CALBL['q:item']]].concat(
-      [['sale', 'v_sale'], ['pbill', 'v_pbill'], ['min', 'v_min'], ['mout', 'v_mout'], ['contra', 'v_contra'], ['b2jv', 'v_jv'], ['exp', 'v_exp']].map(function (x) { return [x[1], x[0] === 'b2jv' ? '#b2jv' : 'f:' + x[0], 'doc', x[0] === 'b2jv' ? secKey('b2jv') : formKey(x[0])]; }),
+      [['sale', 'v_sale'], ['pbill', 'v_pbill'], ['min', 'v_min'], ['mout', 'v_mout'], ['contra', 'v_contra'], ['b2jv', 'v_jv'], ['exp', 'v_exp']].map(function (x) { return [x[1], x[0] === 'b2jv' ? '#b2jv' : 'f:' + x[0], VIC[x[0]] || 'doc', x[0] === 'b2jv' ? secKey('b2jv') : formKey(x[0])]; }),
       [['v_tb', '#fin/tb', 'list', CALBL['fin/tb']], ['v_bs', '#fin/bs', 'scale', CALBL['fin/bs']], ['v_pl', '#fin/pl', 'chart', CALBL['fin/pl']], ['v_ledger', '#parties', 'people', secKey('parties')], ['v_dlist', '#dlist', 'people', secKey('dlist')], ['v_clist', '#clist', 'people', secKey('clist')], ['v_dues', '#dues', 'clock', secKey('dues')], ['v_stock', '#stock', 'box', secKey('stock')], ['v_books', '#books', 'book', secKey('books')]]);
     return L.filter(function (x) {
       var h = x[1]; if (/^q:/.test(h)) return !!NS.quickAddNew; if (/^f:/.test(h)) return !offForm(h.slice(2)); if (/^#/.test(h)) { var s = h.slice(1).split('/')[0]; return s === 'fin' || /^(dlist|clist|ssum|psum|vreg|cbsum|coa)$/.test(s) || ($('#ns-side a[data-sec="' + s + '"]') && !isOff(s)); } return true;
@@ -223,7 +224,8 @@
       if (byId[id]) return byId[id];
       var x = /^c:/.test(id) && reg[id.slice(2)]; if (!x) return null;
       var k = x.k || 'Alt+G ' + x.c;
-      return { id: id, t: x.t, html: '<a class="sc-i" href="#" data-sccode="' + esc(x.c) + '" data-ic="dot"><span>' + esc(x.t) + '</span><kbd>' + esc(k) + '</kbd></a>' };
+      var lk = x.h && ($('#ns-side a[href="#' + x.h + '"]') || $('#ns-side a[data-hsec="' + x.h + '"]')), ic = lk && lk.getAttribute('data-ic') || (x.k && /^F|Alt\+[A-Z]$/.test(x.k) ? 'doc' : 'list');
+      return { id: id, t: x.t, html: '<a class="sc-i" href="#" data-sccode="' + esc(x.c) + '" data-ic="' + esc(ic === 'dot' ? 'list' : ic) + '"><span>' + esc(x.t) + '</span><kbd>' + esc(k) + '</kbd></a>' };
     }).filter(Boolean);
   }
   function scPanel() {
@@ -320,7 +322,7 @@
       '<div class="mb-tools" role="toolbar" aria-label="' + esc(NS.t('desk.tb_t')) + '">' + [['sale', 'tb_sale'], ['pbill', 'tb_pur'], ['min', 'tb_rec'], ['mout', 'tb_pay'], ['contra', 'tb_contra'], ['#b2jv', 'tb_jv'], ['exp', 'tb_exp'], ['@challan', 'tb_challan'], ['@credit-note', 'tb_cn'], ['@debit-note', 'tb_dn']].map(function (t) {
         var w = t[0], key = w.charAt(0) === '#' ? secKey(w.slice(1)) : w.charAt(0) === '@' ? fName(w.slice(1)) || (DOCKEY[w.slice(1)] ? (DOCKEY[w.slice(1)][1] ? 'Alt+' + DOCKEY[w.slice(1)][1] : 'Alt+G ' + DOCKEY[w.slice(1)][0]) : '') : formKey(w);
         if (w.charAt(0) === '@' ? isOff(w.slice(1)) : w.charAt(0) === '#' ? isOff(w.slice(1)) : offForm(w)) return '';
-        return '<button type="button" class="mb-t" data-mbt="' + esc(w) + '" title="' + esc(NS.t('desk.' + t[1]) + (key ? '  ·  ' + key : '')) + '"><span data-i18n="desk.' + t[1] + '">' + esc(NS.t('desk.' + t[1])) + '</span>' + (key ? '<kbd>' + esc(key.replace('Alt+G ', '')) + '</kbd>' : '') + '</button>';
+        return '<button type="button" class="mb-t" data-mbt="' + esc(w) + '" data-ic="' + (VIC[w.replace(/^[#@]/, '').replace(/-note$/, '')] || (/note/.test(w) ? 'repeat' : 'doc')) + '" title="' + esc(NS.t('desk.' + t[1]) + (key ? '  ·  ' + key : '')) + '"><span data-i18n="desk.' + t[1] + '">' + esc(NS.t('desk.' + t[1])) + '</span>' + (key ? '<kbd>' + esc(key.replace('Alt+G ', '')) + '</kbd>' : '') + '</button>';
       }).join('') + '</div>';
     var ap0 = $('#app', main); while (ap0 && ap0.parentNode !== main) ap0 = ap0.parentNode; main.insertBefore(mbar, ap0 || main.firstChild);   /* the App screen may sit deeper on a tool page (cheque, fees) */ root.classList.add('mb-on');
     var setH = function () { root.style.setProperty('--mb-h', (mbar.offsetHeight || 0) + 'px'); }; setH(); window.addEventListener('resize', setH);
@@ -477,6 +479,7 @@
     var ic = a.getAttribute('data-ic'); return /^[td]-/.test(ic || '') ? 'data-ic=' + ic : '';
   }
   function linkByKey(k) { var p = k.split('='); return p[1] ? $('#ns-side a[' + p[0] + '="' + p.slice(1).join('=') + '"]:not(.gw-row)') : null; }
+  function recIc(h) { var s = String(h || '').split('/')[0]; return { st: 'people', acl: 'book', do: 'doc', gsum: 'layers', fin: 'scale', masters: 'set', stf: 'people', os: 'clock' }[s] || 'list'; }
   function gwClone(a, extra) {
     var c = a.cloneNode(true); c.removeAttribute('id'); c.removeAttribute('aria-current'); c.classList.remove('on'); c.classList.add('gw-row'); c.hidden = false;
     if (extra) c.insertAdjacentHTML('beforeend', extra); return c;
@@ -513,7 +516,7 @@
       (last ? '<p><span>Last entry</span><b>' + esc(NS.fmtDate(last)) + '</b></p>' : '') + '</div>';
     /* Recently opened: the last screens used, then the entries saved last (newest first), six in all */
     var rec = lsGet(RECK).slice(0, 4), rows = [];
-    rec.forEach(function (x) { var a = $('#ns-side a[href="#' + x.h + '"]:not(.gw-row)') || $('#ns-side a[data-hsec="' + x.h + '"]:not(.gw-row)'); var c = a ? gwClone(a) : NS.el('a', { href: '#' + x.h, 'class': 'side-v gw-row', 'data-ic': 'dot' }, '<span>' + esc(x.t) + '</span>'); if (!a) c.title = x.t; rows.push(c); });
+    rec.forEach(function (x) { var a = $('#ns-side a[href="#' + x.h + '"]:not(.gw-row)') || $('#ns-side a[data-hsec="' + x.h + '"]:not(.gw-row)'); var c = a ? gwClone(a) : NS.el('a', { href: '#' + x.h, 'class': 'side-v gw-row', 'data-ic': recIc(x.h) }, '<span>' + esc(x.t) + '</span>'); if (!a) c.title = x.t; rows.push(c); });
     D.filter(function (d) { return d && d.no && d.id && !d.cancelled && d.type !== 'ob'; }).sort(function (x, y) { return (y.updated || y.created || 0) - (x.updated || x.created || 0); }).slice(0, 6 - rows.length).forEach(function (d) {
       var party = d.buyer && d.buyer.name || d.party || '', amt = app.amountOf ? app.amountOf(d) : d.total;
       var c = NS.el('a', { href: '#', 'class': 'side-v gw-row gw-doc', 'data-ic': 'doc', 'data-gwdoc': d.id, title: (app.docName ? app.docName(d) : d.type) + ' ' + d.no },

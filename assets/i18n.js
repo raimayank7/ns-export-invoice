@@ -2382,7 +2382,7 @@
     'tb.nopan': "No valid PAN (or an inoperative one) for this supplier: 20%, or the normal rate if higher (5% for purchase of goods).",
     'tb.ldc': "Lower deduction certificate {n} used.",
     'tb.ytd': "This year so far: {y}, TDS {t}.",
-    'tq.title': "TDS returns",
+    'tq.title': "TDS and TCS returns",
     'tq.intro': "Each quarter’s TDS from your bills, payments and salary slips, the challans paid, and what to fix before filing. Make the statement with the department’s utility using the Excel file.",
     'tq.year': "Year",
     'tq.quarter': "Quarter",
@@ -2420,7 +2420,7 @@
     'tq.xl': "Excel for the return",
     'tq.saved': "Saved {f}",
     'tq.noxl': "The Excel maker did not load. Check the internet and try again.",
-    'app.tdsr': "TDS returns",
+    'app.tdsr': "TDS and TCS returns",
     /* ERP round 2 (orders, r2-orders: orders.js, vdocs.js stock vouchers; App only, English) */
     'Doc.grn': 'Receipt note', 'Doc.rejin': 'Goods back from customer', 'Doc.rejout': 'Goods sent back to supplier', 'l.sdc': 'Supplier’s challan no.', 'desk.v_ord': 'Orders and pending goods', 'app.ord': 'Orders and pending goods',
     'or.title': 'Orders and pending goods', 'or.v_so': 'Sales orders pending', 'or.v_po': 'Purchase orders pending', 'or.v_dn': 'Challans not billed', 'or.v_grn': 'Receipt notes not billed', 'or.v_book': 'Order book', 'or.v_lc': 'Additional cost on purchases',

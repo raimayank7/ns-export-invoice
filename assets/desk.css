@@ -517,3 +517,8 @@ html.ns-soft dialog.vs[open],html.ns-soft dialog.vs[open]::backdrop{animation:no
 .mb-t{position:relative}.mb-t kbd{display:none;position:absolute;top:calc(100% + 4px);left:50%;transform:translateX(-50%);z-index:60;background:var(--surface);white-space:nowrap;box-shadow:0 4px 12px rgba(0,0,0,.3);pointer-events:none}
 .mb-t:is(:hover,:focus-visible) kbd{display:block}
 .mb-drop a span{flex:1 0 auto;overflow:visible;text-overflow:clip}
+/* every item has its icon: the Shortcuts panel and the toolbar too (owner 20 Nov) */
+.sc-panel .sc-i::before,.mb-t[data-ic]::before{content:"";flex:none;width:16px;height:16px;background:currentColor;opacity:.85;-webkit-mask:var(--i) center/contain no-repeat;mask:var(--i) center/contain no-repeat}
+.mb-t[data-ic]::before{width:14px;height:14px}
+[data-ic=flag]{--i:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M5 21V4M5 4h11l-2 4 2 4H5'/%3E%3C/svg%3E")}
+@media (min-width:1100px) and (pointer:fine){html.sc-on .sc-panel{width:262px}html.sc-on [data-pane]{margin-inline-end:268px}}   /* room for the icon and the full name */
