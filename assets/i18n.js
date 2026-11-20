@@ -2421,6 +2421,9 @@
     'tq.saved': "Saved {f}",
     'tq.noxl': "The Excel maker did not load. Check the internet and try again.",
     'app.tdsr': "TDS and TCS returns",
+    'app.gststk': "GST stock forms (ITC-01, ITC-03, GSTR-10)",
+    'app.gtds': "GST TDS deducted (GSTR-7)",
+    'app.isd': "ITC distribution (GSTR-6)",
     /* ERP round 2 (orders, r2-orders: orders.js, vdocs.js stock vouchers; App only, English) */
     'Doc.grn': 'Receipt note', 'Doc.rejin': 'Goods back from customer', 'Doc.rejout': 'Goods sent back to supplier', 'l.sdc': 'Supplier’s challan no.', 'desk.v_ord': 'Orders and pending goods', 'app.ord': 'Orders and pending goods',
     'or.title': 'Orders and pending goods', 'or.v_so': 'Sales orders pending', 'or.v_po': 'Purchase orders pending', 'or.v_dn': 'Challans not billed', 'or.v_grn': 'Receipt notes not billed', 'or.v_book': 'Order book', 'or.v_lc': 'Additional cost on purchases',

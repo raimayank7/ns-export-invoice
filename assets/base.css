@@ -513,3 +513,18 @@ html.gst-app main>.hero,html.gst-app main>.prose,html.gst-app main .prose,html.g
 .off-cap{margin:12px 0 2px;font-size:13px;font-weight:700;color:#111}.off-cap span{display:inline-block;min-width:34px}.off-ver p{margin:4px 0 8px}.off-sign{width:auto;min-width:60%}.off-note{color:#555;font-size:11px;margin-top:10px}
 details.off-work{margin:10px 0}details.off-work>summary{list-style:none;cursor:pointer;display:inline-flex}details.off-work>summary::-webkit-details-marker{display:none}
 @media print{html.gst-app body *{visibility:hidden}html.gst-app .off-sheet,html.gst-app .off-sheet *{visibility:visible}html.gst-app .off-sheet{position:absolute;left:0;top:0;border:0;max-width:none;width:100%}}
+/* GST templates: first-time guide (xlfill.js) and the line naming the template in use */
+dialog.xl-guide form{padding:20px 22px}dialog.xl-guide h3{margin:0 0 10px}dialog.xl-guide ol{padding-left:22px;margin:10px 0 14px}dialog.xl-guide li{margin:6px 0}dialog.xl-guide a{word-break:break-all}.xl-tpl{font-size:.85em;margin-left:6px}
+/* inside the App / Windows program (core.js appDoc): software screens, not a website */
+html.appdoc-cut main>:not(.appdoc-keep):not(dialog):not(.remind){display:none!important}
+html.appdoc .hero,html.appdoc .prose,html.appdoc .faq,html.appdoc .cards,html.appdoc .hub-link,html.appdoc .tool-top{display:none!important}
+html.appdoc .tool,html.appdoc .tool.wrap{max-width:none;padding-inline:16px}
+html.appdoc-pv .grid2,html.appdoc-pv .dc-grid{display:block!important}
+html.appdoc-pv .tabs{display:none!important}
+html.appdoc-pv .tool[data-tab=preview] .ed-col,html.appdoc-pv .tool:not([data-tab=preview]) .pv-col{display:none!important}
+html.appdoc-pv .tool[data-tab=preview] .pv-col{display:block!important;position:static;max-width:960px;margin:0 auto}
+html.appdoc-pv .dc-grid:not(.pv-on) .dc-res,html.appdoc-pv .dc-grid.pv-on .dc-in{display:none!important}
+html.appdoc-pv .dc-grid.pv-on .dc-res{max-width:960px;margin:0 auto}
+html.appdoc-pv .pv-on :not(:has([data-prl-sheet])):not([data-prl-sheet]):not([data-prl-sheet] *){display:none!important}html.appdoc-pv .pv-on :has([data-prl-sheet]){display:block!important}
+html.appdoc-pv .appdoc-bar{position:sticky;bottom:0;z-index:20;display:flex;gap:8px;flex-wrap:wrap;padding:10px 0;background:var(--bg);border-top:1px solid var(--line)}
+@media print{html.appdoc .appdoc-bar,html.appdoc .appdoc-pvb{display:none!important}}

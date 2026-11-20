@@ -18,7 +18,7 @@
   function ic(d) { return '<svg class="ic" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="' + d + '"/></svg>'; }
   /* icons for the App's own screens (the other side-menu icons are CSS masks in desk.css, by data-ic) */
   var SECIC = { home: 'home', sales: 'doc', money: 'money', dues: 'clock', buy: 'cart', parties: 'people', cash: 'bank', chq: 'cheque', books: 'book', khata: 'book', preg: 'cart', ebook: 'cart',
-    day: 'calendar', tools: 'layers', repeat: 'repeat', reports: 'chart', b2jv: 'journal', b2fa: 'asset', b2gd: 'box', b2make: 'factory', b2profit: 'trend', b2sman: 'badge', b2year: 'calendar', grp: 'layers', fin: 'scale', fam: 'factory', capl: 'coins', b2job: 'wrench', ledger: 'book', move: 'trend', st: 'list', stf: 'badge', acx: 'tax', tdsr: 'tax', features: 'toggle', bimp: 'bimport', itx: 'itax', msme: 'coins', limits: 'scale', trust: 'coins', warr: 'wrench', fees: 'cap', packs: 'pack', cadb: 'dash', cadoc: 'folder', cagst: 'tax', cacom: 'chat', saved: 'save',
+    day: 'calendar', tools: 'layers', repeat: 'repeat', reports: 'chart', b2jv: 'journal', b2fa: 'asset', b2gd: 'box', b2make: 'factory', b2profit: 'trend', b2sman: 'badge', b2year: 'calendar', grp: 'layers', fin: 'scale', fam: 'factory', capl: 'coins', b2job: 'wrench', ledger: 'book', move: 'trend', st: 'list', stf: 'badge', acx: 'tax', tdsr: 'tax', gststk: 'tax', gtds: 'tax', isd: 'tax', features: 'toggle', bimp: 'bimport', itx: 'itax', msme: 'coins', limits: 'scale', trust: 'coins', warr: 'wrench', fees: 'cap', packs: 'pack', cadb: 'dash', cadoc: 'folder', cagst: 'tax', cacom: 'chat', saved: 'save',
     entries: 'list', low: 'alert', biz: 'shop', party: 'people', pgroups: 'list', item: 'box', igroups: 'list', doc: 'doc', settings: 'set', backup: 'data', bin: 'trash', log: 'clock' };
   /* screen lists that stay inside the page (my., the stock site...) get the same icons */
   function secIcons() { $$('.hub-nav a[data-sec]:not([data-ic])').forEach(function (a) { var k = SECIC[a.getAttribute('data-sec')]; if (k) a.setAttribute('data-ic', k); }); }
@@ -153,7 +153,7 @@
       '§irep', 'stock', 'b2profit',
       '§payr', 'stf', { h: 'stf/year', t: 'v_bonus', ic: 'list' },
       '§xrep', { h: 'exc', t: 'v_exc', ic: 'flag' }, 'reports', 'cadb', 'ebook']],
-    ['tax', ['§gst', { site: 'gstr1' }, { site: 'gstr3b' }, { site: 'gstr2b' }, { site: 'cmp08' }, 'cagst',
+    ['tax', ['§gst', { site: 'gstr1' }, { site: 'gstr3b' }, { site: 'gstr2b' }, { site: 'cmp08' }, 'gststk', 'gtds', 'isd', 'cagst',
       '§itax', 'tdsr', { site: 'tds' }, 'acx', 'itx', 'limits',
       '§payst', { h: 'stf/pf', t: 'v_pf', ic: 'doc' }, { h: 'stf/esi', t: 'v_esi', ic: 'doc' }, { h: 'stf/tax', t: 'v_saltds', ic: 'doc' },
       '§audit', 'cacom', 'cadoc']],
@@ -741,7 +741,7 @@
     msme: ['MS'], limits: ['LH'], buy: ['PE', 'W'], parties: ['PA', 'Y'], grp: ['GR'], chq: ['CQ'], books: ['CB', 'K'], cash: ['CK'], repeat: ['RB'],
     reports: ['RE'], day: ['MD'], tools: ['AT', 'T'], fin: ['FA', 'A'], capl: ['CL'], b2jv: ['JE', 'J'], b2fa: ['FX'], b2gd: ['GD'], b2make: ['PR'],
     b2job: ['JW'], b2profit: ['PF'], b2sman: ['SM'], b2year: ['YE'], features: ['AF'], packs: ['TP'], trust: ['DM'], warr: ['WS'], cacom: ['CC'],
-    fees: ['FE'], stock: ['SK'], fam: ['MA'], cadb: ['CD'], cadoc: ['CA'], cagst: ['CG'], ebook: ['EB'], khata: ['KH'], preg: ['PG'], dlist: ['DR'], clist: ['CR'], ssum: ['SY'], psum: ['PY'], vreg: ['VR'], cbsum: ['CS'], mprint: ['MV'], coa: ['AC'], acl: ['LA'], masters: ['MT'], tdsr: ['TQ'], config: ['CF'],
+    fees: ['FE'], stock: ['SK'], fam: ['MA'], cadb: ['CD'], cadoc: ['CA'], cagst: ['CG'], ebook: ['EB'], khata: ['KH'], preg: ['PG'], dlist: ['DR'], clist: ['CR'], ssum: ['SY'], psum: ['PY'], vreg: ['VR'], cbsum: ['CS'], mprint: ['MV'], coa: ['AC'], acl: ['LA'], masters: ['MT'], tdsr: ['TQ'], gststk: ['GF'], gtds: ['GW'], isd: ['GJ'], config: ['CF'],
     gsum: ['GS'], gvch: ['GV'], os: ['OS'], exc: ['TC'], int: ['IR'], bw: ['BW'], ord: ['OU'],
     /* menu entries that had no key (owner 19 Nov 2026): masters, payroll parts and the final account views */
     'masters/led': ['LD'], 'masters/grp': ['AG'], 'masters/bank': ['BK'], 'masters/vt': ['VT'], 'masters/item': ['IM'], 'masters/igrp': ['IG'], 'masters/unit': ['UM'],
@@ -1280,7 +1280,7 @@
     var ok = NS.$('[data-wn-ok]', bar); ok.textContent = NS.t('wn.ok');
     ok.onclick = function () { put(NOTE); bar.remove(); };
     a.addEventListener('click', function () { put(NOTE); });
-    var at = document.getElementById('main') || document.body; at.insertBefore(bar, at.firstChild);
+    document.body.appendChild(bar);   /* owner 20 Nov: at the bottom, above the status bar (desk.css #ns-wnnote), not above the screen */
     document.addEventListener('ns-lang', function () {
       var l2 = NS.lang(); NS.$('span', bar).textContent = NS.t('wn.note') + ' ' + ((W.t && (W.t[l2] || W.t.en)) || '');
       a.textContent = NS.t('wn.see'); ok.textContent = NS.t('wn.ok');

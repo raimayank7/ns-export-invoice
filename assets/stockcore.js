@@ -424,6 +424,30 @@
     return r2(v);
   }
 
+  /* the stock in hand on `date`, item by item, traced to the lots it came from (FIFO: the newest lots are the ones still in hand), for the
+     GST stock forms (ITC-01, ITC-03, GSTR-10). Each row: { k, name, unit, qty, rate, value, src ('buy' purchase bill, 'make' made here,
+     other = opening stock or count), d (the bill or entry) }; a quantity no priced lot covers comes as src 'none' at the average cost. */
+  function lotsOn(docs, items, biz, date) {
+    var all = moves(docs, items, biz).filter(function (x) { return x.src !== 'move' && (!date || x.date <= date); }).sort(function (a, b) { return a.date < b.date ? -1 : a.date > b.date ? 1 : 0; });
+    var Q = {}, L = {}, N = {}, out = [];
+    all.forEach(function (x) {
+      Q[x.k] = r3((Q[x.k] || 0) + x.qty); N[x.k] = N[x.k] || { name: x.name, unit: x.unit };
+      var ls = L[x.k] || (L[x.k] = []);
+      if (x.rate != null && x.qty > 0) ls.push({ q: x.qty, rate: x.rate, src: x.src, d: x.d });
+      else if (x.src === 'pret') { var q = -x.qty; for (var i = ls.length - 1; i >= 0 && q > 0; i--) { var t = Math.min(q, ls[i].q); ls[i].q -= t; q -= t; } }
+    });
+    Object.keys(Q).forEach(function (k) {
+      var left = Q[k]; if (left <= 0.0005) return;
+      var ls = L[k] || [], tq = 0, tv = 0; ls.forEach(function (l) { tq += l.q; tv += l.q * l.rate; });
+      for (var j = ls.length - 1; j >= 0 && left > 0.0005; j--) {
+        var u = Math.min(left, ls[j].q); if (u <= 0) continue;
+        out.push({ k: k, name: N[k].name, unit: N[k].unit, qty: r3(u), rate: ls[j].rate, value: r2(u * ls[j].rate), src: ls[j].src, d: ls[j].d }); left = r3(left - u);
+      }
+      if (left > 0.0005) { var avg = tq ? tv / tq : 0; out.push({ k: k, name: N[k].name, unit: N[k].unit, qty: left, rate: r2(avg), value: r2(left * avg), src: 'none', d: null }); }
+    });
+    return out;
+  }
+
   /* one item's register: opening, rows with running balance, closing */
   function ledger(docs, items, biz, k, from, to, gd) {
     var open = 0, rows = [], bal;
@@ -743,7 +767,7 @@
   /* Stock ledger additions */
   API.itemGroupOf = itemGroupOf; API.groupTree = groupTree; API.VT = VT; API.ledgers = ledgers; API.ledgerTotals = ledgerTotals;
   /* stock valuation (FIFO or weighted average) */
-  API.valuation = valuation; API.fifoValue = fifoValue;
+  API.valuation = valuation; API.fifoValue = fifoValue; API.lotsOn = lotsOn;
   API.godownMatrix = godownMatrix; API.batchLedger = batchLedger; API.movement = movement;
   /* ERP round 1 */
   API.stockRole = stockRole; API.shortfall = shortfall; API.batchPick = batchPick; API.serialCheck = serialCheck; API.badUnits = badUnits; API.reorder = reorder; API.PO_OPEN = PO_OPEN; API.SO_OPEN = SO_OPEN;

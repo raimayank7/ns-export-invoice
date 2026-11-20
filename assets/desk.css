@@ -436,8 +436,8 @@ html.side-mini .side .side-v::after{display:none}
    the side menu and the Shortcuts panel are the way in; phones keep the full Dashboard */
 .dash-logo{display:none}
 @media (min-width:1100px) and (pointer:fine){
-  html.mb-on.sc-on [data-pane]>:not(.dash-logo):not(.sc-panel){display:none!important}
-  html.mb-on.sc-on .dash-logo{display:flex;align-items:center;justify-content:center;min-height:calc(100vh - var(--hd-h,64px) - var(--mb-h,74px) - var(--sbh,30px) - 40px)}
+  html.mb-on.sc-on:not(.app-frame-on) [data-pane]>:not(.dash-logo):not(.sc-panel){display:none!important}
+  html.mb-on.sc-on:not(.app-frame-on) .dash-logo{display:flex;align-items:center;justify-content:center;min-height:calc(100vh - var(--hd-h,64px) - var(--mb-h,74px) - var(--sbh,30px) - 40px)}
   .dash-logo .brand{display:flex;align-items:center;gap:22px;pointer-events:none}
   .dash-logo .mk{height:150px!important;width:auto}
   .dash-logo b.nsb{font-size:104px!important}
@@ -522,3 +522,6 @@ html.ns-soft dialog.vs[open],html.ns-soft dialog.vs[open]::backdrop{animation:no
 .mb-t[data-ic]::before{width:14px;height:14px}
 [data-ic=flag]{--i:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M5 21V4M5 4h11l-2 4 2 4H5'/%3E%3C/svg%3E")}
 @media (min-width:1100px) and (pointer:fine){html.sc-on .sc-panel{width:262px}html.sc-on [data-pane]{margin-inline-end:268px}}   /* room for the icon and the full name */
+/* What's new note: a slim bar at the bottom, above the status bar (phones: above the tab bar) */
+#ns-wnnote{position:fixed;inset-inline:12px;bottom:calc(var(--sbh,30px) + 8px);z-index:45;margin:0;border-radius:10px;box-shadow:0 6px 20px rgb(0 0 0 / .25)}#ns-wnnote .wrap{max-width:none;padding-block:6px}
+@media (max-width:760px){#ns-wnnote{bottom:calc(74px + env(safe-area-inset-bottom,0px))}}@media print{#ns-wnnote{display:none!important}}

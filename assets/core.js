@@ -305,6 +305,64 @@
   };
 
 
+  /* ---------- inside the App / Windows program (html.embed): software screens, not a website ----------
+     Every tool page drops its website parts (heading, intro, guides, FAQ). A maker with a form and a printed sheet (invoice-type
+     makers, slips, trade kits: .grid2 with .ed-col/.pv-col; the declarations maker: .dc-grid) shows the form full width and gets
+     Preview in its bottom bar: the sheet full screen, Edit (or Esc) back to the form. */
+  function appDoc() {
+    var H = document.documentElement; if (!H.classList.contains('embed') || H.classList.contains('appdoc')) return;
+    var tool = document.querySelector('#tool.tool') || document.querySelector('section.tool') || document.querySelector('.tool');
+    /* the part of the page that is the tool (makers' .tool, GST-style tools' .gt card, kits' .hub, a #...-tool box): kept; the
+       website parts around it are hidden. A page where none is found keeps everything except its heading and guides. */
+    var root = tool || document.querySelector('.gt') || document.querySelector('[id$="-tool"]') || document.querySelector('.hub'), main = document.querySelector('main');
+    if (root && main) { var k = root; while (k.parentNode && k.parentNode !== main) k = k.parentNode; if (k.parentNode === main) { k.classList.add('appdoc-keep'); H.classList.add('appdoc-cut'); } }
+    H.classList.add('appdoc');
+    /* a tool that draws its printed sheet into one box (the price list): Preview shows only that box */
+    if (!tool) {
+      if (!root) return;
+      var look = function () { var sh = root.querySelector('[data-prl-sheet]'); if (sh) { mo.disconnect(); sheetMode(root, sh); } };
+      var mo = new MutationObserver(look); mo.observe(root, { childList: true, subtree: true }); look(); setTimeout(function () { mo.disconnect(); }, 15000);
+      return;
+    }
+    var grid = tool.querySelector('.grid2'), dc = tool.querySelector('.dc-grid'); if (!grid && !dc) return;
+    H.classList.add('appdoc-pv');
+    var bar = tool.querySelector('.actions');
+    if (!bar) { bar = document.createElement('div'); bar.className = 'actions appdoc-bar'; tool.appendChild(bar); }
+    var pv = document.createElement('button'); pv.type = 'button'; pv.className = 'btn appdoc-pvb'; pv.setAttribute('data-ic', 'eye');
+    var save = bar.querySelector('[data-do="save"]'); save ? save.parentNode.insertBefore(pv, save.nextSibling) : bar.insertBefore(pv, bar.firstChild);
+    if (dc) {   /* the declaration's own Print button also in the bar */
+      var pr = tool.querySelector('[data-dc="print"]');
+      if (pr) { var p2 = document.createElement('button'); p2.type = 'button'; p2.className = 'btn primary'; p2.setAttribute('data-ic', 'print'); p2.textContent = pr.textContent; p2.addEventListener('click', function () { pr.click(); }); bar.insertBefore(p2, pv.nextSibling); }
+    }
+    var on = function () { return dc ? dc.classList.contains('pv-on') : tool.getAttribute('data-tab') === 'preview'; };
+    var label = function () { pv.textContent = NS.t(on() ? 'tab.edit' : 'tab.preview'); pv.setAttribute('data-ic', on() ? 'edit' : 'eye'); pv.setAttribute('aria-pressed', String(on())); };
+    var show = function (p) {
+      if (dc) dc.classList.toggle('pv-on', p);
+      else { var b = tool.querySelector('[data-tab-btn="' + (p ? 'preview' : 'edit') + '"]'); if (b) b.click(); else tool.setAttribute('data-tab', p ? 'preview' : 'edit'); }
+      label(); window.scrollTo(0, 0);
+    };
+    if (!dc && tool.getAttribute('data-tab') !== 'edit') show(false);
+    pv.addEventListener('click', function () { show(!on()); });
+    document.addEventListener('keydown', function (e) { if (e.key === 'Escape' && on() && !document.querySelector('dialog[open]')) { e.preventDefault(); e.stopImmediatePropagation(); show(false); } }, true);
+    document.addEventListener('ns-lang', label); label();
+  }
+  /* the tool redraws its own box, so the bar sits outside it and Preview is one class on the box: base.css then shows only the
+     sheet ([data-prl-sheet]) and the elements that hold it */
+  function sheetMode(root, sheet) {
+    var H = document.documentElement; H.classList.add('appdoc-pv');
+    var bar = document.createElement('div'); bar.className = 'actions appdoc-bar appdoc-keep'; root.parentNode.insertBefore(bar, root.nextSibling);
+    var pv = document.createElement('button'); pv.type = 'button'; pv.className = 'btn appdoc-pvb'; bar.appendChild(pv);
+    var p2 = document.createElement('button'); p2.type = 'button'; p2.className = 'btn primary'; p2.setAttribute('data-ic', 'print'); p2.textContent = NS.t('b.print');
+    p2.addEventListener('click', function () { var pr = root.querySelector('[data-prl-print]'); if (pr) pr.click(); }); bar.appendChild(p2);
+    var on = function () { return root.classList.contains('pv-on'); };
+    var label = function () { pv.textContent = NS.t(on() ? 'tab.edit' : 'tab.preview'); pv.setAttribute('data-ic', on() ? 'edit' : 'eye'); pv.setAttribute('aria-pressed', String(on())); };
+    var show = function (p) { root.classList.toggle('pv-on', p); label(); window.scrollTo(0, 0); };
+    pv.addEventListener('click', function () { show(!on()); });
+    document.addEventListener('keydown', function (e) { if (e.key === 'Escape' && on() && !document.querySelector('dialog[open]')) { e.preventDefault(); e.stopImmediatePropagation(); show(false); } }, true);
+    document.addEventListener('ns-lang', label); label();
+  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', function () { setTimeout(appDoc, 0); }); else setTimeout(appDoc, 0);
+
   /* ---------- backup, restore, reminder, auto-save folder ---------- */
   var BACKUP_NAME = 'nivesh-sahayak-backup';
   NS.backupData = function () {
@@ -386,6 +444,30 @@
     var u = APPURL; if (!u) { var a = document.querySelector('#ns-side a[data-ic=app]'); u = a ? a.href : 'https://app.niveshsahayak.in/'; }
     window.open(u + (u.indexOf('?') < 0 ? '?' : '&') + 'autosave=1', '_blank', 'noopener');
   };
+  /* the NSBiz folder inside the folder the customer chose (or that folder itself when it is already named NSBiz):
+     Data (the auto-save file), Backups (a dated copy a day, the last 30), GST Templates, GST Returns/<GSTIN>/<period> */
+  var NSB = 'NSBiz', KEEP_DAYS = 30;
+  function nsDir(h, path) {
+    var start = h.name === NSB ? Promise.resolve(h) : h.getDirectoryHandle(NSB, { create: true });
+    return (path || []).reduce(function (p, n) { return p.then(function (d) { return d.getDirectoryHandle(String(n).replace(/[\\\/:*?"<>|]+/g, '-'), { create: true }); }); }, start);
+  }
+  function nsPlace(h) { return h.name === NSB ? NSB : h.name + ' › ' + NSB; }
+  function putFile(dir, name, body) { return dir.getFileHandle(name, { create: true }).then(function (fh) { return fh.createWritable(); }).then(function (w) { return w.write(body).then(function () { return w.close(); }); }); }
+  function names(dir) {   /* the file names in a folder */
+    var it = dir.entries(), out = [];
+    var step = function () { return it.next().then(function (r) { if (r.done) return out; if (r.value[1].kind === 'file') out.push(r.value[0]); return step(); }); };
+    return step();
+  }
+  /* one dated copy a day in Backups (the day's latest), and only the newest KEEP_DAYS kept */
+  function dailyCopy(h, text) {
+    return nsDir(h, ['Backups']).then(function (d) {
+      return putFile(d, BACKUP_NAME + '-' + NS.today() + '.json', text).then(function () { return names(d); }).then(function (L) {
+        var old = L.filter(function (n) { return n.indexOf(BACKUP_NAME + '-') === 0 && /\.json$/.test(n); }).sort().reverse().slice(KEEP_DAYS);
+        return Promise.all(old.map(function (n) { return d.removeEntry(n).catch(function () {}); }));
+      });
+    }).catch(function () {});
+  }
+  NS.nsFolder = { dir: nsDir, place: nsPlace };
   /* the writer: the full backup file, the same as "Back up everything" */
   var AF = { t: 0, st: '', note: null };
   function afNote(v) { return window.NSStore ? NSStore.meta('autosave', v).catch(function () {}) : Promise.resolve(); }
@@ -396,13 +478,12 @@
         return h.queryPermission({ mode: 'readwrite' }).then(function (p) {
           if (p !== 'granted') return 'ask';
           return NSStore.exportAll().then(function (data) {
-            var b = { app: 'Nivesh Sahayak', kind: 'backup', version: 1, saved: new Date().toISOString(), data: data };
-            return h.getFileHandle(BACKUP_NAME + '.json', { create: true }).then(function (fh) { return fh.createWritable(); })
-              .then(function (w) { return w.write(JSON.stringify(b, null, 1)).then(function () { return w.close(); }); });
+            var b = { app: 'Nivesh Sahayak', kind: 'backup', version: 1, saved: new Date().toISOString(), data: data }, txt = JSON.stringify(b, null, 1);
+            return nsDir(h, ['Data']).then(function (d) { return putFile(d, BACKUP_NAME + '.json', txt); }).then(function () { return dailyCopy(h, txt); });
           }).then(function () {
             var now = Date.now();
             return fdbSet('last', now).then(function () { return NSStore.meta('lastBackup', now); })
-              .then(function () { return afNote({ name: h.name, last: now, host: location.hostname }); }).then(function () { return 'ok'; });
+              .then(function () { return afNote({ name: nsPlace(h) + ' › Data', last: now, host: location.hostname }); }).then(function () { return 'ok'; });
           });
         });
       }).catch(function () { return 'fail'; });
@@ -451,7 +532,7 @@
     return window.showDirectoryPicker({ id: 'ns-backup', mode: 'readwrite', startIn: 'documents' }).then(function (h) {
       /* the picker gave read and write: the file is written at once, so the person sees it is working */
       return folderSet(h).then(afWrite).then(function (st) {
-        if (st === 'ok') { folderOn(h.name); return h.name; }
+        if (st === 'ok') { folderOn(nsPlace(h) + ' › Data'); return h.name; }
         NS.toast(NS.t('oa.fail'), 'bad'); throw new Error(st);
       });
     });
@@ -462,7 +543,7 @@
       if (!h) return false;
       return h.requestPermission({ mode: 'readwrite' }).then(function (q) {
         if (q !== 'granted') return false;
-        return afWrite().then(function (st) { if (st === 'ok') folderOn(h.name); return st === 'ok'; });
+        return afWrite().then(function (st) { if (st === 'ok') folderOn(nsPlace(h) + ' › Data'); return st === 'ok'; });
       });
     }).catch(function () { return false; });
   };
@@ -480,7 +561,7 @@
         var h = r[0];
         if (!h) return NSStore.meta('autosave').then(function (n) { return { supported: true, on: false, here: true, other: n && n.host !== location.hostname ? n : null }; });
         return h.queryPermission({ mode: 'readwrite' }).then(function (p) {
-          return { supported: true, on: true, here: true, name: h.name, file: BACKUP_NAME + '.json', allowed: p === 'granted', last: r[1] || 0 };
+          return { supported: true, on: true, here: true, name: nsPlace(h) + ' › Data', file: BACKUP_NAME + '.json', allowed: p === 'granted', last: r[1] || 0 };
         });
       }).catch(function () { return { supported: true, on: false, here: true }; });
     }
@@ -488,6 +569,44 @@
       return n && n.name ? { supported: true, on: true, elsewhere: true, allowed: !n.paused, name: n.name, file: BACKUP_NAME + '.json', last: n.last || 0, host: n.host || '' } : { supported: true, on: false };
     }, function () { return { supported: true, on: false, home: false }; });
   };
+  /* other files in the NSBiz folder (GST templates, filled returns): the page that keeps the folder (the App, or My data) does the
+     writing; the GST screens open inside the App are pages of other sites, so they ask it by message.
+     NS.folderFile(op, path, name, data): 'put' (data = Blob) -> true | false; 'find' (data = pattern text) -> { name, blob } | null */
+  function fileHere(op, path, name, data) {
+    if (!NS.folderSupported()) return Promise.resolve(op === 'put' ? false : null);
+    return folderGet().then(function (h) {
+      if (!h) return op === 'put' ? false : null;
+      return h.queryPermission({ mode: 'readwrite' }).then(function (p) {
+        if (p !== 'granted') return op === 'put' ? false : null;
+        return nsDir(h, path).then(function (d) {
+          if (op === 'put') return putFile(d, name, data).then(function () { return true; });
+          var re = new RegExp(data, 'i');
+          return names(d).then(function (L) {
+            var hit = L.filter(function (n) { return re.test(n); }).sort().pop();
+            return hit ? d.getFileHandle(hit).then(function (fh) { return fh.getFile(); }).then(function (f) { return { name: hit, blob: f }; }) : null;
+          });
+        });
+      });
+    }).catch(function () { return op === 'put' ? false : null; });
+  }
+  var FF = { n: 0, wait: {} };
+  NS.folderFile = function (op, path, name, data) {
+    if (NS.folderHere()) return fileHere(op, path, name, data);
+    if (window.top === window) return Promise.resolve(op === 'put' ? false : null);
+    return new Promise(function (res) {
+      var id = 'f' + (++FF.n) + '-' + Date.now(), t = setTimeout(function () { delete FF.wait[id]; res(op === 'put' ? false : null); }, 6000);
+      FF.wait[id] = function (v) { clearTimeout(t); res(v); };
+      try { window.top.postMessage({ nsf: op, id: id, path: path, name: name, data: data }, '*'); } catch (e) { clearTimeout(t); res(op === 'put' ? false : null); }
+    });
+  };
+  window.addEventListener('message', function (e) {
+    var m = e.data; if (!m || typeof m !== 'object') return;
+    if (m.nsfr && FF.wait[m.nsfr]) { var f = FF.wait[m.nsfr]; delete FF.wait[m.nsfr]; f(m.res); return; }
+    if (!m.nsf || !m.id || !NS.folderHere() || !e.source) return;
+    var host = ''; try { host = new URL(e.origin).hostname; } catch (x) { return; }
+    if (!/(^|\.)niveshsahayak\.in$|^localhost$|^127\.0\.0\.1$/.test(host) || !/^(put|find)$/.test(m.nsf) || !Array.isArray(m.path)) return;
+    fileHere(m.nsf, m.path.slice(0, 4), String(m.name || ''), m.data).then(function (r) { e.source.postMessage({ nsfr: m.id, res: r }, e.origin); });
+  });
   /* after a save: the App or My data writes the file a moment later */
   NS.folderWrite = function () { afSoon(); return Promise.resolve(true); };
 
