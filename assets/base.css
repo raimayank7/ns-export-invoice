@@ -500,3 +500,6 @@ html.ns-soft #main>*,html.ns-soft [data-pane],html.ns-soft #main [data-pane]>*{a
 html.ns-soft{--font-head:var(--font);--mono:var(--font)}
 html.ns-soft :is(.n,.mono,.amt,kbd,code,td,th){font-variant-numeric:tabular-nums}
 html.ns-soft .sh:not(.stsheet){--font-head:'Plus Jakarta Sans',var(--font);--mono:'IBM Plex Mono',ui-monospace,Consolas,monospace}   /* the printed invoice designs keep their own fonts */
+/* drag a row into its place (NS.dragSort) */
+li.ds-row{cursor:grab}li.ds-drag{opacity:.45}li.ds-a{box-shadow:0 -3px 0 var(--accent,#0e746a)}li.ds-b{box-shadow:0 3px 0 var(--accent,#0e746a)}
+.set-wrap.set-win{align-items:stretch;overflow:hidden}.set-win .set-nav{position:static;overflow:auto;min-height:0}.set-win .set-body{overflow:auto;min-height:0;padding-inline-end:4px}

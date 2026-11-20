@@ -1264,6 +1264,26 @@
     new MutationObserver(function (ms) { ms.forEach(function (m) { if (m.type === 'characterData') add(m.target); else [].forEach.call(m.addedNodes, function (x) { add(x.nodeType === 3 ? x.parentNode : x); }); }); })
       .observe(document.body, { subtree: true, childList: true, characterData: true });
   };
+  /* drag a row of a list into its place (owner 20 Nov: moving one step per click "will take years"). list = <ol>/<ul>;
+     move(from, to) gets the row numbers; can(i) says which rows may move (default all). The row shows a line where it will land. */
+  NS.dragSort = function (list, move, can) {
+    if (!list || list._dragSort) return; list._dragSort = 1;
+    var rows = function () { return [].slice.call(list.children).filter(function (x) { return x.tagName === 'LI'; }); }, from = -1;
+    var mark = function () { rows().forEach(function (li, i) { var ok = !can || can(i); li.draggable = ok; li.classList.toggle('ds-row', ok); }); };
+    mark(); new MutationObserver(mark).observe(list, { childList: true });
+    var clear = function () { rows().forEach(function (x) { x.classList.remove('ds-drag', 'ds-a', 'ds-b'); }); };
+    list.addEventListener('dragstart', function (e) { var li = e.target.closest && e.target.closest('li'); if (!li || li.parentNode !== list) return; from = rows().indexOf(li); li.classList.add('ds-drag'); try { e.dataTransfer.effectAllowed = 'move'; e.dataTransfer.setData('text/plain', String(from)); } catch (er) {} });
+    list.addEventListener('dragover', function (e) {
+      if (from < 0) return; var li = e.target.closest && e.target.closest('li'); if (!li || li.parentNode !== list) return; var i = rows().indexOf(li); if (can && !can(i)) return;
+      e.preventDefault(); clear(); rows()[from].classList.add('ds-drag'); if (i !== from) { var r = li.getBoundingClientRect(); li.classList.add(e.clientY < r.top + r.height / 2 ? 'ds-a' : 'ds-b'); }
+    });
+    list.addEventListener('drop', function (e) {
+      var li = e.target.closest && e.target.closest('li'); if (from < 0 || !li) return; e.preventDefault();
+      var r = li.getBoundingClientRect(), to = rows().indexOf(li) + (e.clientY < r.top + r.height / 2 ? 0 : 1); if (from < to) to--;
+      var f = from; from = -1; clear(); if (to !== f && (!can || can(to))) move(f, to);
+    });
+    list.addEventListener('dragend', function () { from = -1; clear(); });
+  };
   NS.btnIcons = function () {
     if (!document.body) return;
     var todo = new Set(), queued = false;

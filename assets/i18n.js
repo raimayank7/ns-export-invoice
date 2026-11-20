@@ -521,7 +521,7 @@
     'app.cst': "Cheque status", 'app.con': "Cleared on", 'app.c_hand': "Received, not deposited",
     'app.c_dep': "Deposited, not cleared", 'app.c_iss': "Given, not cleared", 'app.c_ok': "Cleared",
     'app.c_bounce': "Bounced", 'app.photo': "Photo of the supplier's bill", 'app.photoh': "Take a photo with your phone or pick a picture. It is made smaller and saved with the bill in this browser.",
-    'app.photorm': "Remove photo", 'app.photobad': "This picture could not be read. Try another photo.", 'app.csv': "Download CSV (Excel)",
+    'app.photorm': "Remove photo", 'app.photobad': "This picture could not be read. Try another photo.", 'app.csv': "Download CSV",
     'app.preg': "Purchase register", 'app.pregh': "Every purchase bill, purchase return and self invoice between the two dates, with GST. Keep it with your GST records or give it to your accountant.", 'app.dn': "Debit note",
     'app.ebook': "Expense book", 'app.ebookh': "Your expenses by type and month for one financial year. GST you will claim as input tax credit is not counted as an expense.", 'app.yrtot': "Total this year",
     'app.thismon': "This month", 'app.topcat': "Biggest expense", 'app.yr': "Financial year",
@@ -2834,7 +2834,7 @@
     /* number series per document: My data › Settings cards and "Change number series" in each maker */
     'hub.g.inv': 'Invoice (Billing)', 'hub.g.docs': 'Number series of each document', 'hub.openmk': 'Open the maker', 'hub.pfx': 'Prefix', 'hub.nextno': 'Next number:',
     'hub.h.docs': 'Each document keeps its own number series. Digits and the financial year follow the invoice settings above (shop and trade sites always add the year). Leave a prefix empty for numbers without one. You can also change a prefix inside each maker, under its number box.',
-    'hub.grp.sell': 'Selling', 'hub.grp.buy': 'Buying', 'hub.grp.money': 'Money, rent and salary', 'hub.grp.trade': 'Shops and trades',
+    'hub.grp.acc': 'Accounting vouchers', 'hub.grp.ord': 'Orders and quotations', 'hub.grp.inv': 'Inventory vouchers', 'hub.grp.pay': 'Payroll and staff', 'hub.grp.oth': 'Other documents', 'hub.inapp': 'Made in the App', 'hub.v.contra': 'Contra voucher', 'hub.v.jv': 'Journal voucher', 'hub.v.oinc': 'Other income', 'hub.v.taxpay': 'Tax payment', 'hub.v.wo': 'Write-off', 'hub.v.pdd': 'Provision for doubtful debts', 'hub.v.make': 'Production (manufacturing)', 'hub.v.jobout': 'Job work sent out', 'hub.v.jobin': 'Job work received back', 'hub.v.sadv': 'Staff advance', 'hub.v.loan': 'Loan', 'hub.v.emi': 'Loan EMI', 'hub.grp.sell': 'Selling', 'hub.grp.buy': 'Buying', 'hub.grp.money': 'Money, rent and salary', 'hub.grp.trade': 'Shops and trades',
     'sr.btn': 'Change number series', 'sr.title': 'Number series: {doc}', 'sr.p': 'This prefix starts every new number of this document. It is saved in My data › Settings, so every tool and the App use it.',
     'sr.more': 'Digits and the financial year are set in', 'sr.save': 'Save the series', 'sr.saved': 'Number series saved.', 'sr.fail': 'It could not be saved. Please try again.',
     /* My data window as a settings panel (core.js openMyData) */

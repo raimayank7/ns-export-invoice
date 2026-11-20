@@ -504,3 +504,16 @@ html.ns-soft dialog.vs[open],html.ns-soft dialog.vs[open]::backdrop{animation:no
 .sc-mine .sc-list li.sc-drag{opacity:.45}.sc-mine .sc-list li.sc-over-a{box-shadow:0 -3px 0 var(--accent,#0e746a)}.sc-mine .sc-list li.sc-over-b{box-shadow:0 3px 0 var(--accent,#0e746a)}
 .sc-x{min-width:32px;font-size:1.1rem;line-height:1}
 @media (max-width:760px){.sc-cols{grid-template-columns:1fr}}
+.sc-dlg .sc-t{text-align:start}.sc-dlg .sc-list li{justify-content:flex-start}.sc-dlg .sc-help{padding-inline:24px}.sc-dlg .sc-cols{padding-inline:24px}
+.sc-dlg .sc-grip{flex:none;width:18px}
+/* hover never changes a row's size (owner 20 Nov video: the key, pin and Modify/List appeared on hover, squeezed the name onto two lines,
+   the rows jumped and the highlight left the mouse). The key and buttons always keep their place and only become visible. */
+.mb-drop{width:max-content;max-width:min(520px,90vw)}
+.mb-drop a span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.mb-drop kbd,.sc-panel kbd{display:inline-block!important;visibility:hidden}
+.mb-drop a:is(:hover,:focus,:focus-visible) kbd,.sc-panel .sc-i:is(:hover,:focus-visible) kbd{visibility:visible}
+.sc-panel .sc-i span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
+/* the toolbar buttons: the key shows as a small label under the button, outside the row, so nothing moves */
+.mb-t{position:relative}.mb-t kbd{display:none;position:absolute;top:calc(100% + 4px);left:50%;transform:translateX(-50%);z-index:60;background:var(--surface);white-space:nowrap;box-shadow:0 4px 12px rgba(0,0,0,.3);pointer-events:none}
+.mb-t:is(:hover,:focus-visible) kbd{display:block}
+.mb-drop a span{flex:1 0 auto;overflow:visible;text-overflow:clip}
