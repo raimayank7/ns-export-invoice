@@ -1024,5 +1024,23 @@
   API.setBillwise = setBillwise; API.isStrict = isStrict; API.obBills = obBills; API.ledSplit = ledSplit; API.setItemLedgers = setItemLedgers; API.ledAcct = ledAcct; API.ledName = ledName; API.baseAcct = baseAcct; API.genTotal = genTotal; API.genAcct = genAcct; API.interest = interest; API.creditCheck = creditCheck; API.openBillsAt = openBillsAt;   /* ERP Round 2, r2-billwise */
   API.stockRole = stockRole; API.STK_SALE = STK_SALE;
   API.stkAdj = stkAdj; API.adjItc = adjItc; API.ADJH = ADJH;   /* ERP round 2 (orders): I-7 */   /* ERP round 1: goods movement of a record (stockcore.js) */
+  /* SQLite Stage 3 (big data): while the App draws one screen, the same dues, balances and postings are asked for by several
+     panels; NSBooks.memo(true) keeps each answer for that drawing only (keyed by the very list of records and the other
+     arguments), memo(false) forgets them. Off by default, so nothing else changes. memoize(name, fn) wraps any such function. */
+  var MEMO = null;
+  function memoize(name, fn) {
+    return function (docs) {
+      if (!MEMO || !docs || typeof docs !== 'object') return fn.apply(this, arguments);
+      var m = MEMO.get(docs); if (!m) { m = {}; MEMO.set(docs, m); }
+      var a = [].slice.call(arguments, 1), k = name;
+      for (var i = 0; i < a.length; i++) { var v = a[i]; if (v && typeof v === 'object') { var ids = m.$ids || (m.$ids = []), at = ids.indexOf(v); if (at < 0) { ids.push(v); at = ids.length - 1; } k += '|#' + at; } else k += '|' + (v === undefined ? '~' : String(v)); }
+      if (Object.prototype.hasOwnProperty.call(m, k)) return m[k];
+      return (m[k] = fn.apply(this, arguments));
+    };
+  }
+  API.memo = function (on) { MEMO = on ? new WeakMap() : null; };
+  API.memoOn = function () { return !!MEMO; };
+  API.memoize = memoize;
+  ['inBooks', 'parties', 'accounts', 'bills'].forEach(function (n) { API[n] = memoize(n, API[n]); });
   if (typeof module !== 'undefined' && module.exports) module.exports = API; else G.NSBooks = API;
 })(this);

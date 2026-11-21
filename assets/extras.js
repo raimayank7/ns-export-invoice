@@ -32,7 +32,7 @@
   /* ---------- edit history ---------- */
   var ACT = { add: 'a_add', edit: 'a_edit', del: 'a_del', restore: 'a_restore', 'import': 'a_import' };
   /* ERP Round 1 (A-1..A-4, C-1, C-18): actions written by store.js; their words are 'au.<key>' */
-  var AU = { cancel: 'a_cancel', uncancel: 'a_uncancel', 'restore-file': 'a_restorefile', wipe: 'a_wipe', lock: 'a_lock', meta: 'a_meta', link: 'a_link', binempty: 'a_binempty' };
+  var AU = { cancel: 'a_cancel', uncancel: 'a_uncancel', 'restore-file': 'a_restorefile', 'restore-files': 'a_restorefile', wipe: 'a_wipe', lock: 'a_lock', meta: 'a_meta', link: 'a_link', binempty: 'a_binempty' };
   function actName(a) { return AU[a] ? NS.t('au.' + AU[a]) : tt(ACT[a] || 'a_edit'); }
   function extraHtml(e) {
     var o = [];
@@ -67,7 +67,7 @@
   /* the history list with the auditor's filters and "Check edit history" (all: the history, newest first; lk: the period lock date) */
   NS.logView = function (el, all, lk, full) {
     function draw(f) {
-      var rows = all.filter(function (e) { return !f || (f === 'lock' ? e.date && lk && e.date < lk && e.act !== 'add' : f === 'back' ? NS.backDated(e) : f === 'set' ? e.store === 'meta' || /^(lock|meta|wipe|binempty|restore-file|link)$/.test(e.act) : f === 'cx' ? /cancel/.test(e.act) : true); });
+      var rows = all.filter(function (e) { return !f || (f === 'lock' ? e.date && lk && e.date < lk && e.act !== 'add' : f === 'back' ? NS.backDated(e) : f === 'set' ? e.store === 'meta' || /^(lock|meta|wipe|binempty|restore-files?|link)$/.test(e.act) : f === 'cx' ? /cancel/.test(e.act) : true); });
       $('.au-list', el).innerHTML = NS.logHtml(rows.slice(0, 300), full) + (rows.length > 300 ? '<p class="soft">' + esc(tt('logmore', { n: rows.length })) + '</p>' : '');
     }
     el.innerHTML = (full ? '<div class="au-tools"><label>' + esc(NS.t('au.show')) + ' <select data-au-f><option value="">' + esc(NS.t('au.f_all')) + '</option>' +

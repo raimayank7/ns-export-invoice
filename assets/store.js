@@ -107,11 +107,12 @@
   }
 
   /* ---------- the shared data home ---------- */
+  var LONG = { snapshot: 1, restoreFiles: 1, deskBackup: 1 };   /* Stage 4: copying or bringing back the data files can take a while on big data */
   function send(op, args) {
     if (host) return host._send(op, args);
     return new Promise(function (res, rej) {
       var id = ++seq;
-      waiting[id] = { res: res, rej: rej, t: setTimeout(function () { delete waiting[id]; rej(new Error('The data home did not answer')); }, 15000) };
+      waiting[id] = { res: res, rej: rej, t: setTimeout(function () { delete waiting[id]; rej(new Error('The data home did not answer')); }, LONG[op] ? 600000 : 15000) };
       frame.contentWindow.postMessage({ ns: 'vault', id: id, op: op, args: args || {} }, VAULT_ORIGIN);
     });
   }
@@ -135,6 +136,8 @@
     if (!w) return;
     clearTimeout(w.t); delete waiting[e.data.id];
     e.data.ok ? w.res(e.data.result) : w.rej(new Error(e.data.result));
+    /* logins on (SQLite Stage 2) and this tab is not logged in, or the login ended: the page shows the login box (core.js) */
+    if (!e.data.ok && /^NSAUTH: (login|this browser)/.test(String(e.data.result || ''))) document.dispatchEvent(new CustomEvent('ns-login', { detail: String(e.data.result) }));
   });
 
   function ready() {
@@ -259,9 +262,13 @@
     return bizList().then(function (l) { var m = {}; l.forEach(function (b) { m[b.id] = b; }); (Array.isArray(rows) ? rows : [rows]).forEach(function (d) { showBiz(d, m); }); return rows; });
   }
   /* each App / My data start (cheap): vouchers with no bizId whose seller matches exactly one business get it; one history entry */
+  function unlinkedDocs() {
+    var all = function () { return call('list', { store: 'doc' }); };
+    return mode === 'vault' && !host ? send('noBiz', {}).then(function (l) { return Array.isArray(l) ? l : all(); }, all) : all();
+  }
   function linkBiz() {
     bizC = null;
-    return Promise.all([bizList(), call('list', { store: 'doc' })]).then(function (r) {
+    return Promise.all([bizList(), unlinkedDocs()]).then(function (r) {   /* SQLite Stage 3: only the vouchers with no business id are read */
       var l = r[0], fix = [];
       (r[1] || []).forEach(function (d) { if (d && !d.bizId && d.seller) { var id = bizIdFor(d.seller, l); if (id) { d.bizId = id; fix.push(d); } } });
       if (!fix.length) return 0;
@@ -275,7 +282,7 @@
   /* Masters > Businesses: the unlinked vouchers whose seller name is `name` (every unlinked one when name is null) go to business bizId; one history entry */
   function linkTo(name, bizId, why) {
     bizC = null;
-    return Promise.all([bizList(), call('list', { store: 'doc' })]).then(function (r) {
+    return Promise.all([bizList(), unlinkedDocs()]).then(function (r) {   /* SQLite Stage 3: only the vouchers with no business id are read */
       var b = r[0].filter(function (x) { return x && x.id === bizId; })[0]; if (!b) throw new Error('No such business');
       var fix = (r[1] || []).filter(function (d) { return d && !d.bizId && d.seller && (name == null || nk(d.seller.name) === nk(name)); });
       if (!fix.length) return 0;
@@ -337,9 +344,11 @@
   function sfErr() { var e = new Error(window.NS && NS.t ? NS.t('sfd.denied') : 'Staff cannot do this. Ask the owner.'); e.denied = true; return Promise.reject(e); }
 
   /* opts.act / opts.why: the history entry's action and reason (cancel, uncancel) */
+  var CYC = 'This opening balance is carried from a closed year. Reopen that year (Year end) to change it.';
   function put(store, obj, opts) {
     if (sfDenied('put', store, obj && obj.id)) return sfErr();
     if (store === 'log' || store === 'ver') return call('put', { store: store, value: obj });   /* the data home adds these, never overwrites */
+    if (store === 'doc' && obj && obj.cyc) return Promise.reject(new Error(CYC));   /* Stage 3: an opening balance carried from a closed year lives only on screen */
     if (!obj.id) obj.id = uid();
     var old, verId = '';
     opts = opts || {};
@@ -410,9 +419,11 @@
   function del(store, id, opts) {
     if (sfDenied('del', store, id)) return sfErr();
     if (store === 'log' || store === 'ver') return Promise.reject(new Error('The edit history cannot be changed or removed'));
+    if (store === 'doc' && /^cy-/.test(String(id))) return Promise.reject(new Error(CYC));
     if (!KEPT[store]) return call('del', { store: store, id: id });
     var hard = false, rec, verId = '';
-    return call('get', { store: store, id: id }).then(function (r) {
+    /* logins on: no right to delete = stop before the recycle-bin copy and the earlier version are written */
+    return send('can', { store: store, id: id, act: 'del' }).catch(function () { return true; }).then(function (ok) { if (ok === false) throw new Error('NSAUTH: no right to delete this'); return call('get', { store: store, id: id }); }).then(function (r) {
       rec = r;
       if (!rec) return;
       hard = !!(opts && opts.hard && rec.sample);
@@ -478,14 +489,48 @@
     ready: function () { return ready().then(function (m) { if (!purged) { purged = true; purgeBin(); } return m; }); },
     mode: function () { return host ? host.mode() : mode; },
     _call: call, _send: send,   /* for the App's own copies of the makers (see host above) */
+    /* user logins (SQLite Stage 2): authStatus, login, logout, setupOwner, recover, users, addUser, setUser, changePw, setRole */
+    auth: function (op, args) { return ready().then(function (m) { return m === 'vault' ? send(op, args || {}) : (op === 'authStatus' ? { on: false, local: true } : Promise.reject(new Error('The data home is not reachable'))); }); },
     list: function (store) { return call('list', { store: store }).then(function (r) { r = r || []; return store === 'doc' ? withBizNames(r) : r; }, function (e) { if (store === 'bin' || store === 'log' || store === 'ver') return []; throw e; }); },
     get: function (store, id) { return call('get', { store: store, id: id }).then(function (r) { return store === 'doc' && r ? withBizNames(r) : r; }); },
+    /* Stage 3: { n, oldest } of the saved documents without reading them (falls back to reading them) */
+    docStat: function (noRead) {
+      return ready().then(function (m) { return m === 'vault' ? send('docStat', {}).then(null, function () { return null; }) : null; }).then(function (s) {
+        if (s && typeof s.n === 'number') return s;
+        if (noRead) return null;   /* only asking for the stamp: no reading of every document */
+        return call('list', { store: 'doc' }).then(function (l) { l = l || []; return { n: l.length, oldest: l.length ? Math.min.apply(null, l.map(function (d) { return d.created || Date.now(); })) : 0 }; });
+      });
+    },
+    /* Stage 3: documents of the open years only; closed = { '<business id>': ['2024-25', ...] } -> { docs, cut } (no cut without SQLite) */
+    docsFrom: function (closed) {
+      return ready().then(function (m) {
+        var p = m === 'vault' ? send('docsFrom', { closed: closed || {} }).then(null, function (e) { if (/NSAUTH/.test(e && e.message)) throw e; return null; }) : Promise.resolve(null);
+        return p.then(function (r) { return r && Array.isArray(r.docs) ? r : call('list', { store: 'doc' }).then(function (l) { return { docs: l || [], cut: {} }; }); });
+      }).then(function (r) { return withBizNames(r.docs).then(function (d) { r.docs = d || []; return r; }); });
+    },
     put: put,
     del: del,
     restore: restore,
     binDays: BIN_DAYS,
     lockDate: lockDate,
     exportAll: function () { return call('exportAll'); },
+    /* Stage 4: the data files as they are (still locked once logins are on); null when the data is not on SQLite.
+       have = { name: stamp } of a copy already made (those come back { same: 1 }); auto = the daily copy (the Windows program makes
+       its own and answers { desk: true }) */
+    snapshot: function (have, auto) {
+      return ready().then(function (m) { return m === 'vault' ? send('snapshot', { have: have || {}, auto: !!auto }).then(null, function (e) { if (/NSAUTH|office network/.test(e && e.message)) throw e; return null; }) : null; });
+    },
+    /* Stage 4: bring back a backup's files (replaces everything on this device). note = which copy, for the edit history */
+    restoreFiles: function (files, note) {
+      return ready().then(function (m) {
+        if (m !== 'vault') throw new Error('The data home is not reachable');
+        return send('restoreFiles', { files: files, note: note || '' });
+      }).then(function (r) {
+        /* one edit-history entry in the brought-back data (skipped when it needs a login first) */
+        return whoName().then(function (w) { return logEntry({ id: uid(), at: Date.now(), who: w, site: location.hostname, act: 'restore-files', n: files.length, file: note || '', ch: [] }); }).catch(function () {}).then(function () { return r; });
+      });
+    },
+    deskBackup: function (op, args) { return ready().then(function (m) { return m === 'vault' ? send('deskBackup', Object.assign({ op: op }, args || {})) : null; }); },
     /* info: { file } the backup file's name, { wipe } "Delete everything". A restore never clears or overwrites the edit history (A-1);
        it adds one entry with the file name, how many records of each kind the file held and the file's SHA-256. */
     importAll: function (data, replace, info) {

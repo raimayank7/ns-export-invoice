@@ -576,11 +576,12 @@
   };
   function hideReminder() { var r = NS.$('#ns-remind'); if (r) r.hidden = true; }
   NS.checkReminder = function () {
-    return Promise.all([NSStore.meta('lastBackup'), NSStore.list('doc'), NSStore.meta('settings')]).then(function (r) {
-      var last = r[0] || 0, docs = r[1].length, every = r[2] && r[2].remindDays != null ? +r[2].remindDays : 7;
+    var stat = NSStore.docStat ? NSStore.docStat() : NSStore.list('doc').then(function (l) { return { n: l.length, oldest: l.length ? Math.min.apply(null, l.map(function (d) { return d.created || Date.now(); })) : 0 }; });   /* SQLite Stage 3: counted, not read */
+    return Promise.all([NSStore.meta('lastBackup'), stat, NSStore.meta('settings')]).then(function (r) {
+      var last = r[0] || 0, docs = r[1].n, every = r[2] && r[2].remindDays != null ? +r[2].remindDays : 7;
       if (!docs || !every) return;
       /* no backup yet: wait until there is something worth losing (3 documents, or work older than a day) */
-      var oldest = Math.min.apply(null, r[1].map(function (d) { return d.created || Date.now(); }));
+      var oldest = r[1].oldest || Date.now();
       if (!last && docs < 3 && Date.now() - oldest < 864e5) return;
       var days = (Date.now() - last) / 864e5;
       if (days < every) return;
@@ -655,6 +656,152 @@
     }).catch(function () {});
   }
   NS.nsFolder = { dir: nsDir, place: nsPlace };
+
+  /* ---------- Stage 4: copies of the data files, NSBiz › Backup › Mon … Sun (like Tally and Evershine) ----------
+     Each day of the week has its own folder, so the last seven days are always there; next week's Monday replaces this one.
+     The files are copied exactly as they are (still locked once logins are on), with backup-info.json listing each file, its
+     size and SHA-256, so a damaged or half-written copy is refused when it is brought back. A copy at most every 2 minutes;
+     files unchanged since this day's copy are skipped (closed years never change). The Windows program makes its own copies
+     (in Public Documents\NSBiz\Backup) and the snapshot answers { desk: true } there.
+     A whole set also goes into one file, NSBiz-backup-<date>.nsbiz: 'NSBIZBK1', a 4-byte header length, the header (JSON), then
+     the files one after the other. */
+  var DAYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'], INFO = 'backup-info.json', FC = { last: 0, t: 0, run: null }, FC_GAP = 120000, MAGIC = 'NSBIZBK1';
+  function hexOf(buf) { return Array.prototype.map.call(new Uint8Array(buf), function (x) { return ('0' + x.toString(16)).slice(-2); }).join(''); }
+  function sha256(u8) { return crypto.subtle.digest('SHA-256', u8).then(hexOf); }
+  function readJson(dir, name) { return dir.getFileHandle(name).then(function (fh) { return fh.getFile(); }).then(function (f) { return f.text(); }).then(JSON.parse).catch(function () { return null; }); }
+  function partsOf(name) { return String(name).split('/').filter(Boolean); }
+  function dirAt(dir, parts, create) { return parts.reduce(function (p, n) { return p.then(function (d) { return d.getDirectoryHandle(n, { create: !!create }); }); }, Promise.resolve(dir)); }
+  function writeAt(dir, name, bytes) { var p = partsOf(name); return dirAt(dir, p.slice(0, -1), true).then(function (d) { return putFile(d, p[p.length - 1], bytes); }); }
+  function readAt(dir, name) { var p = partsOf(name); return dirAt(dir, p.slice(0, -1)).then(function (d) { return d.getFileHandle(p[p.length - 1]); }).then(function (fh) { return fh.getFile(); }).then(function (f) { return f.arrayBuffer(); }).then(function (b) { return new Uint8Array(b); }); }
+  /* every file under a folder, as '/NSBiz01/2026-27.sqlite' */
+  function allFiles(dir, pre) {
+    var it = dir.entries(), out = [];
+    var step = function () {
+      return it.next().then(function (r) {
+        if (r.done) return out;
+        var n = r.value[0], h = r.value[1];
+        if (h.kind === 'file') { out.push((pre || '') + '/' + n); return step(); }
+        return allFiles(h, (pre || '') + '/' + n).then(function (l) { out = out.concat(l); return step(); });
+      });
+    };
+    return step();
+  }
+  function removeAt(dir, name) { var p = partsOf(name); return dirAt(dir, p.slice(0, -1)).then(function (d) { return d.removeEntry(p[p.length - 1]); }).catch(function () {}); }
+  /* one copy into Backup/<folder>; force = now, whatever the time since the last one; full = every file again */
+  function copyInto(h, folder, full) {
+    return nsDir(h, ['Backup', folder]).then(function (dir) {
+      return readJson(dir, INFO).then(function (old) {
+        var today = NS.today(), have = {}, was = {};
+        if (old && !full && old.date === today) (old.files || []).forEach(function (f) { have[f.name] = f.stamp; was[f.name] = f; });
+        return NSStore.snapshot(have, true).then(function (snap) {
+          if (!snap || snap.desk || !snap.files) return snap && snap.desk ? 'desk' : 'none';
+          var list = [];
+          return snap.files.reduce(function (p, f) {
+            return p.then(function () {
+              if (f.same && was[f.name]) { list.push(was[f.name]); return; }
+              return sha256(f.bytes).then(function (s) { return writeAt(dir, f.name, f.bytes).then(function () { list.push({ name: f.name, stamp: f.stamp || '', size: f.bytes.length, sha256: s }); }); });
+            });
+          }, Promise.resolve()).then(function () {
+            var keep = {}; list.forEach(function (f) { keep[f.name] = 1; }); keep['/' + INFO] = 1;
+            return allFiles(dir).then(function (L) { return Promise.all(L.filter(function (n) { return !keep[n]; }).map(function (n) { return removeAt(dir, n); })); });
+          }).then(function () {
+            var head = { app: 'NSBiz', kind: 'nsbiz-files', version: 1, saved: new Date(snap.at).toISOString(), at: snap.at, date: today, folder: folder, logins: !!snap.logins, cipher: !!snap.cipher, files: list };
+            return putFile(dir, INFO, JSON.stringify(head, null, 1)).then(function () { return 'ok'; });   /* written last: a half-written copy has no new list */
+          });
+        });
+      });
+    });
+  }
+  function fileCopy(h, force) {
+    if (!window.NSStore || !NSStore.snapshot) return Promise.resolve('none');
+    var wait = FC_GAP - (Date.now() - FC.last);
+    if (!force && wait > 0) {   /* a copy was made a moment ago: one more after the gap, with whatever changed meanwhile */
+      clearTimeout(FC.t); FC.t = setTimeout(function () { fileCopy(h, true).catch(function () {}); }, wait);
+      return Promise.resolve('wait');
+    }
+    if (FC.run) return FC.run;
+    FC.run = copyInto(h, DAYS[new Date().getDay()], false).then(function (st) { FC.last = Date.now(); FC.run = null; return st; }, function (e) { FC.run = null; throw e; });
+    return FC.run;
+  }
+  /* a set read back (from a day folder or a .nsbiz file) is checked file by file against its list */
+  function verify(head, files) {
+    if (!head || head.kind !== 'nsbiz-files' || !Array.isArray(head.files)) return Promise.reject(new Error(NS.t('fb.e_notns')));
+    return files.reduce(function (p, f, i) {
+      return p.then(function () {
+        var want = head.files[i];
+        if (!f.bytes || f.bytes.length !== want.size) throw new Error(NS.t('fb.e_damaged', { f: want.name }));
+        return sha256(f.bytes).then(function (s) { if (s !== want.sha256) throw new Error(NS.t('fb.e_mismatch', { f: want.name })); });
+      });
+    }, Promise.resolve()).then(function () { return { head: head, files: files }; });
+  }
+  NS.fileBackup = {
+    days: DAYS,
+    /* a copy now (into today's folder), or into a named folder ('Before restore') with every file */
+    copy: function (folder) { return folderGet().then(function (h) { if (!h) return 'off'; return h.queryPermission({ mode: 'readwrite' }).then(function (p) { if (p !== 'granted') return 'ask'; return folder ? copyInto(h, folder, true) : fileCopy(h, true); }); }); },
+    /* the copies in the folder: [{ folder, date, at, logins, size, n }] */
+    list: function () {
+      return folderGet().then(function (h) {
+        if (!h) return null;
+        return h.queryPermission({ mode: 'readwrite' }).then(function (p) {
+          if (p !== 'granted') return null;
+          return Promise.all(DAYS.concat(['Before restore']).map(function (d) {
+            return nsDir(h, ['Backup']).then(function (b) { return b.getDirectoryHandle(d); }).then(function (dir) { return readJson(dir, INFO); }).then(function (x) {
+              return x && x.kind === 'nsbiz-files' ? { folder: d, date: x.date, at: x.at, logins: x.logins, n: x.files.length, size: x.files.reduce(function (s, f) { return s + (f.size || 0); }, 0) } : null;
+            }).catch(function () { return null; });
+          }));
+        });
+      }).then(function (l) { return l && l.filter(Boolean).sort(function (a, b) { return b.at - a.at; }); });
+    },
+    /* read a copy back: from Backup/<folder> of the chosen folder, or from a folder the person picks (a copy on a pen drive) */
+    readFolder: function (folder, dirHandle) {
+      var get = dirHandle ? Promise.resolve(dirHandle) : folderGet().then(function (h) { return nsDir(h, ['Backup', folder]); });
+      return get.then(function (dir) {
+        return readJson(dir, INFO).then(function (head) {
+          if (!head || head.kind !== 'nsbiz-files') throw new Error(NS.t('fb.e_nofolder'));
+          return Promise.all(head.files.map(function (f) { return readAt(dir, f.name).then(function (b) { return { name: f.name, bytes: b }; }, function () { return { name: f.name, bytes: null }; }); }))
+            .then(function (files) { return verify(head, files); });
+        });
+      });
+    },
+    /* one .nsbiz file of the whole data (every file, still locked when logins are on) */
+    pack: function () {
+      return NSStore.snapshot({}, false).then(function (snap) {
+        if (!snap || !snap.files) throw new Error(NS.t('fb.e_notdata'));
+        return Promise.all(snap.files.map(function (f) { return sha256(f.bytes); })).then(function (shas) {
+          var head = { app: 'NSBiz', kind: 'nsbiz-files', version: 1, saved: new Date(snap.at).toISOString(), at: snap.at, date: NS.today(), logins: !!snap.logins, cipher: !!snap.cipher,
+            files: snap.files.map(function (f, i) { return { name: f.name, stamp: f.stamp || '', size: f.bytes.length, sha256: shas[i] }; }) };
+          var hb = new TextEncoder().encode(JSON.stringify(head)), len = new Uint8Array(4);
+          new DataView(len.buffer).setUint32(0, hb.length, true);
+          return new Blob([MAGIC, len, hb].concat(snap.files.map(function (f) { return f.bytes; })), { type: 'application/octet-stream' });
+        });
+      });
+    },
+    unpack: function (file) {
+      return file.arrayBuffer().then(function (buf) {
+        var u = new Uint8Array(buf);
+        if (u.length < 12 || new TextDecoder().decode(u.subarray(0, 8)) !== MAGIC) throw new Error(NS.t('fb.e_notfile'));
+        var n = new DataView(buf, 8, 4).getUint32(0, true), head;
+        try { head = JSON.parse(new TextDecoder().decode(u.subarray(12, 12 + n))); } catch (e) { throw new Error(NS.t('fb.e_filedamaged')); }
+        var at = 12 + n;
+        var files = (head.files || []).map(function (f) { var b = u.subarray(at, at + f.size); at += f.size; return { name: f.name, bytes: b.length === f.size ? b.slice() : null }; });
+        return verify(head, files);
+      });
+    },
+    /* bring a set back: the current data is saved first (into Backup › Before restore, or as a downloaded file), then replaced */
+    restore: function (set, note) {
+      /* the Windows program saves Backup › Before restore by itself when it brings a copy back */
+      var desk = NSStore.deskBackup ? NSStore.deskBackup('bkDays').catch(function () { return null; }) : Promise.resolve(null);
+      var save = desk.then(function (d) { return d ? 'desk' : NS.fileBackup.copy('Before restore'); }).then(function (st) {
+        if (st === 'ok' || st === 'desk') return st;
+        return NS.fileBackup.pack().then(function (blob) {
+          var a = NS.el('a', { href: URL.createObjectURL(blob), download: 'NSBiz-before-restore-' + NS.today() + '.nsbiz' });
+          document.body.appendChild(a); a.click(); a.remove(); setTimeout(function () { URL.revokeObjectURL(a.href); }, 4000);
+          return 'download';
+        });
+      });
+      return save.then(function (how) { return NSStore.restoreFiles(set.files, note).then(function (r) { r.saved = how; return r; }); });
+    }
+  };
   /* the writer: the full backup file, the same as "Back up everything" */
   var AF = { t: 0, st: '', note: null };
   function afNote(v) { return window.NSStore ? NSStore.meta('autosave', v).catch(function () {}) : Promise.resolve(); }
@@ -664,10 +811,14 @@
         if (!h) return 'off';
         return h.queryPermission({ mode: 'readwrite' }).then(function (p) {
           if (p !== 'granted') return 'ask';
-          return NSStore.exportAll().then(function (data) {
-            var b = { app: 'Nivesh Sahayak', kind: 'backup', version: 1, saved: new Date().toISOString(), data: data }, txt = JSON.stringify(b, null, 1);
-            return nsDir(h, ['Data']).then(function (d) { return putFile(d, BACKUP_NAME + '.json', txt); }).then(function () { return dailyCopy(h, txt); });
-          }).then(function () {
+          /* Stage 4: once logins are on no readable file is written (anyone could open it); the locked data files are copied instead */
+          return NSStore.auth('authStatus').then(function (s) { return !!(s && s.on); }, function () { return false; }).then(function (locked) {
+            if (locked) return null;
+            return NSStore.exportAll().then(function (data) {
+              var b = { app: 'Nivesh Sahayak', kind: 'backup', version: 1, saved: new Date().toISOString(), data: data }, txt = JSON.stringify(b, null, 1);
+              return nsDir(h, ['Data']).then(function (d) { return putFile(d, BACKUP_NAME + '.json', txt); }).then(function () { return dailyCopy(h, txt); });
+            });
+          }).then(function () { return fileCopy(h).catch(function () {}); }).then(function () {
             var now = Date.now();
             return fdbSet('last', now).then(function () { return NSStore.meta('lastBackup', now); })
               .then(function () { return afNote({ name: nsPlace(h) + ' › Data', last: now, host: location.hostname }); }).then(function () { return 'ok'; });

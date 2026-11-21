@@ -374,7 +374,7 @@
 
   /* summary of every tracked item for a period: opening, in, out, adjust, closing, average cost, value, low */
   function summary(docs, items, biz, from, to, gd, how) {
-    var all = moves(docs, items, biz), T = tracked(all, items), S = {}, CQ = {};
+    var all = API.moves(docs, items, biz), T = tracked(all, items), S = {}, CQ = {};
     var mv = all.filter(function (x) { return gdOk(x, gd); });
     /* average cost is the business's own, whichever godown the goods sit in */
     all.forEach(function (x) { if (to && x.date > to || x.rate == null || x.qty <= 0) return; var c = CQ[x.k] = CQ[x.k] || [0, 0]; c[0] += x.qty; c[1] += x.qty * x.rate; });
@@ -772,5 +772,8 @@
   /* ERP round 1 */
   API.stockRole = stockRole; API.shortfall = shortfall; API.batchPick = batchPick; API.serialCheck = serialCheck; API.badUnits = badUnits; API.reorder = reorder; API.PO_OPEN = PO_OPEN; API.SO_OPEN = SO_OPEN;
   API.adjValue = adjValue; API.LC_WORDS = LC_WORDS; API.landed = landed; API.promised = promised;   /* ERP round 2 (orders): I-7, I-14 */
+  var BK = typeof NSBooks !== 'undefined' ? NSBooks : G.NSBooks;   /* SQLite Stage 3: one answer per screen drawing (books.js memo) */
+  if (BK && BK.memoize) { API.moves = memoize0('moves', API.moves); API.summary = memoize0('summary', API.summary); }
+  function memoize0(n, f) { var w = BK.memoize('stk.' + n, f); return function () { return w.apply(this, arguments); }; }
   if (typeof module !== 'undefined' && module.exports) module.exports = API; else G.NSStock = API;
 })(this);
