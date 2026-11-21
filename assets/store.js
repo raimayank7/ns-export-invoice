@@ -108,11 +108,19 @@
 
   /* ---------- the shared data home ---------- */
   var LONG = { snapshot: 1, restoreFiles: 1, deskBackup: 1 };   /* Stage 4: copying or bringing back the data files can take a while on big data */
+  /* a save on a busy computer can take longer than 15 s and still go through: giving up early showed 'Could not save' (and the screen kept the bill that was in fact saved) while the data was written (real-use test R-001, R-005, R-024) */
+  var SLOWW = { put: 1, del: 1, clear: 1, importAll: 1 };
+  /* a read that gets no answer (a busy computer, a page that was reloaded a moment ago) is asked once more before it fails: reading changes nothing, and the App then does not stay empty (R-001) */
+  var READ = { list: 1, get: 1 };
   function send(op, args) {
+    var first = send1(op, args);
+    return READ[op] ? first.catch(function (e) { return e && /did not answer/.test(e.message) ? send1(op, args) : Promise.reject(e); }) : first;
+  }
+  function send1(op, args) {
     if (host) return host._send(op, args);
     return new Promise(function (res, rej) {
       var id = ++seq;
-      waiting[id] = { res: res, rej: rej, t: setTimeout(function () { delete waiting[id]; rej(new Error('The data home did not answer')); }, LONG[op] ? 600000 : 15000) };
+      waiting[id] = { res: res, rej: rej, t: setTimeout(function () { delete waiting[id]; rej(new Error('The data home did not answer')); }, LONG[op] ? 600000 : SLOWW[op] ? 60000 : 15000) };
       frame.contentWindow.postMessage({ ns: 'vault', id: id, op: op, args: args || {} }, VAULT_ORIGIN);
     });
   }

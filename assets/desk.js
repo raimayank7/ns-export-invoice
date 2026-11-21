@@ -150,7 +150,7 @@
     ['reports', ['§final', { fin: 'bs', t: 'v_bs', ic: 'scale' }, { fin: 'pl', t: 'v_pl', ic: 'chart' }, { fin: 'tb', t: 'v_tb', ic: 'list' }, 'fin',
       '§books', 'books', { h: 'ssum', t: 'v_ssum', ic: 'chart' }, { h: 'psum', t: 'v_psum', ic: 'chart' }, { h: 'vreg', t: 'v_vreg', ic: 'list' }, { h: 'cbsum', t: 'v_cbsum', ic: 'bank' }, 'grp',
       '§os', { h: 'os', t: 'v_os', ic: 'clock' }, 'dues', { h: 'dlist', t: 'v_dlist', ic: 'people' }, { h: 'clist', t: 'v_clist', ic: 'people' }, 'parties', { h: 'int', t: 'v_int', ic: 'clock' }, 'msme',
-      '§irep', 'stock', 'b2profit',
+      '§irep', { site: 'stock' }, 'b2profit',
       '§payr', 'stf', { h: 'stf/year', t: 'v_bonus', ic: 'list' },
       '§xrep', 'charts', { h: 'exc', t: 'v_exc', ic: 'flag' }, 'reports', 'cadb', 'ebook']],
     ['tax', ['§gst', { site: 'gstr1' }, { site: 'gstr3b' }, { site: 'gstr2b' }, { site: 'cmp08' }, 'gststk', 'gtds', 'isd', 'cagst',
@@ -610,6 +610,19 @@
       }
       return (made[k] = $('.sg-b', g));
     }
+    /* a sub-heading whose entries are all switched off for this business is hidden too (R-007: Inventory Reports, Trade Registers and Audit stood empty) */
+    function tidySubs() {
+      $$('.sg-b', side || document).forEach(function (b) {
+        var kids = Array.prototype.slice.call(b.children), i, j, any;
+        for (i = 0; i < kids.length; i++) {
+          if (!kids[i].classList.contains('sg-sub')) continue;
+          any = false;
+          for (j = i + 1; j < kids.length && !kids[j].classList.contains('sg-sub'); j++) if (!kids[j].hidden && getComputedStyle(kids[j]).display !== 'none') { any = true; break; }
+          kids[i].hidden = !any;
+        }
+      });
+    }
+    NS.sideTidy = tidySubs;
     function sort() {
       SG.forEach(function (g) {
         var b = box(g[0]), sub = '';
@@ -634,6 +647,7 @@
       if (stfOn) $$('a[data-hsec^="stf/"]', side || document).forEach(function (a) { a.hidden = stfOn.indexOf(a.getAttribute('data-hsec').slice(4)) < 0; });
       $$('a[data-oract]', side || document).forEach(function (a) { a.hidden = !(window.NSApp && NSApp.orAct); });
       Object.keys(made).forEach(function (k) { if (k !== 'top') abcSort(made[k]); });
+      tidySubs();
       gwSoon(); setTimeout(sbPath, 50);
       var cur = $('a[aria-current="page"]', hub); if (cur) { var g = cur.closest('.sg'); if (g && g.classList.contains('shut')) { g.classList.remove('shut'); var h = $('.sg-h', g); if (h) h.setAttribute('aria-expanded', 'true'); } }
     }

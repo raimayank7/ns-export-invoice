@@ -38,7 +38,7 @@
   NS.stockCfg = function (seller) {
     var c = NS.cfgFor ? NS.cfgFor(SET, seller || {}, BIZ) : SET;
     var s = Object.assign({}, c && c.stock || {});
-    if (!s.neg) s.neg = 'allow';
+    if (!s.neg) s.neg = 'warn';
     if (!s.expired) s.expired = /pharmacy/.test(host()) ? 'block' : 'warn';
     return s;
   };
