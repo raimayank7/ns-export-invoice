@@ -10364,3 +10364,7 @@ NS.addLang("ta", {
   "bw.mnarr": "Narration (not printed)",
   "bw.mnarrh": "A line for your books: shown in the NSBiz ledgers, day book and Tally, never on the document."
 });
+/* Big lists (bigtable.js): the box under a column title of a long list */
+NS.addLang("ta", {
+  "bt.filter": "Filter"
+});

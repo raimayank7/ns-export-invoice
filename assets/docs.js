@@ -303,6 +303,7 @@
 
       '<fieldset class="card"><legend>' + esc(t('lg.items')) + '</legend><div id="items" class="items"></div>' +
         '<button type="button" class="btn" id="add-item">' + esc(t('add.item')) + '</button>' +
+        '<button type="button" class="btn" id="scan-item" data-ic="camera" title="Scan the item\'s barcode with the camera">Scan barcode</button>' +
         '<datalist id="dl-units">' + UNITS.map(function (u) { return '<option value="' + u + '">'; }).join('') + '</datalist>' +
         '<datalist id="dl-rates">' + rateOpts(doc.date) + '</datalist>' +
         '<h3 class="chg-h">' + esc(t('b1.charges')) + '</h3><div id="chg-list"></div><button type="button" class="btn sm" id="add-chg">+ ' + esc(t('b1.addchg')) + '</button>' +
@@ -343,6 +344,24 @@
     $$('select[id$="state"]', ed).forEach(function (s) { s.innerHTML = stateOptions(t('choose.state')); });
     $('#d-pos', ed).innerHTML = stateOptions(t('same.buyer'));
     $('#add-item', ed).addEventListener('click', function () { doc.items.push({ desc: '', hsn: '', qty: 1, unit: dset().unit || 'Nos', rate: '', disc: '', gst: doc.items.length ? doc.items[doc.items.length - 1].gst : 18 }); renderItems(); var d = $$('#items .it-desc', ed); d[d.length - 1].focus(); });
+    /* camera scan: the item whose code (barcode) matches is added, or its quantity goes up by one when it is already on the bill */
+    var sb = $('#scan-item', ed); if (sb) sb.addEventListener('click', function () {
+      NS.scanCode('Scan the item').then(function (code) {
+        if (!code) return;
+        return NSStore.list('item').then(function (l) {
+          var c = String(code).trim(), m = NS.active(NS.forBiz(l, doc.seller)).filter(function (x) { return x && (String(x.code || '').trim() === c || String(x.barcode || '').trim() === c); })[0];
+          if (!m) { NS.toast('No item has the code ' + c + '. Add it in My data › Items (Code / barcode).', 'bad'); return; }
+          var have = doc.items.filter(function (it) { return it.desc === m.desc; })[0];
+          if (have) have.qty = (num(have.qty) || 0) + 1;
+          else {
+            var it = { desc: m.desc, hsn: m.hsn || '', qty: 1, unit: m.unit || dset().unit || 'Nos', rate: '', disc: '', gst: m.gst != null && m.gst !== '' ? +m.gst : 18 }, rt = rateFor(m); if (rt != null && rt !== '') it.rate = rt;
+            if (window.NSGst && NSGst.hist(m).length) NSGst.fillLine(it, m, doc.date, type === 'self' || doc.side === 'purchase');
+            var last = doc.items[doc.items.length - 1]; if (last && !last.desc && !num(last.rate)) doc.items[doc.items.length - 1] = it; else doc.items.push(it);
+          }
+          renderItems(); draw(); saveDraft(); NS.toast(m.desc + (have ? ': quantity ' + have.qty : ' added'));
+        });
+      });
+    });
     $('#add-chg', ed).addEventListener('click', function () { doc.charges = doc.charges || []; doc.charges.push({ name: '', amt: '', gst: 'main' }); renderCharges(); var n = $$('#chg-list [data-ck=name]', ed); n[n.length - 1].focus(); });
     $$('[data-accent]', ed).forEach(function (b) { b.addEventListener('click', function () { doc.accent = b.getAttribute('data-accent'); fillForm(true); draw(); saveDraft(); }); });
     ['logo', 'sign'].forEach(function (k) {
@@ -706,6 +725,51 @@
     var c = d.tcs || {}, sec = String(c.sec || '').split(':')[0].trim(), pan = NSBooks.tcsPan(d), r = NSBooks.tcsRate(d);
     return (sec ? P.tcsu + ' ' + esc(sec) : P.tcs) + ' @ ' + esc(r) + '%' + (pan ? ' (buyer PAN ' + esc(pan) + ')' : c.nopanOk ? '' : ' (no PAN, s.397(2))');
   }
+  /* the bill on a receipt printer (thermal paper 58 / 80 mm), same content as the thermal layout on screen */
+  function plain(h) { var x = document.createElement('div'); x.innerHTML = String(h == null ? '' : h); return (x.textContent || '').replace(/\s+/g, ' ').trim(); }
+  function rpBuild(d) {
+    var tt = totals(d), tax = taxOn(d), s = d.seller || {}, b = d.buyer || {}, n = d.paper === 'th58' ? 32 : 48, m = function (v) { return NS.money(v, false); };
+    return function (e) {
+      e.align('center').bold(true).size(1, 2).line(plain(s.name || '')).size(1, 1).bold(false);
+      String(s.addr || '').split(/\n/).forEach(function (l) { if (l.trim()) e.line(l.trim()); });
+      if ([s.city, s.pin].filter(Boolean).length) e.line([s.city, s.pin].filter(Boolean).join(' - '));
+      if (s.gstin && !noGstin(d)) e.line('GSTIN: ' + s.gstin); if (s.phone) e.line('Phone: ' + s.phone);
+      e.rule().bold(true).line(plain(title(d))).bold(false).align('left');
+      metaPairs(d, tax).forEach(function (p) { var v = plain(p[1]); if (v) e.line(plain(p[0]) + ': ' + v); });
+      if (b.name) e.line('Bill to: ' + b.name); if (b.gstin) e.line('GSTIN: ' + b.gstin);
+      e.rule();
+      var w2 = 12, w1 = n - w2 - 1;
+      tt.rows.forEach(function (r) {
+        e.line(String(r.it.desc || '').slice(0, n));
+        e.table([{ width: w1, align: 'left' }, { width: w2, align: 'right' }], [[NS.qty(num(r.it.qty)) + ' ' + (r.it.unit || '') + (num(r.it.rate) ? ' x ' + m(num(r.it.rate)) : '') + (tax ? ' +' + r.g + '%' : ''), m(r.amount)]]);
+      });
+      tt.charges.forEach(function (c) { e.table([{ width: w1, align: 'left' }, { width: w2, align: 'right' }], [[c.c.name || 'Charges', m(c.amount)]]); });
+      e.rule();
+      var tl = [[plain(colLbl(tax, d)), m(tt.taxable)]];
+      if (tax) { if (tt.intra) { tl.push(['CGST', m(tt.cgst)]); tl.push([plain(sgstName(d)), m(tt.sgst)]); } else tl.push(['IGST', m(tt.igst)]); }
+      if (tt.tcs) tl.push([plain(tcsLbl(d)).slice(0, w1), m(tt.tcs)]);
+      if (tt.roundOff) tl.push(['Round off', (tt.roundOff > 0 ? '+' : '-') + m(Math.abs(tt.roundOff))]);
+      e.table([{ width: w1, align: 'left' }, { width: w2, align: 'right' }], tl);
+      e.bold(true).size(1, 2).table([{ width: w1, align: 'left' }, { width: w2, align: 'right' }], [['TOTAL', m(tt.grand)]]).size(1, 1).bold(false);
+      e.line(NS.inWords(tt.grand));
+      if (tcsDeclRow(d)) e.line(tcsDeclRow(d));
+      if (T.qr && s.upi && tt.grand > 0 && d.status !== 'paid') { e.align('center').line('Scan to pay by UPI').qrcode('upi://pay?pa=' + encodeURIComponent(s.upi) + '&pn=' + encodeURIComponent(s.name || '') + '&am=' + tt.grand.toFixed(2) + '&cu=INR', { size: 6 }).line(s.upi); }
+      e.align('center').newline().line(d.notes ? plain(d.notes).slice(0, n * 2) : 'Thank you, visit again').line('NSBiz by Nivesh Sahayak').newline(3).cut();
+    };
+  }
+  NS.rpBuildOf = function () { return rpBuild(doc); };   /* the receipt of the bill on screen (tests and the Windows program) */
+  function rprintDoc() {
+    NS.rpPrint(rpBuild(doc), doc.paper === 'th58' ? 32 : 48).then(function () { NS.toast('Sent to the receipt printer'); }, function (e) {
+      if (e && /cancel|none/.test(e.message)) return; NS.toast('The receipt printer did not answer. Check that it is on, then try again (or use Print / PDF).', 'bad'); NS.rpForget();
+    });
+  }
+  function rpBtns() {   /* shown with the thermal paper sizes only */
+    $$('[data-do="print"]').forEach(function (p) {
+      var b = p.parentNode.querySelector('[data-do="rprint"]');
+      if (!b) { b = document.createElement('button'); b.type = 'button'; b.className = p.className.replace(/\bprimary\b/, ''); b.setAttribute('data-do', 'rprint'); b.setAttribute('data-ic', 'print'); b.textContent = 'Receipt printer'; b.addEventListener('click', function () { if (totals(doc).rows.length) save().then(rprintDoc, function () {}); else rprintDoc(); }); p.insertAdjacentElement('afterend', b); }
+      b.hidden = !/^th/.test(doc.paper || '');
+    });
+  }
   /* thermal roll (58 or 80 mm): one narrow column, every line on its own row */
   function thermalHtml(d, tt, tax, SG, copyLabel) {
     var s = d.seller, b = d.buyer, line = function (l, r, cls) { return '<tr' + (cls ? ' class="' + cls + '"' : '') + '><th>' + l + '</th><td>' + r + '</td></tr>'; };
@@ -763,7 +827,7 @@
     pageStyle(d.paper);
     $$('[data-qr]', sheet).forEach(function (q) { drawQr(q, s, d, tt.grand); });
     ext('drawn', sheet);
-    panNote(); cnTcs(); needNote();
+    panNote(); cnTcs(); needNote(); rpBtns();
     var es = $('#ed-sums', root);
     if (es) es.innerHTML = '<span>' + esc(t('sum.items', { n: tt.rows.length })) + '</span><span>' + esc(t('sum.taxable', { v: NS.money(tt.taxable) })) + '</span>' +
       (tax ? '<span>' + esc(t('sum.gst', { v: NS.money(tt.cgst + tt.sgst + tt.igst) })) + (tt.intra ? ' (CGST + ' + SG + ')' : ' (IGST)') + '</span>' : '') + (tt.tcs ? '<span>' + esc(t('b1.sumtcs', { v: NS.money(tt.tcs) })) + '</span>' : '') + '<b>' + esc(t('sum.total', { v: NS.money(tt.grand) })) + '</b>';

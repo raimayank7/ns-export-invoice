@@ -9203,3 +9203,7 @@ NS.addLang("hi", {
   "bw.mnarr": "नैरेशन (प्रिंट नहीं होगा)",
   "bw.mnarrh": "आपके हिसाब-किताब के लिए एक लाइन: NSBiz के लेजर, डे बुक और Tally में दिखेगी, बिल पर कभी नहीं।"
 });
+/* Big lists (bigtable.js): the box under a column title of a long list */
+NS.addLang("hi", {
+  "bt.filter": "फ़िल्टर"
+});

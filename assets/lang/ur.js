@@ -9831,3 +9831,7 @@ NS.addLang("ur", {
   "bw.mnarr": "نیریشن (پرنٹ نہیں ہوگا)",
   "bw.mnarrh": "آپ کے حساب کتاب کے لیے ایک لائن: NSBiz کے لیجر، ڈے بک اور Tally میں دکھے گی، بل پر کبھی نہیں۔"
 });
+/* Big lists (bigtable.js): the box under a column title of a long list */
+NS.addLang("ur", {
+  "bt.filter": "فلٹر"
+});

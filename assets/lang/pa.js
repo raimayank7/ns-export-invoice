@@ -9246,3 +9246,7 @@ NS.addLang("pa", {
   "bw.mnarr": "ਨੈਰੇਸ਼ਨ (ਪ੍ਰਿੰਟ ਨਹੀਂ ਹੋਵੇਗਾ)",
   "bw.mnarrh": "ਤੁਹਾਡੇ ਹਿਸਾਬ-ਕਿਤਾਬ ਲਈ ਇੱਕ ਲਾਈਨ: NSBiz ਦੇ ਲੈਜਰ, ਡੇ ਬੁੱਕ ਅਤੇ Tally ਵਿੱਚ ਦਿਖੇਗੀ, ਬਿੱਲ ਉੱਤੇ ਕਦੇ ਨਹੀਂ।"
 });
+/* Big lists (bigtable.js): the box under a column title of a long list */
+NS.addLang("pa", {
+  "bt.filter": "ਫ਼ਿਲਟਰ"
+});

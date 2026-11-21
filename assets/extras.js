@@ -3,7 +3,7 @@
      NS.pin                 PIN screen lock on my. and app.: a lock on this screen, NOT encryption (the data itself stays readable to anyone with the browser or a backup)
      NS.sample              sample records (made by sample.js, sample: 1): is any there, the strip, one tap removes them all
      NS.nextInvNo           next invoice number of a business (same rule as docs.js: PREFIX/YY-YY/001 per business and financial year)
-     NS.xlsx / NS.reports   registers and reports as Excel files (SheetJS 0.18.5 from cdnjs, loaded only when asked); headers in English like every printout
+     NS.xlsx / NS.reports   registers and reports as Excel files (SheetJS 0.20.3 kept in /assets/vendor/, loaded only when asked; 0.18.5 had CVE-2023-30533 and CVE-2024-22363); headers in English like every printout
    Screen words: NS.t('b1.<key>'). */
 (function () {
   'use strict';
@@ -342,12 +342,18 @@
   }
   NS.addMonths = addMonths;
   /* [{ tpl, date, period }] for every repeating bill: periods up to today not made yet (at most 3 per bill) */
+  /* which periods were already made, per standing bill: one pass over the records (was one pass per standing bill) */
+  NS.recurringMade = function (docs) {
+    var by = {};
+    (docs || []).forEach(function (d) { if (d && d.recOf) (by[d.recOf] || (by[d.recOf] = {}))[d.recFor] = 1; });
+    return by;
+  };
   NS.recurringDue = function (docs, today) {
-    var out = [];
-    docs.forEach(function (tpl) {
-      var r = tpl.rec; if (!r || !r.every || r.stop || !tpl.date) return;
-      var made = {}, list = [];
-      docs.forEach(function (d) { if (d.recOf === tpl.id) made[d.recFor] = 1; });
+    var out = [], tpls = (docs || []).filter(function (t) { var r = t && t.rec; return r && r.every && !r.stop && t.date; });
+    if (!tpls.length) return out;
+    var byTpl = NS.recurringMade(docs);
+    tpls.forEach(function (tpl) {
+      var r = tpl.rec, made = byTpl[tpl.id] || {}, list = [];
       if (window.NSReuse) list = NSReuse.dueDates(tpl, made, today);   /* weekly to yearly, stop date, number of bills (reuse.js) */
       else {
         var step = r.every === 'quarter' ? 3 : 1;
@@ -359,7 +365,7 @@
         }
         list = list.slice(-3);
       }
-      out = out.concat(list.map(function (x) { return { tpl: tpl, date: x.date, period: x.period }; }));
+      list.forEach(function (x) { out.push({ tpl: tpl, date: x.date, period: x.period }); });
     });
     return out.sort(function (a, b) { return a.date.localeCompare(b.date); });
   };
@@ -375,7 +381,7 @@
   };
 
   /* ---------- Excel ---------- */
-  var XL = ['https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js', 'sha384-vtjasyidUo0kW94K5MXDXntzOJpQgBKXmE7e2Ga4LG0skTTLeBi97eFAXsqewJjw'];
+  var XL = ['/assets/vendor/xlsx-0.20.3.full.min.js', ''];
   function sheetName(s, used) {
     var n = String(s).replace(/[\[\]:*?\/\\]/g, ' ').trim().slice(0, 28) || 'Sheet', base = n, i = 2;
     while (used[n.toLowerCase()]) n = base.slice(0, 25) + ' ' + (i++);

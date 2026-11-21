@@ -349,6 +349,131 @@
     }, function () {});
   };
 
+  /* ---------- camera barcode / QR reading for every screen (owner 20 Nov) ----------
+     The browser's own BarcodeDetector where it has one (phones, Mac, ChromeOS); otherwise zxing-wasm 3.1.6 (MIT), a copy of which
+     is kept in /assets/vendor/ so it works offline (Windows Chrome and the Windows program have no BarcodeDetector).
+     NS.codeReader() -> Promise of { read(video) -> Promise of text or '' }. NS.scanCode(title) opens the camera in a box and
+     resolves with the first code read ('' when closed). A USB / Bluetooth scanner needs none of this: it types into the box. */
+  var ZXJS = '/assets/vendor/zxing-reader-3.1.6.js', ZXWASM = '/assets/vendor/zxing_reader-3.1.6.wasm';
+  var FMTS = ['code_128', 'ean_13', 'ean_8', 'upc_a', 'upc_e', 'qr_code', 'code_39', 'itf', 'data_matrix'];
+  NS.codeReader = function () {
+    if ('BarcodeDetector' in window) {
+      return window.BarcodeDetector.getSupportedFormats().then(function (f) {
+        var use = f.filter(function (x) { return FMTS.indexOf(x) >= 0; }); if (!use.length) throw new Error('none');
+        var det = new window.BarcodeDetector({ formats: use });
+        return { read: function (v) { return det.detect(v).then(function (r) { return r && r[0] ? r[0].rawValue : ''; }, function () { return ''; }); } };
+      }).catch(function () { return zx(); });
+    }
+    return zx();
+    function zx() {
+      return NS.loadJs(ZXJS).then(function () {
+        var Z = window.ZXingWASM; if (!Z) throw new Error('load');
+        Z.prepareZXingModule({ overrides: { locateFile: function (p, pre) { return /\.wasm$/.test(p) ? ZXWASM : pre + p; } }, fireImmediately: true });
+        var cv = document.createElement('canvas'), cx = cv.getContext('2d', { willReadFrequently: true });
+        return { read: function (v) {
+          if (!v.videoWidth) return Promise.resolve('');
+          var w = Math.min(v.videoWidth, 1280), h = Math.round(v.videoHeight * w / v.videoWidth); cv.width = w; cv.height = h; cx.drawImage(v, 0, 0, w, h);
+          return Z.readBarcodes(cx.getImageData(0, 0, w, h), { tryHarder: true, maxNumberOfSymbols: 1 }).then(function (r) { return r && r[0] && r[0].isValid ? r[0].text : ''; }, function () { return ''; });
+        } };
+      });
+    }
+  };
+  NS.scanCode = function (title) {
+    return new Promise(function (resolve) {
+      if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) { NS.toast('This browser cannot use the camera. A USB barcode scanner works: it types into the box.', 'bad'); resolve(''); return; }
+      var d = document.createElement('dialog'); d.className = 'b2-dlg ns-scan';
+      d.innerHTML = '<h3>' + NS.esc(title || 'Scan a barcode or QR code') + '</h3><div class="ns-scan-v"><video playsinline muted></video><span class="ns-scan-line"></span></div><p class="soft ns-scan-msg">Starting the camera…</p><div class="row" style="display:flex;justify-content:flex-end;gap:8px"><button type="button" class="btn" data-x>Close</button></div>';
+      document.body.appendChild(d); d.showModal();
+      var v = d.querySelector('video'), msg = d.querySelector('.ns-scan-msg'), stream = null, done = false, timer = 0;
+      var end = function (val) { if (done) return; done = true; clearTimeout(timer); try { if (stream) stream.getTracks().forEach(function (t) { t.stop(); }); } catch (e) {} if (d.open) d.close(); d.remove(); resolve(val || ''); };
+      d.querySelector('[data-x]').addEventListener('click', function () { end(''); });
+      d.addEventListener('cancel', function (e) { e.preventDefault(); end(''); });
+      navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment', width: { ideal: 1280 } }, audio: false }).then(function (s) {
+        stream = s; v.srcObject = s; return v.play();
+      }).then(function () { msg.textContent = 'Hold the code inside the box.'; return NS.codeReader(); }).then(function (R) {
+        var loop = function () { if (done) return; R.read(v).then(function (txt) { if (txt) { if (navigator.vibrate) navigator.vibrate(60); end(txt); } else timer = setTimeout(loop, 180); }); };
+        loop();
+      }).catch(function (e) { msg.textContent = e && e.name === 'NotAllowedError' ? 'Camera permission was refused. Allow the camera for this site and try again.' : 'The camera could not be started on this device.'; });
+    });
+  };
+
+  /* ---------- receipt printer (thermal, ESC/POS) without the print box (owner 20 Nov) ----------
+     ReceiptPrinterEncoder 4.0.1 + WebUSB / WebSerial Receipt Printer (Niels Leenheer, MIT), copies in /assets/vendor/.
+     USB: works where no Windows driver has taken the printer (Android, Mac, Linux, ChromeOS). On Windows a printer with its
+     driver installed is reached through the driver's virtual COM port: choose "Serial / COM port" (also Bluetooth printers).
+     The printer chosen is remembered; next time it reconnects by itself. NS.rpPrint(build): build(encoder) adds the lines. */
+  var RPLIB = ['/assets/vendor/receipt-printer-encoder-4.0.1.js', '/assets/vendor/webusb-receipt-printer-2.1.0.js', '/assets/vendor/webserial-receipt-printer-2.0.0.js'];
+  var RP = null;
+  function rpSaved() { try { return JSON.parse(localStorage.getItem('ns-rp') || 'null'); } catch (e) { return null; } }
+  function rpKeep(o) { try { localStorage.setItem('ns-rp', JSON.stringify(o)); } catch (e) {} }
+  function rpMake(kind, cols) {
+    var P = kind === 'usb' ? new window.WebUSBReceiptPrinter() : new window.WebSerialReceiptPrinter({ baudRate: 9600 });
+    return { kind: kind, p: P, cols: cols, ready: new Promise(function (res) { P.addEventListener('connected', function (dev) { rpKeep({ kind: kind, dev: dev, cols: cols }); res(dev); }); }) };
+  }
+  NS.rpForget = function () { RP = null; try { localStorage.removeItem('ns-rp'); } catch (e) {} };
+  NS.rpPrint = function (build, cols) {
+    return Promise.all(RPLIB.map(function (u) { return NS.loadJs(u); })).then(function () {
+      var send = function (r) { return r.ready.then(function () { var enc = new window.ReceiptPrinterEncoder({ language: 'esc-pos', columns: r.cols || cols || 48 }); build(enc.initialize()); return r.p.print(enc.encode()); }); };
+      var sv = rpSaved();
+      if (RP) return send(RP);
+      if (sv && sv.dev) { RP = rpMake(sv.kind, sv.cols || cols); RP.p.reconnect(sv.dev); return Promise.race([RP.ready, new Promise(function (_, rej) { setTimeout(function () { rej(new Error('gone')); }, 2500); })]).then(function () { return send(RP); }, function () { RP = null; return choose(); }); }
+      return choose();
+      function choose() {
+        return new Promise(function (resolve, reject) {
+          if (!('usb' in navigator) && !('serial' in navigator)) { NS.toast('This browser cannot talk to a receipt printer directly. Use Chrome or Edge on a computer, or the NSBiz Windows program, or Print / PDF.', 'bad'); reject(new Error('none')); return; }
+          var d = document.createElement('dialog'); d.className = 'b2-dlg';
+          d.innerHTML = '<h3>Connect the receipt printer</h3><p class="soft">Once only: NSBiz remembers it. A printer with its Windows driver installed: choose Serial / COM port. Paper width:</p>' +
+            '<p><label><input type="radio" name="rpc" value="48" ' + ((cols || 48) >= 48 ? 'checked' : '') + '> 80 mm (48 letters)</label> &nbsp; <label><input type="radio" name="rpc" value="32" ' + ((cols || 48) < 48 ? 'checked' : '') + '> 58 mm (32 letters)</label></p>' +
+            '<div class="row" style="display:flex;gap:8px;flex-wrap:wrap"><button type="button" class="btn primary" data-k="usb"' + ('usb' in navigator ? '' : ' disabled') + '>USB printer</button><button type="button" class="btn" data-k="serial"' + ('serial' in navigator ? '' : ' disabled') + '>Serial / COM port / Bluetooth</button><button type="button" class="btn" data-k="x">Cancel</button></div>';
+          document.body.appendChild(d); d.showModal();
+          d.addEventListener('click', function (e) {
+            var b = e.target.closest('button[data-k]'); if (!b) return; var k = b.getAttribute('data-k');
+            if (k === 'x') { d.close(); d.remove(); reject(new Error('cancel')); return; }
+            var c = +((d.querySelector('input[name=rpc]:checked') || {}).value || 48);
+            RP = rpMake(k, c); RP.p.connect();   /* inside the click: the browser shows its own list of printers */
+            d.close(); d.remove();
+            Promise.race([RP.ready, new Promise(function (_, rej) { setTimeout(function () { rej(new Error('none')); }, 60000); })]).then(function () { return send(RP); }).then(resolve, function (er) { RP = null; reject(er); });
+          });
+        });
+      }
+    });
+  };
+
+  /* ---------- draw a signature with finger, pen or mouse (owner 20 Nov) ----------
+     signature_pad 5.1.4 (Szymon Nowak, MIT), a copy in /assets/vendor/ so it works offline. NS.drawSign(title) opens a box and
+     resolves with a PNG picture (data URL, transparent, trimmed to the ink) or '' when closed. */
+  var SPLIB = '/assets/vendor/signature_pad-5.1.4.min.js';
+  function signTrim(cv) {
+    var w = cv.width, h = cv.height, d = cv.getContext('2d').getImageData(0, 0, w, h).data, x0 = w, y0 = h, x1 = -1, y1 = -1;
+    for (var y = 0; y < h; y++) for (var x = 0; x < w; x++) if (d[(y * w + x) * 4 + 3] > 8) { if (x < x0) x0 = x; if (x > x1) x1 = x; if (y < y0) y0 = y; if (y > y1) y1 = y; }
+    if (x1 < 0) return '';
+    var p = 6, o = document.createElement('canvas'); x0 = Math.max(0, x0 - p); y0 = Math.max(0, y0 - p); x1 = Math.min(w - 1, x1 + p); y1 = Math.min(h - 1, y1 + p);
+    o.width = x1 - x0 + 1; o.height = y1 - y0 + 1; o.getContext('2d').drawImage(cv, x0, y0, o.width, o.height, 0, 0, o.width, o.height);
+    return o.toDataURL('image/png');
+  }
+  NS.drawSign = function (title) {
+    return NS.loadJs(SPLIB).then(function () {
+      return new Promise(function (resolve) {
+        var d = document.createElement('dialog'); d.className = 'b2-dlg ns-sign';
+        d.innerHTML = '<h3>' + NS.esc(title || 'Draw your signature') + '</h3><p class="soft">Sign inside the box with your finger, a pen or the mouse.</p><div class="ns-sign-box"><canvas></canvas><span class="ns-sign-ln"></span></div>' +
+          '<div class="row" style="display:flex;justify-content:flex-end;gap:8px;flex-wrap:wrap;margin-top:10px"><button type="button" class="btn" data-k="undo">Undo</button><button type="button" class="btn" data-k="clear">Clear</button><button type="button" class="btn" data-k="x">Cancel</button><button type="button" class="btn primary" data-k="ok">Use this signature</button></div>';
+        document.body.appendChild(d); d.showModal();
+        var cv = d.querySelector('canvas'), r = Math.max(window.devicePixelRatio || 1, 1), box = d.querySelector('.ns-sign-box');
+        cv.width = box.clientWidth * r; cv.height = box.clientHeight * r; cv.getContext('2d').scale(r, r);
+        var pad = new window.SignaturePad(cv, { penColor: '#0b2a6f', minWidth: 0.8, maxWidth: 2.6 });
+        var end = function (v) { try { pad.off(); } catch (e) {} if (d.open) d.close(); d.remove(); resolve(v || ''); };
+        d.addEventListener('cancel', function (e) { e.preventDefault(); end(''); });
+        d.addEventListener('click', function (e) {
+          var b = e.target.closest('button[data-k]'); if (!b) return; var k = b.getAttribute('data-k');
+          if (k === 'x') end('');
+          else if (k === 'clear') pad.clear();
+          else if (k === 'undo') { var dt = pad.toData(); if (dt.length) { dt.pop(); pad.fromData(dt); } }
+          else if (k === 'ok') { if (pad.isEmpty()) { NS.toast('Draw the signature first', 'bad'); return; } end(signTrim(cv)); }
+        });
+      });
+    }, function () { NS.toast('The signature box could not load. Upload a picture of the signature instead.', 'bad'); return ''; });
+  };
+
   /* ---------- inside the App / Windows program (html.embed): software screens, not a website ----------
      Every tool page drops its website parts (heading, intro, guides, FAQ). A maker with a form and a printed sheet (invoice-type
      makers, slips, trade kits: .grid2 with .ed-col/.pv-col; the declarations maker: .dc-grid) shows the form full width and gets
@@ -406,6 +531,14 @@
     document.addEventListener('ns-lang', label); label();
   }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', function () { setTimeout(appDoc, 0); }); else setTimeout(appDoc, 0);
+  /* Esc inside the App when this page is shown from its own site (another address than the App, so inapp.js cannot reach the
+     App's Back): the first Esc leaves the box being typed in, the next asks the App to go back (owner 20 Nov: Esc did nothing) */
+  window.addEventListener('keydown', function (e) {
+    if (e.key !== 'Escape' || e.defaultPrevented || e.altKey || e.ctrlKey || e.metaKey || window.parent === window || document.querySelector('dialog[open]')) return;
+    var same = false; try { same = !!window.parent.document; } catch (er) {} if (same) return;   /* same address: inapp.js does it */
+    var t = e.target; if (t && (t.isContentEditable || /^(INPUT|TEXTAREA|SELECT)$/.test(t.tagName))) { if (!(t.list && t.value)) t.blur(); return; }
+    e.preventDefault(); try { window.parent.postMessage({ nsEsc: 1 }, '*'); } catch (er) {}
+  });
 
   /* ---------- backup, restore, reminder, auto-save folder ---------- */
   var BACKUP_NAME = 'nivesh-sahayak-backup';

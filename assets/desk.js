@@ -18,7 +18,7 @@
   function ic(d) { return '<svg class="ic" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="' + d + '"/></svg>'; }
   /* icons for the App's own screens (the other side-menu icons are CSS masks in desk.css, by data-ic) */
   var SECIC = { home: 'home', sales: 'doc', money: 'money', dues: 'clock', buy: 'cart', parties: 'people', cash: 'bank', chq: 'cheque', books: 'book', khata: 'book', preg: 'cart', ebook: 'cart',
-    day: 'calendar', tools: 'layers', repeat: 'repeat', reports: 'chart', b2jv: 'journal', b2fa: 'asset', b2gd: 'box', b2make: 'factory', b2profit: 'trend', b2sman: 'badge', b2year: 'calendar', grp: 'layers', fin: 'scale', fam: 'factory', capl: 'coins', b2job: 'wrench', ledger: 'book', move: 'trend', st: 'list', stf: 'badge', acx: 'tax', tdsr: 'tax', gststk: 'tax', gtds: 'tax', isd: 'tax', features: 'toggle', bimp: 'bimport', itx: 'itax', msme: 'coins', limits: 'scale', trust: 'coins', warr: 'wrench', fees: 'cap', packs: 'pack', cadb: 'dash', cadoc: 'folder', cagst: 'tax', cacom: 'chat', saved: 'save',
+    day: 'calendar', tools: 'layers', repeat: 'repeat', reports: 'chart', b2jv: 'journal', b2fa: 'asset', b2gd: 'box', b2make: 'factory', b2profit: 'trend', b2sman: 'badge', b2year: 'calendar', grp: 'layers', fin: 'scale', fam: 'factory', capl: 'coins', b2job: 'wrench', ledger: 'book', move: 'trend', st: 'list', stf: 'badge', acx: 'tax', tdsr: 'tax', gststk: 'tax', gtds: 'tax', isd: 'tax', charts: 'chart', pdffill: 'doc', features: 'toggle', bimp: 'bimport', itx: 'itax', msme: 'coins', limits: 'scale', trust: 'coins', warr: 'wrench', fees: 'cap', packs: 'pack', cadb: 'dash', cadoc: 'folder', cagst: 'tax', cacom: 'chat', saved: 'save',
     entries: 'list', low: 'alert', biz: 'shop', party: 'people', pgroups: 'list', item: 'box', igroups: 'list', doc: 'doc', settings: 'set', backup: 'data', bin: 'trash', log: 'clock' };
   /* screen lists that stay inside the page (my., the stock site...) get the same icons */
   function secIcons() { $$('.hub-nav a[data-sec]:not([data-ic])').forEach(function (a) { var k = SECIC[a.getAttribute('data-sec')]; if (k) a.setAttribute('data-ic', k); }); }
@@ -152,14 +152,14 @@
       '§os', { h: 'os', t: 'v_os', ic: 'clock' }, 'dues', { h: 'dlist', t: 'v_dlist', ic: 'people' }, { h: 'clist', t: 'v_clist', ic: 'people' }, 'parties', { h: 'int', t: 'v_int', ic: 'clock' }, 'msme',
       '§irep', 'stock', 'b2profit',
       '§payr', 'stf', { h: 'stf/year', t: 'v_bonus', ic: 'list' },
-      '§xrep', { h: 'exc', t: 'v_exc', ic: 'flag' }, 'reports', 'cadb', 'ebook']],
+      '§xrep', 'charts', { h: 'exc', t: 'v_exc', ic: 'flag' }, 'reports', 'cadb', 'ebook']],
     ['tax', ['§gst', { site: 'gstr1' }, { site: 'gstr3b' }, { site: 'gstr2b' }, { site: 'cmp08' }, 'gststk', 'gtds', 'isd', 'cagst',
       '§itax', 'tdsr', 'acx', 'itx', 'limits',
       '§payst', { h: 'stf/pf', t: 'v_pf', ic: 'doc' }, { h: 'stf/esi', t: 'v_esi', ic: 'doc' }, { h: 'stf/tax', t: 'v_saltds', ic: 'doc' },
       '§audit', 'cacom', 'cadoc']],
     ['util', ['§data', { my: 'backup', t: 'v_backup', ic: 'data' }, 'bimp', { h: 'mprint', t: 'v_mprint', ic: 'doc' }, 'b2year',
       '§setup', { h: 'config', t: 'v_config', ic: 'set' }, { h: 'bw', t: 'v_bw', ic: 'list' }, 'features', 'packs',   /* one Configuration (owner 19 Nov): it opens the My data settings itself */
-      '§tools', { site: 'tds' }, { site: 'declaration' }, 'tools']]];   /* TDS and TCS calculator and Declarations under Utilities (owner 20 Nov) */
+      '§tools', { site: 'tds' }, { site: 'declaration' }, 'pdffill', 'tools']]];   /* TDS and TCS calculator and Declarations under Utilities (owner 20 Nov) */
   /* the sub-headings inside a group (accounting names; the App is English only) */
   var SUBN = { acc: 'Accounting Masters', inv: 'Inventory Masters', pay: 'Payroll Masters', dsp: 'Dispatch Masters', co: 'Company',
     vch: 'Accounting Vouchers', ivch: 'Inventory Vouchers', payv: 'Payroll Vouchers', payr: 'Payroll Reports', payst: 'Payroll Statutory', lists: 'Lists and Registers', assets: 'Assets and Loans', trade: 'Trade Registers',
@@ -742,7 +742,7 @@
     msme: ['MS'], limits: ['LH'], buy: ['PE', 'W'], parties: ['PA', 'Y'], grp: ['GR'], chq: ['CQ'], books: ['CB', 'K'], cash: ['CK'], repeat: ['RB'],
     reports: ['RE'], day: ['MD'], tools: ['AT', 'T'], fin: ['FA', 'A'], capl: ['CL'], b2jv: ['JE', 'J'], b2fa: ['FX'], b2gd: ['GD'], b2make: ['PR'],
     b2job: ['JW'], b2profit: ['PF'], b2sman: ['SM'], b2year: ['YE'], features: ['AF'], packs: ['TP'], trust: ['DM'], warr: ['WS'], cacom: ['CC'],
-    fees: ['FE'], stock: ['SK'], fam: ['MA'], cadb: ['CD'], cadoc: ['CA'], cagst: ['CG'], ebook: ['EB'], khata: ['KH'], preg: ['PG'], dlist: ['DR'], clist: ['CR'], ssum: ['SY'], psum: ['PY'], vreg: ['VR'], cbsum: ['CS'], mprint: ['MV'], coa: ['AC'], acl: ['LA'], masters: ['MT'], tdsr: ['TQ'], gststk: ['GF'], gtds: ['GW'], isd: ['GJ'], config: ['CF'],
+    fees: ['FE'], stock: ['SK'], fam: ['MA'], cadb: ['CD'], cadoc: ['CA'], cagst: ['CG'], ebook: ['EB'], khata: ['KH'], preg: ['PG'], dlist: ['DR'], clist: ['CR'], ssum: ['SY'], psum: ['PY'], vreg: ['VR'], cbsum: ['CS'], mprint: ['MV'], coa: ['AC'], acl: ['LA'], masters: ['MT'], tdsr: ['TQ'], gststk: ['GF'], gtds: ['GW'], isd: ['GJ'], charts: ['CH'], pdffill: ['FQ'], config: ['CF'],
     gsum: ['GS'], gvch: ['GV'], os: ['OS'], exc: ['TC'], int: ['IR'], bw: ['BW'], ord: ['OU'],
     /* menu entries that had no key (owner 19 Nov 2026): masters, payroll parts and the final account views */
     'masters/led': ['LD'], 'masters/grp': ['AG'], 'masters/bank': ['BK'], 'masters/vt': ['VT'], 'masters/item': ['IM'], 'masters/igrp': ['IG'], 'masters/unit': ['UM'],
@@ -933,6 +933,7 @@
   }
   var back = null, picked = false, goMode = false;
   function palette(from, mode) {
+    if (!window.MiniSearch) NS.loadJs(MSLIB).catch(function () {});   /* ready by the time the first letters are typed */
     goMode = mode === 'go';
     if (!cmd) {
       cmd = NS.el('dialog', { id: 'desk-cmd', class: 'desk-cmd' });
@@ -975,11 +976,24 @@
     if (!goMode) (NS.cmdMore || []).forEach(function (f) { Promise.resolve().then(f).then(function (more) { items = items.concat(more || []); if (cmd.open && inp.value) draw(inp.value); }).catch(function () {}); });
   }
   var GROUPS = ['go', 'rec', 'new', 'party', 'item', 'doc', 'help', 'act'];
+  var MSLIB = '/assets/vendor/minisearch-7.2.0.js', msIx = null, msFor = null, msLen = -1;
+  function fuzzyIx() {
+    if (!window.MiniSearch) { NS.loadJs(MSLIB).catch(function () {}); return null; }
+    if (msIx && msFor === items && msLen === items.length) return msIx;
+    msIx = new window.MiniSearch({ fields: ['t', 's', 'e'], idField: 'id', searchOptions: { boost: { t: 3 } } });
+    msIx.addAll(items.map(function (x, i) { return { id: i, t: String(x.t || ''), s: String(x.s || ''), e: String(x.e || '') }; }));
+    msFor = items; msLen = items.length; return msIx;
+  }
   function draw(qs) {
     var words = qs.toLowerCase().split(/\s+/).filter(Boolean);
     var one = goMode && /^[a-z]$/i.test(qs.trim()) ? qs.trim().toUpperCase() : '';
     var hit = one ? items.filter(function (x) { return x.code && x.code.charAt(0) === one; }) :
       items.filter(function (x) { var h = (x.t + ' ' + (x.s || '') + ' ' + (x.e || '')).toLowerCase(); return words.every(function (w) { return h.indexOf(w) >= 0; }); });
+    /* close matches (MiniSearch 7.2.0, MIT, kept in /assets/vendor/): a typing mistake or half a word still finds the party, item
+       or screen ("sharma tradrs" finds Sharma Traders). Exact matches stay first; close ones follow, best first. */
+    if (!one && words.length && qs.trim().length >= 3 && hit.length < 6) {
+      var ms = fuzzyIx(); if (ms) { var seen = new Set(hit); ms.search(qs, { fuzzy: 0.25, prefix: true, combineWith: 'AND' }).slice(0, 12).forEach(function (r) { var x = items[r.id]; if (x && !seen.has(x)) { seen.add(x); hit.push(x); } }); }
+    }
     if (!words.length && !goMode) hit = hit.filter(function (x) { return !x.off && x.g !== 'doc' && x.g !== 'party' && x.g !== 'item' && x.g !== 'new' && x.g !== 'help'; });
     else hit = hit.filter(function (x) { return !x.off; });   /* strict (owner 2026-11-18): a tool switched off for this type of business is not offered */   /* what is switched off comes last, so it never pushes the business's own tools down */
     shown = []; var html = '';
