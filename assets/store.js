@@ -341,7 +341,7 @@
     try { if (sessionStorage.getItem('ns-sf-role') !== 'staff') return false; } catch (e) { return false; }
     return op === 'del' || (store === 'meta' && !!SF_NO[id]);
   }
-  function sfErr() { var e = new Error(window.NS && NS.t ? NS.t('sfd.denied') : 'Staff cannot do this. Ask the owner.'); e.denied = true; return Promise.reject(e); }
+  function sfErr() { var e = new Error(window.NS && NS.t ? NS.t('sfd.denied') : 'An employee cannot do this. Ask the owner.'); e.denied = true; return Promise.reject(e); }
 
   /* opts.act / opts.why: the history entry's action and reason (cancel, uncancel) */
   var CYC = 'This opening balance is carried from a closed year. Reopen that year (Year end) to change it.';

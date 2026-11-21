@@ -463,7 +463,7 @@
   /* ERP round 2 S-20: TDS cut when a purchase bill or expense is booked (d.tds = { sec, rate, base, amt }) */
   function tdsBk(d) { return d && d.tds && (d.type === 'pbill' || d.type === 'exp') ? r2(num(d.tds.amt)) : 0; }
   /* a voucher or petty cash head: an advance to staff is money still owed back, not an expense */
-  function expAcct(head) { var k = key(head || 'Miscellaneous'); return /^(advance to staff|staff advance|advance to employee)s?$/.test(k) ? SADV + 'staff' : 'exp:' + k; }
+  function expAcct(head) { var k = key(head || 'Miscellaneous'); return /^(advance to staff|staff advance|advance to employee|employee advance)s?$/.test(k) ? SADV + 'staff' : 'exp:' + k; }
   function loanAcct(d) { return (d.lt === 'od' ? 'od:' : 'loan:') + key(d.lender || partyName(d) || 'loan'); }
   /* a salary slip in parts. Deduction lines are read by their name (the slip's own lines are English: PF, ESI, Professional tax, TDS);
      a line naming an advance or loan recovers the employee's staff advance; any other line is kept as 'other deductions'.

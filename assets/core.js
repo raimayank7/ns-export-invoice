@@ -496,6 +496,9 @@
     var root = tool || document.querySelector('.gt') || document.querySelector('[id$="-tool"]') || document.querySelector('.hub'), main = document.querySelector('main');
     if (root && main) { var k = root; while (k.parentNode && k.parentNode !== main) k = k.parentNode; if (k.parentNode === main) { k.classList.add('appdoc-keep'); H.classList.add('appdoc-cut'); } }
     H.classList.add('appdoc');
+    /* a reading page (What's new, help articles, legal pages) has no tool: its text is the screen, so the "hide the website
+       parts" rule must not hide it (owner 21 Nov: What's new opened blank) */
+    if (!root && main && !main.querySelector('.hero') && main.querySelector(':scope>article.prose, :scope>.prose')) { H.classList.add('appdoc-page'); return; }
     /* a tool that draws its printed sheet into one box (the price list): Preview shows only that box */
     if (!tool) {
       if (!root) return;
@@ -541,12 +544,14 @@
     document.addEventListener('ns-lang', label); label();
   }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', function () { setTimeout(appDoc, 0); }); else setTimeout(appDoc, 0);
+  /* a box that takes typed text (Esc first leaves it); tick boxes, radios and buttons do not count (owner 21 Nov: Esc did nothing on Barcode) */
+  NS.typingIn = function (x) { return !!x && (x.isContentEditable || x.tagName === 'TEXTAREA' || (x.tagName === 'INPUT' && !/^(checkbox|radio|button|submit|reset|range|file|color|image)$/i.test(x.type))); };
   /* Esc inside the App when this page is shown from its own site (another address than the App, so inapp.js cannot reach the
      App's Back): the first Esc leaves the box being typed in, the next asks the App to go back (owner 20 Nov: Esc did nothing) */
   window.addEventListener('keydown', function (e) {
     if (e.key !== 'Escape' || e.defaultPrevented || e.altKey || e.ctrlKey || e.metaKey || window.parent === window || document.querySelector('dialog[open]')) return;
     var same = false; try { same = !!window.parent.document; } catch (er) {} if (same) return;   /* same address: inapp.js does it */
-    var t = e.target; if (t && (t.isContentEditable || /^(INPUT|TEXTAREA|SELECT)$/.test(t.tagName))) { if (!(t.list && t.value)) t.blur(); return; }
+    var t = e.target; if (NS.typingIn(t)) { if (!(t.list && t.value)) t.blur(); return; }   /* a tick box, drop-down or button is not typing: Esc goes back at once */
     e.preventDefault(); try { window.parent.postMessage({ nsEsc: 1 }, '*'); } catch (er) {}
   });
 
@@ -1500,7 +1505,7 @@
     Array.prototype.forEach.call(root.querySelectorAll('.ph'), function (e) { if (e.tagName === 'P') e.remove(); else e.style.visibility = 'hidden'; });
   };
   var PAGE = { a4: [210, 297], a5: [148, 210], th80: [80, 0], th58: [58, 0] };
-  NS.makePdf = function (nodes, paper) {
+  NS.makePdf = function (nodes, paper, opt) {
     return Promise.all(LIBS.map(function (l) { return NS.loadJs(l[0], l[1]); })).then(function () {
       var box = document.createElement('div');
       box.style.cssText = 'position:fixed;left:-12000px;top:0;background:#fff';
@@ -1526,7 +1531,7 @@
           }
           pieces.forEach(function (pcv, i) {
             var fmt = [w, pg[1] || pcv.height * w / pcv.width];
-            if (!pdf) pdf = new window.jspdf.jsPDF({ unit: 'mm', format: fmt, orientation: 'portrait', compress: true });
+            if (!pdf) pdf = new window.jspdf.jsPDF(Object.assign({ unit: 'mm', format: fmt, orientation: 'portrait', compress: true }, opt && opt.password ? { encryption: { userPassword: String(opt.password), ownerPassword: String(opt.password) + '-' + Math.random().toString(36).slice(2), userPermissions: ['print'] } } : {}));
             else pdf.addPage(fmt, 'portrait');
             pdf.addImage(pcv.toDataURL('image/jpeg', 0.92), 'JPEG', 0, 0, w, pcv.height * w / pcv.width);
             /* the sheet's plain (English) words as an invisible layer on its first page: the PDF can be searched and the bill
@@ -1556,7 +1561,7 @@
   NS.sharePdf = function (nodes, name, paper, title, text, o) {
     var fname = String(name).replace(/[\\\/:*?"<>|]+/g, '-').replace(/\s+/g, ' ').trim().slice(0, 90) + '.pdf';
     NS.toast(NS.t('pdf.making'));
-    return NS.makePdf(nodes, paper).then(function (blob) {
+    return NS.makePdf(nodes, paper, o).then(function (blob) {
       var file = new File([blob], fname, { type: 'application/pdf' });
       var can = navigator.canShare && navigator.canShare({ files: [file] });
       if (!can) { saveBlob(blob, fname); NS.toast(NS.t('pdf.saved', { file: fname })); NS.waBar(fname, text, o && o.phone); return; }

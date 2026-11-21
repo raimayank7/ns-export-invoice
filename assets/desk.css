@@ -525,3 +525,12 @@ html.ns-soft dialog.vs[open],html.ns-soft dialog.vs[open]::backdrop{animation:no
 /* What's new note: a slim bar at the bottom, above the status bar (phones: above the tab bar) */
 #ns-wnnote{position:fixed;inset-inline:12px;bottom:calc(var(--sbh,30px) + 8px);z-index:45;margin:0;border-radius:10px;box-shadow:0 6px 20px rgb(0 0 0 / .25)}#ns-wnnote .wrap{max-width:none;padding-block:6px}
 @media (max-width:760px){#ns-wnnote{bottom:calc(74px + env(safe-area-inset-bottom,0px))}}@media print{#ns-wnnote{display:none!important}}
+/* entry and voucher screens laid out like the Declarations form (owner 21 Nov): label on the left, two columns of 32 px boxes; tick boxes and
+   notes with their own layout keep it. One column on narrow windows. */
+dialog.vs .fg{grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:6px 22px!important}
+dialog.vs .fg>.f:not(.wide),dialog.vs .fg>.f.wide:has(>label:not(.chk):not(.hd-new)+:is(input,select,textarea)){display:grid;grid-template-columns:minmax(120px,38%) minmax(0,1fr);align-items:start;gap:2px 10px;margin:0}
+dialog.vs .fg>.f.wide:has(>label:not(.chk):not(.hd-new)+:is(input,select,textarea)){grid-column:1/-1;grid-template-columns:minmax(120px,calc(19% - 6px)) minmax(0,1fr)}
+dialog.vs .fg>.f>label:not(.chk):not(.hd-new){grid-column:1;font-size:.82rem;font-weight:600;line-height:1.25;margin:0;padding-top:8px}
+dialog.vs .fg>.f:is(:not(.wide),:has(>label:not(.chk):not(.hd-new)+:is(input,select,textarea)))>:not(label){grid-column:2;min-width:0}
+dialog.vs .fg>.f>:is(input:not([type=checkbox]):not([type=radio]),select){height:32px;min-height:32px;padding:3px 8px;font-size:.88rem;border-radius:4px}
+@media (max-width:760px){dialog.vs .fg{grid-template-columns:1fr!important}dialog.vs .fg>.f:not(.wide),dialog.vs .fg>.f.wide:has(>label:not(.chk):not(.hd-new)+:is(input,select,textarea)){grid-template-columns:minmax(100px,36%) minmax(0,1fr)}}

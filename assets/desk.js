@@ -454,7 +454,7 @@
     ['Balance sheet', 'Balance Sheet'], ['Profit and loss', 'Profit and Loss A/c'], ['Trial balance', 'Trial Balance'], ['Group reports', 'Group Summary'], ['Income tax planner', 'Income Tax Computation'],
     ['Limits helper', 'Statutory Limits'], ['Money in and out', 'Receipts and Payments List'], ['Print many vouchers', 'Print Many Vouchers'], ['MSME payables', 'MSME Payables (45 days)'],
     ['Parties', 'Party Accounts'], ['Purchase summary', 'Purchase Register'], ['Sales summary', 'Sales Register'], ['Repeating bills', 'Recurring Vouchers'], ['Reports to Excel', 'Export Reports to Excel'],
-    ['Sales', 'Sales List'], ['Staff, salary and loans', 'Employees and Payroll'], ['All tools by job', 'All Tools'], ['Donations and members', 'Donors and Members'], ['Voucher registers', 'Voucher Registers'],
+    ['Sales', 'Sales List'], ['Employee salary and loans', 'Employees and Payroll'], ['Staff, salary and loans', 'Employees and Payroll'], ['All tools by job', 'All Tools'], ['Donations and members', 'Donors and Members'], ['Voucher registers', 'Voucher Registers'],
     ['Warranty and service due', 'Warranty and Service Register'], ['Bill-wise outstanding', 'Bills Outstanding'], ['Capital and loans', 'Capital and Loans'], ['Journal entry', 'Journal Voucher'],
     ['Delivery challan', 'Delivery Challan'], ['Credit note', 'Credit Note'], ['Debit note', 'Debit Note'], ['Cash memo', 'Cash Memo'], ['Sales order', 'Sales Order'], ['Purchase order', 'Purchase Order'],
     ['Proforma invoice', 'Proforma Invoice'], ['Self invoice', 'Self Invoice (RCM)'], ['Export invoice', 'Export Invoice']]
@@ -1090,7 +1090,7 @@
   document.addEventListener('keydown', function (e) {
     if (e.key !== 'Escape' || e.defaultPrevented || e.altKey || e.ctrlKey || e.metaKey || $('dialog[open]') || !A() || root.classList.contains('side-open')) return;
     if ($('.mb-drop')) return;
-    var t = e.target; if (t && (t.isContentEditable || /^(INPUT|TEXTAREA|SELECT)$/.test(t.tagName))) { t.blur(); return; }
+    var t = e.target; if (NS.typingIn(t)) { t.blur(); return; }
     var h = location.hash.replace(/^#/, ''); if (!h || h === 'home') return;
     var tr = A().trail && A().trail();   /* ERP review R-1: one level up = the screen the user came from (reports.js puts the row back) */
     if (tr && tr.length > 1 && !/^do\//.test(h)) { e.preventDefault(); history.back(); return; }

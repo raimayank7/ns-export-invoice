@@ -30,7 +30,7 @@
     ['salary', 'Salary and wages', 'iexp', 'emp', 'none', '192', 'salary|salaries|staff salary'],
     ['bonus', 'Bonus', 'iexp', 'emp', 'none', '192', 'bonus|incentive to staff'],
     ['pfesi', 'Employer\'s PF and ESI', 'iexp', 'emp', 'none', '', 'pf|esi|provident fund|employer pf|employer esi|epf'],
-    ['welfare', 'Staff welfare', 'iexp', 'emp', 'blocked', '', 'staff welfare|tea|refreshment|staff food'],
+    ['welfare', 'Employee welfare', 'iexp', 'emp', 'blocked', '', 'employee welfare|staff welfare|tea|refreshment|staff food'],
     ['phone', 'Phone and internet', 'iexp', 'oth', 'ok', '', 'telephone|mobile|internet|phone'],
     ['repair', 'Repairs and maintenance', 'iexp', 'oth', 'ok', '194C', 'repair|repairs|maintenance', 1],
     ['office', 'Office expenses', 'iexp', 'oth', 'ok', '', 'office|general expenses'],
