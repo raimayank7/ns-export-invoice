@@ -10583,3 +10583,18 @@ NS.addLang("as", {
   "us.lo_ing": "লগইন অফ কৰি ফাইলবোৰৰ লক খুলি আছে…",
   "us.lo_done": "লগইন অফ হ'ল।"
 });
+/* phone test 21 Nov: the saved-document bar of the makers, and Scan barcode */
+NS.addLang("as", {
+  "dnv.first": "প্ৰথম",
+  "dnv.back": "আগৰটো",
+  "dnv.next": "পিছৰটো",
+  "dnv.last": "শেষ",
+  "dnv.pos": "{n}ৰ ভিতৰত {a}",
+  "dnv.new": "নতুন · {n}টা ছেভ হৈছে",
+  "dnv.find": "নম্বৰ বিচাৰক",
+  "dnv.findh": "ছেভ হোৱাটো তাৰ নম্বৰেৰে বিচাৰক",
+  "dnv.list": "লিষ্ট",
+  "dnv.listh": "ছেভ হোৱাবোৰৰ লিষ্ট, ছাৰ্চৰ সৈতে",
+  "dnv.scan": "বাৰক'ড স্কেন",
+  "dnv.scanh": "আইটেমৰ বাৰক'ড কেমেৰাৰে স্কেন কৰক"
+});

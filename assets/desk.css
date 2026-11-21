@@ -48,7 +48,32 @@ html.has-hub .hub>.hub-nav{display:none}
 [data-ic=tool]{--i:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M14.7 6.3a4 4 0 0 0-5.4 5.4L3 18l3 3 6.3-6.3a4 4 0 0 0 5.4-5.4l-2.5 2.5-2.5-2.5z'/%3E%3C/svg%3E")}
 [data-ic=new]{--i:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8z'/%3E%3Cpath d='M19 16l.7 2 2 .7-2 .7-.7 2-.7-2-2-.7 2-.7z'/%3E%3C/svg%3E")}
 #ns-side a.wn-new::after{content:'';width:8px;height:8px;border-radius:50%;background:#E5484D;margin-left:auto;flex:none}
-.wn-day li b{display:block}.wn-day h3{font-size:1rem;margin:1.2em 0 .3em}.wn-day ul{margin-top:.2em}
+/* What's new page (owner 21 Nov: "looks too simple"): highlights, a filter, one card per update, tags by kind and area */
+.wn-page{--wn-new:#0E7C66;--wn-better:#2F5BD3;--wn-fix:#B4561B}
+.wn-hl{margin:1.2em 0;padding:16px 18px;border-radius:16px;background:linear-gradient(135deg,color-mix(in srgb,var(--wn-new) 12%,var(--surface)),var(--surface));border:1px solid var(--line)}
+.wn-hl h2{margin:.1em 0 .6em;font-size:1.3rem}.wn-hl-k{margin:0;font-size:.85rem;color:var(--soft);font-weight:600;text-transform:uppercase;letter-spacing:.04em}
+.wn-hl-g{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px}
+.wn-hl-g .wn-i{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:12px;margin:0}
+.wn-filter{display:flex;flex-wrap:wrap;gap:10px 18px;margin:1em 0;position:sticky;top:calc(var(--hd-h,60px) + 4px);z-index:3;background:var(--bg);padding:8px 0}
+.wn-filter fieldset{border:0;margin:0;padding:0;display:flex;flex-wrap:wrap;gap:6px;align-items:center}.wn-filter legend{float:left;margin-right:6px;font-weight:600;font-size:.9rem}
+.wn-chip{display:inline-flex;align-items:center;min-height:36px;padding:0 12px;border:1px solid var(--line);border-radius:999px;cursor:pointer;font-size:.9rem;background:var(--surface)}
+.wn-chip input{position:absolute;opacity:0;pointer-events:none}.wn-chip:has(input:checked){background:var(--ink,#123);color:var(--surface);border-color:transparent}
+.wn-chip:has(input:focus-visible){outline:2px solid var(--accent,#2F5BD3);outline-offset:2px}
+.wn-day{border:1px solid var(--line);border-radius:14px;padding:12px 16px;margin:12px 0;background:var(--surface)}
+.wn-dh{display:flex;flex-wrap:wrap;align-items:baseline;justify-content:space-between;gap:4px 12px}.wn-dh h3{font-size:1rem;margin:0}.wn-t{font-weight:600}.wn-dh time{color:var(--soft);font-weight:500;margin-right:6px}
+.wn-cnt{margin:0;font-size:.82rem;color:var(--soft)}.wn-n.t-new{color:var(--wn-new)}.wn-n.t-better{color:var(--wn-better)}.wn-n.t-fix{color:var(--wn-fix)}
+.wn-day ul{list-style:none;padding:0;margin:.5em 0 0}.wn-i{padding:9px 0;border-top:1px solid var(--line)}.wn-day li:first-child{border-top:0}
+.wn-i b{display:block}.wn-s{color:var(--ink2,inherit)}
+.wn-tags{display:flex;gap:6px;margin-bottom:3px}.wn-tag,.wn-area{font-size:.72rem;font-weight:700;padding:1px 8px;border-radius:999px;letter-spacing:.02em}
+.wn-tag{color:#fff}.t-new .wn-tag{background:var(--wn-new)}.t-better .wn-tag{background:var(--wn-better)}.t-fix .wn-tag{background:var(--wn-fix)}
+.wn-area{background:var(--surface2,#eef1f5);color:var(--soft)}
+.wn-page:has(input[name=wnk][value=new]:checked) .wn-day .wn-i:not(.t-new),.wn-page:has(input[name=wnk][value=better]:checked) .wn-day .wn-i:not(.t-better),
+.wn-page:has(input[name=wnk][value=fix]:checked) .wn-day .wn-i:not(.t-fix){display:none}
+.wn-page:has(input[name=wna][value=billing]:checked) .wn-day .wn-i:not(.a-billing),.wn-page:has(input[name=wna][value=accounts]:checked) .wn-day .wn-i:not(.a-accounts),
+.wn-page:has(input[name=wna][value=gst]:checked) .wn-day .wn-i:not(.a-gst),.wn-page:has(input[name=wna][value=stock]:checked) .wn-day .wn-i:not(.a-stock),
+.wn-page:has(input[name=wna][value=staff]:checked) .wn-day .wn-i:not(.a-staff),.wn-page:has(input[name=wna][value=data]:checked) .wn-day .wn-i:not(.a-data),
+.wn-page:has(input[name=wna][value=windows]:checked) .wn-day .wn-i:not(.a-windows),.wn-page:has(input[name=wna][value=app]:checked) .wn-day .wn-i:not(.a-app){display:none}
+@media (max-width:620px){.wn-filter{position:static}.wn-day{padding:10px 12px}}
 [data-ic=info]{--i:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='12' cy='12' r='9'/%3E%3Cpath d='M12 11v6M12 7.5v.5'/%3E%3C/svg%3E")}
 [data-ic=money]{--i:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect x='3' y='6' width='18' height='12' rx='2'/%3E%3Ccircle cx='12' cy='12' r='2.5'/%3E%3Cpath d='M6 10v4M18 10v4'/%3E%3C/svg%3E")}
 [data-ic=clock]{--i:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='12' cy='12' r='9'/%3E%3Cpath d='M12 7v5l3 2'/%3E%3C/svg%3E")}
@@ -344,6 +369,18 @@ dialog.vs .dlg-foot{padding:12px 0 14px;margin-top:20px;align-items:center;backg
 dialog.vs .dlg-foot .btn{min-height:42px;padding-inline:20px}
 .vs-keys{margin-inline-start:auto;font-size:.8rem;color:var(--soft)}
 @media (max-width:860px){dialog.vs{inset:0;border:0}.vs-keys{display:none}dialog.vs .dlg-hd{padding:10px 14px}dialog.vs form{padding:14px 14px 0}}
+/* phone test 21 Nov 2026: on a phone the title bar of an entry screen squeezed the title to one letter a line and grew to half the
+   screen (the voucher tools: first/back/next/last, find, list, e-invoice). Now: Back, the title and Configure on one line, the voucher
+   tools in one row under it that scrolls sideways; the bar does not stay on top, so the keyboard leaves room for the field. */
+@media (max-width:640px){
+  dialog.vs .dlg-hd,dialog.vs .dlg-h{flex-wrap:wrap;gap:6px 8px;padding:8px 12px;position:static}
+  dialog.vs .dlg-hd::before,dialog.vs .dlg-h::before{display:none}
+  dialog.vs .dlg-hd h2,dialog.vs .dlg-h h2{order:2;flex:1 1 0;min-width:5em;font-size:1.05rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  dialog.vs .dlg-hd>:not(h2):not(.vs-back):not(.vt-nav),dialog.vs .dlg-h>:not(h2):not(.vs-back):not(.vt-nav){order:3;flex:none}
+  dialog.vs .vt-nav{order:6;flex:1 1 100%;flex-wrap:nowrap;overflow-x:auto;margin:0;padding-bottom:2px;scrollbar-width:thin}
+  dialog.vs .vt-nav>*{flex:none}
+  dialog.vs form{scroll-padding-top:12px}
+}
 @media print{dialog.vs{position:static}}
 /* a tool shown inside the App (its own frame): the screen is the whole frame; phones: the whole window */
 html.embed dialog.vs{inset:0!important}
@@ -523,6 +560,23 @@ html.ns-soft dialog.vs[open],html.ns-soft dialog.vs[open]::backdrop{animation:no
 [data-ic=flag]{--i:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M5 21V4M5 4h11l-2 4 2 4H5'/%3E%3C/svg%3E")}
 @media (min-width:1100px) and (pointer:fine){html.sc-on .sc-panel{width:262px}html.sc-on [data-pane]{margin-inline-end:268px}}   /* room for the icon and the full name */
 /* What's new note: a slim bar at the bottom, above the status bar (phones: above the tab bar) */
+#ns-inst{max-width:min(520px,calc(100vw - 24px));border:0;border-radius:18px;padding:20px 22px;box-shadow:0 20px 50px rgb(0 0 0 / .35);background:var(--surface);color:var(--ink)}
+.side-inst{display:block;box-sizing:border-box;width:100%;min-height:42px;padding:8px 12px;text-align:start;font:inherit;font-weight:600;color:#0E7C66;background:none;border:0;cursor:pointer}@media (min-width:761px){.side-inst{display:none}}
+#ns-inst::backdrop{background:rgb(10 20 30 / .45)}#ns-inst h2{margin:0 0 .5em;font-size:1.25rem}
+.inst-why{margin:0 0 .8em;padding-left:1.2em}.inst-why li{margin:.3em 0}.inst-how{font-weight:600;margin:.6em 0 .2em}.inst-steps li{margin:.35em 0}
+.inst-win{font-size:.9rem}.inst-b{display:flex;justify-content:flex-end;margin-top:12px}
+@media (max-width:620px){#ns-inst{margin:auto auto 0;border-radius:18px 18px 0 0;max-width:100vw;width:100vw;padding-bottom:calc(18px + env(safe-area-inset-bottom,0px))}}
+#ns-instnote{position:fixed;inset-inline:12px;bottom:calc(var(--sbh,30px) + 8px);z-index:45;margin:0;border-radius:10px;box-shadow:0 6px 20px rgb(0 0 0 / .25)}#ns-instnote .wrap{max-width:none;padding-block:6px}
+@media (max-width:760px){#ns-instnote{bottom:calc(74px + env(safe-area-inset-bottom,0px))}}@media print{#ns-inst,#ns-instnote{display:none!important}}
+#ns-wncard{max-width:min(520px,calc(100vw - 24px));border:0;border-radius:18px;padding:20px 22px;box-shadow:0 20px 50px rgb(0 0 0 / .35);background:var(--surface);color:var(--ink)}
+#ns-wncard::backdrop{background:rgb(10 20 30 / .45)}
+#ns-wncard h2{margin:.1em 0 .6em;font-size:1.25rem}.wn-card-k{margin:0;font-size:.8rem;font-weight:700;color:#0E7C66;text-transform:uppercase;letter-spacing:.05em}
+.wn-card-l{list-style:none;margin:0;padding:0;display:grid;gap:10px}.wn-card-l li{display:grid;gap:2px;padding:10px 12px;border:1px solid var(--line);border-radius:12px}
+.wn-card-l .wn-tag{justify-self:start;font-size:.7rem;font-weight:700;color:#fff;padding:1px 8px;border-radius:999px;background:#2F5BD3}
+.wn-card-l .t-new .wn-tag{background:#0E7C66}.wn-card-l .t-fix .wn-tag{background:#B4561B}.wn-card-l li>span:last-child{color:var(--soft);font-size:.92rem}
+.wn-card-more{margin:.8em 0 0;font-size:.88rem}.wn-card-b{display:flex;gap:10px;justify-content:flex-end;flex-wrap:wrap;margin-top:14px}
+@media (max-width:620px){#ns-wncard{margin:auto auto 0;border-radius:18px 18px 0 0;max-width:100vw;width:100vw;padding-bottom:calc(18px + env(safe-area-inset-bottom,0px))}}
+@media print{#ns-wncard{display:none!important}}
 #ns-wnnote{position:fixed;inset-inline:12px;bottom:calc(var(--sbh,30px) + 8px);z-index:45;margin:0;border-radius:10px;box-shadow:0 6px 20px rgb(0 0 0 / .25)}#ns-wnnote .wrap{max-width:none;padding-block:6px}
 @media (max-width:760px){#ns-wnnote{bottom:calc(74px + env(safe-area-inset-bottom,0px))}}@media print{#ns-wnnote{display:none!important}}
 /* entry and voucher screens laid out like the Declarations form (owner 21 Nov): label on the left, two columns of 32 px boxes; tick boxes and

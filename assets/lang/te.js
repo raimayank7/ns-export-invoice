@@ -10581,3 +10581,18 @@ NS.addLang("te", {
   "us.lo_ing": "లాగిన్ ఆఫ్ చేసి ఫైల్‌ల లాక్ తీసేస్తోంది…",
   "us.lo_done": "లాగిన్ ఆఫ్ అయింది."
 });
+/* phone test 21 Nov: the saved-document bar of the makers, and Scan barcode */
+NS.addLang("te", {
+  "dnv.first": "మొదటిది",
+  "dnv.back": "మునుపటిది",
+  "dnv.next": "తర్వాత",
+  "dnv.last": "చివరిది",
+  "dnv.pos": "{n} లో {a}",
+  "dnv.new": "కొత్తది · {n} సేవ్ అయినవి",
+  "dnv.find": "నంబర్ వెతుకు",
+  "dnv.findh": "సేవ్ చేసినదాన్ని దాని నంబర్‌తో వెతకండి",
+  "dnv.list": "లిస్ట్",
+  "dnv.listh": "సేవ్ చేసినవాటి లిస్ట్, సెర్చ్‌తో",
+  "dnv.scan": "బార్‌కోడ్ స్కాన్",
+  "dnv.scanh": "ఐటమ్ బార్‌కోడ్‌ను కెమెరాతో స్కాన్ చేయండి"
+});

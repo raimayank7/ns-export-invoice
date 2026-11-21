@@ -10578,3 +10578,18 @@ NS.addLang("ml", {
   "us.lo_ing": "ലോഗിൻ ഓഫ് ചെയ്ത് ഫയലുകളുടെ ലോക്ക് മാറ്റുന്നു…",
   "us.lo_done": "ലോഗിൻ ഓഫ് ആയി."
 });
+/* phone test 21 Nov: the saved-document bar of the makers, and Scan barcode */
+NS.addLang("ml", {
+  "dnv.first": "ആദ്യം",
+  "dnv.back": "മുമ്പത്തേത്",
+  "dnv.next": "അടുത്തത്",
+  "dnv.last": "അവസാനം",
+  "dnv.pos": "{n}-ൽ {a}",
+  "dnv.new": "പുതിയത് · {n} സേവ് ചെയ്തവ",
+  "dnv.find": "നമ്പർ തിരയുക",
+  "dnv.findh": "സേവ് ചെയ്തത് അതിന്റെ നമ്പർ കൊണ്ട് തിരയുക",
+  "dnv.list": "ലിസ്റ്റ്",
+  "dnv.listh": "സേവ് ചെയ്തവയുടെ ലിസ്റ്റ്, സെർച്ചോടെ",
+  "dnv.scan": "ബാർകോഡ് സ്കാൻ",
+  "dnv.scanh": "ഐറ്റത്തിന്റെ ബാർകോഡ് ക്യാമറ കൊണ്ട് സ്കാൻ ചെയ്യുക"
+});

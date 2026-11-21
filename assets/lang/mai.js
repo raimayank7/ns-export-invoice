@@ -10583,3 +10583,18 @@ NS.addLang("mai", {
   "us.lo_ing": "लॉगिन बंद भ' रहल अछि आ फ़ाइल अनलॉक भ' रहल अछि…",
   "us.lo_done": "लॉगिन बंद अछि।"
 });
+/* phone test 21 Nov: the saved-document bar of the makers, and Scan barcode */
+NS.addLang("mai", {
+  "dnv.first": "पहिल",
+  "dnv.back": "पाछाँ: पहिलुका",
+  "dnv.next": "आगाँ",
+  "dnv.last": "अंतिम",
+  "dnv.pos": "{n} मे सँ {a}",
+  "dnv.new": "नव · {n} सेव भेल",
+  "dnv.find": "नं. खोजू",
+  "dnv.findh": "सेव भेल कोनो एकटा ओकर नंबर सँ खोजू",
+  "dnv.list": "लिस्ट",
+  "dnv.listh": "सेव भेल सबहक लिस्ट, सर्च सँग",
+  "dnv.scan": "बारकोड स्कैन",
+  "dnv.scanh": "कैमरा सँ आइटमक बारकोड स्कैन करू"
+});

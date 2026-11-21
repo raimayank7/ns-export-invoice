@@ -10581,3 +10581,18 @@ NS.addLang("ta", {
   "us.lo_ing": "லாகினை ஆஃப் செய்து ஃபைல்களின் லாக்கை நீக்குகிறது…",
   "us.lo_done": "லாகின் ஆஃப் ஆனது."
 });
+/* phone test 21 Nov: the saved-document bar of the makers, and Scan barcode */
+NS.addLang("ta", {
+  "dnv.first": "முதல்",
+  "dnv.back": "முந்தையது",
+  "dnv.next": "அடுத்து",
+  "dnv.last": "கடைசி",
+  "dnv.pos": "{n}-இல் {a}",
+  "dnv.new": "புதிது · {n} சேவ் ஆனவை",
+  "dnv.find": "எண் தேடு",
+  "dnv.findh": "சேவ் செய்ததை அதன் எண்ணால் தேடவும்",
+  "dnv.list": "லிஸ்ட்",
+  "dnv.listh": "சேவ் செய்தவற்றின் லிஸ்ட், தேடலுடன்",
+  "dnv.scan": "பார்கோட் ஸ்கேன்",
+  "dnv.scanh": "ஐட்டத்தின் பார்கோடை கேமராவால் ஸ்கேன் செய்யவும்"
+});

@@ -303,7 +303,7 @@
 
       '<fieldset class="card"><legend>' + esc(t('lg.items')) + '</legend><div id="items" class="items"></div>' +
         '<button type="button" class="btn" id="add-item">' + esc(t('add.item')) + '</button>' +
-        '<button type="button" class="btn" id="scan-item" data-ic="camera" title="Scan the item\'s barcode with the camera">Scan barcode</button>' +
+        '<button type="button" class="btn" id="scan-item" data-ic="camera" title="' + NS.esc(NS.t('dnv.scanh')) + '"><span data-i18n="dnv.scan">' + NS.esc(NS.t('dnv.scan')) + '</span></button>' +
         '<datalist id="dl-units">' + UNITS.map(function (u) { return '<option value="' + u + '">'; }).join('') + '</datalist>' +
         '<datalist id="dl-rates">' + rateOpts(doc.date) + '</datalist>' +
         '<h3 class="chg-h">' + esc(t('b1.charges')) + '</h3><div id="chg-list"></div><button type="button" class="btn sm" id="add-chg">+ ' + esc(t('b1.addchg')) + '</button>' +

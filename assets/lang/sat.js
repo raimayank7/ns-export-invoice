@@ -10633,3 +10633,18 @@ NS.addLang("sat", {
   "us.lo_ing": "ᱞᱚᱜᱤᱱ ᱵᱚᱸᱫ ᱟᱨ ᱯᱷᱟᱭᱤᱞ ᱟᱱᱞᱚᱠ ᱦᱩᱭᱩᱜ ᱠᱟᱱᱟ…",
   "us.lo_done": "ᱞᱚᱜᱤᱱ ᱵᱚᱸᱫ ᱢᱮᱱᱟᱜᱼᱟ᱾"
 });
+/* phone test 21 Nov: the saved-document bar of the makers, and Scan barcode */
+NS.addLang("sat", {
+  "dnv.first": "ᱯᱩᱭᱞᱩ",
+  "dnv.back": "ᱛᱟᱭᱚᱢ: ᱞᱟᱦᱟᱜ",
+  "dnv.next": "ᱤᱫᱤ",
+  "dnv.last": "ᱢᱩᱪᱟᱹᱫ",
+  "dnv.pos": "{a} / {n}",
+  "dnv.new": "ᱱᱟᱶᱟ · {n} ᱥᱮᱣ",
+  "dnv.find": "ᱱᱚᱢᱵᱚᱨ ᱥᱮᱸᱫᱽᱨᱟ",
+  "dnv.findh": "ᱥᱮᱣ ᱟᱠᱟᱱ ᱱᱚᱢᱵᱚᱨ ᱛᱮ ᱥᱮᱸᱫᱽᱨᱟ ᱢᱮ",
+  "dnv.list": "ᱞᱤᱥᱴ",
+  "dnv.listh": "ᱥᱮᱣ ᱟᱠᱟᱱ ᱨᱮᱭᱟᱜ ᱞᱤᱥᱴ, ᱥᱮᱸᱫᱽᱨᱟ ᱥᱟᱶ",
+  "dnv.scan": "ᱵᱟᱨᱠᱚᱰ ᱥᱠᱮᱱ",
+  "dnv.scanh": "ᱠᱮᱢᱮᱨᱟ ᱛᱮ ᱟᱭᱴᱮᱢ ᱨᱮᱭᱟᱜ ᱵᱟᱨᱠᱚᱰ ᱥᱠᱮᱱ ᱢᱮ"
+});

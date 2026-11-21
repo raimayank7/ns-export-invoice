@@ -10583,3 +10583,18 @@ NS.addLang("doi", {
   "us.lo_ing": "लॉगिन बंद होआ करदा ऐ ते फ़ाइलां अनलॉक होआ करदियां न…",
   "us.lo_done": "लॉगिन बंद ऐ।"
 });
+/* phone test 21 Nov: the saved-document bar of the makers, and Scan barcode */
+NS.addLang("doi", {
+  "dnv.first": "पैह्ला",
+  "dnv.back": "पिच्छें: पैह्ले आह्‌ला",
+  "dnv.next": "अग्गें",
+  "dnv.last": "आखरी",
+  "dnv.pos": "{n} चा {a}",
+  "dnv.new": "नमां · {n} सेव होए दे",
+  "dnv.find": "नं. लब्भो",
+  "dnv.findh": "सेव होए दे कुसै इक गी उसदे नंबर कन्नै लब्भो",
+  "dnv.list": "लिस्ट",
+  "dnv.listh": "सेव होए दें दी लिस्ट, सर्च कन्नै",
+  "dnv.scan": "बारकोड स्कैन",
+  "dnv.scanh": "कैमरे कन्नै आइटम दा बारकोड स्कैन करो"
+});

@@ -429,8 +429,10 @@ b.nsb-in .nsb-n,b.nsb-in .nsb-b{font:inherit!important;font-size:inherit}b.nsb-i
 .ns-cl .cl-by,.ns-cl .cl-ns{font-weight:700;color:#374151}.ns-cl .cl-by{margin-inline-start:2px}
 /* NSBiz inside text: only the lettering of the header's name, no gold pill or colours (owner 2026-11-18: "repeated too many
    times"). The header logo, the credit line on documents (.ns-cl) and the Dashboard logo keep the full mark. */
-b.nsb-in:not(.ns-cl .nsb-in) .nsb-n{background:none!important;-webkit-text-fill-color:currentColor;color:inherit;filter:none!important;padding:0}
-b.nsb-in:not(.ns-cl .nsb-in) .nsb-b{background:none!important;box-shadow:none!important;color:inherit!important;padding:0!important;margin:0!important;border-radius:0;font-size:1em!important}
+b.nsb-in:not(.ns-cl .nsb-in):not(#ns-side a[data-ic=app] .nsb-in) .nsb-n{background:none!important;-webkit-text-fill-color:currentColor;color:inherit;filter:none!important;padding:0}
+b.nsb-in:not(.ns-cl .nsb-in):not(#ns-side a[data-ic=app] .nsb-in) .nsb-b{background:none!important;box-shadow:none!important;color:inherit!important;padding:0!important;margin:0!important;border-radius:0;font-size:1em!important}
+/* the side menu's link to the App is the door to it: drawn like the header logo (owner 21 Nov), a little larger */
+#ns-side a[data-ic=app] b.nsb-in{font-size:1.5em}
 /* Report sheets in dark theme (screen only): soft dark paper instead of bright white. Print, PDF (.lg-paper) and the print copy stay white. */
 @media screen and (prefers-color-scheme:dark){
 :root:not([data-theme=light]) .stsheet:not(.lg-paper){background:#15212F;color:#D7E1EB;border-color:#2A3D53}
@@ -474,8 +476,8 @@ b.nsb-in:not(.ns-cl .nsb-in) .nsb-b{background:none!important;box-shadow:none!im
 :root[data-theme=dark] .hm-tabs a[aria-selected=true]{color:#0E1726}
 b.nsb,b.nsb-in,.nsb-n,.nsb-b{direction:ltr;unicode-bidi:isolate}
 fieldset,.card{min-width:0}.tbl-wrap{max-width:100%}
-b.nsb-in:not(.ns-cl .nsb-in):not(.side-h .nsb-in):not(.sg-h .nsb-in):not(.brand .nsb-in):not(.dash-logo .nsb-in){font-family:inherit!important;font-weight:inherit!important;font-size:inherit!important;display:inline!important;vertical-align:baseline}
-b.nsb-in:not(.ns-cl .nsb-in):not(.side-h .nsb-in):not(.sg-h .nsb-in):not(.brand .nsb-in):not(.dash-logo .nsb-in) .nsb-b{font-size:inherit!important}
+b.nsb-in:not(.ns-cl .nsb-in):not(.side-h .nsb-in):not(.sg-h .nsb-in):not(.brand .nsb-in):not(.dash-logo .nsb-in):not(#ns-side a[data-ic=app] .nsb-in){font-family:inherit!important;font-weight:inherit!important;font-size:inherit!important;display:inline!important;vertical-align:baseline}
+b.nsb-in:not(.ns-cl .nsb-in):not(.side-h .nsb-in):not(.sg-h .nsb-in):not(.brand .nsb-in):not(.dash-logo .nsb-in):not(#ns-side a[data-ic=app] .nsb-in) .nsb-b{font-size:inherit!important}
 /* software screens are English only (owner 2026-11-19): no language picker there; guides and help keep theirs */
 html[data-en-only] [data-lang-pick],html[data-en-only] [data-lang-set],html[data-en-only] .f:has(> [data-lang-set]),html[data-en-only] label:has(> [data-lang-set]){display:none!important}
 
@@ -566,3 +568,11 @@ html.appdoc-pv .ed-col .fg>.f>small,html.appdoc-pv .ed-col .fg>.f>.soft{font-siz
 .ns-scan{max-width:520px;width:94vw}.ns-scan-v{position:relative;background:#000;border-radius:8px;overflow:hidden;aspect-ratio:4/3}.ns-scan-v video{width:100%;height:100%;object-fit:cover;display:block}.ns-scan-line{position:absolute;left:12%;right:12%;top:50%;height:2px;background:#ef4444;box-shadow:0 0 8px #ef4444}
 /* signature box (NS.drawSign) */
 .ns-sign{max-width:560px;width:94vw}.ns-sign-box{position:relative;height:200px;background:#fff;border:1px dashed var(--line,#cbd5e1);border-radius:8px;touch-action:none}.ns-sign-box canvas{width:100%;height:100%;display:block}.ns-sign-ln{position:absolute;left:8%;right:8%;bottom:42px;border-bottom:1px solid #cbd5e1;pointer-events:none}
+/* phone test 21 Nov 2026: on touch screens every button, select, check box and "?" bubble is big enough for a finger
+   (small buttons were 28-34px, the "?" 32px, check boxes 20px). Compact desktop sizes stay for the mouse. */
+@media (pointer:coarse){
+  .btn,.btn.sm,summary.btn,.qa-new .btn.sm{min-height:38px!important}
+  select{min-height:40px}
+  input[type=checkbox],input[type=radio]{min-width:22px;min-height:22px}
+  .hp-q{min-width:38px!important;min-height:38px!important}
+}

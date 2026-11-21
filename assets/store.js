@@ -155,8 +155,12 @@
       var done = false;
       function finish(m) { if (done) return; done = true; mode = m; res(m); }
       if (!('indexedDB' in window)) return finish('local');
-      frame = document.createElement('iframe');
-      frame.src = VAULT;
+      var early = window.__nsVF;   /* the App home started the data home from its head (build.py) */
+      if (early && early.src === VAULT) {
+        frame = early;
+        if (window.__nsVR) { var r0 = window.__nsVR; window.__nsVR = null; return finish(r0.ready ? 'vault' : 'local'); }
+      } else early = null;
+      if (!early) { frame = document.createElement('iframe'); frame.src = VAULT; }
       frame.title = 'Nivesh Sahayak data home';
       frame.setAttribute('aria-hidden', 'true');
       frame.tabIndex = -1;
@@ -175,7 +179,7 @@
       }
       window.addEventListener('message', onMsg);
       setTimeout(function () { finish('local'); }, 6000);
-      (document.body || document.documentElement).appendChild(frame);
+      if (!early) (document.body || document.documentElement).appendChild(frame);
     }).then(function (m) {
       if (m === 'vault') return moveLocalIntoVault().then(function () { return m; }, function () { return m; });
       return m;

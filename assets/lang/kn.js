@@ -10578,3 +10578,18 @@ NS.addLang("kn", {
   "us.lo_ing": "ಲಾಗಿನ್ ಆಫ್ ಮಾಡಿ ಫೈಲ್‌ಗಳ ಲಾಕ್ ತೆಗೆಯಲಾಗುತ್ತಿದೆ…",
   "us.lo_done": "ಲಾಗಿನ್ ಆಫ್ ಆಗಿದೆ."
 });
+/* phone test 21 Nov: the saved-document bar of the makers, and Scan barcode */
+NS.addLang("kn", {
+  "dnv.first": "ಮೊದಲು",
+  "dnv.back": "ಹಿಂದಿನದು",
+  "dnv.next": "ಮುಂದೆ",
+  "dnv.last": "ಕೊನೆ",
+  "dnv.pos": "{n} ರಲ್ಲಿ {a}",
+  "dnv.new": "ಹೊಸದು · {n} ಸೇವ್ ಆಗಿವೆ",
+  "dnv.find": "ನಂಬರ್ ಹುಡುಕಿ",
+  "dnv.findh": "ಸೇವ್ ಮಾಡಿದ್ದನ್ನು ಅದರ ನಂಬರ್‌ನಿಂದ ಹುಡುಕಿ",
+  "dnv.list": "ಲಿಸ್ಟ್",
+  "dnv.listh": "ಸೇವ್ ಮಾಡಿದವುಗಳ ಲಿಸ್ಟ್, ಸರ್ಚ್ ಜೊತೆ",
+  "dnv.scan": "ಬಾರ್‌ಕೋಡ್ ಸ್ಕ್ಯಾನ್",
+  "dnv.scanh": "ಐಟಂನ ಬಾರ್‌ಕೋಡ್ ಅನ್ನು ಕ್ಯಾಮೆರಾದಿಂದ ಸ್ಕ್ಯಾನ್ ಮಾಡಿ"
+});

@@ -10048,3 +10048,18 @@ NS.addLang("ur", {
   "us.lo_ing": "لاگ اِن بند ہو رہے ہیں اور فائلیں ان لاک ہو رہی ہیں…",
   "us.lo_done": "لاگ اِن بند ہیں۔"
 });
+/* phone test 21 Nov: the saved-document bar of the makers, and Scan barcode */
+NS.addLang("ur", {
+  "dnv.first": "پہلا",
+  "dnv.back": "پیچھے: اس سے پہلے والا",
+  "dnv.next": "آگے",
+  "dnv.last": "آخری",
+  "dnv.pos": "{n} میں سے {a}",
+  "dnv.new": "نیا · {n} سیو ہیں",
+  "dnv.find": "نمبر سے ڈھونڈیں",
+  "dnv.findh": "سیو کیا ہوا اس کے نمبر سے ڈھونڈیں",
+  "dnv.list": "لسٹ",
+  "dnv.listh": "سیو کیے ہوؤں کی لسٹ، سرچ کے ساتھ",
+  "dnv.scan": "بارکوڈ اسکین",
+  "dnv.scanh": "کیمرے سے آئٹم کا بارکوڈ اسکین کریں"
+});

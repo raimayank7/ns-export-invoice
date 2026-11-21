@@ -10582,3 +10582,18 @@ NS.addLang("sd", {
   "us.lo_ing": "لاگ ان بند ٿي رهيا آهن ۽ فائلون انلاڪ ٿي رهيون آهن…",
   "us.lo_done": "لاگ ان بند آهن."
 });
+/* phone test 21 Nov: the saved-document bar of the makers, and Scan barcode */
+NS.addLang("sd", {
+  "dnv.first": "پهريون",
+  "dnv.back": "پوئتي: اڳيون",
+  "dnv.next": "اڳيون",
+  "dnv.last": "آخري",
+  "dnv.pos": "{a} / {n}",
+  "dnv.new": "نئون · {n} سيو ٿيل",
+  "dnv.find": "نمبر ڳوليو",
+  "dnv.findh": "سيو ٿيل کي ان جي نمبر سان ڳوليو",
+  "dnv.list": "لسٽ",
+  "dnv.listh": "سيو ٿيلن جي لسٽ، ڳولا سان",
+  "dnv.scan": "بارڪوڊ اسڪين",
+  "dnv.scanh": "ڪئميرا سان آئٽم جو بارڪوڊ اسڪين ڪريو"
+});

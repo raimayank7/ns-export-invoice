@@ -10582,3 +10582,18 @@ NS.addLang("ks", {
   "us.lo_ing": "لاگ اِن چھِ بند گژھان تہٕ فایِلہٕ اَن لاک گژھان…",
   "us.lo_done": "لاگ اِن چھِ بند۔"
 });
+/* phone test 21 Nov: the saved-document bar of the makers, and Scan barcode */
+NS.addLang("ks", {
+  "dnv.first": "گۄڈنیُک",
+  "dnv.back": "پَتھ: برونٛہِم",
+  "dnv.next": "بییُٚک",
+  "dnv.last": "آخری",
+  "dnv.pos": "{a} / {n}",
+  "dnv.new": "نوٚو · {n} سیو",
+  "dnv.find": "نمبر ژھانڈِو",
+  "dnv.findh": "سیو کٔرِمُت نمبرٕ سٕتۍ ژھانڈِو",
+  "dnv.list": "لِسٹ",
+  "dnv.listh": "سیو کٔرِمٕتۍن ہٕنٛز لِسٹ، ژھانڈنہٕ سٕتۍ",
+  "dnv.scan": "بارکوڈ اسکین",
+  "dnv.scanh": "کیمرہٕ سٕتۍ آئٹمُک بارکوڈ اسکین کٔرِو"
+});

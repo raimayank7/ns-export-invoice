@@ -9475,3 +9475,18 @@ NS.addLang('hi', {
   "slv.notactive": "यह लिंक चालू नहीं है",
   "slv.notactiveh": "एचआर से लिंक जाँचें। यह गलत हो सकता है, या कंपनी ने इसे हटा दिया हो सकता है।"
 });
+/* phone test 21 Nov: the saved-document bar of the makers, and Scan barcode */
+NS.addLang("hi", {
+  "dnv.first": "पहला",
+  "dnv.back": "पीछे: इससे पहले वाला",
+  "dnv.next": "आगे",
+  "dnv.last": "आख़िरी",
+  "dnv.pos": "{n} में से {a}",
+  "dnv.new": "नया · {n} सेव हैं",
+  "dnv.find": "नंबर से ढूँढें",
+  "dnv.findh": "सेव किया हुआ उसके नंबर से ढूँढें",
+  "dnv.list": "लिस्ट",
+  "dnv.listh": "सेव किए हुए की लिस्ट, सर्च के साथ",
+  "dnv.scan": "बारकोड स्कैन",
+  "dnv.scanh": "कैमरे से आइटम का बारकोड स्कैन करें"
+});

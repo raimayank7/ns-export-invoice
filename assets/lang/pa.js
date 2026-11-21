@@ -9518,3 +9518,18 @@ NS.addLang('pa', {
   "slv.notactive": "ਇਹ ਲਿੰਕ ਚਾਲੂ ਨਹੀਂ ਹੈ",
   "slv.notactiveh": "ਐਚਆਰ ਤੋਂ ਲਿੰਕ ਜਾਂਚੋ। ਇਹ ਗਲਤ ਹੋ ਸਕਦਾ ਹੈ, ਜਾਂ ਕੰਪਨੀ ਨੇ ਇਸਨੂੰ ਹਟਾ ਦਿੱਤਾ ਹੋ ਸਕਦਾ ਹੈ।"
 });
+/* phone test 21 Nov: the saved-document bar of the makers, and Scan barcode */
+NS.addLang("pa", {
+  "dnv.first": "ਪਹਿਲਾ",
+  "dnv.back": "ਪਿੱਛੇ: ਇਸ ਤੋਂ ਪਹਿਲਾਂ ਵਾਲਾ",
+  "dnv.next": "ਅੱਗੇ",
+  "dnv.last": "ਆਖ਼ਰੀ",
+  "dnv.pos": "{n} ਵਿੱਚੋਂ {a}",
+  "dnv.new": "ਨਵਾਂ · {n} ਸੇਵ ਹਨ",
+  "dnv.find": "ਨੰਬਰ ਨਾਲ ਲੱਭੋ",
+  "dnv.findh": "ਸੇਵ ਕੀਤਾ ਹੋਇਆ ਉਸਦੇ ਨੰਬਰ ਨਾਲ ਲੱਭੋ",
+  "dnv.list": "ਲਿਸਟ",
+  "dnv.listh": "ਸੇਵ ਕੀਤਿਆਂ ਦੀ ਲਿਸਟ, ਸਰਚ ਨਾਲ",
+  "dnv.scan": "ਬਾਰਕੋਡ ਸਕੈਨ",
+  "dnv.scanh": "ਕੈਮਰੇ ਨਾਲ ਆਈਟਮ ਦਾ ਬਾਰਕੋਡ ਸਕੈਨ ਕਰੋ"
+});

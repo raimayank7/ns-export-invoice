@@ -10578,3 +10578,18 @@ NS.addLang("gu", {
   "us.lo_ing": "લોગિન બંધ થઈ રહ્યા છે અને ફાઇલો અનલોક થઈ રહી છે…",
   "us.lo_done": "લોગિન બંધ છે."
 });
+/* phone test 21 Nov: the saved-document bar of the makers, and Scan barcode */
+NS.addLang("gu", {
+  "dnv.first": "પહેલું",
+  "dnv.back": "પાછળ: આની પહેલાંનું",
+  "dnv.next": "આગળ",
+  "dnv.last": "છેલ્લું",
+  "dnv.pos": "{n} માંથી {a}",
+  "dnv.new": "નવું · {n} સેવ છે",
+  "dnv.find": "નંબરથી શોધો",
+  "dnv.findh": "સેવ કરેલું તેના નંબરથી શોધો",
+  "dnv.list": "લિસ્ટ",
+  "dnv.listh": "સેવ કરેલાંની લિસ્ટ, સર્ચ સાથે",
+  "dnv.scan": "બારકોડ સ્કેન",
+  "dnv.scanh": "કેમેરાથી આઇટમનો બારકોડ સ્કેન કરો"
+});

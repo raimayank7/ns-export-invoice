@@ -10582,3 +10582,18 @@ NS.addLang("kok", {
   "us.lo_ing": "लॉगिन बंद जाता आनी फायली अनलॉक जातात…",
   "us.lo_done": "लॉगिन बंद आसा."
 });
+/* phone test 21 Nov: the saved-document bar of the makers, and Scan barcode */
+NS.addLang("kok", {
+  "dnv.first": "पयलें",
+  "dnv.back": "फाटीं: आदलें",
+  "dnv.next": "फुडें",
+  "dnv.last": "निमाणें",
+  "dnv.pos": "{n} पयकी {a}",
+  "dnv.new": "नवें · {n} सेव्ह जाल्लीं",
+  "dnv.find": "नं. सोदात",
+  "dnv.findh": "सेव्ह केल्लें एक ताच्या नंबरान सोदात",
+  "dnv.list": "लिस्ट",
+  "dnv.listh": "सेव्ह केल्ल्यांची लिस्ट, सर्चा सयत",
+  "dnv.scan": "बारकोड स्कॅन",
+  "dnv.scanh": "कॅमेऱ्यान आयटमाचो बारकोड स्कॅन करात"
+});

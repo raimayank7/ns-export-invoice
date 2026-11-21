@@ -10587,3 +10587,18 @@ NS.addLang("brx", {
   "us.lo_ing": "लगिन अफ खालामगासिनो आरो फाइलफोर आनलक खालामगासिनो दं…",
   "us.lo_done": "लगिनफोरा अफ जादों।"
 });
+/* phone test 21 Nov: the saved-document bar of the makers, and Scan barcode */
+NS.addLang("brx", {
+  "dnv.first": "गिबि",
+  "dnv.back": "उनथि: सिगांनि",
+  "dnv.next": "उननि",
+  "dnv.last": "जोबथा",
+  "dnv.pos": "{a} / {n}",
+  "dnv.new": "गोदान · {n} सेभ",
+  "dnv.find": "नम्बर नागिर",
+  "dnv.findh": "सेभ खालामनायखौ नम्बरजों नागिर",
+  "dnv.list": "लिस्ट",
+  "dnv.listh": "सेभ खालामनायफोरनि लिस्ट, नागिरनायजों",
+  "dnv.scan": "बारकड स्केन",
+  "dnv.scanh": "केमेराजों आइटेमनि बारकड स्केन खालाम"
+});

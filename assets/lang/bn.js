@@ -10579,3 +10579,18 @@ NS.addLang("bn", {
   "us.lo_ing": "লগইন বন্ধ হচ্ছে আর ফাইল আনলক হচ্ছে…",
   "us.lo_done": "লগইন বন্ধ আছে।"
 });
+/* phone test 21 Nov: the saved-document bar of the makers, and Scan barcode */
+NS.addLang("bn", {
+  "dnv.first": "প্রথম",
+  "dnv.back": "আগের: এর আগেরটা",
+  "dnv.next": "পরের",
+  "dnv.last": "শেষ",
+  "dnv.pos": "{n}টির মধ্যে {a}",
+  "dnv.new": "নতুন · {n}টি সেভ আছে",
+  "dnv.find": "নম্বর দিয়ে খুঁজুন",
+  "dnv.findh": "সেভ করা একটা তার নম্বর দিয়ে খুঁজুন",
+  "dnv.list": "লিস্ট",
+  "dnv.listh": "সেভ করাগুলোর লিস্ট, সার্চ সহ",
+  "dnv.scan": "বারকোড স্ক্যান",
+  "dnv.scanh": "ক্যামেরা দিয়ে আইটেমের বারকোড স্ক্যান করুন"
+});

@@ -743,7 +743,85 @@
   /* ---------- Install (the browser's own install prompt; hidden once installed) ---------- */
   window.addEventListener('beforeinstallprompt', function (e) { e.preventDefault(); deferredInstall = e; var b = $('[data-desk-install]'); if (b && !standalone()) b.hidden = false; });
   window.addEventListener('appinstalled', function () { deferredInstall = null; var b = $('[data-desk-install]'); if (b) b.hidden = true; NS.toast(T('installed')); });
+  /* owner 21 Nov: "make the web version like the Windows software": on the App the Install button is always there (not installed,
+     not the Windows program) and opens a box that says what installing gives and, where the browser has no install prompt, the
+     exact steps for that browser; plus one gentle note on the 3rd day of use, again at most once a month. App screens are English. */
+  var ISAPP = !!(window.NS_CFG && NS_CFG.inapp) && window.top === window;
+  function winProg() { return !!window.NSDesktopXL || /Electron\//.test(navigator.userAgent); }
+  function browserIs() {
+    var u = navigator.userAgent;
+    if (/iPhone|iPad|iPod/.test(u) || (/Macintosh/.test(u) && navigator.maxTouchPoints > 1)) return 'ios';
+    var mob = /Android/.test(u);
+    if (/SamsungBrowser/.test(u)) return 'samsung';
+    if (/Firefox\//.test(u)) return mob ? 'ffandroid' : 'firefox';
+    if (/Edg\//.test(u)) return mob ? 'android' : 'edge';
+    if (/OPR\//.test(u)) return mob ? 'android' : 'opera';
+    if (/Chrome\//.test(u)) return mob ? 'android' : 'chrome';
+    if (/Safari\//.test(u)) return 'safari';
+    return 'other';
+  }
+  var STEPS = {
+    chrome: ['Click the <b>install</b> icon at the right end of the address bar,', 'or open the menu <b>&#8942;</b> › <b>Cast, save and share</b> › <b>Install page as app</b>.', 'Press <b>Install</b>.'],
+    edge: ['Click the <b>App available</b> icon at the right end of the address bar,', 'or open the menu <b>…</b> › <b>Apps</b> › <b>Install this site as an app</b>.', 'Press <b>Install</b>.'],
+    opera: ['Open the menu, choose <b>Install NSBiz</b> (or look for the install icon in the address bar).'],
+    android: ['Tap the menu <b>&#8942;</b> at the top right.', 'Tap <b>Add to home screen</b> (or <b>Install app</b>).', 'Tap <b>Install</b>. NSBiz now has its own icon on your home screen.'],
+    samsung: ['Tap the menu <b>&#9776;</b> at the bottom.', 'Tap <b>Add page to</b> › <b>Home screen</b>.'],
+    ffandroid: ['Tap the menu <b>&#8942;</b>.', 'Tap <b>Install</b> (or <b>Add to Home screen</b>).'],
+    ios: ['Tap the <b>Share</b> button (the square with an arrow).', 'Scroll down and tap <b>Add to Home Screen</b>.', 'Tap <b>Add</b>. NSBiz now has its own icon on your home screen.'],
+    safari: ['In Safari on a Mac: open the <b>File</b> menu › <b>Add to Dock</b>.'],
+    firefox: ['Firefox on a computer cannot install web apps.', 'Open <b>app.niveshsahayak.in</b> in <b>Chrome</b> or <b>Edge</b> and install it there, or download <b>NSBiz for Windows</b> below.'],
+    other: ['Open your browser menu and look for <b>Install app</b> or <b>Add to home screen</b>.', 'If there is none, use Chrome or Edge, or download NSBiz for Windows below.']
+  };
+  function installBox() {
+    var old = $('#ns-inst'); if (old) old.remove();
+    var b = browserIs(), win = /Windows/.test(navigator.userAgent);
+    var d = NS.el('dialog', { id: 'ns-inst', class: 'inst-dlg', 'aria-labelledby': 'ns-inst-h' });
+    d.innerHTML = '<h2 id="ns-inst-h">Install NSBiz on this device</h2>' +
+      '<ul class="inst-why"><li><b>Its own window and icon</b>, like any other program: no address bar, no tabs.</li>' +
+      '<li><b>Opens without the internet</b> and starts faster.</li><li><b>Same data as now.</b> Nothing moves and nothing is sent to us.</li></ul>' +
+      (deferredInstall ? '<p><button type="button" class="btn primary" data-inst-go>Install now</button></p>' :
+        '<p class="inst-how">How to install in this browser:</p><ol class="inst-steps">' + STEPS[b].map(function (x) { return '<li>' + x + '</li>'; }).join('') + '</ol>') +
+      (win ? '<p class="soft inst-win">Prefer a normal Windows program with automatic daily copies of your data and the office network? <a href="/desktop/">Download NSBiz for Windows</a> (free).</p>' : '') +
+      '<div class="inst-b"><button type="button" class="btn" data-inst-x>Close</button></div>';
+    document.body.appendChild(d);
+    var go = $('[data-inst-go]', d);
+    if (go) go.onclick = function () {
+      var p = deferredInstall; if (!p) return;
+      p.prompt(); p.userChoice.finally(function () { deferredInstall = null; d.close(); });
+    };
+    $('[data-inst-x]', d).onclick = function () { d.close(); };
+    d.addEventListener('close', function () { d.remove(); });
+    try { d.showModal(); } catch (e) { d.setAttribute('open', ''); }
+  }
+  /* the note: from the 3rd day the App was used on this device; "Not now" waits 30 days */
+  function installNote() {
+    if (!ISAPP || standalone() || winProg() || $('#ns-wncard') || $('#ns-instnote')) return;
+    var now = Date.now(), days = [], later = 0;
+    try { days = JSON.parse(localStorage.getItem('ns-inst-days') || '[]'); later = +localStorage.getItem('ns-inst-later') || 0; } catch (e) {}
+    var today = new Date().toISOString().slice(0, 10);
+    if (days.indexOf(today) < 0) { days.push(today); days = days.slice(-5); try { localStorage.setItem('ns-inst-days', JSON.stringify(days)); } catch (e) {} }
+    if (days.length < 3 || now < later) return;
+    if (document.querySelector('dialog[open]')) { setTimeout(installNote, 5000); return; }
+    var bar = NS.el('div', { id: 'ns-instnote', class: 'remind', role: 'status' });
+    bar.innerHTML = '<div class="wrap"><span><b>Install NSBiz on this device:</b> its own window and icon, and it opens without the internet.</span>' +
+      '<button type="button" class="btn primary" data-inst-open>Install</button><button type="button" class="btn" data-inst-later>Not now</button></div>';
+    $('[data-inst-open]', bar).onclick = function () { bar.remove(); installBox(); };
+    $('[data-inst-later]', bar).onclick = function () { try { localStorage.setItem('ns-inst-later', String(now + 30 * 864e5)); } catch (e) {} bar.remove(); };
+    document.body.appendChild(bar);
+  }
+  if (ISAPP && !standalone() && !winProg()) {
+    var showBtn = function () {
+      var b = $('[data-desk-install]'); if (b) b.hidden = false;
+      /* phones: the title bar has no room for the button, so the side menu gets it too */
+      var sd = $('#ns-side'), g = sd && $('.side-g', sd);
+      if (g && !$('.side-inst', sd)) { var x = NS.el('button', { type: 'button', class: 'side-a side-inst', 'data-desk-install': '' }); x.textContent = 'Install NSBiz on this device'; g.parentNode.insertBefore(x, g); }   /* above the groups: never folded away */
+    };
+    if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', showBtn); else showBtn();
+    window.addEventListener('load', function () { setTimeout(installNote, 8000); });
+  }
+  window.addEventListener('appinstalled', function () { var n = $('#ns-instnote'); if (n) n.remove(); });
   function install() {
+    if (ISAPP) { installBox(); return; }
     if (!deferredInstall) { NS.toast(T('installhow')); return; }
     deferredInstall.prompt(); deferredInstall.userChoice.finally(function () { deferredInstall = null; var b = $('[data-desk-install]'); if (b) b.hidden = true; });
   }
@@ -1043,14 +1121,19 @@
       new MutationObserver(function (ms) { ms.forEach(function (m) { [].forEach.call(m.addedNodes, function (n) { if (n.nodeType === 1 && n.matches('dialog.b2-dlg')) voucherScreen(n); }); }); }).observe(document.body, { childList: true });
       /* any other box with an entry form (a Save button and a title bar) becomes a voucher screen when it opens; questions, search,
          help, the setup and other small boxes stay small. Some boxes draw their whole inside again at every opening: dressed each time */
-      var SMALL = '#desk-ask,#desk-cmd,#desk-keys,#ns-help,.nsf-dlg,.pk-dlg,.bz-dlg,#ns-mydata,.cap-dlg,#ns-tell,#ns-series,.sf-gate,.help-pnl,.qe-cus';
+      var SMALL = '#desk-ask,#ns-wncard,#ns-inst,#desk-cmd,#desk-keys,#ns-help,.nsf-dlg,.pk-dlg,.bz-dlg,#ns-mydata,.cap-dlg,#ns-tell,#ns-series,.sf-gate,.help-pnl,.qe-cus';
       var open0 = HTMLDialogElement.prototype.showModal;
       HTMLDialogElement.prototype.showModal = function () {
         try { if (this.classList.contains('vs')) vsDress(this); else if (!this.matches(SMALL) && $('.dlg-hd,.dlg-h', this) && $('input:not([type=hidden]),select,textarea,table,button[type=submit]', this)) voucherScreen(this);   /* any titled box with fields or a list (a tool's rooms, diary, stock...) */ } catch (e) {}
         this._at = Date.now();
         /* an entry screen opens WITHOUT locking the page (multitasking): the title bar (bell, search, Help), the side menu and the
            status bar stay usable; a newer screen sits above an older one. Small boxes and questions still lock the page. */
-        if (this.classList.contains('vs')) { VSZ += 1; this.style.zIndex = String(VSZ); return HTMLDialogElement.prototype.show.apply(this, arguments); }
+        if (this.classList.contains('vs')) {
+          VSZ += 1; this.style.zIndex = String(VSZ); vsHist(this);
+          var r0 = HTMLDialogElement.prototype.show.apply(this, arguments);
+          frVs(); this.addEventListener('close', frVs, { once: true });
+          return r0;
+        }
         return open0.apply(this, arguments);
       };
       return;
@@ -1081,6 +1164,10 @@
   /* the title bar's close button becomes Back; the Save bar gets the keys to remember; a new form starts clean at the top */
   function vsDress(d) {
     var back = $('.vs-back', d) || $('.dlg-hd .icon-btn', d) || $('.dlg-hd [data-x]', d) || $('.dlg-h form[method=dialog] button', d) || $('.dlg-h > button:last-child', d);
+    if (!back) {   /* phone test 21 Nov: a title bar with no close button (Additional cost) left only Cancel at the very bottom */
+      var hd0 = $('.dlg-hd,.dlg-h', d);
+      if (hd0) { back = NS.el('button', { type: 'button' }); hd0.insertBefore(back, hd0.firstChild); }
+    }
     if (back && !back.classList.contains('vs-back')) {
       back.removeAttribute('onclick'); back.type = 'button'; back.className = 'btn sm vs-back'; back.setAttribute('aria-keyshortcuts', 'Escape');
       back.innerHTML = '<span data-i18n="app.back">' + esc(NS.t('app.back')) + '</span>';
@@ -1091,6 +1178,69 @@
     if (d._resuming || Date.now() - (d._resumeAt || 0) < 1500) { d._resuming = false; return; }   /* a parked entry comes back as it was */
     d.removeAttribute('data-dirty'); d.scrollTop = 0;
   }
+  /* phone test 21 Nov 2026: the phone's Back button (and the browser's Back) closes the open entry screen instead of leaving
+     the App and losing the entry. Each entry screen is one step in the browser history (same address); Back takes that step
+     away: the screen closes, asking first when something is typed (Stay puts the step back). Closing it any other way takes
+     the step away too, without moving the page. */
+  var popSkip = 0;
+  /* phone test 21 Nov: inside the App's frame an entry screen showed the App's Back row AND its own Back: while one is open, the
+     App's row steps aside (same site, so the frame can tell the App directly) */
+  function frVs() {
+    if (!document.documentElement.classList.contains('embed')) return;
+    try {
+      var pd = window.parent.document.documentElement, on = !!document.querySelector('dialog.vs[open]');
+      if (pd.classList.contains('fr-vs') !== on) { pd.classList.toggle('fr-vs', on); window.parent.dispatchEvent(new Event('resize')); }
+    } catch (e) {}
+  }
+  /* Chrome on Android skips history steps a page adds, so its Back key never reached them (tested on Android 16): where the browser
+     has close watchers (Chrome 120+), the phone's Back closes the entry screen through one; elsewhere the history step is used */
+  function vsLeaveAsk(d, stay) {
+    if (!d.getAttribute('data-dirty')) { d.close(); return; }
+    NS.ask(NS.t('app.vs_leave'), { ok: NS.t('app.vs_discard'), no: NS.t('app.vs_stay'), danger: 1 }).then(function (y) {
+      if (y) { d.removeAttribute('data-dirty'); d.close(); return; }
+      stay();
+      var x = $('input,select', d); if (x) x.focus();
+    });
+  }
+  /* the watcher is made just after the screen shows and made again at each tap inside it: Chrome only gives the Back key to a
+     close watcher that is new enough (one made while the screen was opening never got it on Android 16) */
+  function vsUnwatch(d) { if (d._cw) { var w = d._cw; d._cw = null; w.onclose = null; try { w.destroy(); } catch (e) {} } }
+  function vsWatchNow(d) {
+    if (!d.open) return;
+    vsUnwatch(d);
+    try { d._cw = new CloseWatcher(); } catch (e) { d._cw = null; return; }
+    d._cw.onclose = function () { d._cw = null; if (d.open) vsLeaveAsk(d, function () { vsWatchNow(d); }); };
+  }
+  function vsWatch(d) {
+    setTimeout(function () { vsWatchNow(d); }, 0);
+    if (d._cwWired) return;
+    d._cwWired = 1;
+    /* after the tap or key press has counted as the user's action (a touch counts when the finger lifts, so not pointerdown) */
+    var re = function () { if (d.open) vsWatchNow(d); };
+    d.addEventListener('click', re, true);
+    d.addEventListener('input', re, true);
+    d.addEventListener('close', function () { vsUnwatch(d); });
+  }
+  function vsHist(d) {
+    if (typeof CloseWatcher === 'function') { vsWatch(d); return; }
+    if (d._hist) return;
+    d._hist = 1;
+    try { history.pushState({ nsvs: Date.now() }, ''); } catch (e) { d._hist = 0; return; }
+    if (d._histWired) return;
+    d._histWired = 1;
+    d.addEventListener('close', function () {
+      if (!d._hist) return;
+      d._hist = 0;
+      if (history.state && history.state.nsvs) { popSkip += 1; history.back(); }
+    });
+  }
+  window.addEventListener('popstate', function () {
+    if (popSkip) { popSkip -= 1; return; }
+    var open = $$('dialog.vs[open]').filter(function (x) { return x._hist; }).sort(function (a, b) { return (+b.style.zIndex || 0) - (+a.style.zIndex || 0); })[0];
+    if (!open) return;
+    open._hist = 0;   /* the step is already gone */
+    vsLeaveAsk(open, function () { vsHist(open); });   /* staying: the step comes back, so the next Back asks again */
+  });
   /* leave the voucher screen; with typing in it, ask first. then = what to open next (an F key) */
   /* Esc on an entry screen (it is not a locked box, so the browser does not do it): the top one goes back, asking first when typed */
   document.addEventListener('keydown', function (e) {
@@ -1299,6 +1449,31 @@
   function dot() { [].forEach.call(document.querySelectorAll('#ns-side a[href$="whats-new/"]'), function (a) { a.classList.add('wn-new'); }); }
   dot(); setTimeout(dot, 1500);
   if (get(NOTE) >= W.d) return;
+  /* owner 21 Nov ("will anyone see what we did?"): after an update the App shows ONE card with the newest update's top lines,
+     a link to everything and Got it; never again for that update. It waits until no entry screen or box is open. */
+  function card() {
+    if (!W.h || !W.h.length || document.getElementById('ns-wncard')) return note();
+    if (document.querySelector('dialog[open]')) { setTimeout(card, 4000); return; }
+    var link = document.querySelector('#ns-side a[href$="whats-new/"]'), href = link ? link.getAttribute('href') : '/whats-new/';
+    var KW = { new: 'New', better: 'Better', fix: 'Fixed' };
+    var d = NS.el('dialog', { id: 'ns-wncard', class: 'wn-card', 'aria-labelledby': 'ns-wncard-h' });
+    d.innerHTML = '<p class="wn-card-k">' + NS.esc(NS.t('wn.card_k')) + '</p><h2 id="ns-wncard-h"></h2><ul class="wn-card-l"></ul>' +
+      '<p class="wn-card-more soft"></p><div class="wn-card-b"><a class="btn" data-ic="new"></a><button type="button" class="btn primary" data-wn-ok data-noic></button></div>';
+    NS.$('h2', d).textContent = W.n || NS.t('wn.title');
+    NS.$('ul', d).innerHTML = W.h.map(function (x) {
+      return '<li class="t-' + NS.esc(x[0]) + '"><span class="wn-tag">' + NS.esc(KW[x[0]] || '') + '</span><b>' + NS.esc(x[1]) + '</b><span>' + NS.esc(x[2] || '') + '</span></li>';
+    }).join('');
+    var more = (W.c || 0) - W.h.length;
+    NS.$('.wn-card-more', d).textContent = more > 1 ? NS.t('wn.card_more', { n: more }) : more === 1 ? NS.t('wn.card_more1') : '';
+    var a = NS.$('a', d); a.href = href; a.textContent = NS.t('wn.see');
+    var ok = NS.$('[data-wn-ok]', d); ok.textContent = NS.t('wn.ok');
+    var done = function () { put(NOTE); try { d.close(); } catch (e) {} d.remove(); };
+    ok.onclick = done; a.addEventListener('click', function () { put(NOTE); put(SEEN); d.remove(); });
+    d.addEventListener('cancel', function () { put(NOTE); });
+    d.addEventListener('close', function () { put(NOTE); if (d.isConnected) d.remove(); });
+    document.body.appendChild(d);
+    try { d.showModal(); ok.focus(); } catch (e) { d.setAttribute('open', ''); }
+  }
   function note() {
     if (document.getElementById('ns-wnnote')) return;
     var L = NS.lang ? NS.lang() : 'en', link = document.querySelector('#ns-side a[href$="whats-new/"]');
@@ -1315,7 +1490,7 @@
       a.textContent = NS.t('wn.see'); ok.textContent = NS.t('wn.ok');
     });
   }
-  if (document.readyState === 'complete') setTimeout(note, 2500); else window.addEventListener('load', function () { setTimeout(note, 2500); });
+  if (document.readyState === 'complete') setTimeout(card, 2500); else window.addEventListener('load', function () { setTimeout(card, 2500); });
   /* opened from the App (it shows inside the App's frame, #do/page/whats-new/): seen (F1-14) */
   function seenNow() { put(SEEN); put(NOTE); [].forEach.call(document.querySelectorAll('#ns-side a.wn-new'), function (a) { a.classList.remove('wn-new'); }); var nb = document.getElementById('ns-wnnote'); if (nb) nb.remove(); }
   document.addEventListener('click', function (e) { var a = e.target.closest && e.target.closest('a[href*="whats-new"]'); if (a) seenNow(); }, true);

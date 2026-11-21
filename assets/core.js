@@ -340,11 +340,12 @@
       var at = L.map(function (d) { return d.id; }).indexOf(o.current()), n = L.length, cur = at >= 0;
       var btn = function (k, label, title, off) { return '<button type="button" class="btn sm" data-dnav="' + k + '" title="' + NS.esc(title) + '" aria-label="' + NS.esc(title) + '"' + (off ? ' disabled' : '') + '>' + label + '</button>'; };
       var f = bar.querySelector('.vt-find'), typed = f ? f.value : '', had = f && document.activeElement === f;
-      bar.innerHTML = btn('first', '|◀', 'First', !n || at === 0) + btn('back', '◀', 'Back: the one before', !n || at === 0) +
-        '<span class="vt-pos soft">' + (cur ? (at + 1) + ' of ' + n : 'New · ' + n + ' saved') + '</span>' +
-        btn('next', '▶', 'Next', !cur || at >= n - 1) + btn('last', '▶|', 'Last', !n || at === n - 1) +
-        '<input class="vt-find" type="search" placeholder="Find no." aria-label="Find a saved one by its number" autocomplete="off">' +
-        btn('list', 'List', 'List of saved ones, with search');
+      var W = function (k, x) { return NS.t('dnv.' + k, x); };   /* phone test 21 Nov: these were English on every language */
+      bar.innerHTML = btn('first', '|◀', W('first'), !n || at === 0) + btn('back', '◀', W('back'), !n || at === 0) +
+        '<span class="vt-pos soft">' + (cur ? W('pos', { a: at + 1, n: n }) : W('new', { n: n })) + '</span>' +
+        btn('next', '▶', W('next'), !cur || at >= n - 1) + btn('last', '▶|', W('last'), !n || at === n - 1) +
+        '<input class="vt-find" type="search" placeholder="' + NS.esc(W('find')) + '" aria-label="' + NS.esc(W('findh')) + '" autocomplete="off">' +
+        btn('list', NS.esc(W('list')), W('listh'));
       var nf = bar.querySelector('.vt-find'); if (typed) nf.value = typed; if (had) nf.focus();
     }, function () {});
   };

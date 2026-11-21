@@ -10502,3 +10502,18 @@ NS.addLang("mni", {
   "us.lo_ing": "ꯂꯣꯒꯏꯟ ꯑꯣꯐ ꯇꯧꯔꯤ ꯑꯃꯁꯨꯡ ꯐꯥꯏꯂꯁꯤꯡ ꯑꯅꯂꯣꯛ ꯇꯧꯔꯤ…",
   "us.lo_done": "ꯂꯣꯒꯏꯟ ꯑꯣꯐ ꯇꯧꯔꯦ꯫"
 });
+/* phone test 21 Nov: the saved-document bar of the makers, and Scan barcode */
+NS.addLang("mni", {
+  "dnv.first": "ꯑꯍꯥꯅꯕ",
+  "dnv.back": "ꯍꯟꯊꯕ: ꯃꯃꯥꯡꯒꯤ",
+  "dnv.next": "ꯃꯊꯪꯒꯤ",
+  "dnv.last": "ꯑꯔꯣꯏꯕ",
+  "dnv.pos": "{a} / {n}",
+  "dnv.new": "ꯑꯅꯧꯕ · {n} ꯁꯦꯚ",
+  "dnv.find": "ꯅꯝꯕꯔ ꯊꯤꯕ",
+  "dnv.findh": "ꯁꯦꯚ ꯇꯧꯔꯕ ꯑꯃ ꯅꯝꯕꯔꯅ ꯊꯤꯕꯤꯌꯨ",
+  "dnv.list": "ꯂꯤꯁ꯭ꯠ",
+  "dnv.listh": "ꯁꯦꯚ ꯇꯧꯔꯕꯁꯤꯡꯒꯤ ꯂꯤꯁ꯭ꯠ, ꯊꯤꯕ ꯌꯥꯕ",
+  "dnv.scan": "ꯕꯥꯔꯀꯣꯗ ꯁ꯭ꯀꯦꯟ",
+  "dnv.scanh": "ꯀꯦꯃꯦꯔꯥꯅ ꯑꯥꯏꯇꯦꯃꯒꯤ ꯕꯥꯔꯀꯣꯗ ꯁ꯭ꯀꯦꯟ ꯇꯧꯕꯤꯌꯨ"
+});

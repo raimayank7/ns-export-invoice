@@ -10450,3 +10450,18 @@ NS.addLang("or", {
   "us.lo_ing": "ଲଗଇନ ବନ୍ଦ କରି ଫାଇଲର ଲକ ଖୋଲୁଛି…",
   "us.lo_done": "ଲଗଇନ ବନ୍ଦ ହେଲା।"
 });
+/* phone test 21 Nov: the saved-document bar of the makers, and Scan barcode */
+NS.addLang("or", {
+  "dnv.first": "ପ୍ରଥମ",
+  "dnv.back": "ପୂର୍ବଟି",
+  "dnv.next": "ପରବର୍ତ୍ତୀ",
+  "dnv.last": "ଶେଷ",
+  "dnv.pos": "{n} ରୁ {a}",
+  "dnv.new": "ନୂଆ · {n} ସେଭ ହୋଇଛି",
+  "dnv.find": "ନମ୍ବର ଖୋଜନ୍ତୁ",
+  "dnv.findh": "ସେଭ ହୋଇଥିବାକୁ ତାର ନମ୍ବରରେ ଖୋଜନ୍ତୁ",
+  "dnv.list": "ଲିଷ୍ଟ",
+  "dnv.listh": "ସେଭ ହୋଇଥିବାର ଲିଷ୍ଟ, ସର୍ଚ୍ଚ ସହ",
+  "dnv.scan": "ବାରକୋଡ୍ ସ୍କାନ୍",
+  "dnv.scanh": "ଆଇଟମର ବାରକୋଡ୍ କ୍ୟାମେରାରେ ସ୍କାନ୍ କରନ୍ତୁ"
+});
