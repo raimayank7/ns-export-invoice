@@ -398,44 +398,54 @@
   };
 
   /* ---------- receipt printer (thermal, ESC/POS) without the print box (owner 20 Nov) ----------
-     ReceiptPrinterEncoder 4.0.1 + WebUSB / WebSerial Receipt Printer (Niels Leenheer, MIT), copies in /assets/vendor/.
-     USB: works where no Windows driver has taken the printer (Android, Mac, Linux, ChromeOS). On Windows a printer with its
-     driver installed is reached through the driver's virtual COM port: choose "Serial / COM port" (also Bluetooth printers).
-     The printer chosen is remembered; next time it reconnects by itself. NS.rpPrint(build): build(encoder) adds the lines. */
-  var RPLIB = ['/assets/vendor/receipt-printer-encoder-4.0.1.js', '/assets/vendor/webusb-receipt-printer-2.1.0.js', '/assets/vendor/webserial-receipt-printer-2.0.0.js'];
-  var RP = null;
-  function rpSaved() { try { return JSON.parse(localStorage.getItem('ns-rp') || 'null'); } catch (e) { return null; } }
-  function rpKeep(o) { try { localStorage.setItem('ns-rp', JSON.stringify(o)); } catch (e) {} }
-  function rpMake(kind, cols) {
-    var P = kind === 'usb' ? new window.WebUSBReceiptPrinter() : new window.WebSerialReceiptPrinter({ baudRate: 9600 });
-    return { kind: kind, p: P, cols: cols, ready: new Promise(function (res) { P.addEventListener('connected', function (dev) { rpKeep({ kind: kind, dev: dev, cols: cols }); res(dev); }); }) };
+     The work is in rpcore.js (NSRp), loaded with its libraries (/assets/vendor/, MIT) only when someone prints to the receipt
+     printer or opens its settings. Settings are kept per device (localStorage 'ns-rp'). */
+  var RPGO = null;
+  function rpLoad() {
+    var L = (window.NS_CFG && NS_CFG.lazy) || {};
+    return NS.loadJs(L['rpcore.js'] || '/assets/rpcore.js').then(function () { return Promise.all(NSRp.LIB.map(function (u) { return NS.loadJs(u); })); }).then(function () { return window.NSRp; });
   }
-  NS.rpForget = function () { RP = null; try { localStorage.removeItem('ns-rp'); } catch (e) {} };
-  NS.rpPrint = function (build, cols) {
-    return Promise.all(RPLIB.map(function (u) { return NS.loadJs(u); })).then(function () {
-      var send = function (r) { return r.ready.then(function () { var enc = new window.ReceiptPrinterEncoder({ language: 'esc-pos', columns: r.cols || cols || 48 }); build(enc.initialize()); return r.p.print(enc.encode()); }); };
-      var sv = rpSaved();
-      if (RP) return send(RP);
-      if (sv && sv.dev) { RP = rpMake(sv.kind, sv.cols || cols); RP.p.reconnect(sv.dev); return Promise.race([RP.ready, new Promise(function (_, rej) { setTimeout(function () { rej(new Error('gone')); }, 2500); })]).then(function () { return send(RP); }, function () { RP = null; return choose(); }); }
-      return choose();
-      function choose() {
-        return new Promise(function (resolve, reject) {
-          if (!('usb' in navigator) && !('serial' in navigator)) { NS.toast('This browser cannot talk to a receipt printer directly. Use Chrome or Edge on a computer, or the NSBiz Windows program, or Print / PDF.', 'bad'); reject(new Error('none')); return; }
-          var d = document.createElement('dialog'); d.className = 'b2-dlg';
-          d.innerHTML = '<h3>Connect the receipt printer</h3><p class="soft">Once only: NSBiz remembers it. A printer with its Windows driver installed: choose Serial / COM port. Paper width:</p>' +
-            '<p><label><input type="radio" name="rpc" value="48" ' + ((cols || 48) >= 48 ? 'checked' : '') + '> 80 mm (48 letters)</label> &nbsp; <label><input type="radio" name="rpc" value="32" ' + ((cols || 48) < 48 ? 'checked' : '') + '> 58 mm (32 letters)</label></p>' +
-            '<div class="row" style="display:flex;gap:8px;flex-wrap:wrap"><button type="button" class="btn primary" data-k="usb"' + ('usb' in navigator ? '' : ' disabled') + '>USB printer</button><button type="button" class="btn" data-k="serial"' + ('serial' in navigator ? '' : ' disabled') + '>Serial / COM port / Bluetooth</button><button type="button" class="btn" data-k="x">Cancel</button></div>';
-          document.body.appendChild(d); d.showModal();
-          d.addEventListener('click', function (e) {
-            var b = e.target.closest('button[data-k]'); if (!b) return; var k = b.getAttribute('data-k');
-            if (k === 'x') { d.close(); d.remove(); reject(new Error('cancel')); return; }
-            var c = +((d.querySelector('input[name=rpc]:checked') || {}).value || 48);
-            RP = rpMake(k, c); RP.p.connect();   /* inside the click: the browser shows its own list of printers */
-            d.close(); d.remove();
-            Promise.race([RP.ready, new Promise(function (_, rej) { setTimeout(function () { rej(new Error('none')); }, 60000); })]).then(function () { return send(RP); }).then(resolve, function (er) { RP = null; reject(er); });
-          });
-        });
+  function rpOpts() { try { return JSON.parse(localStorage.getItem('ns-rp') || 'null') || {}; } catch (e) { return {}; } }
+  NS.rpCan = function () { return 'usb' in navigator || 'serial' in navigator; };
+  NS.rpReady = function () { var o = rpOpts(); return NS.rpCan() && !!o.dev && o.direct !== false; };   /* Print on a thermal bill goes straight to the printer */
+  NS.rpSetup = function (opt) { return rpLoad().then(function (R) { return R.setup(opt); }); };
+  NS.rpForget = function () { if (window.NSRp) NSRp.forget(); else try { localStorage.removeItem('ns-rp'); } catch (e) {} };
+  /* what: function(encoder, opts) adding the lines (docs.js), or the thermal sheet on screen (kit.js; copied at once, so the screen
+     may change while the printer library loads). fallback(): the normal print box, used when the browser cannot reach a printer or
+     the printer does not answer. Resolves true when the bill went to the printer. */
+  NS.rpPrint = function (what, fallback) {
+    fallback = fallback || function () {};
+    if (!NS.rpCan()) { NS.toast(NS.t('tpr.nobrowser'), 'bad'); fallback(); return Promise.resolve(false); }
+    if (what && what.nodeType) {   /* a still copy of the sheet, out of sight, so its styles still apply */
+      var box = document.createElement('div');
+      box.style.cssText = 'position:fixed;top:0;left:0;opacity:0;pointer-events:none;z-index:-1;width:' + (what.offsetWidth || 320) + 'px';
+      box.setAttribute('aria-hidden', 'true'); box.innerHTML = what.innerHTML; document.body.appendChild(box); what = box;
+    }
+    var keep = what;
+    return rpLoad().then(function (R) {
+      var plan = keep && keep.nodeType ? R.fromSheets(keep) : null;
+      if (keep && keep.nodeType) keep.remove();
+      var go = function () { return plan ? R.printPlans(plan) : R.printWith(keep); };
+      if (!R.has()) return R.setup({ thenClose: true }).then(function (ok) { return ok ? go().then(function () { return true; }) : false; });
+      return go().then(function () { return true; });
+    }).then(function (ok) { if (ok) NS.toast(NS.t('tpr.sent')); return ok; }, function () {
+      if (keep && keep.nodeType && keep.parentNode) keep.remove();
+      NS.toast(NS.t('tpr.noans2'), 'bad'); fallback(); return false;
+    });
+  };
+  /* "Receipt printer" and "Printer settings" beside every Print button, shown with the thermal paper sizes only. go(): print the bill. */
+  NS.rpButtons = function (thermal, go) {
+    RPGO = go;
+    NS.$$('[data-do="print"]').forEach(function (p) {
+      var b = p.parentNode.querySelector('[data-do="rprint"]'), g = p.parentNode.querySelector('[data-do="rpset"]');
+      if (!b) {
+        b = document.createElement('button'); b.type = 'button'; b.className = p.className.replace(/\bprimary\b/, ''); b.setAttribute('data-do', 'rprint'); b.setAttribute('data-ic', 'print');
+        b.setAttribute('data-i18n', 'tpr.btn'); b.textContent = NS.t('tpr.btn'); b.addEventListener('click', function () { if (RPGO) RPGO(); });
+        g = document.createElement('button'); g.type = 'button'; g.className = b.className; g.setAttribute('data-do', 'rpset');
+        g.setAttribute('data-i18n', 'tpr.set'); g.textContent = NS.t('tpr.set'); g.addEventListener('click', function () { NS.rpSetup(); });
+        p.insertAdjacentElement('afterend', b); b.insertAdjacentElement('afterend', g);
       }
+      b.hidden = !thermal; if (g) g.hidden = !thermal;
     });
   };
 

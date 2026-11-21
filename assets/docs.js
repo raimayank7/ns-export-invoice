@@ -728,8 +728,9 @@
   /* the bill on a receipt printer (thermal paper 58 / 80 mm), same content as the thermal layout on screen */
   function plain(h) { var x = document.createElement('div'); x.innerHTML = String(h == null ? '' : h); return (x.textContent || '').replace(/\s+/g, ' ').trim(); }
   function rpBuild(d) {
-    var tt = totals(d), tax = taxOn(d), s = d.seller || {}, b = d.buyer || {}, n = d.paper === 'th58' ? 32 : 48, m = function (v) { return NS.money(v, false); };
-    return function (e) {
+    var tt = totals(d), tax = taxOn(d), s = d.seller || {}, b = d.buyer || {}, m = function (v) { return NS.money(v, false); };
+    return function (e, o) {
+      var n = (o && o.cols) || (d.paper === 'th58' ? 32 : 48);
       e.align('center').bold(true).size(1, 2).line(plain(s.name || '')).size(1, 1).bold(false);
       String(s.addr || '').split(/\n/).forEach(function (l) { if (l.trim()) e.line(l.trim()); });
       if ([s.city, s.pin].filter(Boolean).length) e.line([s.city, s.pin].filter(Boolean).join(' - '));
@@ -753,23 +754,13 @@
       e.bold(true).size(1, 2).table([{ width: w1, align: 'left' }, { width: w2, align: 'right' }], [['TOTAL', m(tt.grand)]]).size(1, 1).bold(false);
       e.line(NS.inWords(tt.grand));
       if (tcsDeclRow(d)) e.line(tcsDeclRow(d));
-      if (T.qr && s.upi && tt.grand > 0 && d.status !== 'paid') { e.align('center').line('Scan to pay by UPI').qrcode('upi://pay?pa=' + encodeURIComponent(s.upi) + '&pn=' + encodeURIComponent(s.name || '') + '&am=' + tt.grand.toFixed(2) + '&cu=INR', { size: 6 }).line(s.upi); }
-      e.align('center').newline().line(d.notes ? plain(d.notes).slice(0, n * 2) : 'Thank you, visit again').line('NSBiz by Nivesh Sahayak').newline(3).cut();
+      if (T.qr && s.upi && tt.grand > 0 && d.status !== 'paid') { e.align('center').line('Scan to pay by UPI'); NSRp.qr(e, 'upi://pay?pa=' + encodeURIComponent(s.upi) + '&pn=' + encodeURIComponent(s.name || '') + '&am=' + tt.grand.toFixed(2) + '&cu=INR', o); e.line(s.upi); }
+      e.align('center').newline().line(d.notes ? plain(d.notes).slice(0, n * 2) : 'Thank you, visit again').line('NSBiz by Nivesh Sahayak');   /* paper feed, cut and cash drawer: NSRp.finish */
     };
   }
   NS.rpBuildOf = function () { return rpBuild(doc); };   /* the receipt of the bill on screen (tests and the Windows program) */
-  function rprintDoc() {
-    NS.rpPrint(rpBuild(doc), doc.paper === 'th58' ? 32 : 48).then(function () { NS.toast('Sent to the receipt printer'); }, function (e) {
-      if (e && /cancel|none/.test(e.message)) return; NS.toast('The receipt printer did not answer. Check that it is on, then try again (or use Print / PDF).', 'bad'); NS.rpForget();
-    });
-  }
-  function rpBtns() {   /* shown with the thermal paper sizes only */
-    $$('[data-do="print"]').forEach(function (p) {
-      var b = p.parentNode.querySelector('[data-do="rprint"]');
-      if (!b) { b = document.createElement('button'); b.type = 'button'; b.className = p.className.replace(/\bprimary\b/, ''); b.setAttribute('data-do', 'rprint'); b.setAttribute('data-ic', 'print'); b.textContent = 'Receipt printer'; b.addEventListener('click', function () { if (totals(doc).rows.length) save().then(rprintDoc, function () {}); else rprintDoc(); }); p.insertAdjacentElement('afterend', b); }
-      b.hidden = !/^th/.test(doc.paper || '');
-    });
-  }
+  function rprintDoc() { return NS.rpPrint(rpBuild(doc), browserPrint); }
+  function rpBtns() { NS.rpButtons(/^th/.test(doc.paper || ''), function () { if (totals(doc).rows.length) save().then(rprintDoc, function () {}); else rprintDoc(); }); }
   /* thermal roll (58 or 80 mm): one narrow column, every line on its own row */
   function thermalHtml(d, tt, tax, SG, copyLabel) {
     var s = d.seller, b = d.buyer, line = function (l, r, cls) { return '<tr' + (cls ? ' class="' + cls + '"' : '') + '><th>' + l + '</th><td>' + r + '</td></tr>'; };
@@ -861,7 +852,7 @@
   function drawQr(box, s, d, amount) {
     if (!window.qrcode) return;
     var link = 'upi://pay?pa=' + encodeURIComponent(s.upi.trim()) + '&pn=' + encodeURIComponent((s.name || '').slice(0, 40)) + '&am=' + amount.toFixed(2) + '&cu=INR&tn=' + encodeURIComponent((docName() + ' ' + d.no).slice(0, 40));
-    try { var qr = qrcode(0, 'M'); qr.addData(link); qr.make(); box.innerHTML = qr.createSvgTag({ cellSize: 3, margin: 0, scalable: true }); } catch (e) { box.hidden = true; }
+    try { var qr = qrcode(0, 'M'); qr.addData(link); qr.make(); box.innerHTML = qr.createSvgTag({ cellSize: 3, margin: 0, scalable: true }); box.setAttribute('data-link', link); } catch (e) { box.hidden = true; }
   }
   function fit() {
     var wrap = $('.pv', root), sc = $('.pv-scale', root);
@@ -1093,7 +1084,24 @@
   }
 
   /* ---------- history ---------- */
-  var histOpen = false;
+  var histOpen = false, histRows = [];
+  /* pdf-lib: "Download these as one PDF": the documents the list shows (after the search), oldest first, in one PDF file */
+  function histPdfBtn(dlg, n) {
+    if (!NS.manyPdf) return;
+    var b = $('[data-hist-pdf]', dlg);
+    if (!b) {
+      b = NS.el('button', { type: 'button', 'class': 'btn sm', 'data-hist-pdf': '', 'data-ic': 'download' }, '');
+      var l = $('[data-hist-list]', dlg); l.parentNode.insertBefore(b, l);
+      b.addEventListener('click', function () {
+        var rows = histRows.slice().sort(function (a, c) { return (a.date || '').localeCompare(c.date || '') || String(a.no || '').localeCompare(String(c.no || '')); });
+        if (!rows.length) return;
+        (rows.length > 60 && NS.ask ? NS.ask(t('pdf.many', { n: rows.length })) : Promise.resolve(true)).then(function (ok) {
+          if (!ok) return; dlg.close(); paList(rows, true, docName() + ' (' + rows.length + ') ' + NS.today());
+        });
+      });
+    }
+    b.textContent = t('pdf.onepdf', { n: n }); b.disabled = !n;
+  }
   function renderHistory() {
     var dlg = $('#ns-history'); if (!dlg) return;
     var list = $('[data-hist-list]', dlg), q = $('[data-hist-q]', dlg);
@@ -1102,6 +1110,7 @@
       var rows = all.filter(function (d) { return d.type === doc.type && (!T.split || T.kinds.indexOf(d.kind || T.kinds[0]) >= 0); }).filter(function (d) {
         return !v || [d.no, d.buyer && d.buyer.name, d.seller && d.seller.name].join(' ').toLowerCase().indexOf(v) >= 0;
       }).sort(function (a, b) { return (b.date || '').localeCompare(a.date || '') || (b.updated || 0) - (a.updated || 0); });
+      histRows = rows; histPdfBtn(dlg, rows.length);
       /* money recorded in the App (part payments, receipts against bills) shows here too: "₹3,556.00 due" instead of "Not paid" */
       var left = {};
       if (T.pay && window.NSBooks) rows.forEach(function (d) {
@@ -1154,21 +1163,33 @@
   }
 
   /* ---------- print, share ---------- */
-  function printAll(r) {
+  function printAll(r, asPdf) {
     var me = String(doc.seller && doc.seller.name || '').trim().toLowerCase();
     return NSStore.list('doc').then(function (all) {
       var list = all.filter(function (x) { return (x.type || 'invoice') === (type === 'exp' ? 'expinv' : type) && (!T.split || !T.kinds || T.kinds.indexOf(x.kind) >= 0) && (x.date || '') >= r[0] && (x.date || '') <= (r[1] || r[0]) && (!me || String(x.seller && x.seller.name || '').trim().toLowerCase() === me); })
         .sort(function (a, b) { return (a.date || '').localeCompare(b.date || '') || String(a.no || '').localeCompare(String(b.no || '')); });
       if (!list.length) { NS.toast(t('conv.none'), 'bad'); return; }
-      showTab('preview', true); paHold = true;
-      sheet.innerHTML = list.map(function (d, i) { return '<div class="pa-doc" data-pa="' + i + '">' + labelsFor(d, true).map(function (l) { return sheetHtml(d, l); }).join('') + '</div>'; }).join('');
-      list.forEach(function (d, i) { $$('[data-qr]', $('[data-pa="' + i + '"]', sheet)).forEach(function (q) { drawQr(q, d.seller, d, totals(d).grand); }); });
-      pageStyle(list[0].paper); fit();
-      var old = document.title; document.title = docName() + ' ' + r[0] + ' to ' + (r[1] || r[0]);
-      setTimeout(function () { window.print(); document.title = old; setTimeout(function () { paHold = false; draw(); }, 300); }, 500);
+      return paList(list, asPdf, docName() + ' ' + r[0] + ' to ' + (r[1] || r[0]));
     });
   }
+  /* the documents one after another in the preview, then the print window, or (asPdf) one PDF file: each document drawn like
+     Share as PDF and the files joined with pdf-lib, so each keeps its own paper size (pdftools.js) */
+  function paList(list, asPdf, title) {
+    showTab('preview', true); paHold = true;
+    sheet.innerHTML = list.map(function (d, i) { return '<div class="pa-doc" data-pa="' + i + '">' + labelsFor(d, true).map(function (l) { return sheetHtml(d, l); }).join('') + '</div>'; }).join('');
+    list.forEach(function (d, i) { $$('[data-qr]', $('[data-pa="' + i + '"]', sheet)).forEach(function (q) { drawQr(q, d.seller, d, totals(d).grand); }); });
+    pageStyle(list[0].paper); fit();
+    if (asPdf && NS.manyPdf) return new Promise(function (res) { setTimeout(res, 400); }).then(function () {
+      return NS.manyPdf(list.map(function (d, i) { return { nodes: $$('.sh', $('[data-pa="' + i + '"]', sheet)), paper: d.paper }; }), title);
+    }).then(function () { paHold = false; draw(); });
+    var old = document.title; document.title = title;
+    setTimeout(function () { window.print(); document.title = old; setTimeout(function () { paHold = false; draw(); }, 300); }, 500);
+  }
   function printDoc() {
+    if (/^th/.test(doc.paper || '') && NS.rpReady && NS.rpReady()) { rprintDoc(); return; }   /* a receipt printer is set up on this device: no print box */
+    browserPrint();
+  }
+  function browserPrint() {
     var old = document.title;
     document.title = fileName();
     showTab('preview', true);
@@ -1301,7 +1322,7 @@
       if (NS.leaving) return;   /* this page is moving to the visitor's language page, which reads ?from= itself */
       /* ?printall=from,to: NSBiz's Print many vouchers: every document of this kind in those dates, one after another */
       var pall = qs.get('printall');
-      if (pall) { history.replaceState(null, '', location.pathname + location.hash); return printAll(pall.split(',')); }
+      if (pall) { history.replaceState(null, '', location.pathname + location.hash); return printAll(pall.split(','), qs.get('pdf') === '1'); }   /* &pdf=1: one PDF instead of the print window (pdftools.js) */
       /* ?open=<id>: NSBiz opens a saved document here to edit, print or share */
       if (open) {
         history.replaceState(null, '', location.pathname + location.hash);

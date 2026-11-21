@@ -10374,3 +10374,45 @@ NS.addLang("brx", {
 NS.addLang("brx", {
   "bt.filter": "Filter"
 });
+
+/* receipt printer */
+NS.addLang("brx", {
+  "tpr.btn": "Receipt printer",
+  "tpr.set": "Printer settings",
+  "tpr.title": "Receipt printer",
+  "tpr.nosupport": "This browser cannot talk to a receipt printer directly. Use Chrome or Edge on a computer or an Android phone, or the NSBiz Windows program. Bills print through the normal print box meanwhile.",
+  "tpr.how": "How it is connected",
+  "tpr.usb": "USB",
+  "tpr.serial": "Serial / COM port / Bluetooth",
+  "tpr.howh": "On Windows, a printer whose own driver is installed is reached through its COM port: choose Serial / COM port.",
+  "tpr.paper": "Paper width",
+  "tpr.p80": "80 mm (48 letters a line)",
+  "tpr.p58": "58 mm (32 letters a line)",
+  "tpr.cut": "Cut the paper after each bill",
+  "tpr.drawer": "Open the cash drawer after each bill",
+  "tpr.drawerh": "Only when a cash drawer is plugged into the printer.",
+  "tpr.qr": "UPI QR code on the bill",
+  "tpr.qrn": "Printer's own QR",
+  "tpr.qri": "As a picture (if the QR comes out wrong)",
+  "tpr.qro": "Do not print",
+  "tpr.direct": "Print button sends thermal bills straight to this printer (no print box)",
+  "tpr.connect": "Connect printer",
+  "tpr.test": "Print a test slip",
+  "tpr.forget": "Forget this printer",
+  "tpr.close": "Close",
+  "tpr.on": "Connected: {x}",
+  "tpr.off": "No receipt printer connected on this device.",
+  "tpr.sent": "Sent to the receipt printer",
+  "tpr.noans": "The receipt printer did not answer. Check that it is on and connected.",
+  "tpr.noans2": "The receipt printer did not answer, so the normal print box opens. Check that the printer is on.",
+  "tpr.nobrowser": "This browser cannot print to a receipt printer directly, so the normal print box opens.",
+  "tpr.ready": "Receipt printer connected"
+});
+/* One PDF of many documents (pdf-lib) */
+NS.addLang("brx", {
+  "pdf.onepdf": "Download these as one PDF ({n})",
+  "pdf.joining": "Making one PDF of {n} documents…",
+  "pdf.joined": "Saved {file}: {n} documents, {p} pages",
+  "pdf.joinfail": "The PDF could not be made here. Use Print and choose Save as PDF instead.",
+  "pdf.many": "Make one PDF of {n} documents? This can take a minute or two."
+});
