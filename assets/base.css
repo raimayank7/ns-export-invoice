@@ -520,7 +520,7 @@ details.off-work{margin:10px 0}details.off-work>summary{list-style:none;cursor:p
 dialog.xl-guide form{padding:20px 22px}dialog.xl-guide h3{margin:0 0 10px}dialog.xl-guide ol{padding-left:22px;margin:10px 0 14px}dialog.xl-guide li{margin:6px 0}dialog.xl-guide a{word-break:break-all}.xl-tpl{font-size:.85em;margin-left:6px}
 /* inside the App / Windows program (core.js appDoc): software screens, not a website */
 html.appdoc-cut main>:not(.appdoc-keep):not(dialog):not(.remind){display:none!important}
-html.appdoc .hero,html.appdoc .prose,html.appdoc .faq,html.appdoc .cards,html.appdoc .hub-link,html.appdoc .tool-top{display:none!important}
+html.appdoc .hero,html.appdoc .prose,html.appdoc:not(.appdoc-page) .faq,html.appdoc:not(.appdoc-page) .cards,html.appdoc .hub-link,html.appdoc .tool-top{display:none!important}
 html.appdoc-page .prose,html.appdoc-page article.prose{display:block!important;max-width:880px;margin-inline:auto}
 html.appdoc .tool,html.appdoc .tool.wrap{max-width:none;padding-inline:16px}
 html.appdoc-pv .grid2,html.appdoc-pv .dc-grid{display:block!important}
