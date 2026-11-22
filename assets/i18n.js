@@ -6140,6 +6140,8 @@
     "dc.g.personal": "Personal and general",
     /* Declarations maker (decl.js) */
     "dc.p.share": "the shares must add up to 100",
+    "dc.p.billsum": "the bills listed add up to a different amount",
+    "dc.p.billamt": "one bill line has no amount",
     "dc.p.guard": "name a guardian for the minor nominee",
     /* India plan D: trust, warranty (2026-11-17) */
     "tr.t": "Donations and members",

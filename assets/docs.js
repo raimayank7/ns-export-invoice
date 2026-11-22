@@ -806,7 +806,10 @@
     if (n) { var v = Math.min(+doc.copies || 1, set.length); n.innerHTML = set.map(function (k, i) { return '<option value="' + (i + 1) + '">' + esc(t(i ? 'cps.n' : 'cps.1', { n: i + 1 })) + '</option>'; }).join(''); n.value = String(v); doc.copies = v; }
   }
   /* print copies: 1 = the chosen label; 2 or 3 = Original, Duplicate (and Triplicate) one after another */
+  /* ?cp=orig,trip (the App's print box): exactly these copies, for this one print; the saved document is not changed */
+  var ONECP = (function () { var m = /[?&]cp=([a-z,]+)/.exec(location.search); return m ? m[1].split(',') : null; })();
   function labelsFor(d, all) {
+    if (all && ONECP && T.copy) { var cs = COPIES[copyKey()] || [], pick = ONECP.filter(function (k) { return cs.indexOf(k) >= 0; }); if (pick.length) return pick; }
     var n = +d.copies || 1;
     return T.copy && d.copyLabel && all && n > 1 ? COPIES[copyKey()].slice(0, n) : [d.copyLabel];
   }
@@ -1195,7 +1198,7 @@
     showTab('preview', true);
     draw(true);
     fit();
-    setTimeout(function () { window.print(); document.title = old; draw(); }, 60);
+    setTimeout(function () { window.print(); document.title = old; ONECP = null; draw(); }, 60);
   }
   /* the English name used in file names and shared messages */
   var NAMES = { tax: 'Invoice', supply: 'Bill of Supply', plain: 'Invoice', quote: 'Quotation', estimate: 'Estimate', proforma: 'Proforma Invoice', so: 'Sales Order', challan: 'Delivery Challan',
