@@ -3845,7 +3845,7 @@
     "ax.k_itref": "Income-tax refund received",
     "ax.kh_gst": "Money paid with a GST challan goes into your electronic cash ledger, head by head. The GSTR-3B set-off then uses it.",
     "ax.kh_tds": "TDS cut from payments is paid by the 7th of the next month (for March, by 30 April).",
-    "ax.kh_tcs": "TCS collected on sales is paid by the 7th of the next month (for March, by 30 April).",
+    "ax.kh_tcs": "TCS collected on sales is paid by the 7th of the next month (March too: by 7 April).",
     "ax.kh_adv": "Advance tax is paid by 15 June, 15 September, 15 December and 15 March; self-assessment tax before filing the return.",
     "ax.kh_gstref": "A refund the GST portal paid back from your cash ledger to your bank.",
     "ax.kh_itref": "An income-tax refund received in the bank.",
