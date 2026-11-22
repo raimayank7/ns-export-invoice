@@ -363,6 +363,7 @@ html.embed,html.embed body{overscroll-behavior-y:contain}   /* the end of the do
 /* line icons on text buttons (core.js NS.btnIcons) */
 .btn>svg.bi{width:1.1em;height:1.1em;flex:none;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
 .btn.sm>svg.bi{width:1em;height:1em}
+svg.bi.bi-fill{fill:currentColor!important;stroke:none!important}
 :is(.link,.linkish,[data-tab-btn])>svg.bi{width:1.05em;height:1.05em;flex:none;vertical-align:-.17em;margin-inline-end:5px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
 .md-nav button{display:flex;align-items:center;gap:2px}
 @media (max-width:620px){.md-nav button{justify-content:center}}

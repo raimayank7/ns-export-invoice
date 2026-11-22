@@ -1911,7 +1911,7 @@
     list: 'M9 6h11M9 12h11M9 18h11M4 6h1M4 12h1M4 18h1', gear: 'M12 8a4 4 0 1 0 0 8 4 4 0 0 0 0-8M12 2v3M12 19v3M2 12h3M19 12h3M4.9 4.9L7 7M17 17l2.1 2.1M4.9 19.1L7 17M17 7l2.1-2.1',
     lock: 'M6 11h12v9H6zM8 11V8a4 4 0 0 1 8 0v3', send: 'M4 12l16-8-6 16-3-7z', flag: 'M5 21V4M5 4h11l-2 4 2 4H5', reset: 'M4 12a8 8 0 1 0 3-6.2M4 4v5h5',
     check: 'M5 12l5 5 9-10', data: 'M5 6c0-1.7 3-3 7-3s7 1.3 7 3-3 3-7 3-7-1.3-7-3M5 6v12c0 1.7 3 3 7 3s7-1.3 7-3V6M5 12c0 1.7 3 3 7 3s7-1.3 7-3',
-    ext: 'M14 4h6v6M20 4l-9 9M18 14v6H4V6h6', wa: 'M4 20l1.3-4A8 8 0 1 1 8 18.7zM9 9c0 3 3 6 6 6l1-1.5-2-1-1 1c-1-.5-2-1.5-2.5-2.5l1-1-1-2z',
+    ext: 'M14 4h6v6M20 4l-9 9M18 14v6H4V6h6', wa: 'M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z',   /* the real WhatsApp logo (filled: drawn with class bi-fill, see icSvgHtml) */
     money: 'M3 7h18v10H3zM12 9.5a2.5 2.5 0 1 0 0 5 2.5 2.5 0 0 0 0-5M6 10v4M18 10v4', clock: 'M12 4a8 8 0 1 0 0 16 8 8 0 0 0 0-16M12 8v4l3 2',
     home: 'M3 11l9-7 9 7v9h-6v-6H9v6H3z', people: 'M9 4a4 4 0 1 0 0 8 4 4 0 0 0 0-8M2 21a7 7 0 0 1 14 0M16 4a4 4 0 0 1 0 8M18 14a6 6 0 0 1 4 7', box: 'M3 7l9-4 9 4v10l-9 4-9-4zM3 7l9 4 9-4M12 11v10', shop: 'M4 10v10h16V10M3 10l2-6h14l2 6zM9 20v-6h6v6', book: 'M4 4h6a2 2 0 0 1 2 2v14a2 2 0 0 0-2-2H4zM20 4h-6a2 2 0 0 0-2 2v14a2 2 0 0 1 2-2h6z', bank: 'M3 10l9-6 9 6M5 10v8M9 10v8M15 10v8M19 10v8M3 21h18', filter: 'M3 5h18l-7 8v6l-4 2v-8z', chart: 'M4 4v16h16M8 16v-5M12 16V8M16 16v-3', keyboard: 'M3 6h18v12H3zM7 10h1M11 10h1M15 10h1M7 14h10', eye: 'M2 12s4-7 10-7 10 7 10 7-4 7-10 7S2 12 2 12M12 9a3 3 0 1 0 0 6 3 3 0 0 0 0-6', camera: 'M4 7h4l2-3h4l2 3h4v13H4zM12 10a3.5 3.5 0 1 0 0 7 3.5 3.5 0 0 0 0-7', calc: 'M6 3h12v18H6zM9 7h6M9 11h1M12 11h1M15 11h1M9 15h1M12 15h1M15 15h1', calendar: 'M4 6h16v15H4zM4 10h16M8 3v4M16 3v4', cart: 'M4 5h2l2 10h10l2-7H7M9 19h.01M17 19h.01',
     folder: 'M3 6h6l2 2h10v11H3z',
@@ -1960,7 +1960,7 @@
     var tn = b.firstChild && b.firstChild.nodeType === 3 ? b.firstChild : null;
     if (tn && /^\s*\+\s*(?=[\p{L}\p{N}])/u.test(tn.nodeValue)) { tn.nodeValue = tn.nodeValue.replace(/^\s*\+\s*/, ''); b.setAttribute('data-ic', 'plus'); }
     var k = icFor(b); if (!k || !IC[k]) return;
-    b.insertAdjacentHTML('afterbegin', '<svg class="bi" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="' + IC[k] + '"/></svg>');
+    b.insertAdjacentHTML('afterbegin', icSvgHtml(k));
   }
   /* ?open=<id>&print=1 (the App's Print button): the maker prints the document as soon as it is open; read once */
   var AUTOPRINT = /[?&]print=1\b/.test(location.search);
@@ -1968,7 +1968,9 @@
   /* the one line at the bottom of every printed or shared document: NS + gold Biz, then "by", the emblem and "Nivesh Sahayak" in bold (owner's order) */
   NS.creditLine = function (cls) { return '<p class="ns-cl' + (cls ? ' ' + cls : '') + '"><b class="nsb nsb-in" aria-label="NSBiz"><span class="nsb-n">NS</span><span class="nsb-b">Biz</span></b><span class="cl-by">by</span><img src="/icons/mark-light-48.webp" alt="" width="20" height="14"><span class="cl-ns">Nivesh Sahayak</span></p>'; };
   NS.creditText = 'NSBiz by Nivesh Sahayak';
-  NS.icSvg = function (k) { return IC[k] ? '<svg class="bi" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="' + IC[k] + '"/></svg>' : ''; };
+  /* line icons are stroked; the WhatsApp logo is a filled shape, so it gets class bi-fill (base.css) */
+  function icSvgHtml(k) { return '<svg class="bi' + (k === 'wa' ? ' bi-fill' : '') + '" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="' + IC[k] + '"/></svg>'; }
+  NS.icSvg = function (k) { return IC[k] ? icSvgHtml(k) : ''; };
   /* ---------- every "NSBiz" written on screen is drawn like the header's name: NS in teal, Biz on the gold pill (owner 2026-11-18).
      Not inside fields, lists of choices, printed sheets, the page title or text that is being typed. ---------- */
   var NSB_SKIP = 'script,style,textarea,input,select,option,title,noscript,code,pre,svg,[contenteditable],.brand,.nsb,#sheet,.sh,.stsheet,[data-sheet],#vch-print,.no-nsb';
