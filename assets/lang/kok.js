@@ -10597,3 +10597,61 @@ NS.addLang("kok", {
   "dnv.scan": "बारकोड स्कॅन",
   "dnv.scanh": "कॅमेऱ्यान आयटमाचो बारकोड स्कॅन करात"
 });
+
+/* NSBiz Helper add-on (core.js) */
+NS.addLang("kok", {
+  "ax.t": "NSBiz Helper ऍड-ऑन",
+  "ax.name": "Downloads › NSBiz",
+  "ax.tip": "App उगडें आसतना NSBiz Helper ऍड-ऑन आपसूक सेव करता: Downloads › NSBiz › Data (दर एका बदला उपरांत बॅकअप फायल), Backups (दिसाक एक तारखेची कॉपी, निमाण्यो 30) आनी Backup (सप्तकाच्या दर एका दिसाची एक कॉपी). सगळ्यांत नवी कॉपी ऍड-ऑनांतूय उरता, ब्राउझराचो सायट डेटा पुसलो तरी ती सुरक्षीत उरता.",
+  "ax.open": "Downloads फोल्डर उगडात",
+  "ax.now": "आतां कॉपी सेव करात",
+  "ax.restore": "ऍड-ऑनाची कॉपी परत हाडात",
+  "ax.ask": "ऍड-ऑनांत दवरिल्ली {when} ची कॉपी परत हाडूंक जाय? पयलीं तुमचो सध्याचो डेटा सेव जातलो, मागीर बदलतलो.",
+  "ax.back": "ऍड-ऑनाची कॉपी परत आयली.",
+  "ax.none": "ऍड-ऑनांत अजून खंयचीच कॉपी ना.",
+  "ax.fail": "NSBiz Helper ऍड-ऑनान जाप दिली ना. पान परत लोड करून परत यत्न करात.",
+  "ax.saved": "Downloads › NSBiz हांगा सेव जालें.",
+  "ax.folder": "तुमच्या आवडीच्या फोल्डरांत (दुसरी ड्रायव्ह वा पेन ड्रायव्ह) कॉपी जाय? हांगा वेंचात; मागीर ऍड-ऑन फकत आपली सुरक्षीत कॉपी दवरतलें."
+});
+/* NSBiz Helper add-on: Tally on this PC (tally.js) */
+NS.addLang("kok", {
+  "ty.lv.t": "ह्याच PC चेर Tally त थेट धाडात",
+  "ty.lv.h": "NSBiz Helper ऍड-ऑन जाय जातूंत \"Tally on this computer\" चालू आसा, आनी ह्याच PC चेर TallyPrime उगडें, कंपनी लोड केल्ली आनी तिचें कनेक्शन चालू आसूंक जाय (Help › Settings › Connectivity › Client/Server configuration: TallyPrime acts as Server, port 9000). आदीं लेजर वतात, उपरांत व्हावचर. आदीं Tally कंपनीचो बॅकअप घेयात.",
+  "ty.lv.port": "पोर्ट",
+  "ty.lv.ping": "Tally तपासात",
+  "ty.lv.send": "Tally त धाडात",
+  "ty.lv.cmp": "बॅलन्स जुळयात",
+  "ty.lv.ok": "Tally चालू आसा. उगडी कंपनी: {c}",
+  "ty.lv.perm": "आदीं NSBiz Helper विंडोंत (ब्राउझर टूलबारांतलें ऍड-ऑनाचें बटण) \"Tally on this computer\" चालू करात.",
+  "ty.lv.m": "लेजर: {c} तयार, {a} बदल्ले, {e} एरर.",
+  "ty.lv.v": "व्हावचर: {c} तयार, {a} बदल्ले, {e} एरर.",
+  "ty.lv.le": "Tally न हें घेतलें ना:",
+  "ty.lv.same": "ह्या पिरियडाचे सगळे {n} लेजर Tally कडेन जुळटात.",
+  "ty.lv.diff": "{t} मदले {n} लेजर वेगळे आसात:",
+  "ty.lv.cl": "लेजर",
+  "ty.lv.ct": "Tally त",
+  "ty.lv.cn": "NSBiz त",
+  "ty.lv.cd": "फरक",
+  "ty.lv.none": "Tally त ना",
+  "ty.lv.note": "फकत वेंचिल्ल्या पिरियडाच्यो एंट्री जुळयतात. थेट Tally त केल्ल्यो एंट्रीय फरक म्हूण दिसतल्यो.",
+  "ty.lv.again": "ह्या Tally कंपनींत आदीं धाडिल्ले व्हावचर परत धाडात",
+  "ty.lv.skip": "{n} व्हावचर ह्या Tally कंपनींत आदींच धाडिल्ले, देखून सोडले (ना जाल्यार Tally त दोन फावटीं तयार जाताले).",
+  "ty.lv.allsent": "हे सगळे व्हावचर ह्या Tally कंपनींत आदींच धाडल्यात. Tally तल्यान डिलीट केल्यात जाल्यारूच \"परत धाडात\" चेर टिक करात."
+});
+
+/* NSBiz Helper: send with the PDF attached */
+NS.addLang('kok', {
+  "ax.sv_ready": "{file} तयार आसा. PDF आदींच अटॅच करून धाडात (Send तुमी दामतले):",
+  "ax.sv_wa": "WhatsApp Web",
+  "ax.sv_mail": "Gmail ड्राफ्ट",
+  "ax.sv_save": "फकत सेव करात",
+  "ax.sv_waok": "WhatsApp Web PDF वांगडा उगडटा. तपासात, मागीर Send दामात.",
+  "ax.sv_mailok": "Gmail ड्राफ्ट PDF वांगडा उगडटा. तपासात, मागीर Send दामात.",
+  "ax.sv_fail": "ऍड-ऑन हें उगडूंक शकलें ना. ताचे बदला PDF डाउनलोड जाला."
+});
+
+/* NSBiz Helper: Windows printers */
+NS.addLang('kok', {
+  "tpr.win": "Windows त इंस्टॉल केल्लो प्रिंटर (NSBiz Helper प्रोग्रामा वरवीं)",
+  "tpr.winpick": "Windows प्रिंटर"
+});

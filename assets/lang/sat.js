@@ -10648,3 +10648,61 @@ NS.addLang("sat", {
   "dnv.scan": "ᱵᱟᱨᱠᱚᱰ ᱥᱠᱮᱱ",
   "dnv.scanh": "ᱠᱮᱢᱮᱨᱟ ᱛᱮ ᱟᱭᱴᱮᱢ ᱨᱮᱭᱟᱜ ᱵᱟᱨᱠᱚᱰ ᱥᱠᱮᱱ ᱢᱮ"
 });
+
+/* NSBiz Helper add-on (core.js) */
+NS.addLang("sat", {
+  "ax.t": "NSBiz Helper ᱮᱰ-ᱚᱱ",
+  "ax.name": "Downloads › NSBiz",
+  "ax.tip": "App ᱠᱷᱩᱞᱟᱹ ᱛᱟᱦᱮᱸᱱ ᱠᱷᱟᱱ NSBiz Helper ᱮᱰ-ᱚᱱ ᱟᱡ ᱛᱮ ᱥᱮᱣ ᱮ ᱠᱚᱨᱟᱭᱟ: Downloads › NSBiz › Data (ᱡᱚᱛᱚ ᱵᱚᱫᱚᱞ ᱛᱟᱭᱚᱢ ᱵᱮᱠᱟᱯ ᱯᱷᱟᱭᱤᱞ), Backups (ᱢᱤᱫ ᱢᱟᱦᱟᱸ ᱢᱤᱫ ᱢᱟᱦᱟᱸᱛ ᱠᱚᱯᱤ, ᱢᱩᱪᱟᱹᱫ 30) ᱟᱨ Backup (ᱦᱟᱯᱛᱟ ᱨᱮᱭᱟᱜ ᱡᱚᱛᱚ ᱢᱟᱦᱟᱸ ᱞᱟᱹᱜᱤᱫ ᱢᱤᱫ ᱠᱚᱯᱤ)। ᱱᱟᱣᱟ ᱠᱚᱯᱤ ᱮᱰ-ᱚᱱ ᱵᱷᱤᱛᱨᱤ ᱨᱮᱦᱚᱸ ᱛᱟᱦᱮᱸᱱᱟ, ᱵᱽᱨᱟᱣᱡᱟᱨ ᱨᱮᱭᱟᱜ ᱥᱟᱭᱤᱴ ᱰᱟᱴᱟ ᱢᱮᱴᱟᱣ ᱞᱮᱠᱷᱟᱱ ᱦᱚᱸ ᱨᱩᱠᱷᱤᱭᱟᱹ ᱛᱟᱦᱮᱸᱱᱟ।",
+  "ax.open": "Downloads ᱯᱷᱚᱞᱰᱟᱨ ᱠᱷᱩᱞᱟᱹᱭ ᱢᱮ",
+  "ax.now": "ᱱᱤᱛ ᱠᱚᱯᱤ ᱥᱮᱣ ᱢᱮ",
+  "ax.restore": "ᱮᱰ-ᱚᱱ ᱨᱮᱭᱟᱜ ᱠᱚᱯᱤ ᱨᱩᱣᱟᱹᱲ ᱟᱹᱜᱩᱭ ᱢᱮ",
+  "ax.ask": "ᱮᱰ-ᱚᱱ ᱨᱮ ᱫᱚᱦᱚ {when} ᱨᱮᱭᱟᱜ ᱠᱚᱯᱤ ᱨᱩᱣᱟᱹᱲ ᱟᱹᱜᱩ ᱟ? ᱯᱟᱹᱦᱤᱞ ᱟᱢᱟᱜ ᱱᱤᱛᱚᱜᱟᱜ ᱰᱟᱴᱟ ᱥᱮᱣ ᱦᱩᱭᱩᱜᱼᱟ, ᱛᱟᱭᱚᱢ ᱵᱚᱫᱚᱞᱚᱜᱼᱟ।",
+  "ax.back": "ᱮᱰ-ᱚᱱ ᱨᱮᱭᱟᱜ ᱠᱚᱯᱤ ᱨᱩᱣᱟᱹᱲ ᱦᱤᱡᱩᱜ ᱠᱟᱱᱟ।",
+  "ax.none": "ᱮᱰ-ᱚᱱ ᱨᱮ ᱱᱤᱛ ᱦᱟᱹᱵᱤᱡ ᱡᱟᱦᱟᱸᱱ ᱠᱚᱯᱤ ᱵᱟᱹᱱᱩᱜᱼᱟ।",
+  "ax.fail": "NSBiz Helper ᱮᱰ-ᱚᱱ ᱫᱚ ᱛᱮᱞᱟ ᱵᱟᱝ ᱮᱢ ᱠᱟᱫᱟ। ᱥᱟᱦᱴᱟ ᱫᱩᱦᱲᱟᱹ ᱞᱚᱰ ᱠᱟᱛᱮ ᱫᱩᱦᱲᱟᱹ ᱠᱩᱨᱩᱢᱩᱴᱩᱭ ᱢᱮ।",
+  "ax.saved": "Downloads › NSBiz ᱨᱮ ᱥᱮᱣ ᱮᱱᱟ।",
+  "ax.folder": "ᱟᱢᱟᱜ ᱠᱩᱥᱤ ᱯᱷᱚᱞᱰᱟᱨ ᱨᱮ (ᱮᱴᱟᱜ ᱰᱽᱨᱟᱭᱤᱵᱷ ᱥᱮ ᱯᱮᱱ ᱰᱽᱨᱟᱭᱤᱵᱷ) ᱠᱚᱯᱤ ᱞᱟᱹᱠᱛᱤ ᱠᱟᱱᱟ? ᱱᱚᱰᱮ ᱵᱟᱪᱷᱟᱣ ᱢᱮ; ᱛᱟᱭᱚᱢ ᱮᱰ-ᱚᱱ ᱫᱚ ᱟᱡᱟᱜ ᱨᱩᱠᱷᱤᱭᱟᱹ ᱠᱚᱯᱤ ᱜᱮ ᱫᱚᱦᱚᱭᱟ।"
+});
+/* NSBiz Helper add-on: Tally on this PC (tally.js) */
+NS.addLang("sat", {
+  "ty.lv.t": "ᱱᱚᱶᱟ PC ᱨᱮᱭᱟᱜ Tally ᱛᱮ ᱥᱚᱡᱷᱮ ᱠᱩᱞ ᱢᱮ",
+  "ty.lv.h": "NSBiz Helper ᱮᱰ-ᱚᱱ ᱞᱟᱹᱠᱛᱤᱭᱟ ᱡᱟᱦᱟᱸ ᱨᱮ \"Tally on this computer\" ᱚᱱ ᱛᱟᱦᱮᱸ, ᱟᱨ ᱱᱚᱶᱟ PC ᱨᱮ TallyPrime ᱡᱷᱤᱡ, ᱠᱚᱢᱯᱟᱱᱤ ᱞᱚᱰ ᱟᱨ ᱩᱱᱤᱭᱟᱜ ᱠᱟᱱᱮᱠᱥᱚᱱ ᱚᱱ ᱛᱟᱦᱮᱸ ᱞᱟᱹᱠᱛᱤᱭᱟ (Help › Settings › Connectivity › Client/Server configuration: TallyPrime acts as Server, port 9000)᱾ ᱯᱟᱹᱦᱤᱞ ᱛᱮ ᱞᱮᱡᱚᱨ ᱪᱟᱞᱟᱜᱼᱟ, ᱛᱟᱭᱚᱢ ᱵᱷᱟᱣᱪᱟᱨ᱾ ᱯᱟᱹᱦᱤᱞ ᱛᱮ Tally ᱠᱚᱢᱯᱟᱱᱤ ᱨᱮᱭᱟᱜ ᱵᱮᱠᱟᱯ ᱢᱮ᱾",
+  "ty.lv.port": "ᱯᱚᱨᱴ",
+  "ty.lv.ping": "Tally ᱪᱮᱠ ᱢᱮ",
+  "ty.lv.send": "Tally ᱛᱮ ᱠᱩᱞ ᱢᱮ",
+  "ty.lv.cmp": "ᱵᱮᱞᱮᱱᱥ ᱢᱤᱞᱟᱹᱣ ᱢᱮ",
+  "ty.lv.ok": "Tally ᱪᱟᱞᱟᱜ ᱠᱟᱱᱟ᱾ ᱡᱷᱤᱡ ᱠᱚᱢᱯᱟᱱᱤ: {c}",
+  "ty.lv.perm": "ᱯᱟᱹᱦᱤᱞ ᱛᱮ NSBiz Helper ᱣᱤᱱᱰᱚ (ᱵᱽᱨᱟᱣᱡᱚᱨ ᱴᱩᱞᱵᱟᱨ ᱨᱮ ᱮᱰ-ᱚᱱ ᱨᱮᱭᱟᱜ ᱵᱚᱛᱟᱢ) ᱨᱮ \"Tally on this computer\" ᱚᱱ ᱢᱮ᱾",
+  "ty.lv.m": "ᱞᱮᱡᱚᱨ: {c} ᱵᱮᱱᱟᱣ, {a} ᱵᱚᱫᱚᱞ, {e} ᱮᱨᱚᱨ᱾",
+  "ty.lv.v": "ᱵᱷᱟᱣᱪᱟᱨ: {c} ᱵᱮᱱᱟᱣ, {a} ᱵᱚᱫᱚᱞ, {e} ᱮᱨᱚᱨ᱾",
+  "ty.lv.le": "Tally ᱱᱚᱶᱟ ᱠᱚ ᱵᱟᱝ ᱦᱟᱛᱟᱣ ᱠᱮᱫᱟ:",
+  "ty.lv.same": "ᱱᱚᱶᱟ ᱯᱤᱨᱤᱭᱚᱰ ᱨᱮᱭᱟᱜ ᱡᱚᱛᱚ {n} ᱞᱮᱡᱚᱨ Tally ᱥᱟᱶ ᱢᱤᱞᱟᱹᱣ ᱠᱟᱱᱟ᱾",
+  "ty.lv.diff": "{t} ᱠᱷᱚᱱ {n} ᱞᱮᱡᱚᱨ ᱮᱴᱟᱜ:",
+  "ty.lv.cl": "ᱞᱮᱡᱚᱨ",
+  "ty.lv.ct": "Tally ᱨᱮ",
+  "ty.lv.cn": "NSBiz ᱨᱮ",
+  "ty.lv.cd": "ᱯᱷᱟᱨᱟᱠ",
+  "ty.lv.none": "Tally ᱨᱮ ᱵᱟᱹᱱᱩᱜᱼᱟ",
+  "ty.lv.note": "ᱵᱟᱪᱷᱟᱣ ᱯᱤᱨᱤᱭᱚᱰ ᱨᱮᱭᱟᱜ ᱮᱱᱴᱨᱤ ᱜᱮ ᱢᱤᱞᱟᱹᱣᱚᱜᱼᱟ᱾ Tally ᱨᱮ ᱥᱚᱡᱷᱮ ᱮᱱᱴᱨᱤ ᱦᱚᱸ ᱯᱷᱟᱨᱟᱠ ᱞᱮᱠᱟ ᱧᱮᱞᱚᱜᱼᱟ᱾",
+  "ty.lv.again": "ᱱᱚᱶᱟ Tally ᱠᱚᱢᱯᱟᱱᱤ ᱛᱮ ᱢᱟᱲᱟᱝ ᱠᱩᱞ ᱵᱷᱟᱣᱪᱟᱨ ᱫᱚᱦᱲᱟ ᱠᱩᱞ ᱢᱮ",
+  "ty.lv.skip": "{n} ᱵᱷᱟᱣᱪᱟᱨ ᱱᱚᱶᱟ Tally ᱠᱚᱢᱯᱟᱱᱤ ᱛᱮ ᱢᱟᱲᱟᱝ ᱜᱮ ᱠᱩᱞ ᱞᱮᱱᱟ, ᱚᱱᱟ ᱛᱮ ᱵᱟᱹᱜᱤ ᱠᱟᱱᱟ (ᱵᱟᱝᱠᱷᱟᱱ Tally ᱨᱮ ᱵᱟᱨ ᱫᱷᱟᱣ ᱵᱮᱱᱟᱣᱚᱜ ᱠᱟᱱᱟ)᱾",
+  "ty.lv.allsent": "ᱱᱚᱶᱟ ᱡᱚᱛᱚ ᱵᱷᱟᱣᱪᱟᱨ ᱱᱚᱶᱟ Tally ᱠᱚᱢᱯᱟᱱᱤ ᱛᱮ ᱢᱟᱲᱟᱝ ᱜᱮ ᱠᱩᱞ ᱮᱱᱟ᱾ Tally ᱨᱮ ᱰᱤᱞᱤᱴ ᱞᱮᱫᱟᱢ ᱠᱷᱟᱱ ᱜᱮ \"ᱫᱚᱦᱲᱟ ᱠᱩᱞ ᱢᱮ\" ᱴᱤᱠ ᱢᱮ᱾"
+});
+
+/* NSBiz Helper: send with the PDF attached */
+NS.addLang('sat', {
+  "ax.sv_ready": "{file} ᱛᱭᱟᱨ ᱜᱮᱭᱟ᱾ PDF ᱢᱟᱲᱟᱝ ᱠᱷᱚᱱ ᱮᱴᱮᱪ ᱠᱟᱛᱮ ᱵᱷᱮᱡᱟᱭ ᱢᱮ (Send ᱟᱢ ᱡᱟᱯᱤᱫ ᱢᱮ):",
+  "ax.sv_wa": "WhatsApp Web",
+  "ax.sv_mail": "Gmail ᱰᱨᱟᱯᱷᱴ",
+  "ax.sv_save": "ᱥᱮᱣ ᱜᱮ ᱢᱮ",
+  "ax.sv_waok": "WhatsApp Web PDF ᱥᱟᱶ ᱡᱷᱤᱡᱽ ᱠᱟᱱᱟ᱾ ᱧᱮᱞ ᱢᱮ, ᱛᱟᱭᱚᱢ Send ᱡᱟᱯᱤᱫ ᱢᱮ᱾",
+  "ax.sv_mailok": "Gmail ᱰᱨᱟᱯᱷᱴ PDF ᱥᱟᱶ ᱡᱷᱤᱡᱽ ᱠᱟᱱᱟ᱾ ᱧᱮᱞ ᱢᱮ, ᱛᱟᱭᱚᱢ Send ᱡᱟᱯᱤᱫ ᱢᱮ᱾",
+  "ax.sv_fail": "ᱮᱰ-ᱚᱱ ᱫᱚ ᱱᱚᱣᱟ ᱵᱟᱝ ᱡᱷᱤᱡᱽ ᱫᱟᱲᱮᱭᱟᱫᱼᱟ᱾ ᱚᱱᱟ ᱵᱚᱫᱚᱞ ᱛᱮ PDF ᱰᱟᱣᱱᱞᱚᱰ ᱮᱱᱟ᱾"
+});
+
+/* NSBiz Helper: Windows printers */
+NS.addLang('sat', {
+  "tpr.win": "Windows ᱨᱮ ᱤᱱᱥᱴᱚᱞ ᱠᱟᱱ ᱯᱨᱤᱱᱴᱟᱨ (NSBiz Helper ᱯᱨᱚᱜᱨᱟᱢ ᱦᱚᱛᱮᱛᱮ)",
+  "tpr.winpick": "Windows ᱯᱨᱤᱱᱴᱟᱨ"
+});

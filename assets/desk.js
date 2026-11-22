@@ -18,7 +18,7 @@
   function ic(d) { return '<svg class="ic" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="' + d + '"/></svg>'; }
   /* icons for the App's own screens (the other side-menu icons are CSS masks in desk.css, by data-ic) */
   var SECIC = { home: 'home', sales: 'doc', money: 'money', dues: 'clock', buy: 'cart', parties: 'people', cash: 'bank', chq: 'cheque', books: 'book', khata: 'book', preg: 'cart', ebook: 'cart',
-    day: 'calendar', tools: 'layers', repeat: 'repeat', reports: 'chart', b2jv: 'journal', b2fa: 'asset', b2gd: 'box', b2make: 'factory', b2profit: 'trend', b2sman: 'badge', b2year: 'calendar', grp: 'layers', fin: 'scale', fam: 'factory', capl: 'coins', b2job: 'wrench', ledger: 'book', move: 'trend', st: 'list', stf: 'badge', acx: 'tax', tdsr: 'tax', gststk: 'tax', gtds: 'tax', isd: 'tax', charts: 'chart', pdffill: 'doc', features: 'toggle', bimp: 'bimport', itx: 'itax', msme: 'coins', limits: 'scale', trust: 'coins', warr: 'wrench', fees: 'cap', packs: 'pack', cadb: 'dash', cadoc: 'folder', cagst: 'tax', cacom: 'chat', saved: 'save',
+    day: 'calendar', inbox: 'save', mkimp: 'data', tools: 'layers', repeat: 'repeat', reports: 'chart', b2jv: 'journal', b2fa: 'asset', b2gd: 'box', b2make: 'factory', b2profit: 'trend', b2sman: 'badge', b2year: 'calendar', grp: 'layers', fin: 'scale', fam: 'factory', capl: 'coins', b2job: 'wrench', ledger: 'book', move: 'trend', st: 'list', stf: 'badge', acx: 'tax', tdsr: 'tax', gststk: 'tax', gtds: 'tax', isd: 'tax', charts: 'chart', pdffill: 'doc', features: 'toggle', bimp: 'bimport', itx: 'itax', msme: 'coins', limits: 'scale', trust: 'coins', warr: 'wrench', fees: 'cap', packs: 'pack', cadb: 'dash', cadoc: 'folder', cagst: 'tax', cacom: 'chat', saved: 'save',
     entries: 'list', low: 'alert', biz: 'shop', party: 'people', pgroups: 'list', item: 'box', igroups: 'list', doc: 'doc', settings: 'set', backup: 'data', bin: 'trash', log: 'clock' };
   /* screen lists that stay inside the page (my., the stock site...) get the same icons */
   function secIcons() { $$('.hub-nav a[data-sec]:not([data-ic])').forEach(function (a) { var k = SECIC[a.getAttribute('data-sec')]; if (k) a.setAttribute('data-ic', k); }); }
@@ -157,7 +157,7 @@
       '§itax', 'tdsr', 'acx', 'itx', 'limits',
       '§payst', { h: 'stf/pf', t: 'v_pf', ic: 'doc' }, { h: 'stf/esi', t: 'v_esi', ic: 'doc' }, { h: 'stf/tax', t: 'v_saltds', ic: 'doc' },
       '§audit', 'cacom', 'cadoc']],
-    ['util', ['§data', { my: 'backup', t: 'v_backup', ic: 'data' }, 'bimp', { h: 'mprint', t: 'v_mprint', ic: 'doc' }, 'b2year',
+    ['util', ['§data', { my: 'backup', t: 'v_backup', ic: 'data' }, 'bimp', 'mkimp', { h: 'mprint', t: 'v_mprint', ic: 'doc' }, 'b2year',
       '§setup', { h: 'config', t: 'v_config', ic: 'set' }, { h: 'bw', t: 'v_bw', ic: 'list' }, 'features', 'packs',   /* one Configuration (owner 19 Nov): it opens the My data settings itself */
       '§tools', { site: 'tds' }, { site: 'declaration' }, 'pdffill', 'tools']]];   /* TDS and TCS calculator and Declarations under Utilities (owner 20 Nov) */
   /* the sub-headings inside a group (accounting names; the App is English only) */
@@ -428,7 +428,7 @@
     'h:psum': 'Purchase Register', 'h:exc': 'Exception Reports', 'h:vreg': 'Voucher Registers',
     's:cacom': 'Auditor Comments', 'k:nav.cmp08': 'CMP-08 Statement', 'k:nav.gstr1': 'GSTR-1 Return', 'k:nav.gstr2b': 'GSTR-2B Reconciliation', 'k:nav.gstr3b': 'GSTR-3B Return',
     's:itx': 'Income Tax Computation', 's:limits': 'Statutory Limits', 's:acx': 'Other Income and Tax Payments', 'k:nav.tds': 'TDS and TCS Calculator',
-    's:features': 'Feature Settings', 's:tools': 'All Tools', 'k:desk.v_backup': 'Backup and Restore', 's:bimp': 'Bank Statement Import', 'h:mprint': 'Print Many Vouchers',
+    's:features': 'Feature Settings', 's:tools': 'All Tools', 'k:desk.v_backup': 'Backup and Restore', 's:bimp': 'Bank Statement Import', 's:mkimp': 'Marketplace and Payment Reports', 'h:mprint': 'Print Many Vouchers',
     'k:desk.v_settings': 'Company Settings', 's:packs': 'Trade Packs', 's:b2year': 'Year-End Closing'
   };
   var ERPG = { trans: 'Transactions (Vouchers)', reports: 'Display and Reports', tax: 'Statutory (GST and Tax)', 'x-docs': 'Other Documents' };
@@ -830,7 +830,8 @@
   /* ---------- shortcuts for every tool (owner 2026-11-18: "like normal Windows software") ----------
      Tally-style F keys for new entries, Alt+letter for the main screens, and Alt+G + a 2-letter code ("Go to", as in
      TallyPrime) for EVERY screen and document maker. Fixed letters, so a key never moves when the business type hides tools. */
-  var SECKEY = { home: ['DB', 'H'], sales: ['SL', 'L'], money: ['MN', 'M'], acx: ['OI'], stf: ['SF'], itx: ['IT'], bimp: ['BI'], dues: ['DU', 'U'],
+  var SECKEY = { inbox: ['FW'], home: ['DB', 'H'],   /* FW = From the add-on (things sent From the Web, NSBiz Helper) */
+    sales: ['SL', 'L'], money: ['MN', 'M'], acx: ['OI'], stf: ['SF'], itx: ['IT'], bimp: ['BI'], mkimp: ['MQ'], dues: ['DU', 'U'],
     msme: ['MS'], limits: ['LH'], buy: ['PE', 'W'], parties: ['PA', 'Y'], grp: ['GR'], chq: ['CQ'], books: ['CB', 'K'], cash: ['CK'], repeat: ['RB'],
     reports: ['RE'], day: ['MD'], tools: ['AT', 'T'], fin: ['FA', 'A'], capl: ['CL'], b2jv: ['JE', 'J'], b2fa: ['FX'], b2gd: ['GD'], b2make: ['PR'],
     b2job: ['JW'], b2profit: ['PF'], b2sman: ['SM'], b2year: ['YE'], features: ['AF'], packs: ['TP'], trust: ['DM'], warr: ['WS'], cacom: ['CC'],

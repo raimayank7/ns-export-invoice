@@ -460,8 +460,6 @@ html:has(#tool .actions) body{padding-bottom:calc(66px + env(safe-area-inset-bot
 .tab-sum{font-variant-numeric:tabular-nums;font-weight:600}
 @media (max-width:960px){.tabs{top:var(--hd-h,60px)}html.embed .tabs{top:0}.tool[data-tab=preview] .pv-col{scroll-margin-top:calc(var(--hd-h,60px) + 64px)}}
 
-.pdf-wa{position:fixed;left:50%;bottom:90px;transform:translateX(-50%);z-index:60;display:flex;flex-wrap:wrap;gap:8px;align-items:center;max-width:min(560px,94vw);padding:10px 12px;border-radius:12px;background:var(--surface,#fff);color:var(--ink,#111);border:1px solid var(--line,#ccc);box-shadow:0 6px 24px rgba(0,0,0,.25)}
-@media print{.pdf-wa{display:none}}
 
 /* every maker on a computer (inside NSBiz and on its own site): like the App's entry screens, every button sits in one bar fixed at the
    bottom (New, Saved, Save, Print, Share...), the form scrolls above it; Esc goes back to the App (inapp.js) */
@@ -490,3 +488,5 @@ dialog.or-pick .or-late{color:var(--bad,#b42318)}
 #items.nx-acct .it-qty, #items.nx-acct .it-unit, #items.nx-acct .it-disc { display: none !important; }
 [data-rows="items"].nx-acct .kr-qty, [data-rows="items"].nx-acct .kr-unit, [data-rows="items"].nx-acct .kr-disc { display: none !important; }
 .sh .tot th.tcs-dl,.sh .kv th.tcs-dl{font-weight:400;font-size:.82em;text-align:left;white-space:normal;line-height:1.35}
+/* NSBiz Helper add-on: Tally on this PC (tally.js liveCard) */
+.ty-live{margin-top:16px;padding-top:12px;border-top:1px solid var(--line)}.ty-live h4{margin:0 0 4px}.ty-live .row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}.ty-live #ty-port{width:6em}

@@ -10597,3 +10597,61 @@ NS.addLang("ks", {
   "dnv.scan": "بارکوڈ اسکین",
   "dnv.scanh": "کیمرہٕ سٕتۍ آئٹمُک بارکوڈ اسکین کٔرِو"
 });
+
+/* NSBiz Helper add-on (core.js) */
+NS.addLang("ks", {
+  "ax.t": "NSBiz Helper ایڈ آن",
+  "ax.name": "Downloads › NSBiz",
+  "ax.tip": "App یلہٕ کھولمُت آسہِ تیلہٕ چھُ NSBiz Helper ایڈ آن پانَے سیو کران: Downloads › NSBiz › Data (پرٛتھ تبدیلی پتہٕ بیک اپ فائل)، Backups (روز اکھ تاریخ وٲلۍ کاپی، آخری 30) تہٕ Backup (ہفتہٕ کہِ پرٛتھ دۄہہ اکھ کاپی)۔ سارِوے کھوتہٕ نوٕ کاپی چھےٚ ایڈ آنَس منٛز تہِ آسان، براؤزرُک سائٹ ڈیٹا مٹاوِتھ تہِ چھےٚ محفوظ روزان۔",
+  "ax.open": "Downloads فولڈر کھولِو",
+  "ax.now": "وۄنی کاپی سیو کرِو",
+  "ax.restore": "ایڈ آنُک کاپی واپس اَنِو",
+  "ax.ask": "ایڈ آنَس منٛز تھاوِتھ {when} ہِنٛز کاپی واپس اَنَو؟ گۄڈٕ سیو گژھِ تُہُنٛد موجوٗدٕ ڈیٹا، پتہٕ بدلہِ۔",
+  "ax.back": "ایڈ آنُک کاپی آیہِ واپس۔",
+  "ax.none": "ایڈ آنَس منٛز چھےٚ نہٕ وۄنی کانٛہہ کاپی۔",
+  "ax.fail": "NSBiz Helper ایڈ آنَن دیُت نہٕ جواب۔ صفحہٕ دوبارٕ لوڈ کٔرِتھ کرِو بیٚیہِ کوشش۔",
+  "ax.saved": "Downloads › NSBiz منٛز گو سیو۔",
+  "ax.folder": "پنٕنہِ پسندٕچہِ فولڈرس منٛز (بیٚیہِ ڈرائیو یا پین ڈرائیو) گژھن کاپیہٕ؟ یتہِ ژارِو؛ پتہٕ تھاوِ ایڈ آن صرف پنٕنۍ محفوظ کاپی۔"
+});
+/* NSBiz Helper add-on: Tally on this PC (tally.js) */
+NS.addLang("ks", {
+  "ty.lv.t": "یتھ PC کس Tally منٛز سیٚدھ سوزِو",
+  "ty.lv.h": "NSBiz Helper ایڈ آن گژھہِ یتھ منٛز \"Tally on this computer\" آن آسہِ، تہٕ یتھ PC پیٹھ TallyPrime کھولمُت، کمپنی لوڈ تہٕ اَمِیُک کنکشن آن آسُن (Help › Settings › Connectivity › Client/Server configuration: TallyPrime acts as Server, port 9000)۔ گوڈٕ گژھن لیجر، پتہٕ واؤچر۔ گوڈٕ ہیوُو Tally کمپنی ہُند بیک اَپ۔",
+  "ty.lv.port": "پورٹ",
+  "ty.lv.ping": "Tally چیک کٔرِو",
+  "ty.lv.send": "Tally منٛز سوزِو",
+  "ty.lv.cmp": "بیلنس مِلٲوِو",
+  "ty.lv.ok": "Tally چھُ چلان۔ کھولمٕژ کمپنی: {c}",
+  "ty.lv.perm": "گوڈٕ کٔرِو NSBiz Helper ونڈو (براؤزر ٹول بارس منٛز ایڈ آنُک بٹن) منٛز \"Tally on this computer\" آن۔",
+  "ty.lv.m": "لیجر: {c} بنیٚ، {a} بدلیٚ، {e} ایرر۔",
+  "ty.lv.v": "واؤچر: {c} بنیٚ، {a} بدلیٚ، {e} ایرر۔",
+  "ty.lv.le": "Tally یِم نہٕ ہیٚتِن:",
+  "ty.lv.same": "یتھ پیریڈس ہٕنٛد سٲری {n} لیجر چھِ Tally سٟتؠ مِلان۔",
+  "ty.lv.diff": "{t} منٛزٕ چھِ {n} لیجر الگ:",
+  "ty.lv.cl": "لیجر",
+  "ty.lv.ct": "Tally منٛز",
+  "ty.lv.cn": "NSBiz منٛز",
+  "ty.lv.cd": "فرق",
+  "ty.lv.none": "Tally منٛز نہٕ",
+  "ty.lv.note": "صرف ژارنہٕ آمتِس پیریڈس ہٕنٛز انٹری چھِ مِلاونہٕ یِوان۔ سیٚدھ Tally منٛز کرنہٕ آمژٕ انٹری تہِ ہاوَن فرق۔",
+  "ty.lv.again": "یتھ Tally کمپنی منٛز گوڈٕ سوزمٕتؠ واؤچر سوزِو دوبارٕ",
+  "ty.lv.skip": "{n} واؤچر ٲسۍ یتھ Tally کمپنی منٛز گوڈٕے سوزنہٕ آمتؠ، تَوے ترٲوِکھ (نَتہٕ بَنَہَن Tally منٛز زٕ لٹہٕ)۔",
+  "ty.lv.allsent": "یِم سٲری واؤچر چھِ یتھ Tally کمپنی منٛز گوڈٕے سوزنہٕ آمتؠ۔ \"سوزِو دوبارٕ\" پیٹھ کٔرِو ٹک تیلہِ ییٚلہِ توٚہیہِ یِم Tally منٛز ڈیلیٹ کٔرۍ آسن۔"
+});
+
+/* NSBiz Helper: send with the PDF attached */
+NS.addLang('ks', {
+  "ax.sv_ready": "{file} چھُ تیار۔ PDF گۄڈے اٹیچ کٔرِتھ سوزِو (Send دَبٲو تۄہۍ):",
+  "ax.sv_wa": "WhatsApp Web",
+  "ax.sv_mail": "Gmail ڈرافٹ",
+  "ax.sv_save": "صرف سیو کرِو",
+  "ax.sv_waok": "WhatsApp Web چھُ PDF سٕتۍ کھُلان۔ چیک کرِو، پَتہٕ Send دَبٲوِو۔",
+  "ax.sv_mailok": "Gmail ڈرافٹ چھُ PDF سٕتۍ کھُلان۔ چیک کرِو، پَتہٕ Send دَبٲوِو۔",
+  "ax.sv_fail": "ایڈ آن ہیوٚک نہٕ یہ کھولِتھ۔ اَمہِ بدلہٕ آو PDF ڈاؤن لوڈ کرنہٕ۔"
+});
+
+/* NSBiz Helper: Windows printers */
+NS.addLang('ks', {
+  "tpr.win": "Windows منز انسٹال کورمت پرنٹر (NSBiz Helper پروگرامہ ذریعہ)",
+  "tpr.winpick": "Windows پرنٹر"
+});

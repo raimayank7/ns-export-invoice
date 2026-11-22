@@ -9490,3 +9490,61 @@ NS.addLang("hi", {
   "dnv.scan": "बारकोड स्कैन",
   "dnv.scanh": "कैमरे से आइटम का बारकोड स्कैन करें"
 });
+
+/* NSBiz Helper add-on (core.js) */
+NS.addLang("hi", {
+  "ax.t": "NSBiz Helper ऐड-ऑन",
+  "ax.name": "Downloads › NSBiz",
+  "ax.tip": "App खुला रहने पर NSBiz Helper ऐड-ऑन अपने आप सेव करता है: Downloads › NSBiz › Data (हर बदलाव के बाद बैकअप फ़ाइल), Backups (रोज़ एक तारीख वाली कॉपी, आख़िरी 30) और Backup (हफ़्ते के हर दिन की एक कॉपी)। सबसे नई कॉपी ऐड-ऑन के अंदर भी रहती है, जो ब्राउज़र का साइट डेटा मिटाने पर भी सुरक्षित रहती है।",
+  "ax.open": "Downloads फ़ोल्डर खोलें",
+  "ax.now": "अभी कॉपी सेव करें",
+  "ax.restore": "ऐड-ऑन की कॉपी वापस लाएँ",
+  "ax.ask": "ऐड-ऑन में रखी {when} की कॉपी वापस लाएँ? पहले आपका मौजूदा डेटा सेव होगा, फिर बदला जाएगा।",
+  "ax.back": "ऐड-ऑन की कॉपी वापस आ गई।",
+  "ax.none": "ऐड-ऑन में अभी कोई कॉपी नहीं है।",
+  "ax.fail": "NSBiz Helper ऐड-ऑन ने जवाब नहीं दिया। पेज दोबारा लोड करके फिर कोशिश करें।",
+  "ax.saved": "Downloads › NSBiz में सेव हो गया।",
+  "ax.folder": "कॉपी अपनी पसंद के फ़ोल्डर (दूसरी ड्राइव या पेन ड्राइव) में चाहिए? यहाँ चुनें; तब ऐड-ऑन सिर्फ़ अपनी सुरक्षित कॉपी रखेगा।"
+});
+/* NSBiz Helper add-on: Tally on this PC (tally.js) */
+NS.addLang("hi", {
+  "ty.lv.t": "इसी PC के Tally में सीधे भेजें",
+  "ty.lv.h": "NSBiz Helper ऐड-ऑन चाहिए जिसमें \"Tally on this computer\" चालू हो, और इसी PC पर TallyPrime खुला हो, कंपनी लोड हो और उसका कनेक्शन चालू हो (Help › Settings › Connectivity › Client/Server configuration: TallyPrime acts as Server, port 9000)। पहले लेजर जाते हैं, फिर वाउचर। पहले Tally कंपनी का बैकअप ले लें।",
+  "ty.lv.port": "पोर्ट",
+  "ty.lv.ping": "Tally चेक करें",
+  "ty.lv.send": "Tally में भेजें",
+  "ty.lv.cmp": "बैलेंस मिलाएँ",
+  "ty.lv.ok": "Tally चल रहा है। खुली कंपनी: {c}",
+  "ty.lv.perm": "पहले NSBiz Helper विंडो (ब्राउज़र टूलबार में ऐड-ऑन का बटन) में \"Tally on this computer\" चालू करें।",
+  "ty.lv.m": "लेजर: {c} बने, {a} बदले, {e} एरर।",
+  "ty.lv.v": "वाउचर: {c} बने, {a} बदले, {e} एरर।",
+  "ty.lv.le": "Tally ने ये नहीं लिए:",
+  "ty.lv.same": "इस पीरियड के सभी {n} लेजर Tally से मिलते हैं।",
+  "ty.lv.diff": "{t} में से {n} लेजर अलग हैं:",
+  "ty.lv.cl": "लेजर",
+  "ty.lv.ct": "Tally में",
+  "ty.lv.cn": "NSBiz में",
+  "ty.lv.cd": "अंतर",
+  "ty.lv.none": "Tally में नहीं है",
+  "ty.lv.note": "सिर्फ़ चुने गए पीरियड की एंट्री मिलाई जाती हैं। जो एंट्री सीधे Tally में की गई हैं, वे भी अंतर में दिखेंगी।",
+  "ty.lv.again": "इस Tally कंपनी में पहले भेजे गए वाउचर फिर से भेजें",
+  "ty.lv.skip": "{n} वाउचर इस Tally कंपनी में पहले भेजे जा चुके थे, इसलिए छोड़ दिए गए (वरना Tally में दो बार बन जाते)।",
+  "ty.lv.allsent": "ये सभी वाउचर इस Tally कंपनी में पहले ही भेजे जा चुके हैं। \"फिर से भेजें\" पर टिक तभी करें जब आपने इन्हें Tally में डिलीट कर दिया हो।"
+});
+
+/* NSBiz Helper: send with the PDF attached */
+NS.addLang('hi', {
+  "ax.sv_ready": "{file} तैयार है। PDF पहले से अटैच करके भेजें (Send आप दबाएँगे):",
+  "ax.sv_wa": "WhatsApp Web",
+  "ax.sv_mail": "Gmail ड्राफ्ट",
+  "ax.sv_save": "सिर्फ सेव करें",
+  "ax.sv_waok": "WhatsApp Web PDF के साथ खुल रहा है। चेक करें, फिर Send दबाएँ।",
+  "ax.sv_mailok": "Gmail ड्राफ्ट PDF के साथ खुल रहा है। चेक करें, फिर Send दबाएँ।",
+  "ax.sv_fail": "ऐड-ऑन इसे नहीं खोल पाया। इसकी जगह PDF डाउनलोड हो गई है।"
+});
+
+/* NSBiz Helper: Windows printers */
+NS.addLang('hi', {
+  "tpr.win": "Windows में इंस्टॉल किया प्रिंटर (NSBiz Helper प्रोग्राम से)",
+  "tpr.winpick": "Windows प्रिंटर"
+});

@@ -10465,3 +10465,61 @@ NS.addLang("or", {
   "dnv.scan": "ବାରକୋଡ୍ ସ୍କାନ୍",
   "dnv.scanh": "ଆଇଟମର ବାରକୋଡ୍ କ୍ୟାମେରାରେ ସ୍କାନ୍ କରନ୍ତୁ"
 });
+
+/* NSBiz Helper add-on (core.js) */
+NS.addLang("or", {
+  "ax.t": "NSBiz Helper ଆଡ୍-ଅନ୍",
+  "ax.name": "Downloads › NSBiz",
+  "ax.tip": "App ଖୋଲା ଥିବା ବେଳେ NSBiz Helper ଆଡ୍-ଅନ୍ ନିଜେ ସେଭ୍ କରେ: Downloads › NSBiz › Data (ପ୍ରତି ପରିବର୍ତ୍ତନ ପରେ ବ୍ୟାକଅପ୍ ଫାଇଲ୍), Backups (ଦିନକୁ ଗୋଟିଏ ତାରିଖ ଥିବା କପି, ଶେଷ 30) ଏବଂ Backup (ସପ୍ତାହର ପ୍ରତି ଦିନ ପାଇଁ ଗୋଟିଏ କପି)। ସବୁଠୁ ନୂଆ କପି ଆଡ୍-ଅନ୍ ଭିତରେ ମଧ୍ୟ ରହେ, ବ୍ରାଉଜରର ସାଇଟ୍ ଡାଟା ଲିଭାଇଲେ ମଧ୍ୟ ସୁରକ୍ଷିତ ରହେ।",
+  "ax.open": "Downloads ଫୋଲ୍ଡର ଖୋଲନ୍ତୁ",
+  "ax.now": "ଏବେ କପି ସେଭ୍ କରନ୍ତୁ",
+  "ax.restore": "ଆଡ୍-ଅନ୍‌ର କପି ଫେରାଇ ଆଣନ୍ତୁ",
+  "ax.ask": "ଆଡ୍-ଅନ୍‌ରେ ରଖାଯାଇଥିବା {when} ର କପି ଫେରାଇ ଆଣିବେ? ପ୍ରଥମେ ଆପଣଙ୍କ ବର୍ତ୍ତମାନର ଡାଟା ସେଭ୍ ହେବ, ତା'ପରେ ବଦଳିବ।",
+  "ax.back": "ଆଡ୍-ଅନ୍‌ର କପି ଫେରି ଆସିଲା।",
+  "ax.none": "ଆଡ୍-ଅନ୍‌ରେ ଏପର୍ଯ୍ୟନ୍ତ କୌଣସି କପି ନାହିଁ।",
+  "ax.fail": "NSBiz Helper ଆଡ୍-ଅନ୍ ଉତ୍ତର ଦେଲା ନାହିଁ। ପେଜ୍ ପୁଣି ଲୋଡ୍ କରି ପୁଣି ଚେଷ୍ଟା କରନ୍ତୁ।",
+  "ax.saved": "Downloads › NSBiz ରେ ସେଭ୍ ହେଲା।",
+  "ax.folder": "ଆପଣଙ୍କ ପସନ୍ଦର ଫୋଲ୍ଡରରେ (ଅନ୍ୟ ଡ୍ରାଇଭ୍ ବା ପେନ୍ ଡ୍ରାଇଭ୍) କପି ଦରକାର? ଏଠାରେ ବାଛନ୍ତୁ; ତା'ପରେ ଆଡ୍-ଅନ୍ କେବଳ ନିଜର ସୁରକ୍ଷିତ କପି ରଖିବ।"
+});
+/* NSBiz Helper add-on: Tally on this PC (tally.js) */
+NS.addLang("or", {
+  "ty.lv.t": "ଏହି PC ର Tally କୁ ସିଧା ପଠାନ୍ତୁ",
+  "ty.lv.h": "NSBiz Helper ଆଡ୍-ଅନ୍ ଦରକାର ଯେଉଁଥିରେ \"Tally on this computer\" ଚାଲୁ ଥିବ, ଏବଂ ଏହି PC ରେ TallyPrime ଖୋଲା, କମ୍ପାନୀ ଲୋଡ୍ ଓ ତାର କନେକ୍ସନ୍ ଚାଲୁ ଥିବା ଦରକାର (Help › Settings › Connectivity › Client/Server configuration: TallyPrime acts as Server, port 9000)। ପ୍ରଥମେ ଲେଜର୍ ଯାଏ, ତା’ପରେ ଭାଉଚର୍। ଆଗରୁ Tally କମ୍ପାନୀର ବ୍ୟାକଅପ୍ ନିଅନ୍ତୁ।",
+  "ty.lv.port": "ପୋର୍ଟ",
+  "ty.lv.ping": "Tally ଚେକ୍ କରନ୍ତୁ",
+  "ty.lv.send": "Tally କୁ ପଠାନ୍ତୁ",
+  "ty.lv.cmp": "ବାଲାନ୍ସ ମିଳାନ୍ତୁ",
+  "ty.lv.ok": "Tally ଚାଲୁଛି। ଖୋଲା କମ୍ପାନୀ: {c}",
+  "ty.lv.perm": "ପ୍ରଥମେ NSBiz Helper ୱିଣ୍ଡୋରେ (ବ୍ରାଉଜର୍ ଟୁଲବାରରେ ଆଡ୍-ଅନ୍ ବଟନ୍) \"Tally on this computer\" ଚାଲୁ କରନ୍ତୁ।",
+  "ty.lv.m": "ଲେଜର୍: {c} ତିଆରି, {a} ବଦଳିଲା, {e} ଏରର୍।",
+  "ty.lv.v": "ଭାଉଚର୍: {c} ତିଆରି, {a} ବଦଳିଲା, {e} ଏରର୍।",
+  "ty.lv.le": "Tally ଏଗୁଡ଼ିକ ନେଲା ନାହିଁ:",
+  "ty.lv.same": "ଏହି ପିରିୟଡର ସମସ୍ତ {n} ଲେଜର୍ Tally ସହ ମେଳ ଖାଉଛି।",
+  "ty.lv.diff": "{t} ମଧ୍ୟରୁ {n} ଲେଜର୍ ଅଲଗା:",
+  "ty.lv.cl": "ଲେଜର୍",
+  "ty.lv.ct": "Tally ରେ",
+  "ty.lv.cn": "NSBiz ରେ",
+  "ty.lv.cd": "ଫରକ",
+  "ty.lv.none": "Tally ରେ ନାହିଁ",
+  "ty.lv.note": "କେବଳ ବାଛିଥିବା ପିରିୟଡର ଏଣ୍ଟ୍ରି ମିଳାଯାଏ। ସିଧା Tally ରେ କରାଯାଇଥିବା ଏଣ୍ଟ୍ରି ମଧ୍ୟ ଫରକ ଭାବେ ଦେଖାଯିବ।",
+  "ty.lv.again": "ଏହି Tally କମ୍ପାନୀକୁ ଆଗରୁ ପଠାଯାଇଥିବା ଭାଉଚର୍ ପୁଣି ପଠାନ୍ତୁ",
+  "ty.lv.skip": "{n} ଭାଉଚର୍ ଏହି Tally କମ୍ପାନୀକୁ ଆଗରୁ ପଠାଯାଇଥିଲା, ତେଣୁ ଛାଡ଼ି ଦିଆଗଲା (ନହେଲେ Tally ରେ ଦୁଇଥର ତିଆରି ହୋଇଥାନ୍ତା)।",
+  "ty.lv.allsent": "ଏହି ସମସ୍ତ ଭାଉଚର୍ ଏହି Tally କମ୍ପାନୀକୁ ଆଗରୁ ପଠାଯାଇସାରିଛି। Tally ରେ ଡିଲିଟ୍ କରିଥିଲେ ହିଁ \"ପୁଣି ପଠାନ୍ତୁ\" ରେ ଟିକ୍ ଦିଅନ୍ତୁ।"
+});
+
+/* NSBiz Helper: send with the PDF attached */
+NS.addLang('or', {
+  "ax.sv_ready": "{file} ପ୍ରସ୍ତୁତ। PDF ଆଗରୁ ଆଟାଚ୍ କରି ପଠାନ୍ତୁ (Send ଆପଣ ଦବାଇବେ):",
+  "ax.sv_wa": "WhatsApp Web",
+  "ax.sv_mail": "Gmail ଡ୍ରାଫ୍ଟ",
+  "ax.sv_save": "କେବଳ ସେଭ୍ କରନ୍ତୁ",
+  "ax.sv_waok": "WhatsApp Web PDF ସହିତ ଖୋଲୁଛି। ଯାଞ୍ଚ କରନ୍ତୁ, ତା'ପରେ Send ଦବାନ୍ତୁ।",
+  "ax.sv_mailok": "Gmail ଡ୍ରାଫ୍ଟ PDF ସହିତ ଖୋଲୁଛି। ଯାଞ୍ଚ କରନ୍ତୁ, ତା'ପରେ Send ଦବାନ୍ତୁ।",
+  "ax.sv_fail": "ଆଡ୍-ଅନ୍ ଏହାକୁ ଖୋଲିପାରିଲା ନାହିଁ। ତା' ବଦଳରେ PDF ଡାଉନଲୋଡ୍ ହୋଇଛି।"
+});
+
+/* NSBiz Helper: Windows printers */
+NS.addLang('or', {
+  "tpr.win": "Windows ରେ ଇନଷ୍ଟଲ୍ ହୋଇଥିବା ପ୍ରିଣ୍ଟର୍ (NSBiz Helper ପ୍ରୋଗ୍ରାମ ମାଧ୍ୟମରେ)",
+  "tpr.winpick": "Windows ପ୍ରିଣ୍ଟର୍"
+});

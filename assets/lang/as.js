@@ -10598,3 +10598,61 @@ NS.addLang("as", {
   "dnv.scan": "বাৰক'ড স্কেন",
   "dnv.scanh": "আইটেমৰ বাৰক'ড কেমেৰাৰে স্কেন কৰক"
 });
+
+/* NSBiz Helper add-on (core.js) */
+NS.addLang("as", {
+  "ax.t": "NSBiz Helper এড-অন",
+  "ax.name": "Downloads › NSBiz",
+  "ax.tip": "App খোলা থাকোঁতে NSBiz Helper এড-অনে নিজে সেভ কৰে: Downloads › NSBiz › Data (প্ৰতিটো সলনিৰ পিছত বেকআপ ফাইল), Backups (দিনে এটা তাৰিখ থকা কপি, শেষৰ 30টা) আৰু Backup (সপ্তাহৰ প্ৰতিটো দিনৰ এটা কপি)। আটাইতকৈ নতুন কপি এড-অনৰ ভিতৰতো থাকে, ব্ৰাউজাৰৰ চাইট ডেটা মচিলেও সুৰক্ষিত থাকে।",
+  "ax.open": "Downloads ফোল্ডাৰ খোলক",
+  "ax.now": "এতিয়াই কপি সেভ কৰক",
+  "ax.restore": "এড-অনৰ কপি ঘূৰাই আনক",
+  "ax.ask": "এড-অনত ৰখা {when}ৰ কপি ঘূৰাই আনিব নেকি? প্ৰথমে আপোনাৰ এতিয়াৰ ডেটা সেভ হ'ব, তাৰ পিছত সলনি হ'ব।",
+  "ax.back": "এড-অনৰ কপি ঘূৰি আহিল।",
+  "ax.none": "এড-অনত এতিয়ালৈকে কোনো কপি নাই।",
+  "ax.fail": "NSBiz Helper এড-অনে উত্তৰ নিদিলে। পেজটো পুনৰ লোড কৰি আকৌ চেষ্টা কৰক।",
+  "ax.saved": "Downloads › NSBiz ত সেভ হ'ল।",
+  "ax.folder": "নিজৰ পছন্দৰ ফোল্ডাৰত (আন ড্ৰাইভ বা পেন ড্ৰাইভ) কপি লাগে নেকি? ইয়াত বাছক; তেতিয়া এড-অনে কেৱল নিজৰ সুৰক্ষিত কপি ৰাখিব।"
+});
+/* NSBiz Helper add-on: Tally on this PC (tally.js) */
+NS.addLang("as", {
+  "ty.lv.t": "এই PC ৰ Tally লৈ পোনপটীয়াকৈ পঠিয়াওক",
+  "ty.lv.h": "NSBiz Helper এড-অন লাগিব য’ত \"Tally on this computer\" অন থাকে, আৰু এই PC ত TallyPrime খোলা, কোম্পানী লোড কৰা আৰু তাৰ কানেকশ্বন অন থাকিব লাগিব (Help › Settings › Connectivity › Client/Server configuration: TallyPrime acts as Server, port 9000)। আগতে লেজাৰ যায়, তাৰ পাছত ভাউচাৰ। আগতে Tally কোম্পানীৰ বেকআপ লওক।",
+  "ty.lv.port": "পৰ্ট",
+  "ty.lv.ping": "Tally চেক কৰক",
+  "ty.lv.send": "Tally লৈ পঠিয়াওক",
+  "ty.lv.cmp": "বেলেঞ্চ মিলাওক",
+  "ty.lv.ok": "Tally চলি আছে। খোলা কোম্পানী: {c}",
+  "ty.lv.perm": "আগতে NSBiz Helper উইণ্ড’ত (ব্ৰাউজাৰ টুলবাৰত এড-অনৰ বুটাম) \"Tally on this computer\" অন কৰক।",
+  "ty.lv.m": "লেজাৰ: {c} তৈয়াৰ, {a} সলনি, {e} এৰৰ।",
+  "ty.lv.v": "ভাউচাৰ: {c} তৈয়াৰ, {a} সলনি, {e} এৰৰ।",
+  "ty.lv.le": "Tally য়ে এইবোৰ নললে:",
+  "ty.lv.same": "এই পিৰিয়ডৰ আটাইকেইটা {n} লেজাৰ Tally ৰ সৈতে মিলে।",
+  "ty.lv.diff": "{t} টাৰ ভিতৰত {n} টা লেজাৰ বেলেগ:",
+  "ty.lv.cl": "লেজাৰ",
+  "ty.lv.ct": "Tally ত",
+  "ty.lv.cn": "NSBiz ত",
+  "ty.lv.cd": "পাৰ্থক্য",
+  "ty.lv.none": "Tally ত নাই",
+  "ty.lv.note": "কেৱল বাছি লোৱা পিৰিয়ডৰ এন্ট্ৰি মিলোৱা হয়। পোনপটীয়াকৈ Tally ত কৰা এন্ট্ৰিও পাৰ্থক্য হিচাপে দেখা যাব।",
+  "ty.lv.again": "এই Tally কোম্পানীলৈ আগতে পঠিওৱা ভাউচাৰ পুনৰ পঠিয়াওক",
+  "ty.lv.skip": "{n} টা ভাউচাৰ এই Tally কোম্পানীলৈ আগতেই পঠিওৱা হৈছিল, সেয়ে বাদ দিয়া হ’ল (নহ’লে Tally ত দুবাৰ তৈয়াৰ হ’লহেঁতেন)।",
+  "ty.lv.allsent": "এই আটাইবোৰ ভাউচাৰ এই Tally কোম্পানীলৈ আগতেই পঠিওৱা হৈছে। Tally ত ডিলিট কৰিছে যদিহে তেতিয়াহে \"পুনৰ পঠিয়াওক\" ত টিক দিয়ক।"
+});
+
+/* NSBiz Helper: send with the PDF attached */
+NS.addLang('as', {
+  "ax.sv_ready": "{file} সাজু হৈছে। PDF আগতেই এটাচ কৰি পঠিয়াওক (Send আপুনি টিপিব):",
+  "ax.sv_wa": "WhatsApp Web",
+  "ax.sv_mail": "Gmail ড্ৰাফ্ট",
+  "ax.sv_save": "কেৱল সেভ কৰক",
+  "ax.sv_waok": "WhatsApp Web PDF সৈতে খুলি আছে। চাই লওক, তাৰ পিছত Send টিপক।",
+  "ax.sv_mailok": "Gmail ড্ৰাফ্ট PDF সৈতে খুলি আছে। চাই লওক, তাৰ পিছত Send টিপক।",
+  "ax.sv_fail": "এড-অনে ইয়াক খুলিব নোৱাৰিলে। তাৰ সলনি PDF ডাউনলোড হৈছে।"
+});
+
+/* NSBiz Helper: Windows printers */
+NS.addLang('as', {
+  "tpr.win": "Windows-ত ইনষ্টল কৰা প্ৰিণ্টাৰ (NSBiz Helper প্ৰ'গ্ৰামৰ জৰিয়তে)",
+  "tpr.winpick": "Windows প্ৰিণ্টাৰ"
+});

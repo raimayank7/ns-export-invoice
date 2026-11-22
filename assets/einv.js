@@ -419,6 +419,8 @@
     a.href = URL.createObjectURL(new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' }));
     a.download = name; document.body.appendChild(a); a.click();
     setTimeout(function () { URL.revokeObjectURL(a.href); a.remove(); }, 2000);
+    /* NSBiz Helper add-on: the same file waits for the portal panel's "Put the file into the upload box" */
+    var AD = NS.addonAny && NS.addonAny(); if (AD) AD.call('pending', { name: name, text: JSON.stringify(data, null, 2), kind: what }).catch(function () {});
     msg([], [t(what === 'einv' ? 'ei.made' : 'ei.madeewb', { file: name })].concat(r.note));
   }
 

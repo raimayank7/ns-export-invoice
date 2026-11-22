@@ -130,7 +130,8 @@
 
   /* ---------- connection ---------- */
   var CON = null;   /* { kind, p, ready } while this page is open */
-  RP.ok = function () { return !!(root.navigator && ('usb' in root.navigator || 'serial' in root.navigator)); };
+  function win() { return !!(root.NS && root.NS.helperUp); }   /* the NSBiz Helper program answers (through the add-on): Windows printers */
+  RP.ok = function () { return !!(root.navigator && ('usb' in root.navigator || 'serial' in root.navigator)) || win(); };
   function make(kind) {
     var P = kind === 'usb' ? new root.WebUSBReceiptPrinter() : new root.WebSerialReceiptPrinter({ baudRate: +RP.opts().baud || 9600 });
     var c = { kind: kind, p: P, name: '' };
@@ -146,10 +147,14 @@
   function conn() {
     if (CON) return Promise.resolve(CON);
     var o = RP.opts(); if (!o.dev || !RP.ok()) return Promise.reject(new Error('none'));
+    if (o.kind === 'win') {   /* the bytes go to the Windows printer by its name (RAW, no print box), through the helper */
+      if (!win()) return Promise.reject(new Error('none'));
+      return Promise.resolve({ kind: 'win', name: o.name, p: { print: function (b) { return root.NS.helper('printRaw', { printer: o.dev.win, b64: root.NS.u8b64(b), doc: 'NSBiz bill' }); } } });
+    }
     var c = CON = make(o.kind); c.p.reconnect(o.dev);
     return wait(c.ready, 2500).then(function () { return c; }, function (e) { if (CON === c) CON = null; throw e; });
   }
-  RP.forget = function () { if (CON) { try { CON.p.disconnect(); } catch (e) {} } CON = null; try { root.localStorage.removeItem('ns-rp'); } catch (e) {} };
+  RP.forget = function () { if (CON && CON.p.disconnect) { try { CON.p.disconnect(); } catch (e) {} } CON = null; try { root.localStorage.removeItem('ns-rp'); } catch (e) {} };
   RP.send = function (bytes) { return conn().then(function (c) { return c.p.print(bytes); }); };
   /* build(encoder, opts) adds the lines (docs.js); finish() adds the cut and the drawer */
   RP.printWith = function (build) {
@@ -187,7 +192,9 @@
         (RP.ok() ? '' : '<p class="remind">' + esc(T('tpr.nosupport', 'This browser cannot talk to a receipt printer directly. Use Chrome or Edge on a computer or an Android phone, or the NSBiz Windows program. Bills print through the normal print box meanwhile.')) + '</p>') +
         '<p class="soft" data-st></p>' +
         '<fieldset><legend>' + esc(T('tpr.how', 'How it is connected')) + '</legend>' +
-        radio('rpk', 'usb', T('tpr.usb', 'USB'), o.kind !== 'serial' && usb) + radio('rpk', 'serial', T('tpr.serial', 'Serial / COM port / Bluetooth'), o.kind === 'serial' || !usb) +
+        radio('rpk', 'usb', T('tpr.usb', 'USB'), o.kind !== 'serial' && o.kind !== 'win' && usb) + radio('rpk', 'serial', T('tpr.serial', 'Serial / COM port / Bluetooth'), o.kind === 'serial' || (!usb && o.kind !== 'win')) +
+        (win() ? '<br>' + radio('rpk', 'win', T('tpr.win', 'A printer installed in Windows (through the NSBiz Helper program)'), o.kind === 'win') +
+          ' <select data-win aria-label="' + esc(T('tpr.winpick', 'Windows printer')) + '"><option value="">' + esc(T('tpr.winpick', 'Windows printer')) + '…</option></select>' : '') +
         '<br><small class="hint">' + esc(T('tpr.howh', 'On Windows, a printer whose own driver is installed is reached through its COM port: choose Serial / COM port.')) + '</small></fieldset>' +
         '<fieldset><legend>' + esc(T('tpr.paper', 'Paper width')) + '</legend>' + radio('rpc', 48, T('tpr.p80', '80 mm (48 letters a line)'), o.cols >= 48) + radio('rpc', 32, T('tpr.p58', '58 mm (32 letters a line)'), o.cols < 48) + '</fieldset>' +
         chk('cut', T('tpr.cut', 'Cut the paper after each bill')) +
@@ -196,12 +203,15 @@
         [['native', T('tpr.qrn', "Printer's own QR")], ['image', T('tpr.qri', 'As a picture (if the QR comes out wrong)')], ['off', T('tpr.qro', 'Do not print')]].map(function (x) { return '<option value="' + x[0] + '"' + (o.qr === x[0] ? ' selected' : '') + '>' + esc(x[1]) + '</option>'; }).join('') + '</select></p>' +
         chk('direct', T('tpr.direct', 'Print button sends thermal bills straight to this printer (no print box)')) +
         '<div class="row" style="display:flex;gap:8px;flex-wrap:wrap">' +
-        '<button type="button" class="btn primary" data-a="connect"' + (usb || ser ? '' : ' disabled') + '>' + esc(T('tpr.connect', 'Connect printer')) + '</button>' +
+        '<button type="button" class="btn primary" data-a="connect"' + (usb || ser || win() ? '' : ' disabled') + '>' + esc(T('tpr.connect', 'Connect printer')) + '</button>' +
         '<button type="button" class="btn" data-a="test">' + esc(T('tpr.test', 'Print a test slip')) + '</button>' +
         '<button type="button" class="btn" data-a="forget">' + esc(T('tpr.forget', 'Forget this printer')) + '</button>' +
         '<button type="button" class="btn" data-a="close">' + esc(T('tpr.close', 'Close')) + '</button></div>';
       document.body.appendChild(d); d.showModal ? d.showModal() : d.setAttribute('open', '');
-      var st = d.querySelector('[data-st]');
+      var st = d.querySelector('[data-st]'), ws = d.querySelector('[data-win]');
+      if (ws) root.NS.helper('printers').then(function (r) {   /* the printers installed in Windows, the one in use first */
+        (r.printers || []).forEach(function (p) { var op = document.createElement('option'); op.value = p.name; op.textContent = p.name + (p.dflt ? ' ✓' : ''); if (o.kind === 'win' && o.dev && o.dev.win === p.name) op.selected = true; ws.appendChild(op); });
+      }, function () {});
       function status() {
         var x = RP.opts(), on = !!x.dev;
         st.textContent = on ? T('tpr.on', 'Connected: {x}', { x: (x.name || (x.kind === 'usb' ? 'USB' : 'COM')) }) : T('tpr.off', 'No receipt printer connected on this device.');
@@ -223,6 +233,10 @@
         if (a === 'connect') {
           RP.keep(read());
           var k = (d.querySelector('input[name=rpk]:checked') || {}).value || (usb ? 'usb' : 'serial');
+          if (k === 'win') {
+            var pn = ws && ws.value; if (!pn) { NS.toast(T('tpr.winpick', 'Windows printer') + '?', 'bad'); return; }
+            CON = null; RP.keep({ kind: 'win', dev: { win: pn }, name: pn }); status(); NS.toast(T('tpr.ready', 'Receipt printer connected')); if (opt.thenClose) done(true); return;
+          }
           RP.connect(k).then(function () { status(); NS.toast(T('tpr.ready', 'Receipt printer connected')); if (opt.thenClose) done(true); }, function () { status(); });
         }
       });

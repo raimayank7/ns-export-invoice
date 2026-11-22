@@ -468,10 +468,81 @@
           var big = v.inv ? v.inv.reduce(function (a, e) { return a + (e.dir === 'in' ? e.amt : 0); }, 0) : v.lines.reduce(function (a, l) { return a + (l.v > 0 ? l.v : 0); }, 0);
           return '<tr><td>' + NS.fmtDate(v.date) + '</td><td>' + esc(v.type) + '</td><td class="mono">' + esc(v.no) + '</td><td>' + esc(v.party || '—') + '</td><td class="n">' + NS.money(big) + '</td></tr>';
         }).join('') + '</tbody></table></div>' + (last.length > 200 ? '<p class="hint">' + esc(t('ty.more', { n: last.length - 200 })) + '</p>' : '') +
-        '<p class="row"><button type="button" class="btn" id="ty-m">' + esc(t('ty.b.m')) + '</button><button type="button" class="btn primary" id="ty-v">' + esc(t('ty.b.v')) + '</button></p><p class="hint">' + esc(t('ty.h.order')) + '</p>';
+        '<p class="row"><button type="button" class="btn" id="ty-m">' + esc(t('ty.b.m')) + '</button><button type="button" class="btn primary" id="ty-v">' + esc(t('ty.b.v')) + '</button></p><p class="hint">' + esc(t('ty.h.order')) + '</p>' + liveCard();
       $('#ty-m', box).addEventListener('click', function () { save('tally-masters-' + NS.today() + '.xml', mastersXml(last)); });
       $('#ty-v', box).addEventListener('click', function () { save('tally-vouchers-' + NS.today() + '.xml', vouchersXml(last)); });
+      liveWire();
     }).catch(function (e) { out.innerHTML = '<p class="warn">' + esc(e.message) + '</p>'; });
+  }
+  /* ---------- Tally on this PC, through the NSBiz Helper add-on (phase 5): the same two files, sent straight to TallyPrime's
+     own connection (port 9000), and the ledger balances read back to compare. Shown only when the add-on is in the browser. ---------- */
+  function port() { try { return localStorage.getItem('ns-tally-port') || '9000'; } catch (e) { return '9000'; } }
+  function liveCard() {
+    if (!NS.addonAny || !NS.addonAny()) return '';
+    return '<div class="ty-live"><h4>' + esc(t('ty.lv.t')) + '</h4><p class="hint">' + esc(t('ty.lv.h')) + '</p>' +
+      '<p class="row"><label for="ty-port">' + esc(t('ty.lv.port')) + '</label> <input id="ty-port" inputmode="numeric" size="6" value="' + esc(port()) + '">' +
+      '<button type="button" class="btn" id="ty-ping">' + esc(t('ty.lv.ping')) + '</button><button type="button" class="btn primary" id="ty-send">' + esc(t('ty.lv.send')) + '</button>' +
+      '<button type="button" class="btn" id="ty-cmp">' + esc(t('ty.lv.cmp')) + '</button></p>' +
+      '<p><label class="chk"><input type="checkbox" id="ty-again"> ' + esc(t('ty.lv.again')) + '</label></p><div id="ty-lout" aria-live="polite"></div></div>';
+  }
+  function liveWire() {
+    var A = NS.addonAny && NS.addonAny(), lo = $('#ty-lout', box); if (!A || !lo) return;
+    var P = function () { var v = String($('#ty-port', box).value || '').replace(/\D/g, '') || '9000'; try { localStorage.setItem('ns-tally-port', v); } catch (e) {} return +v; };
+    var busy = function (on) { ['#ty-ping', '#ty-send', '#ty-cmp'].forEach(function (s) { $(s, box).disabled = on; }); };
+    var fail = function (e) { busy(false); lo.innerHTML = '<p class="warn">' + esc(e && e.message || String(e)) + '</p>'; };
+    var perm = function (r) { if (r && r.perm === false) { busy(false); lo.innerHTML = '<p class="warn">' + esc(t('ty.lv.perm')) + '</p>'; return true; } return false; };
+    var res = function (key, r) {
+      return '<p>' + esc(t(key, { c: r.created, a: r.altered, e: r.errors + (r.exceptions || 0) })) + '</p>' +
+        (r.lineErrors && r.lineErrors.length ? '<details open><summary>' + esc(t('ty.lv.le')) + '</summary><ul class="warn">' + r.lineErrors.map(function (l) { return '<li>' + esc(l) + '</li>'; }).join('') + '</ul></details>' : '') +
+        (r.raw ? '<pre class="mono">' + esc(r.raw) + '</pre>' : '');
+    };
+    $('#ty-ping', box).addEventListener('click', function () {
+      busy(true); lo.innerHTML = '<p class="hint">…</p>';
+      A.call('tally', { op: 'ping', port: P() }).then(function (r) { if (perm(r)) return; busy(false); lo.innerHTML = '<p>' + esc(t('ty.lv.ok', { c: (r.companies || []).join(', ') || '—' })) + '</p>'; }, fail);
+    });
+    /* Tally does not notice a voucher sent twice: what went to each Tally company is remembered here (this browser), and only
+       new vouchers are sent unless "send again" is ticked. A voucher Tally refused is not marked, so it goes next time. */
+    var vkey = function (v) {
+      var s = (v.lines || []).reduce(function (a, l) { return a + Math.abs(l.v); }, 0) + (v.inv || []).reduce(function (a, e) { return a + Math.abs(e.amt || 0) + Math.abs(e.qty || 0); }, 0);
+      return [v.type, v.no || '', v.date, r2(s), v.party || ''].join('|');
+    };
+    var sentGet = function (co) { try { return JSON.parse(localStorage.getItem('ns-tally-sent|' + co) || '{}') || {}; } catch (e) { return {}; } };
+    var sentPut = function (co, o) { var k = Object.keys(o); if (k.length > 50000) k.slice(0, k.length - 50000).forEach(function (x) { delete o[x]; }); try { localStorage.setItem('ns-tally-sent|' + co, JSON.stringify(o)); } catch (e) {} };
+    $('#ty-send', box).addEventListener('click', function () {
+      busy(true); lo.innerHTML = '<p class="hint">…</p>';
+      var p = P(), out = '', co = '', sent = {}, list = last, skipped = 0;
+      A.call('tally', { op: 'ping', port: p }).then(function (r) {
+        if (perm(r)) return null;
+        co = (r.companies || [])[0] || 'port ' + p; sent = sentGet(co);
+        if (!$('#ty-again', box).checked) { list = last.filter(function (v) { return !sent[vkey(v)]; }); skipped = last.length - list.length; }
+        if (!list.length) { busy(false); lo.innerHTML = '<p class="warn">' + esc(t('ty.lv.allsent')) + '</p>'; return null; }
+        return A.call('tally', { op: 'send', port: p, xml: mastersXml(list) });
+      }).then(function (r) {
+        if (!r) return null; out = res('ty.lv.m', r) + (skipped ? '<p class="hint">' + esc(t('ty.lv.skip', { n: skipped })) + '</p>' : ''); lo.innerHTML = out;
+        return A.call('tally', { op: 'send', port: p, xml: vouchersXml(list) });
+      }).then(function (r) {
+        if (!r) return; busy(false); lo.innerHTML = out + res('ty.lv.v', r);
+        var bad = (r.lineErrors || []).join('\n'), now = NS.today();
+        list.forEach(function (v) { if (!r.errors || !v.no || bad.indexOf(v.no) < 0) { if (!(r.errors && !v.no)) sent[vkey(v)] = now; } });
+        sentPut(co, sent);
+      }, fail);
+    });
+    $('#ty-cmp', box).addEventListener('click', function () {
+      busy(true); lo.innerHTML = '<p class="hint">…</p>';
+      var f = $('#ty-from', box), to = $('#ty-to', box), saved = src === 'saved';
+      /* NSBiz side: what these vouchers move on each Tally ledger (debit positive) */
+      var mine = {}; last.forEach(function (v) { (v.lines || []).forEach(function (l) { var n = ledName(l.a); mine[n] = r2((mine[n] || 0) + l.v); }); });
+      A.call('tally', { op: 'ledgers', port: P(), from: saved && f && f.value ? ymd(f.value) : '', to: saved && to && to.value ? ymd(to.value) : '' }).then(function (r) {
+        if (perm(r)) return; busy(false);
+        var tl = {}; (r.ledgers || []).forEach(function (l) { tl[String(l.name).toLowerCase()] = r2(-(l.closing - l.opening)); });   /* Tally: debit is negative */
+        var names = Object.keys(mine).sort(), diff = names.filter(function (n) { var k = n.toLowerCase(); return !(k in tl) || Math.abs(tl[k] - mine[n]) > 0.5; });
+        var dc = function (v) { return Math.abs(v) < 0.005 ? '0' : NS.money(Math.abs(v)) + (v > 0 ? ' Dr' : ' Cr'); };
+        lo.innerHTML = !diff.length ? '<p><b>' + esc(t('ty.lv.same', { n: names.length })) + '</b></p>' :
+          '<p><b>' + esc(t('ty.lv.diff', { n: diff.length, t: names.length })) + '</b></p><div class="tbl"><table class="bk-t"><thead><tr><th>' + esc(t('ty.lv.cl')) + '</th><th class="n">' + esc(t('ty.lv.ct')) + '</th><th class="n">' + esc(t('ty.lv.cn')) + '</th><th class="n">' + esc(t('ty.lv.cd')) + '</th></tr></thead><tbody>' +
+          diff.map(function (n) { var k = n.toLowerCase(), have = k in tl; return '<tr><td>' + esc(n) + '</td><td class="n">' + (have ? dc(tl[k]) : esc(t('ty.lv.none'))) + '</td><td class="n">' + dc(mine[n]) + '</td><td class="n">' + (have ? dc(r2(tl[k] - mine[n])) : '') + '</td></tr>'; }).join('') +
+          '</tbody></table></div>' + '<p class="hint">' + esc(t('ty.lv.note')) + '</p>';
+      }, fail);
+    });
   }
   function badList(bad) { return bad && bad.length ? '<details open><summary>' + esc(t('bk.fixn', { n: bad.length })) + '</summary><ul class="warn">' + bad.map(function (b) { return '<li>' + esc(b) + '</li>'; }).join('') + '</ul></details>' : ''; }
   function save(name, text) {

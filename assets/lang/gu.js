@@ -10593,3 +10593,61 @@ NS.addLang("gu", {
   "dnv.scan": "બારકોડ સ્કેન",
   "dnv.scanh": "કેમેરાથી આઇટમનો બારકોડ સ્કેન કરો"
 });
+
+/* NSBiz Helper add-on (core.js) */
+NS.addLang("gu", {
+  "ax.t": "NSBiz Helper એડ-ઓન",
+  "ax.name": "Downloads › NSBiz",
+  "ax.tip": "App ખુલ્લું હોય ત્યારે NSBiz Helper એડ-ઓન જાતે સેવ કરે છે: Downloads › NSBiz › Data (દરેક ફેરફાર પછી બેકઅપ ફાઇલ), Backups (રોજ એક તારીખવાળી કૉપી, છેલ્લી 30) અને Backup (અઠવાડિયાના દરેક દિવસની એક કૉપી). સૌથી નવી કૉપી એડ-ઓનમાં પણ રહે છે, બ્રાઉઝરનો સાઇટ ડેટા ભૂંસાય તો પણ તે સુરક્ષિત રહે છે.",
+  "ax.open": "Downloads ફોલ્ડર ખોલો",
+  "ax.now": "હમણાં કૉપી સેવ કરો",
+  "ax.restore": "એડ-ઓનની કૉપી પાછી લાવો",
+  "ax.ask": "એડ-ઓનમાં રાખેલી {when}ની કૉપી પાછી લાવવી છે? પહેલાં તમારો હાલનો ડેટા સેવ થશે, પછી બદલાશે.",
+  "ax.back": "એડ-ઓનની કૉપી પાછી આવી ગઈ.",
+  "ax.none": "એડ-ઓનમાં હજી કોઈ કૉપી નથી.",
+  "ax.fail": "NSBiz Helper એડ-ઓને જવાબ ન આપ્યો. પેજ ફરી લોડ કરીને ફરી પ્રયત્ન કરો.",
+  "ax.saved": "Downloads › NSBiz માં સેવ થયું.",
+  "ax.folder": "કૉપી તમારી પસંદના ફોલ્ડરમાં (બીજી ડ્રાઇવ કે પેન ડ્રાઇવ) જોઈએ છે? અહીં પસંદ કરો; પછી એડ-ઓન ફક્ત પોતાની સુરક્ષિત કૉપી રાખશે."
+});
+/* NSBiz Helper add-on: Tally on this PC (tally.js) */
+NS.addLang("gu", {
+  "ty.lv.t": "આ જ PC ના Tally માં સીધું મોકલો",
+  "ty.lv.h": "NSBiz Helper એડ-ઓન જોઈએ જેમાં \"Tally on this computer\" ચાલુ હોય, અને આ જ PC પર TallyPrime ખુલ્લું, કંપની લોડ અને તેનું કનેક્શન ચાલુ હોય (Help › Settings › Connectivity › Client/Server configuration: TallyPrime acts as Server, port 9000). પહેલાં લેજર જાય છે, પછી વાઉચર. પહેલાં Tally કંપનીનો બેકઅપ લો.",
+  "ty.lv.port": "પોર્ટ",
+  "ty.lv.ping": "Tally ચેક કરો",
+  "ty.lv.send": "Tally માં મોકલો",
+  "ty.lv.cmp": "બેલેન્સ મેળવો",
+  "ty.lv.ok": "Tally ચાલુ છે. ખુલ્લી કંપની: {c}",
+  "ty.lv.perm": "પહેલાં NSBiz Helper વિન્ડોમાં (બ્રાઉઝર ટૂલબારમાં એડ-ઓનનું બટન) \"Tally on this computer\" ચાલુ કરો.",
+  "ty.lv.m": "લેજર: {c} બન્યા, {a} બદલાયા, {e} એરર.",
+  "ty.lv.v": "વાઉચર: {c} બન્યા, {a} બદલાયા, {e} એરર.",
+  "ty.lv.le": "Tally એ આ લીધું નહીં:",
+  "ty.lv.same": "આ પીરિયડના બધા {n} લેજર Tally સાથે મળે છે.",
+  "ty.lv.diff": "{t} માંથી {n} લેજર અલગ છે:",
+  "ty.lv.cl": "લેજર",
+  "ty.lv.ct": "Tally માં",
+  "ty.lv.cn": "NSBiz માં",
+  "ty.lv.cd": "તફાવત",
+  "ty.lv.none": "Tally માં નથી",
+  "ty.lv.note": "ફક્ત પસંદ કરેલા પીરિયડની એન્ટ્રી મેળવાય છે. સીધી Tally માં કરેલી એન્ટ્રી પણ તફાવતમાં દેખાશે.",
+  "ty.lv.again": "આ Tally કંપનીમાં પહેલાં મોકલેલા વાઉચર ફરી મોકલો",
+  "ty.lv.skip": "{n} વાઉચર આ Tally કંપનીમાં પહેલાં મોકલાઈ ગયા હતા, તેથી છોડી દીધા (નહીં તો Tally માં બે વાર બની જાત).",
+  "ty.lv.allsent": "આ બધા વાઉચર આ Tally કંપનીમાં પહેલેથી મોકલાઈ ગયા છે. Tally માં ડિલીટ કર્યા હોય તો જ \"ફરી મોકલો\" પર ટિક કરો."
+});
+
+/* NSBiz Helper: send with the PDF attached */
+NS.addLang('gu', {
+  "ax.sv_ready": "{file} તૈયાર છે. PDF પહેલેથી અટેચ કરીને મોકલો (Send તમે દબાવશો):",
+  "ax.sv_wa": "WhatsApp Web",
+  "ax.sv_mail": "Gmail ડ્રાફ્ટ",
+  "ax.sv_save": "ફક્ત સેવ કરો",
+  "ax.sv_waok": "WhatsApp Web PDF સાથે ખૂલી રહ્યું છે. ચેક કરો, પછી Send દબાવો.",
+  "ax.sv_mailok": "Gmail ડ્રાફ્ટ PDF સાથે ખૂલી રહ્યો છે. ચેક કરો, પછી Send દબાવો.",
+  "ax.sv_fail": "એડ-ઓન આ ખોલી શક્યું નહીં. તેના બદલે PDF ડાઉનલોડ થઈ ગઈ છે."
+});
+
+/* NSBiz Helper: Windows printers */
+NS.addLang('gu', {
+  "tpr.win": "Windows માં ઇન્સ્ટોલ કરેલું પ્રિન્ટર (NSBiz Helper પ્રોગ્રામ દ્વારા)",
+  "tpr.winpick": "Windows પ્રિન્ટર"
+});

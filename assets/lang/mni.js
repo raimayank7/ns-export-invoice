@@ -10517,3 +10517,61 @@ NS.addLang("mni", {
   "dnv.scan": "ꯕꯥꯔꯀꯣꯗ ꯁ꯭ꯀꯦꯟ",
   "dnv.scanh": "ꯀꯦꯃꯦꯔꯥꯅ ꯑꯥꯏꯇꯦꯃꯒꯤ ꯕꯥꯔꯀꯣꯗ ꯁ꯭ꯀꯦꯟ ꯇꯧꯕꯤꯌꯨ"
 });
+
+/* NSBiz Helper add-on (core.js) */
+NS.addLang("mni", {
+  "ax.t": "NSBiz Helper ꯑꯦꯗ-ꯑꯣꯟ",
+  "ax.name": "Downloads › NSBiz",
+  "ax.tip": "App ꯍꯥꯡꯗꯣꯛꯂꯤꯉꯩꯗꯥ NSBiz Helper ꯑꯦꯗ-ꯑꯣꯟꯅꯥ ꯃꯁꯥꯃꯛ ꯁꯦꯚ ꯇꯧꯏ: Downloads › NSBiz › Data (ꯍꯣꯡꯂꯛꯄꯥ ꯈꯨꯗꯤꯡꯃꯛꯀꯤ ꯃꯇꯨꯡꯗꯥ ꯕꯦꯀꯑꯞ ꯐꯥꯏꯜ), Backups (ꯅꯨꯃꯤꯠ ꯈꯨꯗꯤꯡꯗꯥ ꯇꯥꯔꯤꯈ ꯌꯥꯎꯕ ꯀꯣꯄꯤ ꯑꯃꯥ, ꯑꯔꯣꯏꯕ 30) ꯑꯃꯁꯨꯡ Backup (ꯍꯞꯇꯥꯒꯤ ꯅꯨꯃꯤꯠ ꯈꯨꯗꯤꯡꯃꯛꯀꯤ ꯀꯣꯄꯤ ꯑꯃꯥ)। ꯑꯅꯧꯕ ꯀꯣꯄꯤ ꯑꯦꯗ-ꯑꯣꯟꯒꯤ ꯃꯅꯨꯡꯗꯁꯨ ꯂꯩ, ꯕ꯭ꯔꯥꯎꯖꯔꯒꯤ ꯁꯥꯏꯠ ꯗꯦꯇꯥ ꯃꯨꯠꯊꯠꯂꯕꯁꯨ ꯉꯥꯛ ꯁꯦꯟꯅꯥ ꯂꯩ।",
+  "ax.open": "Downloads ꯐꯣꯜꯗꯔ ꯍꯥꯡꯗꯣꯀꯎ",
+  "ax.now": "ꯍꯧꯖꯤꯛ ꯀꯣꯄꯤ ꯁꯦꯚ ꯇꯧ",
+  "ax.restore": "ꯑꯦꯗ-ꯑꯣꯟꯒꯤ ꯀꯣꯄꯤ ꯍꯟꯅꯥ ꯄꯨꯔꯛꯎ",
+  "ax.ask": "ꯑꯦꯗ-ꯑꯣꯟꯗꯥ ꯊꯝꯂꯕ {when} ꯒꯤ ꯀꯣꯄꯤ ꯍꯟꯅꯥ ꯄꯨꯔꯛꯀꯗ꯭ꯔꯥ? ꯑꯍꯥꯅꯕꯗꯥ ꯍꯧꯖꯤꯛꯀꯤ ꯗꯦꯇꯥ ꯁꯦꯚ ꯇꯧꯒꯅꯤ, ꯃꯇꯨꯡꯗꯥ ꯍꯣꯡꯗꯣꯛꯀꯅꯤ।",
+  "ax.back": "ꯑꯦꯗ-ꯑꯣꯟꯒꯤ ꯀꯣꯄꯤ ꯍꯜꯂꯛꯂꯦ।",
+  "ax.none": "ꯑꯦꯗ-ꯑꯣꯟꯗꯥ ꯍꯧꯖꯤꯛ ꯐꯥꯑꯣꯕꯥ ꯀꯣꯄꯤ ꯂꯩꯇꯦ।",
+  "ax.fail": "NSBiz Helper ꯑꯦꯗ-ꯑꯣꯟꯅꯥ ꯄꯥꯎꯈꯨꯝ ꯄꯤꯈꯤꯗꯦ। ꯄꯦꯖ ꯑꯃꯨꯛ ꯍꯟꯅꯥ ꯂꯣꯗ ꯇꯧꯔꯒꯥ ꯑꯃꯨꯛ ꯍꯟꯅꯥ ꯍꯣꯠꯅꯕꯤꯌꯨ।",
+  "ax.saved": "Downloads › NSBiz ꯗꯥ ꯁꯦꯚ ꯇꯧꯔꯦ।",
+  "ax.folder": "ꯅꯍꯥꯛꯅꯥ ꯈꯟꯕ ꯐꯣꯜꯗꯔꯗꯥ (ꯑꯇꯣꯞꯄ ꯗ꯭ꯔꯥꯏꯚ ꯅꯠꯔꯒꯥ ꯄꯦꯟ ꯗ꯭ꯔꯥꯏꯚ) ꯀꯣꯄꯤ ꯄꯥꯝꯕ꯭ꯔꯥ? ꯃꯐꯝ ꯑꯁꯤꯗꯥ ꯈꯅꯕꯤꯌꯨ; ꯃꯗꯨꯒꯤ ꯃꯇꯨꯡꯗꯥ ꯑꯦꯗ-ꯑꯣꯟꯅꯥ ꯃꯁꯥꯒꯤ ꯀꯣꯄꯤ ꯈꯛꯇꯃꯛ ꯊꯝꯒꯅꯤ।"
+});
+/* NSBiz Helper add-on: Tally on this PC (tally.js) */
+NS.addLang("mni", {
+  "ty.lv.t": "PC ꯁꯤꯒꯤ Tally ꯗ ꯆꯨꯃꯗ ꯊꯥꯕꯤꯌꯨ",
+  "ty.lv.h": "\"Tally on this computer\" ꯑꯣꯟ ꯇꯧꯔꯕ NSBiz Helper ꯑꯦꯗ-ꯑꯣꯟ ꯃꯊꯧ ꯇꯥꯏ, ꯑꯃꯁꯨꯡ PC ꯁꯤꯗ TallyPrime ꯍꯥꯡꯗꯣꯛꯂꯒ, ꯀꯝꯄꯦꯅꯤ ꯂꯣꯗ ꯇꯧꯔꯒ ꯃꯗꯨꯒꯤ ꯀꯅꯦꯛꯁꯟ ꯑꯣꯟ ꯇꯧꯒꯗꯕꯅꯤ (Help › Settings › Connectivity › Client/Server configuration: TallyPrime acts as Server, port 9000)꯫ ꯑꯍꯥꯅꯕꯗ ꯂꯦꯖꯔ ꯆꯠꯂꯤ, ꯃꯇꯨꯡꯗ ꯚꯧꯆꯔ꯫ ꯑꯍꯥꯅꯕꯗ Tally ꯀꯝꯄꯦꯅꯤꯒꯤ ꯕꯦꯀꯑꯞ ꯂꯧꯕꯤꯌꯨ꯫",
+  "ty.lv.port": "ꯄꯣꯔꯠ",
+  "ty.lv.ping": "Tally ꯆꯦꯛ ꯇꯧꯕꯤꯌꯨ",
+  "ty.lv.send": "Tally ꯗ ꯊꯥꯕꯤꯌꯨ",
+  "ty.lv.cmp": "ꯕꯦꯂꯦꯟꯁ ꯃꯥꯟꯅꯍꯟꯕꯤꯌꯨ",
+  "ty.lv.ok": "Tally ꯆꯠꯂꯤ꯫ ꯍꯥꯡꯗꯣꯛꯂꯕ ꯀꯝꯄꯦꯅꯤ: {c}",
+  "ty.lv.perm": "ꯑꯍꯥꯅꯕꯗ NSBiz Helper ꯋꯤꯟꯗꯣ (ꯕ꯭ꯔꯥꯎꯖꯔ ꯇꯨꯜꯕꯥꯔꯗ ꯂꯩꯕ ꯑꯦꯗ-ꯑꯣꯟꯒꯤ ꯕꯇꯟ) ꯗ \"Tally on this computer\" ꯑꯣꯟ ꯇꯧꯕꯤꯌꯨ꯫",
+  "ty.lv.m": "ꯂꯦꯖꯔ: {c} ꯁꯦꯃꯈꯤ, {a} ꯍꯣꯡꯈꯤ, {e} ꯑꯦꯔꯔ꯫",
+  "ty.lv.v": "ꯚꯧꯆꯔ: {c} ꯁꯦꯃꯈꯤ, {a} ꯍꯣꯡꯈꯤ, {e} ꯑꯦꯔꯔ꯫",
+  "ty.lv.le": "Tally ꯅ ꯂꯧꯗꯕꯁꯤꯡ:",
+  "ty.lv.same": "ꯄꯤꯔꯤꯌꯗ ꯁꯤꯒꯤ ꯂꯦꯖꯔ {n} ꯄꯨꯝꯅꯃꯛ Tally ꯒ ꯃꯥꯟꯅꯩ꯫",
+  "ty.lv.diff": "{t} ꯒꯤ ꯃꯅꯨꯡꯗ ꯂꯦꯖꯔ {n} ꯇꯣꯉꯥꯟꯅꯩ:",
+  "ty.lv.cl": "ꯂꯦꯖꯔ",
+  "ty.lv.ct": "Tally ꯗ",
+  "ty.lv.cn": "NSBiz ꯗ",
+  "ty.lv.cd": "ꯈꯦꯠꯅꯕ",
+  "ty.lv.none": "Tally ꯗ ꯂꯩꯇꯦ",
+  "ty.lv.note": "ꯈꯟꯈꯤꯕ ꯄꯤꯔꯤꯌꯗꯀꯤ ꯑꯦꯟꯇ꯭ꯔꯤꯈꯛ ꯆꯥꯡꯗꯝꯃꯤ꯫ Tally ꯗ ꯆꯨꯃꯗ ꯇꯧꯈꯤꯕ ꯑꯦꯟꯇ꯭ꯔꯤꯁꯤꯡꯁꯨ ꯈꯦꯠꯅꯕ ꯑꯣꯏꯅ ꯎꯒꯅꯤ꯫",
+  "ty.lv.again": "Tally ꯀꯝꯄꯦꯅꯤ ꯁꯤꯗ ꯃꯃꯥꯡꯗ ꯊꯥꯈꯤꯕ ꯚꯧꯆꯔꯁꯤꯡ ꯑꯃꯨꯛ ꯍꯟꯅꯥ ꯊꯥꯕꯤꯌꯨ",
+  "ty.lv.skip": "ꯚꯧꯆꯔ {n} Tally ꯀꯝꯄꯦꯅꯤ ꯁꯤꯗ ꯃꯃꯥꯡꯗ ꯊꯥꯈ꯭ꯔꯕꯅꯤ, ꯃꯔꯝ ꯑꯗꯨꯅ ꯊꯥꯗꯣꯀꯈꯤ (ꯅꯠꯇ꯭ꯔꯕꯗꯤ Tally ꯗ ꯑꯅꯤꯔꯛ ꯁꯦꯃꯒꯅꯤ)꯫",
+  "ty.lv.allsent": "ꯚꯧꯆꯔ ꯄꯨꯝꯅꯃꯛ ꯑꯁꯤ Tally ꯀꯝꯄꯦꯅꯤ ꯁꯤꯗ ꯍꯥꯟꯅ ꯊꯥꯔꯦ꯫ Tally ꯗ ꯗꯤꯂꯤꯠ ꯇꯧꯔꯕꯗꯤ ꯈꯛꯇꯗ \"ꯑꯃꯨꯛ ꯍꯟꯅꯥ ꯊꯥꯕꯤꯌꯨ\" ꯇꯤꯛ ꯇꯧꯕꯤꯌꯨ꯫"
+});
+
+/* NSBiz Helper: send with the PDF attached */
+NS.addLang('mni', {
+  "ax.sv_ready": "{file} ꯁꯦꯝ ꯁꯥꯔꯦ꯫ PDF ꯃꯃꯥꯡꯗꯒꯤ ꯑꯦꯇꯦꯆ ꯇꯧꯔꯒꯥ ꯊꯥꯕꯤꯌꯨ (Send ꯅꯍꯥꯛꯅꯥ ꯅꯝꯒꯅꯤ):",
+  "ax.sv_wa": "WhatsApp Web",
+  "ax.sv_mail": "Gmail ꯗ꯭ꯔꯥꯐꯠ",
+  "ax.sv_save": "ꯁꯦꯚ ꯈꯛꯇꯃꯛ ꯇꯧ",
+  "ax.sv_waok": "WhatsApp Web PDF ꯒꯥ ꯂꯣꯌꯅꯅꯥ ꯍꯥꯡꯗꯣꯛꯂꯤ꯫ ꯌꯦꯡꯁꯤꯟꯕꯤꯌꯨ, ꯃꯇꯨꯡꯗꯥ Send ꯅꯝꯕꯤꯌꯨ꯫",
+  "ax.sv_mailok": "Gmail ꯗ꯭ꯔꯥꯐꯠ PDF ꯒꯥ ꯂꯣꯌꯅꯅꯥ ꯍꯥꯡꯗꯣꯛꯂꯤ꯫ ꯌꯦꯡꯁꯤꯟꯕꯤꯌꯨ, ꯃꯇꯨꯡꯗꯥ Send ꯅꯝꯕꯤꯌꯨ꯫",
+  "ax.sv_fail": "ꯑꯦꯗ-ꯑꯣꯟꯅꯥ ꯃꯁꯤ ꯍꯥꯡꯗꯣꯛꯄꯥ ꯉꯃꯗꯦ꯫ ꯃꯗꯨꯒꯤ ꯃꯍꯨꯠꯇꯥ PDF ꯗꯥꯎꯅꯂꯣꯗ ꯇꯧꯔꯦ꯫"
+});
+
+/* NSBiz Helper: Windows printers */
+NS.addLang('mni', {
+  "tpr.win": "Windows ꯗꯥ ꯏꯅꯁ꯭ꯇꯣꯜ ꯇꯧꯔꯕꯥ ꯄ꯭ꯔꯤꯟꯇꯔ (NSBiz Helper ꯄ꯭ꯔꯣꯒ꯭ꯔꯥꯝꯒꯤ ꯈꯨꯠꯊꯥꯡꯗꯥ)",
+  "tpr.winpick": "Windows ꯄ꯭ꯔꯤꯟꯇꯔ"
+});

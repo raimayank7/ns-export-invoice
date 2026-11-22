@@ -10602,3 +10602,61 @@ NS.addLang("brx", {
   "dnv.scan": "बारकड स्केन",
   "dnv.scanh": "केमेराजों आइटेमनि बारकड स्केन खालाम"
 });
+
+/* NSBiz Helper add-on (core.js) */
+NS.addLang("brx", {
+  "ax.t": "NSBiz Helper एड-अन",
+  "ax.name": "Downloads › NSBiz",
+  "ax.tip": "App खेवनाय थाब्ला NSBiz Helper एड-अनआ गाव गावनो सेभ खालामो: Downloads › NSBiz › Data (गासै सोलायनायनि उनाव बेकआप फाइल), Backups (सानफ्रोमबो मोनसे तारिखनि कपि, जोबथा 30) आरो Backup (हप्तानि गासै सानखौ मोनसे कपि)। गोदान कपिआ एड-अननि सिंआवबो थायो, ब्राउजारनि साइट डेटा खोमोर लाबोबोब्लाबो रैखाथि थायो।",
+  "ax.open": "Downloads फोल्डार खेव",
+  "ax.now": "दिनैनो कपि सेभ खालाम",
+  "ax.restore": "एड-अननि कपिखौ फिनना लाबो",
+  "ax.ask": "एड-अनआव दोनथानाय {when} नि कपिखौ फिनना लाबोनो? गिबियाव नोंथांनि दानोनि डेटा सेभ जागोन, उनाव सोलायजागोन।",
+  "ax.back": "एड-अननि कपिआ फिनना फैबाय।",
+  "ax.none": "एड-अनआव दासिमबो मोनसेबो कपि गैया।",
+  "ax.fail": "NSBiz Helper एड-अनआ फिननाय होआखै। बिलाइखौ फिन लोड खालामनानै फिन नाजा।",
+  "ax.saved": "Downloads › NSBiz आव सेभ जाबाय।",
+  "ax.folder": "नोंथांनि मोजां मोननाय फोल्डारआव (गुबुन ड्राइभ एबा पेन ड्राइभ) कपि नांगौ? बेयाव सायख; बेनि उनाव एड-अनआ बिनि रैखाथि कपिखौल' दोनगोन।"
+});
+/* NSBiz Helper add-on: Tally on this PC (tally.js) */
+NS.addLang("brx", {
+  "ty.lv.t": "बे PC नि Tally-आव सिधा दैथाय",
+  "ty.lv.h": "NSBiz Helper एड-अन नांगो जेरै \"Tally on this computer\" चालु जायो, आरो बे PC आव TallyPrime खेवनाय, कम्पानि लोड आरो बेनि कनेक्सन चालु जायो (Help › Settings › Connectivity › Client/Server configuration: TallyPrime acts as Server, port 9000)। गिबियाव लेजार थांगौ, उनाव भाउचार। गिबिसिन Tally कम्पानिनि बेकआप ला।",
+  "ty.lv.port": "पोर्ट",
+  "ty.lv.ping": "Tally नायनानै नाय",
+  "ty.lv.send": "Tally-आव दैथाय",
+  "ty.lv.cmp": "बेलेन्स मिलाय",
+  "ty.lv.ok": "Tally सलायगासिनो दं। खेवनाय कम्पानि: {c}",
+  "ty.lv.perm": "गिबियाव NSBiz Helper उइन्डोआव (ब्राउजार टुलबारआव एड-अननि बुथाम) \"Tally on this computer\" चालु खालाम।",
+  "ty.lv.m": "लेजार: {c} सोरजिनाय, {a} सोलायनाय, {e} एरर।",
+  "ty.lv.v": "भाउचार: {c} सोरजिनाय, {a} सोलायनाय, {e} एरर।",
+  "ty.lv.le": "Tally-आ बेफोरखौ लाखैसै:",
+  "ty.lv.same": "बे पिरियडनि गासै {n} लेजार Tally जों मिलि जायो।",
+  "ty.lv.diff": "{t} नि गेजेराव {n} लेजार गुबुन:",
+  "ty.lv.cl": "लेजार",
+  "ty.lv.ct": "Tally-आव",
+  "ty.lv.cn": "NSBiz-आव",
+  "ty.lv.cd": "फारागि",
+  "ty.lv.none": "Tally-आव गैया",
+  "ty.lv.note": "बाछिनाय पिरियडनि एन्ट्रिफोरखौल मिलायो। Tally-आव सिधा खालामनाय एन्ट्रिफोरबो फारागि महरै नुनो।",
+  "ty.lv.again": "बे Tally कम्पानियाव गिबियाव दैथायनाय भाउचारफोरखौ फिन दैथाय",
+  "ty.lv.skip": "{n} भाउचारफोरखौ बे Tally कम्पानियाव गिबियावनो दैथायनाय जादोंमोन, बेनिखायनो नागारनाय जाखो (नङा जायोब्ला Tally-आव मोननै खेप सोरजिगोन)।",
+  "ty.lv.allsent": "बे गासै भाउचारफोरखौ बे Tally कम्पानियाव गिबियावनो दैथायनाय जाबाय। नों बेफोरखौ Tally-आव डिलिट खालामबाय जायोब्लासो \"फिन दैथाय\"-आव टिक हो।"
+});
+
+/* NSBiz Helper: send with the PDF attached */
+NS.addLang('brx', {
+  "ax.sv_ready": "{file} थियारि जादों। PDF आगोलाव अटैच खालामनानै दैथाय (Send नोंथाङा नेनगोन):",
+  "ax.sv_wa": "WhatsApp Web",
+  "ax.sv_mail": "Gmail ड्राफ्ट",
+  "ax.sv_save": "सेभ खालाम थिखोन",
+  "ax.sv_waok": "WhatsApp Web आ PDF जों खेवगासिनो दं। नायनानै Send नेन।",
+  "ax.sv_mailok": "Gmail ड्राफ्ट आ PDF जों खेवगासिनो दं। नायनानै Send नेन।",
+  "ax.sv_fail": "एड-अनआ बेखौ खेवनो हानाय नङा। बेनि सोलायै PDF डाउनलोड जादों।"
+});
+
+/* NSBiz Helper: Windows printers */
+NS.addLang('brx', {
+  "tpr.win": "Windows आव इंस्टॉल खालामनाय प्रिंटर (NSBiz Helper प्रोग्रामजों)",
+  "tpr.winpick": "Windows प्रिंटर"
+});

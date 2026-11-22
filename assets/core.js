@@ -407,7 +407,7 @@
     return NS.loadJs(L['rpcore.js'] || '/assets/rpcore.js').then(function () { return Promise.all(NSRp.LIB.map(function (u) { return NS.loadJs(u); })); }).then(function () { return window.NSRp; });
   }
   function rpOpts() { try { return JSON.parse(localStorage.getItem('ns-rp') || 'null') || {}; } catch (e) { return {}; } }
-  NS.rpCan = function () { return 'usb' in navigator || 'serial' in navigator; };
+  NS.rpCan = function () { return 'usb' in navigator || 'serial' in navigator || !!NS.helperUp; };   /* NS.helperUp: Windows printers through the NSBiz Helper program */
   NS.rpReady = function () { var o = rpOpts(); return NS.rpCan() && !!o.dev && o.direct !== false; };   /* Print on a thermal bill goes straight to the printer */
   NS.rpSetup = function (opt) { return rpLoad().then(function (R) { return R.setup(opt); }); };
   NS.rpForget = function () { if (window.NSRp) NSRp.forget(); else try { localStorage.removeItem('ns-rp'); } catch (e) {} };
@@ -799,6 +799,8 @@
       var desk = NSStore.deskBackup ? NSStore.deskBackup('bkDays').catch(function () { return null; }) : Promise.resolve(null);
       var save = desk.then(function (d) { return d ? 'desk' : NS.fileBackup.copy('Before restore'); }).then(function (st) {
         if (st === 'ok' || st === 'desk') return st;
+        /* the NSBiz Helper add-on: into Downloads › NSBiz › Before restore */
+        if (NS.addon.here()) return NS.fileBackup.pack().then(function (blob) { return blob.arrayBuffer(); }).then(function (b) { return addonCall('before', { pack: b }, [b]); }).then(function () { return 'addon'; });
         return NS.fileBackup.pack().then(function (blob) {
           var a = NS.el('a', { href: URL.createObjectURL(blob), download: 'NSBiz-before-restore-' + NS.today() + '.nsbiz' });
           document.body.appendChild(a); a.click(); a.remove(); setTimeout(function () { URL.revokeObjectURL(a.href); }, 4000);
@@ -808,13 +810,194 @@
       return save.then(function (how) { return NSStore.restoreFiles(set.files, note).then(function (r) { r.saved = how; return r; }); });
     }
   };
+  /* ---------- NSBiz Helper, the add-on for Firefox, Edge and Chrome (owner 21 Nov 2026) ----------
+     The add-on marks the page <html data-nsbiz-addon="version"> and, when asked, puts a hidden frame of its own (the bridge) into
+     the page. The App (or My data) then hands it the backups, because the add-on cannot read the App's data by itself:
+     Downloads › NSBiz › Data (the backup file, after every change, at most every 30 s), Backups (one copy for each day of the month, day-01 … day-31, replaced a month later),
+     Backup (one .nsbiz copy for each day of the week, at most every 10 minutes), and its own safe copy of the newest .nsbiz,
+     which survives "clear site data". With a folder chosen (Chrome/Edge) the folder is used and the add-on only keeps its copy.
+     Database copy for Excel (Downloads › NSBiz › Database) when switched on in the add-on's own window. */
+  var ADD = { ver: document.documentElement.getAttribute('data-nsbiz-addon') || '', origin: '', frame: null, wait: {}, n: 0, ready: null, last: 0, day: 0, dated: 0, db: 0, t: 0 };
+  function addonReady() {
+    if (ADD.ready) return ADD.ready;
+    ADD.ready = new Promise(function (res, rej) {
+      var t = setTimeout(function () { window.removeEventListener('message', h); ADD.ready = null; rej(new Error('addon')); }, 8000);
+      function h(e) {
+        if (e.source !== window || !e.data || e.data.nsbizAddon !== 'ready' || !/^(chrome|moz|ms-browser)-extension:\/\//.test(e.data.origin || '')) return;
+        window.removeEventListener('message', h); clearTimeout(t);
+        ADD.origin = e.data.origin; ADD.frame = document.getElementById('nsbiz-addon-bridge');
+        ADD.frame ? res() : rej(new Error('addon'));
+      }
+      window.addEventListener('message', h);
+      window.postMessage({ nsbizAddon: 'bridge' }, location.origin);
+    });
+    return ADD.ready;
+  }
+  window.addEventListener('message', function (e) {
+    var m = e.data;
+    if (!ADD.origin || e.origin !== ADD.origin || !m || !m.nsbizRes || !ADD.wait[m.nsbizRes]) return;
+    var w = ADD.wait[m.nsbizRes]; delete ADD.wait[m.nsbizRes]; clearTimeout(w.t);
+    m.err ? w.rej(new Error(m.err)) : w.res(m.res);
+  });
+  function addonCall(op, arg, transfer) {
+    return addonReady().then(function () {
+      return new Promise(function (res, rej) {
+        var id = 'x' + (++ADD.n) + '-' + Date.now();
+        ADD.wait[id] = { res: res, rej: rej, t: setTimeout(function () { delete ADD.wait[id]; rej(new Error('addon')); }, 10 * 60000) };
+        ADD.frame.contentWindow.postMessage({ nsbizReq: id, op: op, arg: arg || {} }, ADD.origin, transfer || []);
+      });
+    });
+  }
+  /* what the Windows program's "database copy" reads from the App: every record + the account postings (books.js) */
+  function addonPayload() {
+    return NSStore.exportAll().then(function (data) {
+      var B = window.NSBooks, docs = data.doc || [], out = { data: data, ledger: [], totals: {} };
+      if (!B) return out;
+      (data.biz || []).forEach(function (b) {
+        var rows = []; try { rows = B.inBooks(docs, b.name); } catch (e) { rows = []; }
+        rows.forEach(function (d) {
+          var L = []; try { L = B.postings(d); } catch (e) {}
+          var party = B.partyName ? B.partyName(d) : '';
+          L.forEach(function (l) { out.ledger.push({ biz: b.name, date: d.date || '', id: d.id || '', type: d.virt || d.type || '', no: d.no || '', party: party, a: l.a, dr: l.dr || 0, cr: l.cr || 0 }); });
+        });
+      });
+      docs.forEach(function (d) { if (d.items && B.itemTotals) { try { out.totals[d.id] = B.itemTotals(d); } catch (e) {} } });
+      return out;
+    });
+  }
+  /* the summary for the add-on's toolbar, search and reminders (home.js, the App only); nothing but "locked" once logins are on */
+  function addonDigest(locked) {
+    var d = null;
+    if (locked) d = { locked: true };
+    else if (window.NSHomeUI && NSHomeUI.digest) { try { d = NSHomeUI.digest(); } catch (e) { d = null; } }
+    if (!d || (!d.locked && !d.biz)) return Promise.resolve();   /* no business picked yet (start, just after a restore): keep the last one */
+    d.app = location.origin + location.pathname;
+    return addonCall('digest', d).catch(function () {});
+  }
+  /* settings follow you (the add-on's switch, off by default): the tool settings (meta 'prefs') through the browser's own sync.
+     Look-ups of other people's GSTINs and profit and loss drafts stay on this device. */
+  var SYNC_SKIP = /^ns-(gstin-recent|pl-draft-)/;
+  function addonSync(hi, pull) {
+    if (!hi || !hi.prefs || !hi.prefs.sync) return Promise.resolve();
+    return NSStore.meta('prefs').then(function (all) {
+      all = all || {};
+      if (pull) return addonCall('syncGet').then(function (remote) {
+        var got = 0;
+        Object.keys(remote || {}).forEach(function (k) { var r = remote[k]; if (SYNC_SKIP.test(k) || !r) return; if (!all[k] || (all[k].t || 0) < (r.t || 0)) { all[k] = r; got++; } });
+        return got ? NSStore.meta('prefs', all).then(function () { if (NS.prefPull) NS.prefPull(); }) : null;
+      });
+      var out = {}; Object.keys(all).forEach(function (k) { if (!SYNC_SKIP.test(k)) out[k] = all[k]; });
+      return addonCall('syncPut', { prefs: out });
+    }).catch(function () {});
+  }
+  /* the NSBiz Helper program on the PC, reached through the add-on (phase 9): Excel GST tools, printers, DSC signing.
+     NS.helperUp turns true once the helper answered (event ns-helper). */
+  NS.helperUp = false;
+  NS.helper = function (op, a) {
+    var x = NS.addonAny && NS.addonAny();
+    if (!x) return Promise.reject(new Error('The NSBiz Helper add-on is not in this browser'));
+    return x.call('helper', Object.assign({ op: op }, a || {}));
+  };
+  NS.helperCheck = function () {
+    var x = NS.addonAny && NS.addonAny(); if (!x) return Promise.resolve(false);
+    return x.status().then(function (s) { return s && s.helper ? NS.helper('hello') : null; }).then(function (h) {
+      var up = !!(h && h.ok); if (up !== NS.helperUp) { NS.helperUp = up; NS.helperInfo = h || null; document.dispatchEvent(new CustomEvent('ns-helper')); }
+      return up;
+    }, function () { return false; });
+  };
+  function u8b64(u8) { var s = ''; for (var i = 0; i < u8.length; i += 0x8000) s += String.fromCharCode.apply(null, u8.subarray(i, i + 0x8000)); return btoa(s); }
+  function b64u8(b) { var t = atob(b), u = new Uint8Array(t.length); for (var i = 0; i < t.length; i++) u[i] = t.charCodeAt(i); return u; }
+  NS.u8b64 = u8b64; NS.b64u8 = b64u8;
+  /* the same answer shape as the Windows program's NSDesktopXL.fill: { ok, written, errors, bytes } or { ok: false, noexcel, errors } */
+  NS.helperXL = {
+    fill: function (bytes, ext, spec) {
+      return NS.helper('xlFill', { b64: u8b64(bytes instanceof Uint8Array ? bytes : new Uint8Array(bytes)), ext: ext, spec: spec }).then(function (r) {
+        return { ok: true, written: r.written, errors: r.errors || [], bytes: b64u8(r.b64 || '') };
+      }, function (e) { var m = String(e && e.message || e); return { ok: false, noexcel: /Excel is not installed/i.test(m), errors: [m] }; });
+    }
+  };
+  NS.addonStart = function () {
+    setTimeout(function () { NS.helperCheck(); }, 2000);
+    return addonCall('hello').then(function (hi) {
+      return NSStore.auth('authStatus').then(function (s) { return !!(s && s.on); }, function () { return false; }).then(function (locked) {
+        return Promise.all([addonDigest(locked), locked ? null : addonSync(hi, true)]);
+      });
+    }).catch(function () {});
+  };
+  /* one run; folder = a folder is chosen too (then only the safe copy goes to the add-on) */
+  function addonBackup(folder, force) {
+    var now = Date.now();
+    if (!force && now - ADD.last < 30000) {   /* saves in quick succession: one run a little later with all of them */
+      clearTimeout(ADD.t); ADD.t = setTimeout(function () { afWrite(); }, 30000 - (now - ADD.last));
+      return Promise.resolve('wait');
+    }
+    ADD.last = now;
+    return addonCall('hello').then(function (hi) {
+      return NSStore.auth('authStatus').then(function (s) { return !!(s && s.on); }, function () { return false; }).then(function (locked) {
+        addonDigest(locked); if (!locked) addonSync(hi, false);
+        var dayDue = force || now - ADD.day > 600000, datedDue = force || now - ADD.dated > 3600000;
+        var json = folder || locked ? Promise.resolve(null) : NS.backupData().then(function (b) { return JSON.stringify(b, null, 1); });
+        var pack = dayDue && NSStore.snapshot ? NS.fileBackup.pack().then(function (b) { return b.arrayBuffer(); }, function () { return null; }) : Promise.resolve(null);
+        return Promise.all([json, pack]).then(function (r) {
+          if (!r[0] && !r[1]) return 'none';
+          return addonCall('backup', { json: r[0], pack: r[1], dated: datedDue, day: dayDue && !folder }, r[1] ? [r[1]] : []).then(function () {
+            if (r[1]) ADD.day = now; if (r[0] && datedDue) ADD.dated = now;
+            /* the database copy, when switched on in the add-on (at most every 2 minutes; not once logins lock the data) */
+            if (hi && hi.prefs && hi.prefs.dbcopy && !locked && (force || now - ADD.db > 120000)) {
+              ADD.db = now;
+              return addonPayload().then(function (p) { return addonCall('dbcopy', { payload: p }); }).catch(function () {}).then(function () { return 'ok'; });
+            }
+            return 'ok';
+          });
+        });
+      });
+    }).catch(function () { return 'fail'; });
+  }
+  /* the add-on for this page: its own, or (a tool opened inside the App, same address) the App page's */
+  NS.addonAny = function () {
+    if (NS.addon && NS.addon.on) return NS.addon;
+    try { var T = window.top !== window && window.top.location.origin === location.origin && window.top.NS && window.top.NS.addon; return T && T.on ? T : null; } catch (e) { return null; }
+  };
+  NS.addon = {
+    on: !!ADD.ver, version: ADD.ver, call: addonCall,
+    here: function () { return !!ADD.ver && NS.folderHere(); },
+    /* the add-on's own copy: { at, head, bytes (ArrayBuffer) } or null */
+    kept: function () { return addonCall('keptData'); },
+    status: function () { return addonCall('status'); },
+    show: function () { return addonCall('show'); },
+    now: function () { return afWrite(true); }
+  };
+  /* "Bring back the add-on's copy" (My data › Auto-save): the current data is saved first, as for any copy brought back */
+  NS.addonRestore = function () {
+    return addonCall('keptData').then(function (k) {
+      if (!k || !k.bytes) throw new Error(NS.t('ax.none'));
+      return NS.fileBackup.unpack(new Blob([k.bytes])).then(function (set) {
+        var when = new Date(k.at).toLocaleString('en-IN', { dateStyle: 'medium', timeStyle: 'short' });
+        return (NS.ask ? NS.ask(NS.t('ax.ask', { when: when }), { ok: NS.t('ax.restore'), danger: true }) : Promise.resolve(window.confirm(NS.t('ax.ask', { when: when })))).then(function (yes) {
+          if (!yes) return null;
+          return NS.fileBackup.restore(set, 'add-on copy ' + when).then(function (r) { NS.toast(NS.t('ax.back')); document.dispatchEvent(new CustomEvent('ns-data')); return r; });
+        });
+      });
+    }).catch(function (e) { NS.toast(e && e.message && e.message !== 'addon' ? e.message : NS.t('ax.fail'), 'bad'); throw e; });
+  };
+
   /* the writer: the full backup file, the same as "Back up everything" */
   var AF = { t: 0, st: '', note: null };
   function afNote(v) { return window.NSStore ? NSStore.meta('autosave', v).catch(function () {}) : Promise.resolve(); }
-  function afWrite() {
+  function afWrite(force) {
+    force = force === true;
     var go = function () {
       return folderGet().then(function (h) {
-        if (!h) return 'off';
+        if (!h || !NS.folderSupported()) {
+          /* no folder (or a browser that can't keep one, e.g. Firefox): the NSBiz Helper add-on saves into Downloads › NSBiz */
+          if (!NS.addon.here()) return 'off';
+          return addonBackup(false, force).then(function (st) {
+            if (st !== 'ok') return st;
+            var now = Date.now();
+            return NSStore.meta('lastBackup', now).then(function () { return afNote({ name: NS.t('ax.name'), last: now, host: location.hostname, addon: true }); }).then(function () { return 'ok'; });
+          });
+        }
+        if (NS.addon.here()) addonBackup(true, force).catch(function () {});   /* the folder does the files; the add-on keeps its safe copy */
         return h.queryPermission({ mode: 'readwrite' }).then(function (p) {
           if (p !== 'granted') return 'ask';
           /* Stage 4: once logins are on no readable file is written (anyone could open it); the locked data files are copied instead */
@@ -865,7 +1048,7 @@
   };
   NS.isInstalled = function () { return !!(window.matchMedia && matchMedia('(display-mode: standalone), (display-mode: window-controls-overlay)').matches) || navigator.standalone === true; };
   function afSoon(ms) {
-    if (!NS.folderHere() || !NS.folderSupported()) return;
+    if (!NS.folderHere() || !(NS.folderSupported() || NS.addon.on)) return;
     clearTimeout(AF.t); AF.t = setTimeout(afWrite, ms == null ? 1500 : ms);
   }
   function folderOn(name) {
@@ -898,6 +1081,19 @@
   };
   /* {supported, on, name, file, allowed, last, here}; on other sites: {on, name, last, host, elsewhere} from the data home's note */
   NS.folderStatus = function () {
+    /* the add-on saves here when no folder is chosen: { addon: true, ... } */
+    if (NS.addon.here() && window.NSStore) {
+      var mine = function () {
+        return NSStore.meta('lastBackup').then(function (last) {
+          return { supported: true, on: true, here: true, addon: true, allowed: true, name: NS.t('ax.name'), file: BACKUP_NAME + '.json', last: last || 0, canFolder: NS.folderSupported() };
+        });
+      };
+      if (!NS.folderSupported()) return mine().catch(function () { return { supported: true, on: false, here: true }; });
+      return folderGet().then(function (h) { return h ? null : mine(); }).catch(function () { return null; }).then(function (r) { return r || folderStatus0(); });
+    }
+    return folderStatus0();
+  };
+  function folderStatus0() {
     if (!NS.folderSupported()) return window.NSStore ? NSStore.meta('autodl').then(function (v) { return { supported: false, autodl: !!v }; }, function () { return { supported: false }; }) : Promise.resolve({ supported: false });
     if (!window.NSStore) return Promise.resolve({ supported: true, on: false, home: false });   /* pages with no saved data (view.) */
     if (NS.folderHere()) {
@@ -912,7 +1108,7 @@
     return NSStore.meta('autosave').then(function (n) {
       return n && n.name ? { supported: true, on: true, elsewhere: true, allowed: !n.paused, name: n.name, file: BACKUP_NAME + '.json', last: n.last || 0, host: n.host || '' } : { supported: true, on: false };
     }, function () { return { supported: true, on: false, home: false }; });
-  };
+  }
   /* other files in the NSBiz folder (GST templates, filled returns): the page that keeps the folder (the App, or My data) does the
      writing; the GST screens open inside the App are pages of other sites, so they ask it by message.
      NS.folderFile(op, path, name, data): 'put' (data = Blob) -> true | false; 'find' (data = pattern text) -> { name, blob } | null */
@@ -973,6 +1169,7 @@
   /* start: the App and My data write once (changes made while they were closed), and open the auto save part when asked to */
   function folderStart() {
     if (window.top !== window || !window.NSStore) return;
+    if (NS.addon.here()) NSStore.ready().then(function () { NS.addonStart(); afSoon(800); }).catch(function () {});   /* the add-on: summary + settings, then one run */
     if (!NS.folderSupported()) { if (AF_OPEN && NS.folderHere() && NS.openMyData) { NS._mdTab = 'af'; NS.openMyData(); } return; }
     if (!NS.folderHere()) {
       /* an older version kept a folder on each site: those can't be used any more, forget them quietly */
@@ -988,7 +1185,7 @@
   if (document.readyState === 'complete') setTimeout(folderStart, 1500); else window.addEventListener('load', function () { setTimeout(folderStart, 1500); });
   /* browsers that cannot keep a folder: if the person switched it on, a backup file goes to Downloads once a day (App or My data open) */
   function autoDl(now) {
-    if (NS.folderSupported() || !NS.folderHere() || !window.NSStore) return;
+    if (NS.folderSupported() || !NS.folderHere() || !window.NSStore || NS.addon.on) return;   /* the add-on saves by itself */
     Promise.all([NSStore.meta('autodl'), NSStore.meta('lastBackup'), NSStore.list('doc'), NSStore.list('party')]).then(function (r) {
       if (!r[0] || (!r[2].length && !r[3].length)) return;
       if (!now && Date.now() - (r[1] || 0) < 20 * 36e5) return;
@@ -1112,7 +1309,11 @@
       /* phones and tablets: the part is still there, saying auto save is for computers (the button "Auto-save and storage" opens it) */
       var dlRow = '<label class="md-chk"><input type="checkbox" data-autodl' + (f.autodl ? ' checked' : '') + '> <b>' + E(T('oa.dl')) + '</b></label><p class="soft">' + E(T('oa.dlp')) + '</p>';
       var instTip = f.supported && f.on && here && !NS.isInstalled() ? '<p class="note">' + E(T('oa.inst2', { b: NS.browserName() || T('oa.thisbr') })) + ' <button type="button" class="btn sm" data-desk-install>' + E(T('desk.install')) + '</button></p>' : '';
-      var afPane = !f.supported ? '<p>' + off + E(T('ux.af.pc')) + '</p><div class="md-bar">' + B('backup', 'md.save', 1) + '</div>' + dlRow : instTip + NS.mdRow(T('oa.t'), fTxt + (f.on && f.last ? '<br>' + E(T('md.last')) + ' ' + E(new Date(f.last).toLocaleString('en-IN', { dateStyle: 'medium', timeStyle: 'short' })) : ''),
+      var when = function (t) { return new Date(t).toLocaleString('en-IN', { dateStyle: 'medium', timeStyle: 'short' }); };
+      var addPane = f.addon ? NS.mdRow(T('ax.t'), on + E(T('md2.on')) + ' · <bdi class="mono">' + E(f.name) + '</bdi>' + (f.last ? '<br>' + E(T('md.last')) + ' ' + E(when(f.last)) : ''),
+          T('ax.tip'), B('addon-show', 'ax.open', 1) + B('addon-now', 'ax.now') + B('addon-restore', 'ax.restore')) +
+        (f.canFolder ? '<p class="soft">' + E(T('ax.folder')) + '</p><div class="md-bar">' + FB('folder-pick', 'md.choose') + '</div>' : '') : '';
+      var afPane = f.addon ? addPane : !f.supported ? '<p>' + off + E(T('ux.af.pc')) + '</p><div class="md-bar">' + B('backup', 'md.save', 1) + '</div>' + dlRow : instTip + NS.mdRow(T('oa.t'), fTxt + (f.on && f.last ? '<br>' + E(T('md.last')) + ' ' + E(new Date(f.last).toLocaleString('en-IN', { dateStyle: 'medium', timeStyle: 'short' })) : ''),
           (f.on ? T('oa.on', { file: f.file || BACKUP_NAME + '.json', name: f.name }) + (f.allowed ? '' : ' ' + T('oa.ask')) : T('oa.off')),
           f.home === false ? '' : f.elsewhere ? FB('folder-pick', 'oa.open', 1) : f.on ? (f.allowed ? '' : FB('folder-allow', 'md.allow', 1)) + B('folder-off', 'md.turnoff') : FB('folder-pick', 'md.choose', 1)) +
         (f.other ? '<p class="note">' + E(T('oa.other', { host: f.other.host || '' })) + '</p>' : '') +
@@ -1171,6 +1372,9 @@
     else if (a === 'folder-allow') NS.folderAllow().then(mdAgain);
     else if (a === 'folder-off') NS.folderOff().then(mdAgain);
     else if (a === 'af-later') { afBar.later = true; afBar(null); }
+    else if (a === 'addon-show') NS.addon.show().catch(function () { NS.toast(NS.t('ax.fail'), 'bad'); });
+    else if (a === 'addon-now') { t.disabled = true; NS.addon.now().then(function (st) { NS.toast(NS.t(st === 'ok' ? 'ax.saved' : 'ax.fail'), st === 'ok' ? '' : 'bad'); mdAgain(); }); }
+    else if (a === 'addon-restore') NS.addonRestore().then(mdAgain, function () {});
     else if (a === 'my-data') { NS._mdTab = t.getAttribute('data-tab') || 'ov'; NS.openMyData(); }
     else if (a === 'remind-later') { var r = NS.$('#ns-remind'); if (r) r.hidden = true; NSStore.meta('lastBackup', Date.now() - 4 * 864e5); }
   });
@@ -1558,11 +1762,74 @@
     document.body.appendChild(bar);
     setTimeout(function () { bar.remove(); }, 60000);
   };
+  /* NSBiz Helper add-on (phase 7), switch "WhatsApp Web and Gmail" on: a document goes to the party's WhatsApp Web chat or a
+     Gmail draft with the PDF already attached (the add-on puts it in; the person presses Send), and wa.me links open
+     WhatsApp Web straight away. The switch's state is asked once a minute at most. */
+  var SENDSW = null, SENDAT = 0;
+  NS.addonSend = function () {
+    var a = NS.addonAny && NS.addonAny();
+    if (!a) return Promise.resolve(false);
+    if (SENDSW !== null && Date.now() - SENDAT < 60000) return Promise.resolve(SENDSW);
+    return a.status().then(function (s) { SENDSW = !!(s && s.send); SENDAT = Date.now(); return SENDSW; }, function () { return false; });
+  };
+  function b64Of(blob) {
+    return new Promise(function (res, rej) { var r = new FileReader(); r.onload = function () { res(String(r.result).split(',')[1] || ''); }; r.onerror = rej; r.readAsDataURL(blob); });
+  }
+  NS.addonSendTo = function (via, o, blob, fname) {
+    var a = NS.addonAny(); if (!a) return Promise.reject(new Error('addon'));
+    return (blob ? b64Of(blob) : Promise.resolve('')).then(function (b64) {
+      return a.call('send', { via: via, phone: o.phone || '', email: o.email || '', subject: o.subject || '', text: o.text || '', file: b64 ? { name: fname, b64: b64, type: 'application/pdf' } : null });
+    });
+  };
+  /* the bar after the PDF is made, with the add-on: WhatsApp Web (when the party's mobile is known) or a Gmail draft */
+  NS.sendBar = function (blob, fname, title, text, o) {
+    o = o || {};
+    var old = document.querySelector('.pdf-wa'); if (old) old.remove();
+    var p = String(o.phone || '').replace(/\D/g, '');
+    var T = function (k, v) { return NS.esc(NS.t(k, v)); };
+    var bar = NS.el('div', { 'class': 'pdf-wa', role: 'status' }, '<span>' + T('ax.sv_ready', { file: fname }) + '</span> ' +
+      (p.length >= 10 ? '<button type="button" class="btn sm primary" data-sv="wa">' + T('ax.sv_wa') + '</button> ' : '') +
+      '<button type="button" class="btn sm' + (p.length >= 10 ? '' : ' primary') + '" data-sv="mail">' + T('ax.sv_mail') + '</button> <button type="button" class="btn sm" data-sv="save">' + T('ax.sv_save') + '</button> <button type="button" class="btn sm" data-x>' + T('pdf.waclose') + '</button>');
+    bar.addEventListener('click', function (e) {
+      var b = e.target.closest('button'); if (!b) return;
+      var via = b.getAttribute('data-sv');
+      bar.remove();
+      if (via === 'save') { saveBlob(blob, fname); NS.toast(NS.t('pdf.saved', { file: fname })); return; }
+      if (!via) return;
+      NS.addonSendTo(via, { phone: o.phone, email: o.email, subject: title, text: text }, blob, fname).then(function () {
+        NS.toast(NS.t(via === 'wa' ? 'ax.sv_waok' : 'ax.sv_mailok'));
+      }, function () { NS.toast(NS.t('ax.sv_fail'), 'bad'); saveBlob(blob, fname); });
+    });
+    document.body.appendChild(bar);
+    setTimeout(function () { bar.remove(); }, 120000);
+  };
+  /* wa.me links and windows: straight into WhatsApp Web (the chat with the message typed in) */
+  function waParts(u) { try { var x = new URL(u); if (x.hostname !== 'wa.me') return null; return { phone: x.pathname.replace(/\D/g, ''), text: x.searchParams.get('text') || '' }; } catch (e) { return null; } }
+  function waSend(u) {
+    var w = waParts(u); if (!w) return false;
+    NS.addonSendTo('wa', w).catch(function () { window.__nsOpen ? window.__nsOpen.call(window, u, '_blank', 'noopener') : null; });
+    return true;
+  }
+  if (!window.__nsOpen) {
+    window.__nsOpen = window.open;
+    window.open = function (u) { if (SENDSW === true && typeof u === 'string' && /^https:\/\/wa\.me\//.test(u) && waSend(u)) return null; return window.__nsOpen.apply(window, arguments); };
+    document.addEventListener('click', function (e) {
+      if (SENDSW !== true || e.defaultPrevented || e.button) return;
+      var a = e.target.closest && e.target.closest('a[href^="https://wa.me/"]'); if (!a) return;
+      if (waSend(a.href)) e.preventDefault();
+    }, true);
+    setTimeout(function () { NS.addonSend(); }, 1500);
+    document.addEventListener('visibilitychange', function () { if (!document.hidden) NS.addonSend(); });
+  }
   /* phone: share sheet with the PDF file; computer or old phone: the PDF is downloaded. A slow PDF can outlast the tap, so then one more tap shares it. */
   NS.sharePdf = function (nodes, name, paper, title, text, o) {
     var fname = String(name).replace(/[\\\/:*?"<>|]+/g, '-').replace(/\s+/g, ' ').trim().slice(0, 90) + '.pdf';
     NS.toast(NS.t('pdf.making'));
     return NS.makePdf(nodes, paper, o).then(function (blob) {
+      /* with the add-on's sending switch on, its bar comes first (even where the computer has a share sheet) */
+      return NS.addonSend().then(function (on) { return on ? NS.sendBar(blob, fname, title, text, o) : shareIt(blob); });
+    }).catch(fail);
+    function shareIt(blob) {
       var file = new File([blob], fname, { type: 'application/pdf' });
       var can = navigator.canShare && navigator.canShare({ files: [file] });
       if (!can) { saveBlob(blob, fname); NS.toast(NS.t('pdf.saved', { file: fname })); NS.waBar(fname, text, o && o.phone); return; }
@@ -1574,14 +1841,15 @@
         document.body.appendChild(b);
         setTimeout(function () { b.remove(); }, 20000);
       });
-    }).catch(function (er) {
+    }
+    function fail(er) {
       try { console.warn('PDF could not be made', er); } catch (e2) {}
       /* a computer: the print window, where 'Save as PDF' makes the same file (P2-6: a toast alone left nothing) */
       if (!(window.matchMedia && matchMedia('(pointer:coarse)').matches)) { NS.toast(NS.t('pdf.failp'), 'bad'); setTimeout(function () { window.print(); }, 400); return; }
       NS.toast(NS.t('pdf.fail'), 'bad');
       if (navigator.share) navigator.share({ title: title, text: text }).catch(function () {});
       else window.open('https://wa.me/?text=' + encodeURIComponent(text), '_blank', 'noopener');
-    });
+    }
   };
 
   /* ---------- motion: a panel, tab or list that the user brings up fades in. Works for every tool without changing it:

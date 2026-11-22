@@ -10063,3 +10063,61 @@ NS.addLang("ur", {
   "dnv.scan": "بارکوڈ اسکین",
   "dnv.scanh": "کیمرے سے آئٹم کا بارکوڈ اسکین کریں"
 });
+
+/* NSBiz Helper add-on (core.js) */
+NS.addLang("ur", {
+  "ax.t": "NSBiz Helper ایڈ آن",
+  "ax.name": "Downloads › NSBiz",
+  "ax.tip": "App کھلی ہو تو NSBiz Helper ایڈ آن خود سیو کرتا ہے: Downloads › NSBiz › Data (ہر تبدیلی کے بعد بیک اپ فائل)، Backups (روز ایک تاریخ والی کاپی، آخری 30) اور Backup (ہفتے کے ہر دن کی ایک کاپی)۔ سب سے نئی کاپی ایڈ آن کے اندر بھی رہتی ہے، جو براؤزر کا سائٹ ڈیٹا مٹانے پر بھی محفوظ رہتی ہے۔",
+  "ax.open": "Downloads فولڈر کھولیں",
+  "ax.now": "ابھی کاپی سیو کریں",
+  "ax.restore": "ایڈ آن کی کاپی واپس لائیں",
+  "ax.ask": "ایڈ آن میں رکھی {when} کی کاپی واپس لائیں؟ پہلے آپ کا موجودہ ڈیٹا سیو ہوگا، پھر بدلا جائے گا۔",
+  "ax.back": "ایڈ آن کی کاپی واپس آ گئی۔",
+  "ax.none": "ایڈ آن میں ابھی کوئی کاپی نہیں ہے۔",
+  "ax.fail": "NSBiz Helper ایڈ آن نے جواب نہیں دیا۔ صفحہ دوبارہ لوڈ کر کے پھر کوشش کریں۔",
+  "ax.saved": "Downloads › NSBiz میں سیو ہو گیا۔",
+  "ax.folder": "کاپیاں اپنی پسند کے فولڈر (دوسری ڈرائیو یا پین ڈرائیو) میں چاہئیں؟ یہاں چنیں؛ پھر ایڈ آن صرف اپنی محفوظ کاپی رکھے گا۔"
+});
+/* NSBiz Helper add-on: Tally on this PC (tally.js) */
+NS.addLang("ur", {
+  "ty.lv.t": "اسی PC کے Tally میں سیدھا بھیجیں",
+  "ty.lv.h": "NSBiz Helper ایڈ آن چاہیے جس میں \"Tally on this computer\" آن ہو، اور اسی PC پر TallyPrime کھلا ہو، کمپنی لوڈ ہو اور اس کا کنکشن آن ہو (Help › Settings › Connectivity › Client/Server configuration: TallyPrime acts as Server, port 9000)۔ پہلے لیجر جاتے ہیں، پھر واؤچر۔ پہلے Tally کمپنی کا بیک اپ لے لیں۔",
+  "ty.lv.port": "پورٹ",
+  "ty.lv.ping": "Tally چیک کریں",
+  "ty.lv.send": "Tally میں بھیجیں",
+  "ty.lv.cmp": "بیلنس ملائیں",
+  "ty.lv.ok": "Tally چل رہا ہے۔ کھلی کمپنی: {c}",
+  "ty.lv.perm": "پہلے NSBiz Helper ونڈو (براؤزر ٹول بار میں ایڈ آن کا بٹن) میں \"Tally on this computer\" آن کریں۔",
+  "ty.lv.m": "لیجر: {c} بنے، {a} بدلے، {e} ایرر۔",
+  "ty.lv.v": "واؤچر: {c} بنے، {a} بدلے، {e} ایرر۔",
+  "ty.lv.le": "Tally نے یہ نہیں لیے:",
+  "ty.lv.same": "اس پیریڈ کے سبھی {n} لیجر Tally سے ملتے ہیں۔",
+  "ty.lv.diff": "{t} میں سے {n} لیجر الگ ہیں:",
+  "ty.lv.cl": "لیجر",
+  "ty.lv.ct": "Tally میں",
+  "ty.lv.cn": "NSBiz میں",
+  "ty.lv.cd": "فرق",
+  "ty.lv.none": "Tally میں نہیں",
+  "ty.lv.note": "صرف چنے گئے پیریڈ کی انٹریاں ملائی جاتی ہیں۔ سیدھے Tally میں کی گئی انٹریاں بھی فرق میں دکھیں گی۔",
+  "ty.lv.again": "اس Tally کمپنی میں پہلے بھیجے گئے واؤچر دوبارہ بھیجیں",
+  "ty.lv.skip": "{n} واؤچر اس Tally کمپنی میں پہلے بھیجے جا چکے تھے، اس لیے چھوڑ دیے گئے (ورنہ Tally میں دو بار بن جاتے)۔",
+  "ty.lv.allsent": "یہ سبھی واؤچر اس Tally کمپنی میں پہلے ہی بھیجے جا چکے ہیں۔ \"دوبارہ بھیجیں\" پر ٹک تبھی کریں جب آپ نے انہیں Tally میں ڈیلیٹ کر دیا ہو۔"
+});
+
+/* NSBiz Helper: send with the PDF attached */
+NS.addLang('ur', {
+  "ax.sv_ready": "{file} تیار ہے۔ PDF پہلے سے اٹیچ کرکے بھیجیں (Send آپ دبائیں گے):",
+  "ax.sv_wa": "WhatsApp Web",
+  "ax.sv_mail": "Gmail ڈرافٹ",
+  "ax.sv_save": "صرف سیو کریں",
+  "ax.sv_waok": "WhatsApp Web PDF کے ساتھ کھل رہا ہے۔ چیک کریں، پھر Send دبائیں۔",
+  "ax.sv_mailok": "Gmail ڈرافٹ PDF کے ساتھ کھل رہا ہے۔ چیک کریں، پھر Send دبائیں۔",
+  "ax.sv_fail": "ایڈ آن اسے نہیں کھول سکا۔ اس کی جگہ PDF ڈاؤن لوڈ ہو گئی ہے۔"
+});
+
+/* NSBiz Helper: Windows printers */
+NS.addLang('ur', {
+  "tpr.win": "Windows میں انسٹال کیا گیا پرنٹر (NSBiz Helper پروگرام کے ذریعے)",
+  "tpr.winpick": "Windows پرنٹر"
+});

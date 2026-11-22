@@ -10597,3 +10597,61 @@ NS.addLang("sd", {
   "dnv.scan": "بارڪوڊ اسڪين",
   "dnv.scanh": "ڪئميرا سان آئٽم جو بارڪوڊ اسڪين ڪريو"
 });
+
+/* NSBiz Helper add-on (core.js) */
+NS.addLang("sd", {
+  "ax.t": "NSBiz Helper ايڊ آن",
+  "ax.name": "Downloads › NSBiz",
+  "ax.tip": "App کليل هجي ته NSBiz Helper ايڊ آن پاڻ سيو ڪري ٿو: Downloads › NSBiz › Data (هر تبديلي کان پوءِ بيڪ اپ فائل)، Backups (روز هڪ تاريخ واري ڪاپي، آخري 30) ۽ Backup (هفتي جي هر ڏينهن جي هڪ ڪاپي)۔ سڀ کان نئين ڪاپي ايڊ آن اندر به رهي ٿي، برائوزر جي سائيٽ ڊيٽا ميٽڻ تي به محفوظ رهي ٿي۔",
+  "ax.open": "Downloads فولڊر کوليو",
+  "ax.now": "هاڻي ڪاپي سيو ڪريو",
+  "ax.restore": "ايڊ آن جي ڪاپي واپس آڻيو",
+  "ax.ask": "ايڊ آن ۾ رکيل {when} جي ڪاپي واپس آڻيون؟ پهريان توهان جي موجوده ڊيٽا سيو ٿيندي، پوءِ مٽائي ويندي۔",
+  "ax.back": "ايڊ آن جي ڪاپي واپس آئي۔",
+  "ax.none": "ايڊ آن ۾ اڃا ڪا ڪاپي ناهي۔",
+  "ax.fail": "NSBiz Helper ايڊ آن جواب نه ڏنو۔ صفحو ٻيهر لوڊ ڪري ٻيهر ڪوشش ڪريو۔",
+  "ax.saved": "Downloads › NSBiz ۾ سيو ٿي ويو۔",
+  "ax.folder": "پنهنجي پسند جي فولڊر ۾ (ٻي ڊرائيو يا پين ڊرائيو) ڪاپيون گهرجن؟ هتي چونڊيو؛ پوءِ ايڊ آن رڳو پنهنجي محفوظ ڪاپي رکندو۔"
+});
+/* NSBiz Helper add-on: Tally on this PC (tally.js) */
+NS.addLang("sd", {
+  "ty.lv.t": "هن ئي PC جي Tally ۾ سڌو موڪليو",
+  "ty.lv.h": "NSBiz Helper ايڊ آن گهرجي جنهن ۾ \"Tally on this computer\" آن هجي، ۽ هن ئي PC تي TallyPrime کليل، ڪمپني لوڊ ۽ ان جو ڪنيڪشن آن هجي (Help › Settings › Connectivity › Client/Server configuration: TallyPrime acts as Server, port 9000). پهرين ليجر وڃن ٿا، پوءِ واؤچر. پهرين Tally ڪمپني جو بيڪ اپ وٺو.",
+  "ty.lv.port": "پورٽ",
+  "ty.lv.ping": "Tally چيڪ ڪريو",
+  "ty.lv.send": "Tally ۾ موڪليو",
+  "ty.lv.cmp": "بيلنس ملايو",
+  "ty.lv.ok": "Tally هلي رهيو آهي. کليل ڪمپني: {c}",
+  "ty.lv.perm": "پهرين NSBiz Helper ونڊو (برائوزر ٽول بار ۾ ايڊ آن جو بٽڻ) ۾ \"Tally on this computer\" آن ڪريو.",
+  "ty.lv.m": "ليجر: {c} ٺهيا، {a} بدليا، {e} ايرر.",
+  "ty.lv.v": "واؤچر: {c} ٺهيا، {a} بدليا، {e} ايرر.",
+  "ty.lv.le": "Tally اهي نه ورتا:",
+  "ty.lv.same": "هن پيريڊ جا سڀ {n} ليجر Tally سان ملن ٿا.",
+  "ty.lv.diff": "{t} مان {n} ليجر الڳ آهن:",
+  "ty.lv.cl": "ليجر",
+  "ty.lv.ct": "Tally ۾",
+  "ty.lv.cn": "NSBiz ۾",
+  "ty.lv.cd": "فرق",
+  "ty.lv.none": "Tally ۾ ناهي",
+  "ty.lv.note": "رڳو چونڊيل پيريڊ جون انٽريون ملايون وڃن ٿيون. سڌو Tally ۾ ڪيل انٽريون به فرق ۾ ڏيکاريون وينديون.",
+  "ty.lv.again": "هن Tally ڪمپني ۾ اڳ موڪليل واؤچر ٻيهر موڪليو",
+  "ty.lv.skip": "{n} واؤچر هن Tally ڪمپني ۾ اڳ ۾ ئي موڪليا ويا هئا، تنهن ڪري ڇڏيا ويا (نه ته Tally ۾ ٻه دفعا ٺهي پون ها).",
+  "ty.lv.allsent": "اهي سڀ واؤچر هن Tally ڪمپني ۾ اڳ ۾ ئي موڪليا ويا آهن. \"ٻيهر موڪليو\" تي ٽڪ تڏهن ئي ڪريو جڏهن توهان انهن کي Tally ۾ ڊليٽ ڪيو هجي."
+});
+
+/* NSBiz Helper: send with the PDF attached */
+NS.addLang('sd', {
+  "ax.sv_ready": "{file} تيار آهي. PDF اڳ ۾ ئي اٽيچ ڪري موڪليو (Send توهان دٻائيندا):",
+  "ax.sv_wa": "WhatsApp Web",
+  "ax.sv_mail": "Gmail ڊرافٽ",
+  "ax.sv_save": "رڳو سيو ڪريو",
+  "ax.sv_waok": "WhatsApp Web PDF سان کلي رهيو آهي. چيڪ ڪريو، پوءِ Send دٻايو.",
+  "ax.sv_mailok": "Gmail ڊرافٽ PDF سان کلي رهيو آهي. چيڪ ڪريو، پوءِ Send دٻايو.",
+  "ax.sv_fail": "ايڊ آن هن کي کولي نه سگهيو. ان بدران PDF ڊائونلوڊ ٿي وئي آهي."
+});
+
+/* NSBiz Helper: Windows printers */
+NS.addLang('sd', {
+  "tpr.win": "Windows ۾ انسٽال ٿيل پرنٽر (NSBiz Helper پروگرام ذريعي)",
+  "tpr.winpick": "Windows پرنٽر"
+});
