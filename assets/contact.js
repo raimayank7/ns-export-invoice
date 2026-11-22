@@ -121,7 +121,7 @@
       var keep = box.querySelector('textarea') && box.querySelector('textarea').value;
       if (keep) return;   /* never wipe what someone is typing when the language changes */
       box.innerHTML = '';
-      box.appendChild(form('q'));
+      box.appendChild(form(box.getAttribute('data-topic') || 'q'));
     });
   }
   function start() {

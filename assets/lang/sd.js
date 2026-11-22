@@ -10655,3 +10655,9 @@ NS.addLang('sd', {
   "tpr.win": "Windows ۾ انسٽال ٿيل پرنٽر (NSBiz Helper پروگرام ذريعي)",
   "tpr.winpick": "Windows پرنٽر"
 });
+
+/* NSBiz Helper: get the add-on */
+NS.addLang('sd', {
+  "ax.get": "{b} استعمال ڪريو ٿا؟ مفت NSBiz Helper ايڊ آن توهان جو بيڪ اپ پاڻمرادو Downloads › NSBiz ۾ محفوظ ڪري ٿو ۽ ٽول بار ۾ بقايا ۽ ياد ڏياريون ڏيکاري ٿو.",
+  "ax.getbtn": "NSBiz Helper کي {b} ۾ شامل ڪريو"
+});

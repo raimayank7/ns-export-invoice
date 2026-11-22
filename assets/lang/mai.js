@@ -10656,3 +10656,9 @@ NS.addLang('mai', {
   "tpr.win": "Windows मे इंस्टॉल कएल प्रिंटर (NSBiz Helper प्रोग्राम सँ)",
   "tpr.winpick": "Windows प्रिंटर"
 });
+
+/* NSBiz Helper: get the add-on */
+NS.addLang('mai', {
+  "ax.get": "{b} प्रयोग करैत छी? मुफ्त NSBiz Helper ऐड-ऑन अहाँक बैकअप अपने-आप Downloads › NSBiz मे सेव करैत अछि आ टूलबार मे बकाया आ रिमाइंडर देखबैत अछि।",
+  "ax.getbtn": "NSBiz Helper केँ {b} मे जोड़ू"
+});

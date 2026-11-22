@@ -10655,3 +10655,9 @@ NS.addLang('kok', {
   "tpr.win": "Windows त इंस्टॉल केल्लो प्रिंटर (NSBiz Helper प्रोग्रामा वरवीं)",
   "tpr.winpick": "Windows प्रिंटर"
 });
+
+/* NSBiz Helper: get the add-on */
+NS.addLang('kok', {
+  "ax.get": "{b} वापरतात? फुकट NSBiz Helper ॲड-ऑन तुमचो बॅकअप आपसूक Downloads › NSBiz हांगा सेव करता आनी टूलबारांत येणें आनी रिमायंडर दाखयता.",
+  "ax.getbtn": "NSBiz Helper {b} न जोडात"
+});

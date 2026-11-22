@@ -1046,6 +1046,10 @@
     if (/Safari\//.test(u)) return 'Safari';
     return '';
   };
+  /* a computer (add-ons cannot be added on phones and tablets) */
+  NS.onComputer = function () { return !/Android|iPhone|iPad|iPod|Mobile|Tablet/i.test(navigator.userAgent); };
+  /* the NSBiz Helper add-on's store pages, by NS.browserName(); add Edge and Firefox when their reviews pass */
+  NS.addonStores = { Chrome: 'https://chromewebstore.google.com/detail/cgfkgeplflfadejffmomnnhcopjkknpm' };
   NS.isInstalled = function () { return !!(window.matchMedia && matchMedia('(display-mode: standalone), (display-mode: window-controls-overlay)').matches) || navigator.standalone === true; };
   function afSoon(ms) {
     if (!NS.folderHere() || !(NS.folderSupported() || NS.addon.on)) return;
@@ -1313,11 +1317,15 @@
       var addPane = f.addon ? NS.mdRow(T('ax.t'), on + E(T('md2.on')) + ' · <bdi class="mono">' + E(f.name) + '</bdi>' + (f.last ? '<br>' + E(T('md.last')) + ' ' + E(when(f.last)) : ''),
           T('ax.tip'), B('addon-show', 'ax.open', 1) + B('addon-now', 'ax.now') + B('addon-restore', 'ax.restore')) +
         (f.canFolder ? '<p class="soft">' + E(T('ax.folder')) + '</p><div class="md-bar">' + FB('folder-pick', 'md.choose') + '</div>' : '') : '';
+      /* no add-on yet: offer it where its store listing is live (NS.addonStores, by browser name) */
+      var store = !f.addon && NS.onComputer() && NS.addonStores[NS.browserName()];
+      var getPane = store ? '<p class="note">' + E(T('ax.get', { b: NS.browserName() })) + ' <a class="btn sm" href="' + store + '" target="_blank" rel="noopener">' + E(T('ax.getbtn', { b: NS.browserName() })) + ' ↗</a></p>' : '';
       var afPane = f.addon ? addPane : !f.supported ? '<p>' + off + E(T('ux.af.pc')) + '</p><div class="md-bar">' + B('backup', 'md.save', 1) + '</div>' + dlRow : instTip + NS.mdRow(T('oa.t'), fTxt + (f.on && f.last ? '<br>' + E(T('md.last')) + ' ' + E(new Date(f.last).toLocaleString('en-IN', { dateStyle: 'medium', timeStyle: 'short' })) : ''),
           (f.on ? T('oa.on', { file: f.file || BACKUP_NAME + '.json', name: f.name }) + (f.allowed ? '' : ' ' + T('oa.ask')) : T('oa.off')),
           f.home === false ? '' : f.elsewhere ? FB('folder-pick', 'oa.open', 1) : f.on ? (f.allowed ? '' : FB('folder-allow', 'md.allow', 1)) + B('folder-off', 'md.turnoff') : FB('folder-pick', 'md.choose', 1)) +
         (f.other ? '<p class="note">' + E(T('oa.other', { host: f.other.host || '' })) + '</p>' : '') +
         '<p class="soft">' + E(T('oa.all')) + ' ' + E(T(here ? 'oa.here' : 'oa.away2')) + '</p>';
+      afPane = getPane + afPane;
       var restore = '<label class="btn sm">' + E(T('md.restore')) + '<input type="file" accept=".json,application/json" data-act="restore" hidden></label>';
       var inApp = !!(window.NSApp && NSApp.openUrl), hub = location.origin === HOME.origin ? '' : '<a class="btn sm" href="' + (inApp ? '#do/my/" data-close-box' : 'https://my.niveshsahayak.in/" target="_blank" rel="noopener"') + '>' + E(T('md2.open')) + (inApp ? '' : ' ↗') + '</a>';   /* in the App: the Data Manager opens on an App screen (owner 2026-11-18) */   /* not on the full data page itself */
       var tabs = [['ov', 'md2.ov'], ['bk', 'md2.bk'], ['af', 'md2.folder'], ['ac', 'b3.ac.t']];

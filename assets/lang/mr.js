@@ -10651,3 +10651,9 @@ NS.addLang('mr', {
   "tpr.win": "Windows मध्ये इन्स्टॉल केलेला प्रिंटर (NSBiz Helper प्रोग्राममधून)",
   "tpr.winpick": "Windows प्रिंटर"
 });
+
+/* NSBiz Helper: get the add-on */
+NS.addLang('mr', {
+  "ax.get": "{b} वापरता? मोफत NSBiz Helper ॲड-ऑन तुमचा बॅकअप आपोआप Downloads › NSBiz मध्ये सेव्ह करतो आणि टूलबारमध्ये थकबाकी व रिमाइंडर दाखवतो.",
+  "ax.getbtn": "NSBiz Helper {b} मध्ये जोडा"
+});

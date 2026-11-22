@@ -36,6 +36,7 @@
   SEC.masters.sort(function (a, b) { return (b === 'masters') - (a === 'masters'); });   /* the Masters article first on its own screen */
   var DO = { ifsc: ['ifsc-code-checker', 'pin-code-finder'], pincode: ['pin-code-finder', 'distance-calculator'], distance: ['distance-calculator', 'pin-code-finder'] };
   var IDX = null, loading = null;
+  var ALLHELP = false;   /* the App's help home: search every site's articles */
   function base() { return location.origin; }
   function mySite() { return IN_APP || (IDX && IDX.site) || ''; }
   /* this site's articles (and on the App every site's, for the search); inside the App's document copy, that maker's articles */
@@ -44,7 +45,7 @@
     if (IDX && IDX.want === L) return Promise.resolve(IDX);
     if (loading && loading.want === L) return loading;
     /* the screen language's list when the help has been translated (help_tr.py), else English */
-    var name = '/help/' + (IN_APP || isApp() ? 'all' : 'index'), get = function (u) { return fetch(u, { cache: 'no-cache' }).then(function (r) { if (!r.ok) throw new Error(r.status); return r.json(); }); };
+    var name = '/help/' + (IN_APP || isApp() || ALLHELP ? 'all' : 'index'), get = function (u) { return fetch(u, { cache: 'no-cache' }).then(function (r) { if (!r.ok) throw new Error(r.status); return r.json(); }); };
     loading = (L === 'en' ? get(name + '.json') : get(name + '.' + L + '.json').then(function (j) {
       /* an article written after the translation was made is still offered, in English */
       return get(name + '.json').then(function (e) {
@@ -90,6 +91,56 @@
     }).filter(Boolean).sort(function (x, y) { return y.sc - x.sc; }).slice(0, 30).map(function (x) { return x.a; });
   }
   /* where an article is read from: this site's own address, else the full address of the site that keeps it */
+  /* ---------- the search box on the help home (owner 22 Nov): articles and their common questions, as you type; nothing found = ask us ---------- */
+  function findBox() {
+    var box = $('[data-help-find]'); if (!box || box._on) return; box._on = 1;
+    if (box.getAttribute('data-help-find') === 'all') ALLHELP = true;   /* the App's help: every site's articles */
+    var inp = $('input', box), out = $('.hf-out', box), t0;
+    function low(s) { return String(s || '').toLowerCase(); }
+    /* a typed question ("how do I add a second godown?"): small words are left out, and an answer needs at least half of the rest */
+    var STOP = ' how what why when where which who can could do does did is are was the a an to of in on for and or my i me we our it this that with from by be at as if any not no will should would kaise kya kyon kab kahan kaun hai hain ka ki ke ko se me mein par aur ya kare karen karna karte hota hoti nu da di de vich te ate kiven ki hai ne ';
+    function keyWords(q) { var w = words(q).filter(function (x) { return STOP.indexOf(' ' + x + ' ') < 0; }); return w.length ? w : words(q); }
+    function stem(w) { return w.length > 4 ? w.replace(/(ies|es|s|ing|ed)$/, '') : w; }
+    function score(ws, hi, lo) {
+      var sc = 0, n = 0;
+      ws.forEach(function (w) { var x = stem(w); if (hi.indexOf(x) >= 0) { sc += 3; n++; } else if (lo.indexOf(x) >= 0) { sc += 1; n++; } });
+      return n && n >= Math.ceil(ws.length / 2) ? sc + n * 2 : 0;
+    }
+    function qaHits(ws) {
+      var hits = [];
+      IDX.all.forEach(function (a) { (a.faq || []).forEach(function (f) { var sc = score(ws, low(f[0]), low(f[1])); if (sc) hits.push({ a: a, f: f, sc: sc }); }); });
+      return hits.sort(function (x, y) { return y.sc - x.sc; }).slice(0, 5);
+    }
+    function artHits(ws) {
+      return IDX.all.map(function (a) {
+        var sc = score(ws, low(a.title + ' ' + (a.card || '')), low((a.summary || '') + ' ' + (a.keywords || []).join(' ') + ' ' + (a.topicName || '') + ' ' + (a.faq || []).map(function (f) { return f[0]; }).join(' ')));
+        return sc ? { a: a, sc: sc + (a.site === mySite() ? 1 : 0) } : null;
+      }).filter(Boolean).sort(function (x, y) { return y.sc - x.sc; }).slice(0, 8).map(function (x) { return x.a; });
+    }
+    function draw() {
+      var q = inp.value.trim();
+      if (!q) { out.innerHTML = ''; return; }
+      load().then(function () {
+        if (inp.value.trim() !== q) return;
+        var ws = keyWords(q), arts = artHits(ws), qs = qaHits(ws), h = '';
+        if (qs.length) h += '<h3 class="hf-h">' + esc(T('fq')) + '</h3>' + qs.map(function (x) {
+          return '<details class="faq"><summary>' + esc(x.f[0]) + ' <small class="hf-src">' + esc(x.a.card || x.a.title) + '</small></summary><p>' + esc(x.f[1]) + '</p><p class="hf-more"><a href="' + esc(urlOf(x.a)) + '">' + esc(x.a.card || x.a.title) + ' ›</a></p></details>'; }).join('');
+        if (arts.length) h += '<h3 class="hf-h">' + esc(T('fa')) + '</h3><ul class="hf-list">' + arts.map(function (a) {
+          return '<li><a href="' + esc(urlOf(a)) + '"><b>' + esc(a.card || a.title) + '</b><span>' + esc(cut(a.summary, 120)) + '</span>' + (a.site && a.site !== IDX.site ? '<small>' + esc(a.siteName || a.site) + '</small>' : '') + '</a></li>'; }).join('') + '</ul>';
+        h += '<p class="hf-none">' + esc(arts.length || qs.length ? T('fnot') : T('fnone')) + ' <button type="button" class="btn sm" data-hf-ask>' + esc(T('fask')) + '</button></p>';
+        out.innerHTML = h;
+      }, function () { out.innerHTML = '<p class="soft">' + esc(T('offline')) + '</p>'; });
+    }
+    inp.addEventListener('input', function () { clearTimeout(t0); t0 = setTimeout(draw, 150); });
+    out.addEventListener('click', function (e) {
+      if (!e.target.closest('[data-hf-ask]')) return;
+      var ask = $('#ask'), ta = $('.help-ask textarea');
+      if (ta && !ta.value.trim()) ta.value = inp.value.trim();
+      if (ask) ask.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      if (ta) setTimeout(function () { ta.focus(); }, 400);
+    });
+    if (/^#?q=/.test(location.hash)) { inp.value = decodeURIComponent(location.hash.replace(/^#?q=/, '')); draw(); }
+  }
   function urlOf(a) { return a.site && a.site !== (IDX && IDX.site) && a.url ? a.url : (IN_APP && a.url ? a.url : a.path); }
 
   /* ---------- the panel ---------- */
@@ -186,5 +237,6 @@
       return IDX.all.map(function (a) { return { g: 'help', t: a.card || a.title, s: a.site && a.site !== IDX.site ? a.siteName : cut(a.summary, 70), e: (a.title + ' ' + (a.keywords || []).join(' ')), run: function () { open('', a); } }; });
     }).catch(function () { return []; });
   });
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', findBox); else findBox();
   /* a site without help articles has no Help button (build.py adds it only where /help/ exists) */
 })();

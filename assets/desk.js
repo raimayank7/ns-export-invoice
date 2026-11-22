@@ -1122,7 +1122,7 @@
       new MutationObserver(function (ms) { ms.forEach(function (m) { [].forEach.call(m.addedNodes, function (n) { if (n.nodeType === 1 && n.matches('dialog.b2-dlg')) voucherScreen(n); }); }); }).observe(document.body, { childList: true });
       /* any other box with an entry form (a Save button and a title bar) becomes a voucher screen when it opens; questions, search,
          help, the setup and other small boxes stay small. Some boxes draw their whole inside again at every opening: dressed each time */
-      var SMALL = '#desk-ask,#ns-wncard,#ns-inst,#desk-cmd,#desk-keys,#ns-help,.nsf-dlg,.pk-dlg,.bz-dlg,#ns-mydata,.cap-dlg,#ns-tell,#ns-series,.sf-gate,.help-pnl,.qe-cus,.vt-cpd';
+      var SMALL = '#desk-ask,#ns-wncard,#ns-inst,#desk-cmd,#desk-keys,#ns-help,.nsf-dlg,.pk-dlg,.bz-dlg,#ns-mydata,.cap-dlg,#ns-tell,#ns-series,.sf-gate,.help-pnl,.qe-cus,.vt-cpd,.vt-ask';
       var open0 = HTMLDialogElement.prototype.showModal;
       HTMLDialogElement.prototype.showModal = function () {
         try { if (this.classList.contains('vs')) vsDress(this); else if (!this.matches(SMALL) && $('.dlg-hd,.dlg-h', this) && $('input:not([type=hidden]),select,textarea,table,button[type=submit]', this)) voucherScreen(this);   /* any titled box with fields or a list (a tool's rooms, diary, stock...) */ } catch (e) {}

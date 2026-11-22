@@ -10660,3 +10660,9 @@ NS.addLang('brx', {
   "tpr.win": "Windows आव इंस्टॉल खालामनाय प्रिंटर (NSBiz Helper प्रोग्रामजों)",
   "tpr.winpick": "Windows प्रिंटर"
 });
+
+/* NSBiz Helper: get the add-on */
+NS.addLang('brx', {
+  "ax.get": "{b} बाहायो नाम? बेसेनगैयै NSBiz Helper ऐड-ऑनआ नोंथांनि बैकआपखौ गावनोगाव Downloads › NSBiz आव सेभ खालामो आरो टुलबारआव बाकि आरो रिमाइन्डार दिन्थियो।",
+  "ax.getbtn": "NSBiz Helper खौ {b} आव दाजाब"
+});

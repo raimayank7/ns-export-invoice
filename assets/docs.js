@@ -27,7 +27,7 @@
     exp: { prefix: 'EXP', kinds: ['expwp', 'expwop', 'sezwp', 'sezwop'], title: 'tax', alwaysTax: true, igst: true, copy: 'inv', due: true, pay: true, noLbl: 'no', party: 'billto' },
     cashmemo: { prefix: 'CM', kinds: ['cashmemo'], gstFlag: true, gstOff: true, qr: true, pay: true, paidFirst: true, noLbl: 'cmno', party: 'custto', paper: 'th80' }
   };
-  var COPIES = { inv: ['orig', 'dup', 'trip'], invs: ['orig', 'dupsup'], dc: ['dcorig', 'dcdup', 'dctrip'], note: ['orig', 'dupsup'], pnote: ['orig', 'ocopy'] };
+  var COPIES = { inv: ['orig', 'dup', 'trip', 'extra'], invs: ['orig', 'dupsup', 'extra'], dc: ['dcorig', 'dcdup', 'dctrip', 'extra'], note: ['orig', 'dupsup', 'extra'], pnote: ['orig', 'ocopy', 'extra'] };   /* extra: owner 22 Nov, a 4th copy */
   var REASONS = ['ret', 'price', 'disc', 'short', 'tax', 'other'];
   var PAPERS = ['a4', 'a5', 'th80', 'th58'];
   /* Batch 1: extra charges on every item document; TCS (collected by the seller under the Income-tax Act) on sale bills; repeat on invoices */
@@ -107,7 +107,7 @@
     ret: 'Goods returned', price: 'Price changed', price_c: 'Price reduced', price_d: 'Price increased (rate difference)', disc2: 'Discount after sale', disc2p: 'Discount after purchase', ocopy: 'Office copy',
     pdnnote: 'We have debited your account for the goods returned or the amount claimed above. Please send us your credit note for it under section 34 of the CGST Act, so the GST can be adjusted on both sides.',
     pcnnote: 'We have credited your account with the amount above against your invoice.', short: 'Short or damaged supply', taxfix: 'Tax corrected', taxfix_c: 'Tax charged in excess', taxfix_d: 'Tax charged short',
-    dupsup: 'Duplicate for supplier', cashmemo: 'CASH MEMO', cmno: 'Memo No.', self: 'SELF INVOICE', sino: 'Self Invoice No.', supplier: 'Supplier (unregistered)', recv: 'Goods / services received on',
+    dupsup: 'Duplicate for supplier', extra: 'Extra copy', cashmemo: 'CASH MEMO', cmno: 'Memo No.', self: 'SELF INVOICE', sino: 'Self Invoice No.', supplier: 'Supplier (unregistered)', recv: 'Goods / services received on',
     sinote: 'Self invoice issued by the recipient under section 31(3)(f) of the CGST Act for a supply received from an unregistered supplier. Tax is payable by the recipient on reverse charge.', custto: 'Customer', cash: 'Cash', thanks: 'Thank you, visit again', recd: 'Goods received in good condition', recdsign: 'Receiver’s sign, name and date', items: 'Items', page: 'Page', tcs: 'TCS', tcsu: 'TCS u/s' };
   /* reason codes print through RP (P.tax is the invoice title, so the "tax corrected" reason has its own word) */
   var RP = { ret: 'ret', price: 'price', disc: 'disc2', 'short': 'short', tax: 'taxfix', other: 'other' };
@@ -1188,6 +1188,12 @@
     var old = document.title; document.title = title;
     setTimeout(function () { window.print(); document.title = old; setTimeout(function () { paHold = false; draw(); }, 300); }, 500);
   }
+  /* print as soon as the paper is drawn: fonts and pictures (logo, signature, QR) loaded, instead of a fixed wait (owner 22 Nov: "too slow") */
+  function whenDrawn(fn) {
+    var imgs = [].slice.call(document.querySelectorAll('#sheet img, .sh img')), t0 = Date.now();
+    var waits = [document.fonts && document.fonts.ready ? document.fonts.ready : 0].concat(imgs.map(function (i) { return i.complete ? 0 : new Promise(function (r) { i.addEventListener('load', r, { once: true }); i.addEventListener('error', r, { once: true }); }); }));
+    Promise.race([Promise.all(waits), new Promise(function (r) { setTimeout(r, 2500); })]).then(function () { setTimeout(fn, Math.max(60, 250 - (Date.now() - t0))); });
+  }
   function printDoc() {
     if (/^th/.test(doc.paper || '') && NS.rpReady && NS.rpReady()) { rprintDoc(); return; }   /* a receipt printer is set up on this device: no print box */
     browserPrint();
@@ -1329,7 +1335,7 @@
       /* ?open=<id>: NSBiz opens a saved document here to edit, print or share */
       if (open) {
         history.replaceState(null, '', location.pathname + location.hash);
-        return NSStore.get('doc', open).then(function (rec) { if (rec && (rec.type || 'invoice') === (type === 'exp' ? 'expinv' : type) && T.split && T.kinds.indexOf(rec.kind) < 0 && T.split[rec.kind]) { location.replace((NS.siteHref ? NS.siteHref(T.split[rec.kind]) : kindSite(T.split[rec.kind])) + '?open=' + encodeURIComponent(open)); return; } if (rec && (rec.type || 'invoice') === (type === 'exp' ? 'expinv' : type)) { openDoc(rec, false); render(); } else NS.toast(t('conv.none'), 'bad'); }).then(function () { if (NS.autoPrint && NS.autoPrint()) setTimeout(printDoc, 900); }).catch(function () {});
+        return NSStore.get('doc', open).then(function (rec) { if (rec && (rec.type || 'invoice') === (type === 'exp' ? 'expinv' : type) && T.split && T.kinds.indexOf(rec.kind) < 0 && T.split[rec.kind]) { location.replace((NS.siteHref ? NS.siteHref(T.split[rec.kind]) : kindSite(T.split[rec.kind])) + '?open=' + encodeURIComponent(open)); return; } if (rec && (rec.type || 'invoice') === (type === 'exp' ? 'expinv' : type)) { openDoc(rec, false); render(); } else NS.toast(t('conv.none'), 'bad'); }).then(function () { if (NS.autoPrint && NS.autoPrint()) whenDrawn(printDoc); }).catch(function () {});
       }
       /* ?copy=<id>: the App's "make the same bill again": a saved document of this kind opened as a new one (today's date, next number) */
       if (copy) {

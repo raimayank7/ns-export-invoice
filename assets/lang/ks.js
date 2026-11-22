@@ -10655,3 +10655,9 @@ NS.addLang('ks', {
   "tpr.win": "Windows منز انسٹال کورمت پرنٹر (NSBiz Helper پروگرامہ ذریعہ)",
   "tpr.winpick": "Windows پرنٹر"
 });
+
+/* NSBiz Helper: get the add-on */
+NS.addLang('ks', {
+  "ax.get": "{b} چھِو ورتاوان؟ مُفت NSBiz Helper ایڈ آن چھُ تُہُند بیک اپ پانہٕ Downloads › NSBiz منز محفوظ کران تہٕ ٹول بارس منز بقایا تہٕ یاد دہانی ہاوان۔",
+  "ax.getbtn": "NSBiz Helper کٔرِو {b} منز شامل"
+});
