@@ -53,7 +53,7 @@
     'rm.ago': 'Your last backup was {n} days ago. Save a backup file so your work is safe if this browser is cleared.',
     'rm.none': 'You have {n} saved documents and no backup yet. Save a backup file so your work is safe if this browser is cleared.',
     'af.on': 'Auto-save is on: every save also updates the backup file in “{name}”.', 'af.off': 'Auto-save to folder is off.',
-    'md.loading': 'Loading your data…', 'md.biz': 'my businesses', 'md.party': 'customers and suppliers', 'md.item': 'items and services', 'md.doc': 'saved documents',
+    'md.loading': 'Loading your data…', "md.slow": "Your data is taking too long to answer. Close any other NSBiz tabs or windows (an older one can hold your data), then press Reload. Nothing is lost.", "md.reload": "Reload", 'md.biz': 'my businesses', 'md.party': 'customers and suppliers', 'md.item': 'items and services', 'md.doc': 'saved documents',
     'md.shared': 'Your data is kept in this browser on this device, in one place shared by every Nivesh Sahayak document tool. Nothing is sent to us.',
     'md.local': 'Your data is kept in this browser on this device. Nothing is sent to us. The shared data home could not be reached just now, so this site keeps it for now and moves it there automatically.',
     'md.last': 'Last backup:', 'md.never': 'never', 'md.save': 'Save a backup file', 'md.restore': 'Restore from a backup file',

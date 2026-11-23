@@ -603,3 +603,9 @@ html.appdoc-pv .ed-col .fg>.f>small,html.appdoc-pv .ed-col .fg>.f>.soft{font-siz
 
 /* My data › NSBiz Helper (23 Nov) */
 .hx-list{margin:6px 0 10px;padding-inline-start:20px}.hx-list li{margin:3px 0}
+/* the New button first on the voucher bar (23 Nov) */
+
+/* a saved voucher opens locked until Edit (23 Nov) */
+form.vt-locked :is(input,select,textarea):disabled{opacity:1;color:inherit;-webkit-text-fill-color:currentColor;cursor:default;border-color:transparent!important;background:transparent!important;box-shadow:none!important;-webkit-appearance:none;appearance:none}form.vt-locked input[type=checkbox]:disabled{-webkit-appearance:auto;appearance:auto;opacity:.75}form.vt-locked select:disabled{background-image:none!important}form.vt-locked input[type=date]:disabled::-webkit-calendar-picker-indicator{display:none}form.vt-locked .dlg-foot [data-vtedit]::after{content:"";}
+form.vt-locked button[data-vtlk]{display:none!important}
+form.vt-locked .wg-rep{visibility:hidden}

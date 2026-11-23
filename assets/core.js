@@ -1388,6 +1388,12 @@
     dlg.classList.add('md-dlg');
     if (!dlg.open) {
       body.innerHTML = '<p class="soft">' + NS.esc(NS.t('md.loading')) + '</p>';
+      /* still waiting after 8 s: say so and offer a reload (another tab holding the data home, a stuck connection) */
+      clearTimeout(NS._mdSlow); NS._mdSlow = setTimeout(function () {
+        if (!dlg.open || !/md-loading|^<p class="soft">/.test(body.innerHTML) || NS.$('.md-wrap', body)) return;
+        body.innerHTML = '<p class="note">' + NS.esc(NS.t('md.slow')) + '</p><div class="md-bar"><button type="button" class="btn sm primary" data-md-reload>' + NS.esc(NS.t('md.reload')) + '</button></div>';
+        var rb = NS.$('[data-md-reload]', body); if (rb) rb.addEventListener('click', function () { location.reload(); });
+      }, 8000);
       if (dlg.showModal) dlg.showModal(); else dlg.setAttribute('open', '');
     }
     Promise.all(['biz', 'party', 'item', 'doc'].map(function (s) { return NSStore.list(s); })).then(function (r) {
