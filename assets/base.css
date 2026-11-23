@@ -596,3 +596,10 @@ html.appdoc-pv .ed-col .fg>.f>small,html.appdoc-pv .ed-col .fg>.f>.soft{font-siz
 /* the "PDF ready" bar of Share as PDF (NS.waBar, NS.sendBar): every page, also the App screens (it was only in doc.css) */
 .pdf-wa{position:fixed;left:50%;bottom:90px;transform:translateX(-50%);z-index:60;display:flex;flex-wrap:wrap;gap:8px;align-items:center;max-width:min(560px,94vw);padding:10px 12px;border-radius:12px;background:var(--surface,#fff);color:var(--ink,#111);border:1px solid var(--line,#ccc);box-shadow:0 6px 24px rgba(0,0,0,.25)}
 @media print{.pdf-wa{display:none}}
+
+/* owner 23 Nov: printouts show only the document and its credit, never the browser's own date, title, web address or page number.
+   Empty page-margin boxes switch the browser header and footer off (Chrome and Edge 131+). */
+@media print{@page{@top-left{content:""}@top-center{content:""}@top-right{content:""}@bottom-left{content:""}@bottom-center{content:""}@bottom-right{content:""}}}
+
+/* My data › NSBiz Helper (23 Nov) */
+.hx-list{margin:6px 0 10px;padding-inline-start:20px}.hx-list li{margin:3px 0}

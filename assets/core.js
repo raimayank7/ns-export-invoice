@@ -238,6 +238,7 @@
       ? f('qa-code', 'qa.code', '<input id="qa-code">') + f('qa-w', 'qa.wrate', '<input id="qa-w" inputmode="decimal">') + f('qa-m', 'qa.mrp', '<input id="qa-m" inputmode="decimal">') + f('qa-min', 'qa.min', '<input id="qa-min" inputmode="decimal">')
       : f('qa-pan', 'qa.pan', '<input id="qa-pan" maxlength="10" autocapitalize="characters">') + f('qa-pin', 'qa.pin', '<input id="qa-pin" inputmode="numeric" maxlength="6">') + f('qa-em', 'qa.email', '<input id="qa-em" type="email">') +
         f('qa-cd', 'qa.cdays', '<input id="qa-cd" inputmode="numeric">') + f('qa-cl', 'qa.climit', '<input id="qa-cl" inputmode="decimal">') +
+        f('qa-km', 'qa.km', '<input id="qa-km" inputmode="decimal">') + f('qa-ag', 'qa.agent', '<input id="qa-ag">') +
         f('qa-ob', 'qa.ob', '<input id="qa-ob" inputmode="decimal">') + f('qa-obs', 'qa.obside', '<select id="qa-obs"><option value="recv">' + E(T('qa.obrecv')) + '</option><option value="pay">' + E(T('qa.obpay')) + '</option></select>');
     d.innerHTML = '<div class="dlg-hd"><h2>' + E(T(item ? 'qa.titem' : 'qa.tparty')) + '</h2></div><form class="qa-form"><div class="qa-grid">' + main + '</div>' +
       '<details class="qa-more"><summary>' + E(T('qa.more')) + '</summary><div class="qa-grid">' + more + '</div></details>' +
@@ -258,6 +259,15 @@
       $q('qa-gs').addEventListener('input', function () { var g = this.value.toUpperCase().replace(/\s/g, ''); this.value = g; if (/^\d{2}/.test(g) && NS.stateName(g.slice(0, 2))) $q('qa-s').value = g.slice(0, 2); if (g.length >= 12 && !$q('qa-pan').value) $q('qa-pan').value = g.slice(2, 12); });
     } else {
       $q('qa-h').addEventListener('input', function () { if (/^99/.test(this.value.trim())) $q('qa-k').value = 'service'; });
+    }
+    /* details brought in (the add-on's look-up of a GSTIN on a web page): filled in, More details opened when they hold some (owner 23 Nov) */
+    if (q.pre && !item) {
+      var P = q.pre, put = function (id, val) { var x = $q(id); if (x && val != null && String(val).trim() !== '') x.value = String(val).trim(); };
+      put('qa-gs', P.gstin); if (P.gstin) $q('qa-gs').dispatchEvent(new Event('input'));
+      put('qa-ph', P.phone); put('qa-a', P.addr); put('qa-c', P.city); put('qa-s', P.state); put('qa-pan', P.pan); put('qa-pin', P.pin); put('qa-em', P.email);
+      put('qa-km', P.km); put('qa-ag', P.agent);
+      if (P.role) { $q('qa-t').value = P.role; $q('qa-t').dispatchEvent(new Event('change')); }
+      if (P.pin || P.email || P.km || P.agent) { var dm = d.querySelector('.qa-more'); if (dm) dm.open = true; }
     }
     d.querySelector('[data-qa-x]').addEventListener('click', function () { d.removeAttribute('data-dirty'); d.close(); inp.focus(); });
     d.addEventListener('close', function () { setTimeout(function () { if (document.contains(inp)) inp.focus(); }, 0); }, { once: true });
@@ -283,7 +293,7 @@
         rec = { name: nm, role: v('qa-t'), gstin: g, phone: v('qa-ph'), addr: v('qa-a'), city: v('qa-c'), state: v('qa-s') || (g ? g.slice(0, 2) : '') };
         if (gsel.value && !/^(debtors|creditors)$/.test(gsel.value)) rec.group = gsel.value;
         if (pan) rec.pan = pan; if (v('qa-pin')) rec.pin = v('qa-pin'); if (v('qa-em')) rec.email = v('qa-em');
-        if (n('qa-cd')) rec.cdays = n('qa-cd'); if (n('qa-cl')) rec.climit = n('qa-cl');
+        if (n('qa-cd')) rec.cdays = n('qa-cd'); if (n('qa-cl')) rec.climit = n('qa-cl'); if (n('qa-km')) rec.km = n('qa-km'); if (v('qa-ag')) rec.agent = v('qa-ag');
         var ob = n('qa-ob');
         /* opening balance: the same entry the App's Opening balance form makes, dated the first day of this financial year */
         if (ob) extra = biz().then(function (b) { return b ? NSStore.put('doc', { type: 'ob', app: 1, date: fyStart, seller: b, buyer: { name: nm }, side: v('qa-obs') || 'recv', amount: ob, no: '', total: ob }) : null; });
@@ -905,6 +915,89 @@
       return up;
     }, function () { return false; });
   };
+  /* ---------- My data › NSBiz Helper (owner 23 Nov: "a way to know that the NSBiz Helper add-on and program are installed,
+     and then what we can do"): three checks in order (add-on in this browser, its helper switch, the helper program answering),
+     each with what to do next, and what works now. A tab after Shared folder. ---------- */
+  var HX_SETUP = 'https://github.com/raimayank7/ns-desktop-releases/releases/download/helper-v1.0.0/NSBiz-Helper-Setup.exe';
+  function verGte(a, b) { a = String(a || '0').split('.'); b = String(b).split('.'); for (var i = 0; i < 3; i++) { var x = +a[i] || 0, y = +b[i] || 0; if (x !== y) return x > y; } return true; }
+  /* { addon, ver, sw, prog, info, err } */
+  NS.helperState = function () {
+    var x = NS.addonAny && NS.addonAny();
+    if (!x) return Promise.resolve({ addon: false });
+    var st = { addon: true, ver: x.version || '' };
+    return x.status().then(function (s) {
+      st.sw = !!(s && s.helper); if (!st.sw) return st;
+      return NS.helper('hello').then(function (h) { st.prog = !!(h && h.ok); st.info = h || null; return st; }, function (e) { st.prog = false; st.err = String(e && e.message || e); return st; });
+    }, function (e) { st.err = String(e && e.message || e); return st; }).then(function (r) {
+      var up = !!r.prog; if (up !== NS.helperUp) { NS.helperUp = up; NS.helperInfo = r.info || null; document.dispatchEvent(new CustomEvent('ns-helper')); }
+      return r;
+    });
+  };
+  function hxHtml(st) {
+    var T = NS.t, E = NS.esc, on = '<i class="md-dot on"></i>', off = '<i class="md-dot"></i>', warn = '<i class="md-dot warn"></i>';
+    var b = NS.browserName ? NS.browserName() : '', store = NS.addonStores && NS.addonStores[b];
+    var h = '<p class="soft">' + E(T('hx.intro')) + '</p>';
+    /* 1. the add-on */
+    h += NS.mdRow('1. ' + T('hx.add'), st.addon ? on + E(T('hx.add_on', { v: st.ver || '?' })) : off + E(T('hx.add_off')), T('hx.add_tip'),
+      st.addon ? '' : store ? '<a class="btn sm primary" href="' + E(store) + '" target="_blank" rel="noopener">' + E(T('hx.add_get', { b: b })) + ' ↗</a>' : '');
+    if (!st.addon && !store) h += '<p class="note">' + E(T(NS.onComputer && NS.onComputer() ? 'hx.add_soon' : 'hx.add_pc', { b: b || T('oa.thisbr') })) + '</p>';
+    /* 2. the switch inside the add-on */
+    if (st.addon) {
+      var canOpen = verGte(st.ver, '1.0.2');
+      h += NS.mdRow('2. ' + T('hx.sw'), st.sw ? on + E(T('hx.sw_on')) : warn + E(T('hx.sw_off')), T('hx.sw_how'),
+        st.sw ? '' : canOpen ? '<button type="button" class="btn sm primary" data-hx="open">' + E(T('hx.sw_open')) + '</button>' : '');
+      if (!st.sw) h += '<p class="note">' + E(T('hx.sw_how')) + '</p>';
+    }
+    /* 3. the program on this PC */
+    if (st.addon && st.sw) {
+      var i = st.info || {};
+      h += NS.mdRow('3. ' + T('hx.prog'), st.prog ? on + E(T('hx.prog_on', { v: i.version || '?' })) + E(T(i.excel ? 'hx.prog_xl' : 'hx.prog_noxl')) + (i.folder ? '<br>' + E(T('hx.prog_dir', { f: i.folder })) : '')
+        : warn + E(T('hx.prog_off')), T('hx.prog_tip'), st.prog ? '' : '<a class="btn sm primary" href="' + HX_SETUP + '" rel="nofollow" download>' + E(T('hx.prog_get')) + '</a>');
+      if (!st.prog && st.err) h += '<p class="soft">' + E(T('hx.err', { e: st.err })) + '</p>';
+      if (!st.prog) h += '<p class="note">' + E(T('hx.prog_after')) + '</p>';
+    } else if (st.addon) h += NS.mdRow('3. ' + T('hx.prog'), off + E(T('hx.prog_wait')), T('hx.prog_tip'), '');
+    /* what works now */
+    var L = [];
+    if (st.addon) L.push('hx.c1', 'hx.c2', 'hx.c3', 'hx.c4');
+    if (st.prog) L.push('hx.c5', 'hx.c6', 'hx.c7', 'hx.c8');
+    h += '<h3>' + E(T('hx.can')) + '</h3>' + (L.length ? '<ul class="hx-list">' + L.map(function (k) { return '<li>' + E(T(k)) + '</li>'; }).join('') + '</ul>' : '<p class="soft">' + E(T('hx.none')) + '</p>');
+    if (st.addon && !st.prog) h += '<p class="soft">' + E(T('hx.later')) + '</p>';
+    h += '<div class="md-bar"><button type="button" class="btn sm" data-hx="again" data-ic="refresh">' + E(T('hx.again')) + '</button></div>';
+    return h;
+  }
+  function hxDraw(p) {
+    if (!p) return;
+    p.innerHTML = '<p class="soft">' + NS.esc(NS.t('hx.checking')) + '</p>';
+    NS.helperState().then(function (st) { p.innerHTML = hxHtml(st); }, function () { p.innerHTML = hxHtml({ addon: false }); });
+  }
+  NS.mdExt = (NS.mdExt || []).concat([function (body) {
+    /* placed after the other parts' tabs (Shared folder adds its own in the same pass) */
+    Promise.resolve().then(function () {
+      var nav = NS.$('.md-nav', body), panes = NS.$('.md-panes', body); if (!nav || !panes || NS.$('#md-t-hx', body)) return;
+      var cur = NS._mdTab === 'hx';
+      var b = NS.el('button', { type: 'button', role: 'tab', id: 'md-t-hx', 'aria-controls': 'md-p-hx', 'aria-selected': String(cur), tabindex: cur ? '0' : '-1', 'data-md-tab': 'hx', 'data-ic': 'tool' });
+      b.textContent = NS.t('hx.tab'); nav.appendChild(b);
+      var p = NS.el('section', { 'class': 'md-pane', role: 'tabpanel', id: 'md-p-hx', 'aria-labelledby': 'md-t-hx', 'data-md-pane': 'hx' }); if (!cur) p.hidden = true;
+      panes.appendChild(p);
+      if (cur) {
+        NS.$$('[data-md-tab]', body).forEach(function (x) { if (x !== b) { x.setAttribute('aria-selected', 'false'); x.tabIndex = -1; } });
+        NS.$$('.md-pane', body).forEach(function (x) { if (x !== p) x.hidden = true; });
+        hxDraw(p);
+      }
+      b.addEventListener('click', function () { hxDraw(p); });
+    });
+  }]);
+  /* "See the NSBiz Helper status" anywhere (Sign with DSC, printers, GST Excel tools) and the tab's own buttons */
+  NS.openHelperStatus = function () { NS._mdTab = 'hx'; var top = window.top !== window && window.top.NS && window.top.NS.openHelperStatus; try { if (top && window.top.location.origin === location.origin) return top(); } catch (e) {} NS.openMyData(); };
+  document.addEventListener('click', function (e) {
+    var t = e.target.closest && e.target.closest('[data-hx], [data-hx-status]'); if (!t) return;
+    if (t.hasAttribute('data-hx-status')) { e.preventDefault(); NS.openHelperStatus(); return; }
+    var a = t.getAttribute('data-hx'), p = t.closest('[data-md-pane="hx"]');
+    if (a === 'again') hxDraw(p);
+    else if (a === 'open') { var x = NS.addonAny && NS.addonAny(); if (x) x.call('openWindow', { part: 'hlp' }).then(function () { NS.toast(NS.t('hx.opened')); }, function () { NS.toast(NS.t('hx.sw_how'), 'bad'); }); }
+  });
+  /* back on this tab after turning the switch on in the add-on's window: check again by itself */
+  window.addEventListener('focus', function () { var p = NS.$('#md-p-hx'); if (p && !p.hidden && p.closest('dialog[open]')) hxDraw(p); });
   function u8b64(u8) { var s = ''; for (var i = 0; i < u8.length; i += 0x8000) s += String.fromCharCode.apply(null, u8.subarray(i, i + 0x8000)); return btoa(s); }
   function b64u8(b) { var t = atob(b), u = new Uint8Array(t.length); for (var i = 0; i < t.length; i++) u[i] = t.charCodeAt(i); return u; }
   NS.u8b64 = u8b64; NS.b64u8 = b64u8;
@@ -1976,6 +2069,26 @@
   /* the one line at the bottom of every printed or shared document: NS + gold Biz, then "by", the emblem and "Nivesh Sahayak" in bold (owner's order) */
   NS.creditLine = function (cls) { return '<p class="ns-cl' + (cls ? ' ' + cls : '') + '"><b class="nsb nsb-in" aria-label="NSBiz"><span class="nsb-n">NS</span><span class="nsb-b">Biz</span></b><span class="cl-by">by</span><img src="/icons/mark-light-48.webp" alt="" width="20" height="14"><span class="cl-ns">Nivesh Sahayak</span></p>'; };
   NS.creditText = 'NSBiz by Nivesh Sahayak';
+  /* owner 23 Nov: @page rule for print windows: no browser header/footer; credit at the foot of every page when asked */
+  NS.pageBoxes = function (credit) {
+    return '@page{@top-left{content:""}@top-center{content:""}@top-right{content:""}@bottom-left{content:""}@bottom-right{content:""}' +
+      '@bottom-center{content:"' + (credit ? NS.creditText : '') + '";font:8pt Arial,sans-serif;color:#555}}';
+  };
+  (function () {
+    var st = null;
+    function hasCredit() {
+      var els = document.querySelectorAll('.ns-cl, .made');
+      for (var i = 0; i < els.length; i++) { if (!els[i].closest('header, footer, nav, #ns-side, .hd, .ft, [hidden], dialog:not([open])')) return true; }
+      return false;
+    }
+    window.addEventListener('beforeprint', function () {
+      if (st || hasCredit()) return;
+      st = document.createElement('style'); st.setAttribute('data-ns-pcredit', '');
+      st.textContent = '@media print{' + NS.pageBoxes(true) + '}';
+      document.head.appendChild(st);
+    });
+    window.addEventListener('afterprint', function () { if (st) { st.remove(); st = null; } });
+  })();
   /* line icons are stroked; the WhatsApp logo is a filled shape, so it gets class bi-fill (base.css) */
   function icSvgHtml(k) { return '<svg class="bi' + (k === 'wa' ? ' bi-fill' : '') + '" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="' + IC[k] + '"/></svg>'; }
   NS.icSvg = function (k) { return IC[k] ? icSvgHtml(k) : ''; };
