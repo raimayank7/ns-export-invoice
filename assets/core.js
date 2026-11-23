@@ -938,7 +938,7 @@
     var b = NS.browserName ? NS.browserName() : '', store = NS.addonStores && NS.addonStores[b];
     var h = '<p class="soft">' + E(T('hx.intro')) + '</p>';
     /* 1. the add-on */
-    h += NS.mdRow('1. ' + T('hx.add'), st.addon ? on + E(T('hx.add_on', { v: st.ver || '?' })) : off + E(T('hx.add_off')), T('hx.add_tip'),
+    h += NS.mdRow('1. ' + T('hx.add'), st.addon ? on + E(T('hx.add_on')) : off + E(T('hx.add_off')), T('hx.add_tip'),
       st.addon ? '' : store ? '<a class="btn sm primary" href="' + E(store) + '" target="_blank" rel="noopener">' + E(T('hx.add_get', { b: b })) + ' ↗</a>' : '');
     if (!st.addon && !store) h += '<p class="note">' + E(T(NS.onComputer && NS.onComputer() ? 'hx.add_soon' : 'hx.add_pc', { b: b || T('oa.thisbr') })) + '</p>';
     /* 2. the switch inside the add-on */
@@ -951,7 +951,7 @@
     /* 3. the program on this PC */
     if (st.addon && st.sw) {
       var i = st.info || {};
-      h += NS.mdRow('3. ' + T('hx.prog'), st.prog ? on + E(T('hx.prog_on', { v: i.version || '?' })) + E(T(i.excel ? 'hx.prog_xl' : 'hx.prog_noxl')) + (i.folder ? '<br>' + E(T('hx.prog_dir', { f: i.folder })) : '')
+      h += NS.mdRow('3. ' + T('hx.prog'), st.prog ? on + E(T('hx.prog_on')) + E(T(i.excel ? 'hx.prog_xl' : 'hx.prog_noxl')) + (i.folder ? '<br>' + E(T('hx.prog_dir', { f: i.folder })) : '')
         : warn + E(T('hx.prog_off')), T('hx.prog_tip'), st.prog ? '' : '<a class="btn sm primary" href="' + HX_SETUP + '" rel="nofollow" download>' + E(T('hx.prog_get')) + '</a>');
       if (!st.prog && st.err) h += '<p class="soft">' + E(T('hx.err', { e: st.err })) + '</p>';
       if (!st.prog) h += '<p class="note">' + E(T('hx.prog_after')) + '</p>';
