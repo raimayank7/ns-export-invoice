@@ -285,7 +285,10 @@
         (T.transport ? field('tr-veh', t('l.veh'), { ltr: 1, ph: 'PB10AB1234' }) + field('tr-tname', t('l.tname')) + field('tr-lr', t('l.lr'), { ltr: 1 }) : '') +
         (!T.transport && /^(invoice|so|proforma|cashmemo)$/.test(type) ? '<details class="f wide dp-box"><summary>' + esc(t('dp.t')) + '</summary><div class="fg">' +
           field('dp-through', t('dp.through')) + field('dp-dest', t('dp.dest')) + '<div class="f"><label for="dp-mode">' + esc(t('dp.mode')) + '</label><select id="dp-mode">' + ['', 'Road', 'Rail', 'Air', 'Ship', 'Courier', 'By hand'].map(function (x) { return '<option>' + x + '</option>'; }).join('') + '</select></div>' +
-          field('dp-veh', t('dp.veh'), { ltr: 1, ph: 'PB10AB1234' }) + field('dp-tname', t('dp.tname')) + field('dp-lr', t('dp.lr'), { ltr: 1 }) + field('dp-lrdate', t('dp.lrdate'), { type: 'date' }) + field('dp-ewb', t('dp.ewb'), { ltr: 1 }) + '</div></details>' : '') +
+          field('dp-veh', t('dp.veh'), { ltr: 1, ph: 'PB10AB1234' }) + field('dp-tname', t('dp.tname')) + field('dp-lr', t('dp.lr'), { ltr: 1 }) + field('dp-lrdate', t('dp.lrdate'), { type: 'date' }) +
+          field('dp-pkgs', t('dp.pkgs')) + field('dp-wt', t('dp.wt')) + field('dp-mark', t('dp.mark')) + field('dp-po', t('dp.po'), { ltr: 1 }) + field('dp-podate', t('dp.podate'), { type: 'date' }) +
+          '<div class="f"><label for="dp-ttype">' + esc(t('dp.ttype')) + '</label><select id="dp-ttype">' + NS.EWB_TT.map(function (x) { return '<option value="' + x[0] + '">' + esc(x[1]) + '</option>'; }).join('') + '</select></div>' +
+          field('dp-ewb', t('dp.ewb'), { ltr: 1 }) + field('dp-ewbdt', t('dp.ewbdt'), { type: 'date' }) + '</div></details>' : '') +
       '</div></fieldset>' +
 
       '<fieldset class="card"><legend>' + esc(t(type === 'quote' ? 'lg.qto' : 'lg.' + (pk(T.party, T.kinds[0]) || 'billto'))) + '</legend><div class="fg">' +
@@ -462,7 +465,7 @@
   var SMAP = { 's-name': 'name', 's-addr': 'addr', 's-city': 'city', 's-pin': 'pin', 's-state': 'state', 's-gstin': 'gstin', 's-phone': 'phone', 's-email': 'email', 's-bankName': 'bankName', 's-bankAcc': 'bankAcc', 's-bankIfsc': 'bankIfsc', 's-bankBranch': 'bankBranch', 's-upi': 'upi' };
   var BMAP = { 'b-name': 'name', 'b-addr': 'addr', 'b-city': 'city', 'b-pin': 'pin', 'b-state': 'state', 'b-gstin': 'gstin', 'b-phone': 'phone' };
   var SHMAP = { 'sh-name': 'name', 'sh-addr': 'addr', 'sh-city': 'city', 'sh-pin': 'pin', 'sh-state': 'state' };
-  var DPMAP = { 'dp-through': 'through', 'dp-dest': 'dest', 'dp-mode': 'mode', 'dp-veh': 'veh', 'dp-tname': 'tname', 'dp-lr': 'lr', 'dp-lrdate': 'lrdate', 'dp-ewb': 'ewb' };   /* dispatch details (owner 2026-11-18) */
+  var DPMAP = { 'dp-through': 'through', 'dp-dest': 'dest', 'dp-mode': 'mode', 'dp-veh': 'veh', 'dp-tname': 'tname', 'dp-lr': 'lr', 'dp-lrdate': 'lrdate', 'dp-ewb': 'ewb', 'dp-ewbdt': 'ewbdate', 'dp-pkgs': 'pkgs', 'dp-wt': 'wt', 'dp-mark': 'mark', 'dp-po': 'po', 'dp-podate': 'podate', 'dp-ttype': 'ttype' };   /* dispatch details (owner 2026-11-18) */
   var DMAP = { 'd-kind': 'kind', 'd-no': 'no', 'd-date': 'date', 'd-due': 'due', 'd-valid': 'valid', 'd-deliv': 'deliv', 'd-recv': 'recv', 'd-pos': 'pos', 'd-ref': 'ref', 'd-notes': 'notes', 'd-terms': 'terms', 'd-narr': 'narr', 'd-status': 'status', 'd-copy': 'copyLabel',
     'd-reason': 'reason', 'd-side': 'side', 'd-paper': 'paper', 'd-design': 'design', 'd-copies': 'copies' };
   var OMAP = { 'd-ono': 'no', 'd-odate': 'date' }, TRMAP = { 'tr-veh': 'veh', 'tr-tname': 'tname', 'tr-lr': 'lr' };
@@ -660,7 +663,8 @@
     if (d.ref) x.push([P[T.refLbl || 'ref'], esc(d.ref)]);   /* an empty "Order ref." row is not printed (round C) */
     if (d.against) x.push(['Against', esc(d.against)]);
     var dp = d.disp || {};   /* dispatch details, only the ones typed */
-    [['through', 'Dispatched through'], ['dest', 'Destination'], ['mode', 'Mode of transport'], ['veh', 'Vehicle no.'], ['tname', 'Transporter'], ['lr', 'LR / Bilty no.'], ['lrdate', 'LR date'], ['ewb', 'E-way bill no.']].forEach(function (z) { if (dp[z[0]]) x.push([z[1], z[0] === 'lrdate' ? NS.fmtDate(dp[z[0]]) : '<span' + (/^(veh|lr|ewb)$/.test(z[0]) ? ' class="mono"' : '') + '>' + esc(dp[z[0]]) + '</span>']); });
+    [['through', 'Dispatched through'], ['dest', 'Destination'], ['mode', 'Mode of transport'], ['veh', 'Vehicle no.'], ['tname', 'Transporter'], ['lr', 'LR / Bilty no.'], ['lrdate', 'LR date'], ['pkgs', 'No. of packages'], ['wt', 'Weight'], ['mark', 'Marks'], ['po', 'Buyer\'s order (PO) no.'], ['podate', 'PO date'], ['ewb', 'E-way bill no.'], ['ewbdate', 'E-way bill date']].forEach(function (z) { if (/^ewb/.test(z[0]) && d.irn && d.irn.ewb) return;   /* the portal's own e-way bill block prints them */
+      if (dp[z[0]]) x.push([z[1], /date$/.test(z[0]) ? NS.fmtDate(dp[z[0]]) : '<span' + (/^(veh|lr|ewb)$/.test(z[0]) ? ' class="mono"' : '') + '>' + esc(dp[z[0]]) + '</span>']); });
     if (T.transport) { if (tr.veh) x.push([P.veh, '<span class="mono">' + esc(tr.veh) + '</span>']); if (tr.tname) x.push([P.tname, esc(tr.tname)]); if (tr.lr) x.push([P.lr, esc(tr.lr)]); }
     return x;
   }

@@ -609,3 +609,12 @@ html.appdoc-pv .ed-col .fg>.f>small,html.appdoc-pv .ed-col .fg>.f>.soft{font-siz
 form.vt-locked :is(input,select,textarea):disabled{opacity:1;color:inherit;-webkit-text-fill-color:currentColor;cursor:default;border-color:transparent!important;background:transparent!important;box-shadow:none!important;-webkit-appearance:none;appearance:none}form.vt-locked input[type=checkbox]:disabled{-webkit-appearance:auto;appearance:auto;opacity:.75}form.vt-locked select:disabled{background-image:none!important}form.vt-locked input[type=date]:disabled::-webkit-calendar-picker-indicator{display:none}form.vt-locked .dlg-foot [data-vtedit]::after{content:"";}
 form.vt-locked button[data-vtlk]{display:none!important}
 form.vt-locked .wg-rep{visibility:hidden}
+
+/* NSBiz pick list (core.js NS.pickers, 23 Nov) */
+input[data-pkro]{cursor:pointer}input[data-pkro]:not(:disabled){caret-color:transparent}
+.pk-box{position:fixed;z-index:2147483000;display:flex;flex-direction:column;background:var(--surface,#fff);color:var(--ink,#14201e);border:1px solid var(--line,#cfdad7);border-radius:10px;box-shadow:0 12px 32px rgba(0,0,0,.28);overflow:hidden;min-height:120px}
+.pk-q{margin:8px;padding:8px 10px;border:1px solid var(--line,#cfdad7);border-radius:8px;font:inherit;color:inherit;background:var(--bg,transparent);min-height:38px}
+.pk-ul{list-style:none;margin:0;padding:0 6px;overflow:auto;flex:1}.pk-o{padding:7px 10px;border-radius:7px;cursor:pointer;display:flex;flex-direction:column;gap:1px}
+.pk-o b{font-weight:600}.pk-o small{color:var(--soft,#5b6b67);font-size:.82em}.pk-o.on{background:var(--accent,#0e746a);color:#fff}.pk-o.on small{color:#e6f3f1}
+.pk-typed{font-style:italic}.pk-new{font-weight:700;color:var(--accent,#0e746a)}.pk-new.on{color:#fff}.pk-none{padding:10px;color:var(--soft,#5b6b67)}
+.pk-hint{margin:0;padding:6px 12px;border-top:1px solid var(--line,#cfdad7);font-size:.78em;color:var(--soft,#5b6b67)}

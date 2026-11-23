@@ -1715,6 +1715,10 @@
   var DSP = null, dspAsk = null;
   NS.dispatch = function (fresh) { if (DSP && !fresh) return Promise.resolve(DSP); if (!window.NSStore) return Promise.resolve({ tr: [], veh: [] }); return (dspAsk = NSStore.meta('dispatch').then(function (m) { DSP = { tr: (m && m.tr) || [], veh: (m && m.veh) || [] }; return DSP; }, function () { return DSP || { tr: [], veh: [] }; })); };
   NS.dispatchSave = function (fn) { return NS.dispatch(true).then(function (D) { fn(D); return NSStore.meta('dispatch', { tr: D.tr, veh: D.veh }).then(function () { DSP = D; return D; }); }); };
+  /* e-way bill transaction types (owner 23 Nov): the user chooses; empty = worked out (Bill To - Ship To when shipping elsewhere) */
+  NS.EWB_TT = [['', 'Auto (Regular, or Bill To - Ship To)'], ['1', 'Regular'], ['2', 'Bill To - Ship To'], ['3', 'Bill From - Dispatch From'], ['4', 'Combination of 2 and 3']];
+  /* the portal's e-way bill date ("23/11/2026 10:15:00 AM" or 2026-11-23...) as yyyy-mm-dd for a date box */
+  NS.ewbDay = function (v) { v = String(v || '').trim(); var m = v.match(/^(\d{4})-(\d{2})-(\d{2})/); if (m) return m[0]; m = v.match(/^(\d{1,2})[\/.-](\d{1,2})[\/.-](\d{4})/); return m ? m[3] + '-' + ('0' + m[2]).slice(-2) + '-' + ('0' + m[1]).slice(-2) : ''; };
   NS.vehNo = function (v) { return String(v || '').toUpperCase().replace(/[\s.\-]/g, ''); };
   var DKIND = [['veh', /(^|-)(veh|dpveh)$/], ['tname', /(^|-)(tname|dptname)$/], ['tid', /(^|-)tid$/], ['driver', /(^|-)driver$/], ['dphone', /(^|-)dphone$/]];
   function dKind(el) { var id = el && el.id || ''; for (var i = 0; i < DKIND.length; i++) if (DKIND[i][1].test(id)) return DKIND[i][0]; return ''; }
@@ -1740,10 +1744,10 @@
       if (k === 'veh') {
         var no = NS.vehNo(val), v = D.veh.filter(function (x) { return NS.vehNo(x.no) === no; })[0];
         if (el.value !== no && /^[A-Z]{2}\d/.test(no)) { el.value = no; el.dispatchEvent(new Event('input', { bubbles: true })); }
-        if (v) { var t = D.tr.filter(function (x) { return x.id === v.tr; })[0]; if (t) { dSet(dFind(box, 'tname'), t.name); dSet(dFind(box, 'tid'), t.tid); } dSet(dFind(box, 'driver'), v.driver); dSet(dFind(box, 'dphone'), v.dphone); return; }
+        if (v) { dSet(dFind(box, 'driver'), v.driver); dSet(dFind(box, 'dphone'), v.dphone); return; }   /* owner 23 Nov: a vehicle never fills the transporter */
         if (!/^[A-Z]{2}\d{1,2}[A-Z]{0,3}\d{3,4}$|^(TR|BH)/.test(no)) return;   /* only a real vehicle number is remembered */
         var tn = dFind(box, 'tname'), tr = tn && D.tr.filter(function (x) { return NS.key0(x.name) === NS.key0(tn.value); })[0], dr = dFind(box, 'driver'), dp = dFind(box, 'dphone');
-        return NS.dispatchSave(function (M) { if (!M.veh.some(function (x) { return NS.vehNo(x.no) === no; })) M.veh.push({ id: 'v' + Date.now().toString(36), no: no, tr: tr ? tr.id : '', driver: dr ? dr.value.trim() : '', dphone: dp ? dp.value.trim() : '' }); });
+        return NS.dispatchSave(function (M) { if (!M.veh.some(function (x) { return NS.vehNo(x.no) === no; })) M.veh.push({ id: 'v' + Date.now().toString(36), no: no, tr: '', driver: dr ? dr.value.trim() : '', dphone: dp ? dp.value.trim() : '' }); });
       }
       if (k === 'tname' || k === 'tid') {
         var t2 = k === 'tname' ? D.tr.filter(function (x) { return NS.key0(x.name) === NS.key0(val); })[0] : D.tr.filter(function (x) { return String(x.tid || '').toUpperCase() === val.toUpperCase(); })[0];
@@ -1754,7 +1758,6 @@
         return NS.dispatchSave(function (M) {
           var t3 = M.tr.filter(function (x) { return NS.key0(x.name) === NS.key0(val); })[0];
           if (!t3) { t3 = { id: 't' + Date.now().toString(36), name: val, tid: ti ? ti.value.trim().toUpperCase() : '' }; M.tr.push(t3); }
-          M.veh.forEach(function (v) { if (vno && NS.vehNo(v.no) === vno && !v.tr) v.tr = t3.id; });
         });
       }
     });
@@ -2461,11 +2464,132 @@
     document.addEventListener('focusin', function (e) { noAuto(e.target); }, true);   /* a box drawn some other way: before the browser offers anything */
   };
 
+  /* ---------- NSBiz's own pick list for every box with saved choices (owner 23 Nov: "use a popup box for customer and items
+     so the browser's autofill will not react"). Chrome mixes its autofill into the browser's datalist dropdown, so a box with a
+     datalist becomes read-only (the browser never fills read-only boxes) and opens this list instead: click it, or just start
+     typing. The list shows the saved names (starting with the typed letters first), arrow keys + Enter pick, a name that is not
+     saved yet is taken as typed (Enter), "+ New party / item" opens the quick-add box. The box keeps its value and list, so every
+     screen reads it as before; picking sends the same input/change events typing did. data-nopick leaves a box as it is. ---------- */
+  var PK = { box: null, inp: null, at: 0 };
+  function pkOpts(inp) {
+    /* every list the box has had: a screen that gives one box two lists (rent receipt: saved businesses, then landlords of earlier receipts) shows both */
+    var ids = [inp.getAttribute('list') || ''].concat(inp._pkLists || []), seen = {}, out = [];
+    ids.forEach(function (id) { var dl = document.getElementById(id); if (dl) [].forEach.call(dl.options, function (o) { var v = String(o.value || '').trim(); if (!v || seen[v.toLowerCase()]) return; seen[v.toLowerCase()] = 1; out.push({ v: v, l: o.label && o.label !== v ? o.label : '' }); }); });
+    return out;
+  }
+  function pkWord(inp) { var q = qaOf(inp); return q ? (q.kind === 'item' ? NS.t('pk.newi') : NS.t('pk.newp')) : ''; }
+  function pkClose(back) {
+    if (!PK.box) return;
+    var inp = PK.inp; PK.box.remove(); PK.box = null; PK.inp = null;
+    document.removeEventListener('mousedown', pkOut, true); window.removeEventListener('resize', pkClose0); window.removeEventListener('scroll', pkScroll, true);
+    if (back && inp && document.contains(inp)) { inp._pkSkip = Date.now(); inp.focus(); }
+  }
+  function pkClose0() { pkClose(false); }
+  function pkScroll(e) { if (PK.box && !PK.box.contains(e.target)) pkPlace(); }
+  function pkOut(e) { if (PK.box && !PK.box.contains(e.target) && e.target !== PK.inp) pkClose(false); }
+  function pkPlace() {
+    var b = PK.box, r = PK.inp.getBoundingClientRect(), w = Math.max(r.width, 300), vh = window.innerHeight, vw = window.innerWidth;
+    b.style.width = Math.min(w, vw - 16) + 'px';
+    b.style.left = Math.max(8, Math.min(r.left, vw - Math.min(w, vw - 16) - 8)) + 'px';
+    var below = vh - r.bottom - 8, h = Math.min(360, Math.max(below, r.top - 8));
+    b.style.maxHeight = h + 'px';
+    if (below >= 220 || below >= r.top) { b.style.top = (r.bottom + 2) + 'px'; b.style.bottom = ''; } else { b.style.top = ''; b.style.bottom = (vh - r.top + 2) + 'px'; }
+  }
+  function pkPick(v) {
+    var inp = PK.inp; if (!inp) return;
+    pkClose(false);
+    inp.value = v;
+    inp.dispatchEvent(new Event('input', { bubbles: true })); inp.dispatchEvent(new Event('change', { bubbles: true }));
+    /* on to the next box, as Enter does on every screen */
+    var f = inp.form || inp.closest('form, dialog, .card, section') || document.body;
+    var all = [].filter.call(f.querySelectorAll('input,select,textarea'), function (x) { return !x.disabled && x.type !== 'hidden' && x.type !== 'checkbox' && x.offsetParent !== null && !x.closest('details:not([open])'); });
+    var i = all.indexOf(inp); inp._pkSkip = Date.now();
+    if (i >= 0 && all[i + 1]) all[i + 1].focus(); else inp.focus();
+  }
+  function pkDraw() {
+    var q = PK.box.querySelector('.pk-q'), ul = PK.box.querySelector('.pk-ul'), t = q.value.trim().toLowerCase();
+    var L = PK.opts.filter(function (o) { return !t || (o.v + ' ' + o.l).toLowerCase().indexOf(t) >= 0; });
+    L.sort(function (a, b) { var x = a.v.toLowerCase().indexOf(t) === 0 ? 0 : 1, y = b.v.toLowerCase().indexOf(t) === 0 ? 0 : 1; return x - y; });
+    L = L.slice(0, 200);
+    var nw = pkWord(PK.inp), exact = L.some(function (o) { return o.v.toLowerCase() === t; });
+    var rows = L.map(function (o, i) { return '<li role="option" class="pk-o" data-v="' + NS.esc(o.v) + '" id="pk-o' + i + '"><b>' + NS.esc(o.v) + '</b>' + (o.l ? '<small>' + NS.esc(o.l) + '</small>' : '') + '</li>'; });
+    if (t && !exact) rows.push('<li role="option" class="pk-o pk-typed" data-v="' + NS.esc(q.value.trim()) + '">' + NS.esc(NS.t('pk.use', { v: q.value.trim() })) + '</li>');
+    if (nw) rows.push('<li role="option" class="pk-o pk-new" data-new="1">+ ' + NS.esc(nw) + (t && !exact ? ': ' + NS.esc(q.value.trim()) : '') + '</li>');
+    ul.innerHTML = rows.join('') || '<li class="pk-none">' + NS.esc(NS.t('pk.none')) + '</li>';
+    PK.at = 0; pkMark();
+  }
+  function pkMark() {
+    var o = PK.box.querySelectorAll('.pk-o'); if (!o.length) return;
+    PK.at = Math.max(0, Math.min(PK.at, o.length - 1));
+    [].forEach.call(o, function (x, i) { x.classList.toggle('on', i === PK.at); x.setAttribute('aria-selected', i === PK.at ? 'true' : 'false'); });
+    o[PK.at].scrollIntoView({ block: 'nearest' });
+  }
+  function pkChoose(li) {
+    if (!li) return;
+    if (li.getAttribute('data-new')) { var inp = PK.inp, v = PK.box.querySelector('.pk-q').value.trim(); pkClose(false); inp.value = v; inp._pkSkip = Date.now(); inp.focus(); NS.quickAdd(inp); return; }
+    pkPick(li.getAttribute('data-v'));
+  }
+  function pkOpen(inp, typed) {
+    if (PK.box) pkClose(false);
+    var b = PK.box = NS.el('div', { 'class': 'pk-box', role: 'dialog', 'aria-label': (inp.labels && inp.labels[0] ? inp.labels[0].textContent : '') || NS.t('pk.pick') });
+    b.innerHTML = '<input class="pk-q" type="search" role="combobox" aria-expanded="true" aria-autocomplete="list" autocomplete="off" spellcheck="false" placeholder="' + NS.esc(NS.t('pk.find')) + '">' +
+      '<ul class="pk-ul" role="listbox"></ul><p class="pk-hint">' + NS.esc(NS.t('pk.hint')) + '</p>';
+    (inp.closest('dialog[open]') || document.body).appendChild(b);   /* inside a box shown on top of the page, or it would sit behind it */
+    PK.inp = inp; PK.opts = pkOpts(inp);
+    var q = b.querySelector('.pk-q');
+    q.value = typed != null ? typed : inp.value;
+    pkPlace(); pkDraw();
+    q.focus(); if (typed == null) q.select();
+    q.addEventListener('input', pkDraw);
+    /* a list that is still being read (NS.suggest fills it on focus): drawn again when it arrives */
+    if (window.MutationObserver) { var mo = new MutationObserver(function () { if (PK.inp !== inp) { mo.disconnect(); return; } var at = PK.at; PK.opts = pkOpts(inp); pkDraw(); PK.at = at; pkMark(); });
+      [inp.getAttribute('list') || ''].concat(inp._pkLists || []).forEach(function (id) { var d = document.getElementById(id); if (d) mo.observe(d, { childList: true }); }); }
+    q.addEventListener('keydown', function (e) {
+      if (e.key === 'ArrowDown') { e.preventDefault(); PK.at++; pkMark(); }
+      else if (e.key === 'ArrowUp') { e.preventDefault(); PK.at--; pkMark(); }
+      else if (e.key === 'Enter') { e.preventDefault(); e.stopPropagation(); var on = b.querySelector('.pk-o.on'); if (on) pkChoose(on); else if (q.value.trim()) pkPick(q.value.trim()); else pkClose(true); }
+      else if (e.key === 'Escape') { e.preventDefault(); e.stopPropagation(); pkClose(true); }
+      else if (e.key === 'Tab') { var o2 = b.querySelector('.pk-o.on:not(.pk-new)'); if (o2 && q.value.trim()) { e.preventDefault(); pkChoose(o2); } else pkClose(false); }
+    });
+    b.addEventListener('mousedown', function (e) { if (e.target !== q) e.preventDefault(); });
+    b.addEventListener('click', function (e) { var li = e.target.closest('.pk-o'); if (li) pkChoose(li); });
+    document.addEventListener('mousedown', pkOut, true); window.addEventListener('resize', pkClose0); window.addEventListener('scroll', pkScroll, true);
+  }
+  function pkWant(x) { return x && x.tagName === 'INPUT' && x.getAttribute('list') && x.type !== 'search' && !x.hasAttribute('data-nopick') && !x.closest('[data-nopick], .pk-box'); }
+  function pkSet(el) {
+    /* transporter, vehicle, transporter ID and driver boxes (found by their ids, see dispatch masters): their saved list now, not on first focus */
+    if (el && el.querySelectorAll) [].forEach.call(el.querySelectorAll('input:not([list])'), function (x) { var k = dKind(x); if (k && k !== 'dphone') { x.setAttribute('list', 'ns-dl-' + k); NS.dispatch().then(function (D) { dList(k, D); }); } });
+    var L = el && el.querySelectorAll ? [].slice.call(el.querySelectorAll('input[list]')) : [];
+    if (pkWant(el)) L.push(el);
+    L.forEach(function (x) { if (!pkWant(x) || x.hasAttribute('data-pk')) return; x.setAttribute('data-pk', ''); if (!x.readOnly) { x.readOnly = true; x.setAttribute('data-pkro', ''); } });
+  }
+  NS.pickers = function () {
+    if (!document.body || NS._pk) return; NS._pk = 1;
+    pkSet(document.body);
+    if (window.MutationObserver) new MutationObserver(function (ms) { ms.forEach(function (m) { [].forEach.call(m.addedNodes, function (n) { if (n.nodeType === 1) pkSet(n); }); if (m.type === 'attributes') { if (m.oldValue && m.oldValue !== m.target.getAttribute('list')) (m.target._pkLists = m.target._pkLists || []).push(m.oldValue); pkSet(m.target); } }); })
+      .observe(document.body, { childList: true, subtree: true, attributes: true, attributeOldValue: true, attributeFilter: ['list'] });
+    var ok = function (t) { return t && t.hasAttribute && t.hasAttribute('data-pkro') && !t.disabled; };
+    document.addEventListener('click', function (e) { var t = e.target; if (ok(t) && !PK.box) pkOpen(t); }, true);
+    document.addEventListener('keydown', function (e) {
+      var t = e.target; if (!ok(t)) return;
+      var k = e.key;
+      if (k.length === 1 && !e.ctrlKey && !e.metaKey && !e.altKey) { e.preventDefault(); pkOpen(t, k); }
+      else if (k === 'ArrowDown' || k === 'F4' || (k === 'Enter' && !t.value.trim()) || k === 'Backspace' || k === 'Delete') { e.preventDefault(); e.stopPropagation(); pkOpen(t, k === 'Backspace' ? t.value.slice(0, -1) : k === 'Delete' ? '' : null); }
+    }, true);
+    /* a read-only box is skipped by the browser's own "required" check: NSBiz checks it */
+    document.addEventListener('submit', function (e) {
+      var f = e.target, miss = f && f.querySelector && [].filter.call(f.querySelectorAll('input[data-pkro][required]'), function (x) { return !x.disabled && x.offsetParent !== null && !x.value.trim(); })[0];
+      if (!miss) return;
+      e.preventDefault(); e.stopImmediatePropagation();
+      NS.toast(NS.t('pk.need'), 'bad'); miss.focus(); pkOpen(miss);
+    }, true);
+  };
+
   /* ---------- page start ---------- */
   NS.start = function () {
     var lang = NS.initLang ? NS.initLang() : null;
     NS.initTheme();
-    NS.motion(); NS.noAutofill();
+    NS.motion(); NS.noAutofill(); NS.pickers();
     NS.btnIcons(); NS.nsbMarks();
     var y = NS.$('[data-year]'); if (y) y.textContent = new Date().getFullYear();
     NS.sponsor();

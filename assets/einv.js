@@ -209,7 +209,7 @@
       actualFromStateCode: +s.state, fromStateCode: +s.state,
       toGstin: b.gstin && NS.gstinCheck(b.gstin).ok ? b.gstin : 'URP', toTrdName: clip(b.name, 100), toAddr1: ta[0], toAddr2: ta[1],
       toPlace: clip((to || b).city, 50), toPincode: +digits((to || b).pin), actualToStateCode: ewbState((to && to.state) || b.state), toStateCode: ewbState(d.pos || b.state),
-      transType: to ? 2 : 1,
+      transType: +((d.disp || {}).ttype) || (to ? 2 : 1),   /* owner 23 Nov: the type the user chose in the dispatch details */
       OthValue: r2(tt.roundOff + (tt.tcs || 0)), totalValue: r2(tt.taxable), cgstValue: r2(rows.reduce(function (a, r) { return a + r.cgst; }, 0)), sgstValue: r2(rows.reduce(function (a, r) { return a + r.sgst; }, 0)),
       igstValue: r2(rows.reduce(function (a, r) { return a + r.igst; }, 0)), cessValue: 0, TotNonAdvolVal: 0, totInvValue: tt.grand
     };
