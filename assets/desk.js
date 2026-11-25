@@ -18,7 +18,7 @@
   function ic(d) { return '<svg class="ic" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="' + d + '"/></svg>'; }
   /* icons for the App's own screens (the other side-menu icons are CSS masks in desk.css, by data-ic) */
   var SECIC = { home: 'home', sales: 'doc', money: 'money', dues: 'clock', buy: 'cart', parties: 'people', cash: 'bank', chq: 'cheque', books: 'book', khata: 'book', preg: 'cart', ebook: 'cart',
-    day: 'calendar', inbox: 'save', mkimp: 'data', tools: 'layers', repeat: 'repeat', reports: 'chart', b2jv: 'journal', b2fa: 'asset', b2gd: 'box', b2make: 'factory', b2profit: 'trend', b2sman: 'badge', b2year: 'calendar', grp: 'layers', fin: 'scale', fam: 'factory', capl: 'coins', b2job: 'wrench', ledger: 'book', move: 'trend', st: 'list', stf: 'badge', acx: 'tax', tdsr: 'tax', gststk: 'tax', gtds: 'tax', isd: 'tax', charts: 'chart', pdffill: 'doc', features: 'toggle', bimp: 'bimport', itx: 'itax', msme: 'coins', limits: 'scale', trust: 'coins', warr: 'wrench', fees: 'cap', packs: 'pack', cadb: 'dash', cadoc: 'folder', cagst: 'tax', cacom: 'chat', saved: 'save',
+    day: 'calendar', inbox: 'save', mkimp: 'data', tools: 'layers', repeat: 'repeat', reports: 'chart', b2jv: 'journal', b2fa: 'asset', b2gd: 'box', b2make: 'factory', b2profit: 'trend', b2sman: 'badge', b2year: 'calendar', grp: 'layers', fin: 'scale', fam: 'factory', capl: 'coins', b2job: 'wrench', ledger: 'book', move: 'trend', st: 'list', stf: 'badge', acx: 'tax', tdsr: 'tax', gststk: 'tax', gtds: 'tax', isd: 'tax', charts: 'chart', pdffill: 'doc', ftools: 'wrench', features: 'toggle', bimp: 'bimport', itx: 'itax', msme: 'coins', limits: 'scale', trust: 'coins', warr: 'wrench', fees: 'cap', packs: 'pack', cadb: 'dash', cadoc: 'folder', cagst: 'tax', cacom: 'chat', saved: 'save',
     entries: 'list', low: 'alert', biz: 'shop', party: 'people', pgroups: 'list', item: 'box', igroups: 'list', doc: 'doc', settings: 'set', backup: 'data', bin: 'trash', log: 'clock' };
   /* screen lists that stay inside the page (my., the stock site...) get the same icons */
   function secIcons() { $$('.hub-nav a[data-sec]:not([data-ic])').forEach(function (a) { var k = SECIC[a.getAttribute('data-sec')]; if (k) a.setAttribute('data-ic', k); }); }
@@ -159,7 +159,7 @@
       '§audit', 'cacom', 'cadoc']],
     ['util', ['§data', { my: 'backup', t: 'v_backup', ic: 'data' }, 'bimp', 'mkimp', { h: 'mprint', t: 'v_mprint', ic: 'doc' }, 'b2year',
       '§setup', { h: 'config', t: 'v_config', ic: 'set' }, { h: 'bw', t: 'v_bw', ic: 'list' }, 'features', 'packs',   /* one Configuration (owner 19 Nov): it opens the My data settings itself */
-      '§tools', { site: 'tds' }, { site: 'declaration' }, 'pdffill', 'tools']]];   /* TDS and TCS calculator and Declarations under Utilities (owner 20 Nov) */
+      '§tools', { site: 'tds' }, { site: 'declaration' }, 'pdffill', 'ftools', 'tools']]];   /* TDS and TCS calculator and Declarations under Utilities (owner 20 Nov) */
   /* the sub-headings inside a group (accounting names; the App is English only) */
   var SUBN = { acc: 'Accounting Masters', inv: 'Inventory Masters', pay: 'Payroll Masters', dsp: 'Dispatch Masters', co: 'Company',
     vch: 'Accounting Vouchers', ivch: 'Inventory Vouchers', payv: 'Payroll Vouchers', payr: 'Payroll Reports', payst: 'Payroll Statutory', lists: 'Lists and Registers', assets: 'Assets and Loans', trade: 'Trade Registers',
@@ -835,7 +835,7 @@
     msme: ['MS'], limits: ['LH'], buy: ['PE', 'W'], parties: ['PA', 'Y'], grp: ['GR'], chq: ['CQ'], books: ['CB', 'K'], cash: ['CK'], repeat: ['RB'],
     reports: ['RE'], day: ['MD'], tools: ['AT', 'T'], fin: ['FA', 'A'], capl: ['CL'], b2jv: ['JE', 'J'], b2fa: ['FX'], b2gd: ['GD'], b2make: ['PR'],
     b2job: ['JW'], b2profit: ['PF'], b2sman: ['SM'], b2year: ['YE'], features: ['AF'], packs: ['TP'], trust: ['DM'], warr: ['WS'], cacom: ['CC'],
-    fees: ['FE'], stock: ['SK'], fam: ['MA'], cadb: ['CD'], cadoc: ['CA'], cagst: ['CG'], ebook: ['EB'], khata: ['KH'], preg: ['PG'], dlist: ['DR'], clist: ['CR'], ssum: ['SY'], psum: ['PY'], vreg: ['VR'], cbsum: ['CS'], mprint: ['MV'], coa: ['AC'], acl: ['LA'], masters: ['MT'], tdsr: ['TQ'], gststk: ['GF'], gtds: ['GW'], isd: ['GJ'], charts: ['CH'], pdffill: ['FQ'], config: ['CF'],
+    fees: ['FE'], stock: ['SK'], fam: ['MA'], cadb: ['CD'], cadoc: ['CA'], cagst: ['CG'], ebook: ['EB'], khata: ['KH'], preg: ['PG'], dlist: ['DR'], clist: ['CR'], ssum: ['SY'], psum: ['PY'], vreg: ['VR'], cbsum: ['CS'], mprint: ['MV'], coa: ['AC'], acl: ['LA'], masters: ['MT'], tdsr: ['TQ'], gststk: ['GF'], gtds: ['GW'], isd: ['GJ'], charts: ['CH'], pdffill: ['FQ'], ftools: ['FT'], config: ['CF'],
     gsum: ['GS'], gvch: ['GV'], os: ['OS'], exc: ['TC'], int: ['IR'], bw: ['BW'], ord: ['OU'],
     /* menu entries that had no key (owner 19 Nov 2026): masters, payroll parts and the final account views */
     'masters/led': ['LD'], 'masters/grp': ['AG'], 'masters/bank': ['BK'], 'masters/vt': ['VT'], 'masters/item': ['IM'], 'masters/igrp': ['IG'], 'masters/unit': ['UM'],

@@ -1719,6 +1719,9 @@
   NS.EWB_TT = [['', 'Auto (Regular, or Bill To - Ship To)'], ['1', 'Regular'], ['2', 'Bill To - Ship To'], ['3', 'Bill From - Dispatch From'], ['4', 'Combination of 2 and 3']];
   /* the portal's e-way bill date ("23/11/2026 10:15:00 AM" or 2026-11-23...) as yyyy-mm-dd for a date box */
   NS.ewbDay = function (v) { v = String(v || '').trim(); var m = v.match(/^(\d{4})-(\d{2})-(\d{2})/); if (m) return m[0]; m = v.match(/^(\d{1,2})[\/.-](\d{1,2})[\/.-](\d{4})/); return m ? m[3] + '-' + ('0' + m[2]).slice(-2) + '-' + ('0' + m[1]).slice(-2) : ''; };
+  /* GST rates a bill line may carry on a date (same list as docs.js RATE_SETS: 28% left on 1 Feb 2026, 40% and 1.5% came on 22 Sep 2025) */
+  NS.gstRatesFor = function (date) { var S = [['2026-02-01', [0, 0.1, 0.25, 1.5, 3, 5, 12, 18, 40]], ['2025-09-22', [0, 0.1, 0.25, 1.5, 3, 5, 12, 18, 28, 40]], ['', [0, 0.1, 0.25, 3, 5, 12, 18, 28]]];
+    return S.filter(function (r) { return String(date || '') >= r[0]; })[0][1]; };
   NS.vehNo = function (v) { return String(v || '').toUpperCase().replace(/[\s.\-]/g, ''); };
   var DKIND = [['veh', /(^|-)(veh|dpveh)$/], ['tname', /(^|-)(tname|dptname)$/], ['tid', /(^|-)tid$/], ['driver', /(^|-)driver$/], ['dphone', /(^|-)dphone$/]];
   function dKind(el) { var id = el && el.id || ''; for (var i = 0; i < DKIND.length; i++) if (DKIND[i][1].test(id)) return DKIND[i][0]; return ''; }

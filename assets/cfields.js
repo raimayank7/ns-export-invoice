@@ -608,8 +608,19 @@
   document.addEventListener('focusin', function (e) {
     var el = e.target;
     if (el.closest && (el.closest('.it[data-i]') || el.closest('#app-form .line[data-row]'))) { (dataAsk || loadData()).then(function () { if (document.activeElement === el) lineStrip(el); }); }
-    else if (strip && !(el.closest && el.closest('.cf-strip'))) stripHide();
+    else if (strip && !(el.closest && el.closest('.cf-strip'))) { if (ptrDown) hideLater = true; else stripHide(); }
   });
+  /* owner's sales check 24 Nov: the strip used to vanish on mouse-down, so everything under it jumped up and the click landed on
+     the wrong button ("+ Add line" missed, the "No GST" tick could be hit). With the mouse, it now goes only after the click. */
+  var ptrDown = false, hideLater = false;
+  document.addEventListener('pointerdown', function () { ptrDown = true; }, true);
+  document.addEventListener('pointerup', function () {
+    setTimeout(function () {
+      ptrDown = false; if (!hideLater) return; hideLater = false;
+      var a = document.activeElement;
+      if (strip && !(a && a.closest && (a.closest('.cf-strip') || a.closest('.it[data-i]') || a.closest('#app-form .line[data-row]')))) stripHide();
+    }, 0);
+  }, true);
 
   /* ---------- registers: filter row, extra columns, group by a field (ledger.js) ---------- */
   var FILT = {};
