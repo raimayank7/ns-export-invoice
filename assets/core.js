@@ -1722,6 +1722,16 @@
   /* GST rates a bill line may carry on a date (same list as docs.js RATE_SETS: 28% left on 1 Feb 2026, 40% and 1.5% came on 22 Sep 2025) */
   NS.gstRatesFor = function (date) { var S = [['2026-02-01', [0, 0.1, 0.25, 1.5, 3, 5, 12, 18, 40]], ['2025-09-22', [0, 0.1, 0.25, 1.5, 3, 5, 12, 18, 28, 40]], ['', [0, 0.1, 0.25, 3, 5, 12, 18, 28]]];
     return S.filter(function (r) { return String(date || '') >= r[0]; })[0][1]; };
+  NS.noPick = function (text) {
+    var s = String(text || '').trim(); if (!s) return function () { return true; };
+    var nums = [], full = [], ok = true;
+    s.split(/[,;]+/).forEach(function (p) {
+      p = p.trim(); if (!p) return; var m = /^(\d+)\s*(?:-|to)\s*(\d+)$/i.exec(p), n = /^\d+$/.test(p);
+      if (m) { var a = +m[1], b = +m[2]; if (a > b) { var c = a; a = b; b = c; } nums.push([a, b]); } else if (n) nums.push([+p, +p]); else if (/[A-Za-z/\\]/.test(p)) full.push(p.replace(/\s+/g, '').toUpperCase()); else ok = false;
+    });
+    if (!ok || !nums.length && !full.length) return null;
+    return function (no) { var t = String(no || '').replace(/\s+/g, '').toUpperCase(); if (full.indexOf(t) >= 0) return true; var m = /(\d+)\D*$/.exec(t); if (!m) return false; var k = +m[1]; return nums.some(function (r) { return k >= r[0] && k <= r[1]; }); };
+  };
   NS.vehNo = function (v) { return String(v || '').toUpperCase().replace(/[\s.\-]/g, ''); };
   var DKIND = [['veh', /(^|-)(veh|dpveh)$/], ['tname', /(^|-)(tname|dptname)$/], ['tid', /(^|-)tid$/], ['driver', /(^|-)driver$/], ['dphone', /(^|-)dphone$/]];
   function dKind(el) { var id = el && el.id || ''; for (var i = 0; i < DKIND.length; i++) if (DKIND[i][1].test(id)) return DKIND[i][0]; return ''; }
@@ -1823,13 +1833,23 @@
     Array.prototype.forEach.call(root.querySelectorAll('.ph'), function (e) { if (e.tagName === 'P') e.remove(); else e.style.visibility = 'hidden'; });
   };
   var PAGE = { a4: [210, 297], a5: [148, 210], th80: [80, 0], th58: [58, 0] };
+  /* text painted with a gradient (the NSBiz wordmark, .nsb-n) is drawn by html2canvas as a filled box: give it its plain colour */
+  function plainText(root) {
+    Array.prototype.forEach.call(root.querySelectorAll('*'), function (el) {
+      var cs = getComputedStyle(el); if (cs.webkitBackgroundClip !== 'text' && cs.backgroundClip !== 'text') return;
+      var col = /nsb-n/.test(el.className) ? '#0E746A' : (cs.color && cs.color !== 'rgba(0, 0, 0, 0)' ? cs.color : '#0E746A');
+      el.style.setProperty('background-image', 'none', 'important'); el.style.setProperty('-webkit-background-clip', 'border-box', 'important'); el.style.setProperty('background-clip', 'border-box', 'important');
+      el.style.setProperty('color', col, 'important'); el.style.setProperty('-webkit-text-fill-color', col, 'important'); el.style.setProperty('filter', 'none', 'important');
+    });
+  }
+  NS.pdfPlain = plainText;   /* exportmenu.js: report PDFs and pictures */
   NS.makePdf = function (nodes, paper, opt) {
     return Promise.all(LIBS.map(function (l) { return NS.loadJs(l[0], l[1]); })).then(function () {
       var box = document.createElement('div');
       box.style.cssText = 'position:fixed;left:-12000px;top:0;background:#fff';
       document.body.appendChild(box);
       var pg = PAGE[paper] || PAGE.a4, pdf = null;
-      var shots = Array.prototype.map.call(nodes, function (n) { var c = n.cloneNode(true); c.classList.remove('a5'); NS.dropHints(c); box.appendChild(c); return c; });
+      var shots = Array.prototype.map.call(nodes, function (n) { var c = n.cloneNode(true); c.classList.remove('a5'); NS.dropHints(c); box.appendChild(c); plainText(c); return c; });
       return shots.reduce(function (p, c) {
         return p.then(function () { return window.html2canvas(c, { scale: 2, backgroundColor: '#ffffff', logging: false }); }).then(function (cv) {
           var w = pg[0];

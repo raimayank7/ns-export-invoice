@@ -811,9 +811,10 @@
   }
   /* print copies: 1 = the chosen label; 2 or 3 = Original, Duplicate (and Triplicate) one after another */
   /* ?cp=orig,trip (the App's print box): exactly these copies, for this one print; the saved document is not changed */
+  var ONENOS = new URLSearchParams(location.search).get('nos') || '';   /* bill numbers from Print many vouchers, read before the address is tidied */
   var ONECP = (function () { var m = /[?&]cp=([a-z,]+)/.exec(location.search); return m ? m[1].split(',') : null; })();
   function labelsFor(d, all) {
-    if (all && ONECP && T.copy) { var cs = COPIES[copyKey()] || [], pick = ONECP.filter(function (k) { return cs.indexOf(k) >= 0; }); if (pick.length) return pick; }
+    if (all && ONECP && T.copy) { var cs = COPIES[copyKey()] || [], pick = ONECP.map(function (k) { return cs.indexOf(k) < 0 && (k === 'dup' || k === 'trip') && cs.indexOf('dupsup') >= 0 ? 'dupsup' : k; }).filter(function (k, i, a) { return cs.indexOf(k) >= 0 && a.indexOf(k) === i; }); if (pick.length) return pick; }
     var n = +d.copies || 1;
     return T.copy && d.copyLabel && all && n > 1 ? COPIES[copyKey()].slice(0, n) : [d.copyLabel];
   }
@@ -1171,9 +1172,9 @@
 
   /* ---------- print, share ---------- */
   function printAll(r, asPdf) {
-    var me = String(doc.seller && doc.seller.name || '').trim().toLowerCase();
+    var me = String(doc.seller && doc.seller.name || '').trim().toLowerCase(), pick = NS.noPick && NS.noPick(ONENOS) || function () { return true; };
     return NSStore.list('doc').then(function (all) {
-      var list = all.filter(function (x) { return (x.type || 'invoice') === (type === 'exp' ? 'expinv' : type) && (!T.split || !T.kinds || T.kinds.indexOf(x.kind) >= 0) && (x.date || '') >= r[0] && (x.date || '') <= (r[1] || r[0]) && (!me || String(x.seller && x.seller.name || '').trim().toLowerCase() === me); })
+      var list = all.filter(function (x) { return pick(x.no) && (x.type || 'invoice') === (type === 'exp' ? 'expinv' : type) && (!T.split || !T.kinds || T.kinds.indexOf(x.kind) >= 0) && (x.date || '') >= r[0] && (x.date || '') <= (r[1] || r[0]) && (!me || String(x.seller && x.seller.name || '').trim().toLowerCase() === me); })
         .sort(function (a, b) { return (a.date || '').localeCompare(b.date || '') || String(a.no || '').localeCompare(String(b.no || '')); });
       if (!list.length) { NS.toast(t('conv.none'), 'bad'); return; }
       return paList(list, asPdf, docName() + ' ' + r[0] + ' to ' + (r[1] || r[0]));

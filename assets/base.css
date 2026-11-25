@@ -618,3 +618,5 @@ input[data-pkro]{cursor:pointer}input[data-pkro]:not(:disabled){caret-color:tran
 .pk-o b{font-weight:600}.pk-o small{color:var(--soft,#5b6b67);font-size:.82em}.pk-o.on{background:var(--accent,#0e746a);color:#fff}.pk-o.on small{color:#e6f3f1}
 .pk-typed{font-style:italic}.pk-new{font-weight:700;color:var(--accent,#0e746a)}.pk-new.on{color:#fff}.pk-none{padding:10px;color:var(--soft,#5b6b67)}
 .pk-hint{margin:0;padding:6px 12px;border-top:1px solid var(--line,#cfdad7);font-size:.78em;color:var(--soft,#5b6b67)}
+/* the NSBiz wordmark on paper: plain teal letters, so it prints also with "Background graphics" off (25 Nov) */
+@media print{.nsb-n{background:none!important;color:#0E746A!important;-webkit-text-fill-color:#0E746A!important;filter:none!important}}
