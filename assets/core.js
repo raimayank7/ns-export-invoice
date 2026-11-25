@@ -1837,7 +1837,7 @@
   function plainText(root) {
     Array.prototype.forEach.call(root.querySelectorAll('*'), function (el) {
       var cs = getComputedStyle(el); if (cs.webkitBackgroundClip !== 'text' && cs.backgroundClip !== 'text') return;
-      var col = /nsb-n/.test(el.className) ? '#0E746A' : (cs.color && cs.color !== 'rgba(0, 0, 0, 0)' ? cs.color : '#0E746A');
+      var col = /nsb-n/.test(el.className) ? '#0C5F57' : (cs.color && cs.color !== 'rgba(0, 0, 0, 0)' ? cs.color : '#0C5F57');
       el.style.setProperty('background-image', 'none', 'important'); el.style.setProperty('-webkit-background-clip', 'border-box', 'important'); el.style.setProperty('background-clip', 'border-box', 'important');
       el.style.setProperty('color', col, 'important'); el.style.setProperty('-webkit-text-fill-color', col, 'important'); el.style.setProperty('filter', 'none', 'important');
     });
@@ -2054,6 +2054,7 @@
     writeoff: 'M6 3h9l4 4v14H6zM14 3v5h5M8 16l8-6', cap: 'M2 9l10-5 10 5-10 5zM6 11v5c3 2.5 9 2.5 12 0v-5M22 9v6',
     star: 'M12 3l2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 17l-5.4 2.9 1-6.1-4.4-4.3 6.1-.9z', bed: 'M3 18V7M3 13h18v5M21 13a3 3 0 0 0-3-3h-7v3M7 10.5a1.5 1.5 0 1 0 0 .01',
     wrench: 'M14.7 6.3a4 4 0 0 0-5.4 5.4L3 18l3 3 6.3-6.3a4 4 0 0 0 5.4-5.4l-2.6 2.6-2.4-.6-.6-2.4z',
+    more: 'M12 5.5h.01M12 12h.01M12 18.5h.01', sort: 'M7 4v16M3 8l4-4 4 4M17 20V4M13 16l4 4 4-4', phone: 'M6 3h4l2 5-2.5 1.5a11 11 0 0 0 5 5L16 12l5 2v4a2 2 0 0 1-2 2A16 16 0 0 1 4 6a2 2 0 0 1 2-3', mail: 'M3 6h18v12H3zM3 7l9 7 9-7', chev: 'M6 9l6 6 6-6',
     pulse: 'M3 12h4l3-7 4 14 3-7h4', bell: 'M6 16V11a6 6 0 0 1 12 0v5l2 2H4zM10 20a2 2 0 0 0 4 0',
     file: 'M6 3h9l4 4v14H6zM14 3v5h5', link: 'M10 14a4 4 0 0 0 6 0l3-3a4 4 0 0 0-6-6l-1 1M14 10a4 4 0 0 0-6 0l-3 3a4 4 0 0 0 6 6l1-1'
   };
@@ -2099,7 +2100,14 @@
   var AUTOPRINT = /[?&]print=1\b/.test(location.search);
   NS.autoPrint = function () { var x = AUTOPRINT; AUTOPRINT = false; return x; };
   /* the one line at the bottom of every printed or shared document: NS + gold Biz, then "by", the emblem and "Nivesh Sahayak" in bold (owner's order) */
-  NS.creditLine = function (cls) { return '<p class="ns-cl' + (cls ? ' ' + cls : '') + '"><b class="nsb nsb-in" aria-label="NSBiz"><span class="nsb-n">NS</span><span class="nsb-b">Biz</span></b><span class="cl-by">by</span><img src="/icons/mark-light-48.webp" alt="" width="20" height="14"><span class="cl-ns">Nivesh Sahayak</span></p>'; };
+  var CLN = 0;
+  /* THE credit line, one drawing for everything printed, saved as PDF or shared (owner 2026-11-25: bottom centre of every page, NSBiz as in the header, then the emblem, then Nivesh Sahayak).
+     The wordmark is a VECTOR picture (Cinzel Decorative Black outlines, the header's teal and gold gradients, white Biz on the pill): text with a gradient clipped to its letters prints as a dark box,
+     a picture never does, and it needs no font. */
+  NS.creditLine = function (cls) { CLN++; return '<p class="ns-cl' + (cls ? ' ' + cls : '') + '"><b class="nsb nsb-in nsb-wm" aria-label="NSBiz"><svg class="nsb-wm-s" viewBox="-230 0 3434 1120" width="3.434em" height="1.12em" aria-hidden="true" focusable="false" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="nsbA' + CLN + '" gradientUnits="userSpaceOnUse" x1="657" y1="978" x2="895" y2="-374"><stop offset="0" stop-color="#127F74"/><stop offset="1" stop-color="#063F39"/></linearGradient><linearGradient id="nsbB' + CLN + '" gradientUnits="userSpaceOnUse" x1="2308" y1="2.5" x2="2504" y2="1117.5"><stop offset="0" stop-color="#E9BC52"/><stop offset="1" stop-color="#B47F23"/></linearGradient></defs><g transform="translate(0 862) scale(1 -1)" fill="url(#nsbA' + CLN + ')"><path transform="translate(0 0)" d="M1142 -135Q1081 -173 1010 -173Q948 -173 881 -136Q812 -99 746 -31L307 423V71Q307 45 325.0 27.5Q343 10 368 10H387V0H21V10H40Q65 10 83.0 27.5Q101 45 101 71V637Q-53 801 -169 801Q-198 801 -225 791L-230 800Q-174 840 -109 840Q-66 840 -21.5 823.5Q23 807 56 786Q118 745 166 696L577 271V629Q576 655 558.0 672.5Q540 690 515 690H496V700H862V690H844Q819 690 801.0 672.5Q783 655 782 630V59L800 40Q800 40 823.5 15.0Q847 -10 855.5 -18.0Q864 -26 890.0 -49.5Q916 -73 932.0 -82.5Q948 -92 976.0 -107.5Q1004 -123 1027 -127Q1053 -133 1082.0 -133.0Q1111 -133 1138 -125Z"/><path transform="translate(881 0)" d="M647 170Q647 127 628.0 78.5Q609 30 567.0 -11.0Q525 -52 459.0 -78.0Q393 -104 315.0 -104.0Q237 -104 175 -79Q59 -33 24 82Q15 113 15 140Q15 227 68 303L77 296Q44 237 44 182Q44 114 78.0 62.0Q112 10 169.0 -19.0Q226 -48 285.5 -48.0Q345 -48 386.0 -29.0Q427 -10 446.0 22.0Q465 54 465.0 89.0Q465 124 440.0 160.5Q415 197 366 224L203 320Q79 393 79 508Q79 611 151 667Q211 714 314 714Q380 714 482 704H560L539 541H529Q529 596 486.0 630.0Q443 664 376.0 664.0Q309 664 273.0 641.0Q237 618 234 580Q231 554 248 536Q263 520 278.0 511.5Q293 503 305.0 496.0Q317 489 322 487L509 380Q572 345 607 293Q647 234 647 170Z"/></g><rect x="1608" y="126" width="1596" height="868" rx="434" fill="url(#nsbB' + CLN + ')"/><g fill="#fff"><path transform="translate(1762.0 757) scale(0.70 -0.70)" d="M402 -16Q-9 -16 -9 321Q-9 350 -6 380L4 381Q4 195 127 103V628Q126 655 107.0 672.5Q88 690 63 690H50V700H358Q528 700 608 623Q651 581 651 522Q651 457 608 413Q589 392 565 383Q570 383 575 383Q643 383 700.0 336.0Q757 289 757.0 209.0Q757 129 700 76Q603 -16 402 -16ZM436 486V516Q433 581 410.0 613.0Q387 645 332 649V38Q422 39 472.0 86.5Q522 134 522 211Q522 296 475.0 334.0Q428 372 366 372V381Q387 381 401.5 392.5Q416 404 423 421Q436 458 436 486Z"/><path transform="translate(2290.5 757) scale(0.70 -0.70)" d="M43 10Q69 10 87.5 28.5Q106 47 107 73V628Q106 654 87.5 672.0Q69 690 43 690H30V700H389V690H376Q350 690 331.5 672.0Q313 654 312 628V73Q312 47 331.0 28.5Q350 10 376 10H389V0H30V10Z"/><path transform="translate(2583.1 757) scale(0.70 -0.70)" d="M49 719Q64 713 101.5 707.0Q139 701 154.5 701.0Q170 701 170 701H515Q557 701 586.0 706.0Q615 711 621 714V705L285 50H426Q499 50 555.0 98.5Q611 147 634 232H644L606 0H35V9L367 651H187Q127 650 93.0 615.5Q59 581 59 521V513H49Z"/></g></svg></b><span class="cl-by">by</span><img src="/icons/mark-light-48.webp" alt="" width="20" height="14"><span class="cl-ns">Nivesh Sahayak</span></p>'; };
+  /* windows we write ourselves (print pages, hidden frames) do not load the site's styles: this is the credit line's own small stylesheet; .ns-fx = fixed at the foot of every page */
+  NS.creditCss = '.ns-cl{display:flex;align-items:center;justify-content:center;gap:4px;font:11px Arial,Helvetica,sans-serif;color:#374151;-webkit-print-color-adjust:exact;print-color-adjust:exact}.ns-cl img{height:1.6em;width:auto}.ns-cl b{display:inline-flex;align-items:center;font-size:1.45em;line-height:1;direction:ltr}.ns-cl .nsb-wm-s{display:block;width:3.434em;height:1.12em;margin-left:-.23em;overflow:visible}.ns-cl .cl-by,.ns-cl .cl-ns{font-weight:700;color:#374151}.ns-cl .cl-by{margin-inline-start:2px}@media print{.ns-fx{position:fixed;left:0;right:0;bottom:5mm;margin:0}}';
+  NS.creditDoc = function () { return NS.creditLine('ns-fx'); };
   NS.creditText = 'NSBiz by Nivesh Sahayak';
   /* owner 23 Nov: @page rule for print windows: no browser header/footer; credit at the foot of every page when asked */
   NS.pageBoxes = function (credit) {
@@ -2115,11 +2123,29 @@
     }
     window.addEventListener('beforeprint', function () {
       if (st || hasCredit()) return;
-      st = document.createElement('style'); st.setAttribute('data-ns-pcredit', '');
-      st.textContent = '@media print{' + NS.pageBoxes(true) + '}';
-      document.head.appendChild(st);
+      st = document.createElement('div'); st.setAttribute('data-ns-pcredit', ''); st.className = 'ns-pcredit';
+      st.innerHTML = NS.creditDoc() + '<style>@media print{' + NS.pageBoxes(false) + '}</style>';   /* the same picture credit as everywhere, fixed at the foot of every printed page */
+      document.body.appendChild(st);
     });
     window.addEventListener('afterprint', function () { if (st) { st.remove(); st = null; } });
+  })();
+  /* every printable sheet (.stsheet / [data-sheet]) ends with the credit line: a screen whose builder forgot it gets it here, so nothing printed, saved as PDF or shared is left without it (owner 2026-11-25) */
+  (function () {
+    var SEL = '.stsheet, [data-sheet]';
+    function add(sh) {
+      if (!sh.isConnected || !/^(DIV|SECTION|ARTICLE)$/.test(sh.tagName) || sh.querySelector('.ns-cl') || (sh.parentNode && sh.parentNode.closest && sh.parentNode.closest(SEL)) || sh.classList.contains('no-credit')) return;
+      sh.insertAdjacentHTML('beforeend', NS.creditLine('st-ft'));
+    }
+    function scan(n) {
+      if (!n || n.nodeType !== 1) return;
+      if (n.matches && n.matches(SEL)) add(n);
+      if (n.querySelectorAll) Array.prototype.forEach.call(n.querySelectorAll(SEL), add);
+    }
+    function start() {
+      scan(document.body);
+      new MutationObserver(function (list) { list.forEach(function (m) { Array.prototype.forEach.call(m.addedNodes, scan); var t = m.target; if (t && t.nodeType === 1 && t.closest) { var sh = t.closest(SEL); if (sh) add(sh); } }); }).observe(document.body, { childList: true, subtree: true });
+    }
+    if (document.body) start(); else document.addEventListener('DOMContentLoaded', start);
   })();
   /* line icons are stroked; the WhatsApp logo is a filled shape, so it gets class bi-fill (base.css) */
   function icSvgHtml(k) { return '<svg class="bi' + (k === 'wa' ? ' bi-fill' : '') + '" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="' + IC[k] + '"/></svg>'; }

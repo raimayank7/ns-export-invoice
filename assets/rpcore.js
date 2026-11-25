@@ -44,6 +44,41 @@
     if (o.qr === 'image') { var im = RP.qrImage(data, cols, o.makeQr); return e.image(im.img, im.w, im.w, 'threshold', 128); }
     return e.qrcode(data, { size: cols >= 48 ? 6 : 4 });
   };
+  /* the credit line on a receipt roll: the same drawing as everywhere (NSBiz wordmark, emblem, Nivesh Sahayak), in black and white, as a picture (owner 2026-11-25) */
+  var EMB = null; try { if (root.document && root.Image) { EMB = new root.Image(); EMB.src = '/icons/mark-light-48.webp'; } } catch (e) { EMB = null; }
+  RP.creditImage = function () {
+    try {
+      var NSr = root.NS; if (!NSr || !NSr.creditLine || !root.document || !root.Path2D) return null;
+      var ds = [], m = NSr.creditLine('').match(/ d="[^"]+"/g) || []; m.forEach(function (q) { ds.push(q.slice(4, -1)); });
+      if (ds.length < 5) return null;
+      var W = 320, H = 40, c = root.document.createElement('canvas'); c.width = W; c.height = H;
+      var x = c.getContext('2d'); if (!x) return null;
+      x.fillStyle = '#fff'; x.fillRect(0, 0, W, H);
+      var s = 30 / 1120, top = 5, emb = EMB && EMB.complete && EMB.naturalWidth ? 26 : 0;
+      x.font = 'bold 17px Arial, Helvetica, sans-serif'; x.textBaseline = 'middle';
+      var wm = 3434 * s /* ink from the N's swash to the end of the pill */, by = x.measureText('by').width, nm = x.measureText('Nivesh Sahayak').width;
+      var total = wm + 8 + by + 6 + (emb ? emb + 4 : 0) + nm, left = Math.max(2, (W - total) / 2) + 230 * s;
+      function at(tx, ty, sx, sy) { x.setTransform(s * sx, 0, 0, s * sy, left + tx * s, ty * s + top); }
+      x.fillStyle = '#000';
+      at(0, 862, 1, -1); x.fill(new root.Path2D(ds[0])); at(881, 862, 1, -1); x.fill(new root.Path2D(ds[1]));
+      x.setTransform(1, 0, 0, 1, 0, 0);
+      var px = left + 1608 * s, py = 126 * s + top, pw = 1596 * s, ph = 868 * s;
+      x.beginPath(); x.moveTo(px + ph / 2, py); x.lineTo(px + pw - ph / 2, py); x.arc(px + pw - ph / 2, py + ph / 2, ph / 2, -Math.PI / 2, Math.PI / 2); x.lineTo(px + ph / 2, py + ph); x.arc(px + ph / 2, py + ph / 2, ph / 2, Math.PI / 2, Math.PI * 1.5); x.closePath(); x.fill();
+      x.fillStyle = '#fff';
+      at(1762, 757, .7, -.7); x.fill(new root.Path2D(ds[2])); at(2290.5, 757, .7, -.7); x.fill(new root.Path2D(ds[3])); at(2583.1, 757, .7, -.7); x.fill(new root.Path2D(ds[4]));
+      x.setTransform(1, 0, 0, 1, 0, 0); x.fillStyle = '#000';
+      var tx = left + 3204 * s + 8, cy = top + 15;
+      x.fillText('by', tx, cy); tx += by + 6;
+      if (emb) { x.save(); x.filter = 'grayscale(1) brightness(.55) contrast(4)'; x.drawImage(EMB, tx, cy - 13, emb, emb * (EMB.naturalHeight / EMB.naturalWidth)); x.restore(); tx += emb + 4; }   /* darkened so the thin lines survive the black-and-white print */
+      x.fillText('Nivesh Sahayak', tx, cy);
+      return { img: x.getImageData(0, 0, W, H), w: W, h: H };
+    } catch (err) { return null; }
+  };
+  RP.credit = function (e, o) {
+    var im = typeof e.image === 'function' ? RP.creditImage() : null;
+    if (!im) { e.align('center').line('NSBiz by Nivesh Sahayak').align('left'); return e; }
+    e.align('center'); e.image(im.img, im.w, im.h, 'threshold', 128); e.align('left'); return e;
+  };
   RP.finish = function (e, o) {   /* paper out past the cutter, cut, then the cash drawer */
     o = o || RP.opts();
     e.newline(4); if (o.cut !== false) e.cut();
@@ -55,6 +90,7 @@
     plan.forEach(function (s) {
       if (s.t === 'rule') { e.rule(); return; }
       if (s.t === 'feed') { e.newline(s.n || 1); return; }
+      if (s.t === 'credit') { RP.credit(e, o); return; }
       if (s.t === 'qr') { e.align('center'); RP.qr(e, s.data, o); if (s.label) e.line(clip(ascii(s.label), n)); e.align('left'); return; }
       if (s.big) e.size(1, 2); if (s.bold) e.bold(true);
       if (s.t === 'text') e.align(s.align || 'left').line(ascii(s.s)).align('left');
@@ -113,7 +149,7 @@
           return;
         }
         if (tag === 'HR') { plan.push({ t: 'rule' }); return; }
-        if (cl.contains('ns-cl')) { plan.push({ t: 'text', s: 'NSBiz by Nivesh Sahayak', align: 'center' }); return; }   /* the credit line: one printed line */
+        if (cl.contains('ns-cl')) { plan.push({ t: 'credit' }); return; }   /* the credit line: one printed line */
         if (tag === 'TABLE') { table(c); return; }
         if (tag === 'H1' || tag === 'H2' || tag === 'H3') { lines(c, 'center', true, tag !== 'H3'); return; }
         if (cl.contains('dt')) { plan.push({ t: 'rule' }); lines(c, 'center', true); plan.push({ t: 'rule' }); return; }

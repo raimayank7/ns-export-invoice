@@ -440,8 +440,9 @@ b.nsb-in .nsb-n,b.nsb-in .nsb-b{font:inherit!important;font-size:inherit}b.nsb-i
 /* the one credit line at the bottom of every document (core.js NS.creditLine): the header's mark, always in its light colours on paper */
 .ns-cl{display:flex;align-items:center;justify-content:center;gap:4px;-webkit-print-color-adjust:exact;print-color-adjust:exact}
 .ns-cl img{height:1.6em;width:auto}.ns-cl b.nsb-in{font-size:1.45em}.ns-cl .cl-by{color:#6B7280}
-.ns-cl .nsb-n{background-image:linear-gradient(170deg,#127F74 0%,#063F39 100%)!important;filter:none!important}
+.ns-cl .nsb-n{background:none!important;-webkit-background-clip:border-box!important;background-clip:border-box!important;color:#0C5F57!important;-webkit-text-fill-color:#0C5F57!important;filter:none!important}
 .ns-cl .nsb-b{color:#fff!important;background:linear-gradient(170deg,#E9BC52,#B47F23)!important;box-shadow:none!important}
+.ns-cl .nsb-wm .nsb-wm-s{display:block;width:3.434em;height:1.12em;margin-left:-.23em;overflow:visible}
 .made.ns-cl{font-size:11px}.dc-cl.ns-cl{margin-top:18px;padding-top:6px;border-top:1px solid #E5E7EB}
 .ns-cl .cl-by,.ns-cl .cl-ns{font-weight:700;color:#374151}.ns-cl .cl-by{margin-inline-start:2px}
 /* NSBiz inside text: only the lettering of the header's name, no gold pill or colours (owner 2026-11-18: "repeated too many
@@ -619,4 +620,6 @@ input[data-pkro]{cursor:pointer}input[data-pkro]:not(:disabled){caret-color:tran
 .pk-typed{font-style:italic}.pk-new{font-weight:700;color:var(--accent,#0e746a)}.pk-new.on{color:#fff}.pk-none{padding:10px;color:var(--soft,#5b6b67)}
 .pk-hint{margin:0;padding:6px 12px;border-top:1px solid var(--line,#cfdad7);font-size:.78em;color:var(--soft,#5b6b67)}
 /* the NSBiz wordmark on paper: plain teal letters, so it prints also with "Background graphics" off (25 Nov) */
-@media print{.nsb-n{background:none!important;color:#0E746A!important;-webkit-text-fill-color:#0E746A!important;filter:none!important}}
+@media print{.nsb-n,.ns-cl .nsb-n,b.nsb-in .nsb-n{background:none!important;background-image:none!important;-webkit-background-clip:border-box!important;background-clip:border-box!important;color:#0C5F57!important;-webkit-text-fill-color:#0C5F57!important;filter:none!important}}
+@media print{.ns-pcredit{display:block}.ns-cl.ns-fx{position:fixed!important;left:0;right:0;bottom:5mm;margin:0!important;justify-content:center}}
+@media screen{.ns-pcredit{display:none}}

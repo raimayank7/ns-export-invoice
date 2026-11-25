@@ -759,7 +759,7 @@
       e.line(NS.inWords(tt.grand));
       if (tcsDeclRow(d)) e.line(tcsDeclRow(d));
       if (T.qr && s.upi && tt.grand > 0 && d.status !== 'paid') { e.align('center').line('Scan to pay by UPI'); NSRp.qr(e, 'upi://pay?pa=' + encodeURIComponent(s.upi) + '&pn=' + encodeURIComponent(s.name || '') + '&am=' + tt.grand.toFixed(2) + '&cu=INR', o); e.line(s.upi); }
-      e.align('center').newline().line(d.notes ? plain(d.notes).slice(0, n * 2) : 'Thank you, visit again').line('NSBiz by Nivesh Sahayak');   /* paper feed, cut and cash drawer: NSRp.finish */
+      e.align('center').newline().line(d.notes ? plain(d.notes).slice(0, n * 2) : 'Thank you, visit again'); NSRp.credit(e, o);   /* paper feed, cut and cash drawer: NSRp.finish */
     };
   }
   NS.rpBuildOf = function () { return rpBuild(doc); };   /* the receipt of the bill on screen (tests and the Windows program) */
