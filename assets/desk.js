@@ -831,10 +831,10 @@
   /* ---------- shortcuts for every tool (owner 2026-11-18: "like normal Windows software") ----------
      Tally-style F keys for new entries, Alt+letter for the main screens, and Alt+G + a 2-letter code ("Go to", as in
      TallyPrime) for EVERY screen and document maker. Fixed letters, so a key never moves when the business type hides tools. */
-  var SECKEY = { inbox: ['FW'], home: ['DB', 'H'],   /* FW = From the add-on (things sent From the Web, NSBiz Helper) */
-    sales: ['SL', 'L'], money: ['MN', 'M'], acx: ['OI'], stf: ['SF'], itx: ['IT'], bimp: ['BI'], mkimp: ['MQ'], dues: ['DU', 'U'],
-    msme: ['MS'], limits: ['LH'], buy: ['PE', 'W'], parties: ['PA', 'Y'], grp: ['GR'], chq: ['CQ'], books: ['CB', 'K'], cash: ['CK'], repeat: ['RB'],
-    reports: ['RE'], day: ['MD'], tools: ['AT', 'T'], fin: ['FA', 'A'], capl: ['CL'], b2jv: ['JE', 'J'], b2fa: ['FX'], b2gd: ['GD'], b2make: ['PR'],
+  var SECKEY = { inbox: ['FW'], home: ['DB'],   /* FW = From the add-on (things sent From the Web, NSBiz Helper) */
+    sales: ['SL'], money: ['MN'], acx: ['OI'], stf: ['SF'], itx: ['IT'], bimp: ['BI'], mkimp: ['MQ'], dues: ['DU'],
+    msme: ['MS'], limits: ['LH'], buy: ['PE'], parties: ['PA'], grp: ['GR'], chq: ['CQ'], books: ['CB'], cash: ['CK'], repeat: ['RB'],
+    reports: ['RE'], day: ['MD'], tools: ['AT'], fin: ['FA'], capl: ['CL'], b2jv: ['JE'], b2fa: ['FX'], b2gd: ['GD'], b2make: ['PR'],
     b2job: ['JW'], b2profit: ['PF'], b2sman: ['SM'], b2year: ['YE'], features: ['AF'], packs: ['TP'], trust: ['DM'], warr: ['WS'], cacom: ['CC'],
     fees: ['FE'], stock: ['SK'], fam: ['MA'], cadb: ['CD'], cadoc: ['CA'], cagst: ['CG'], ebook: ['EB'], khata: ['KH'], preg: ['PG'], dlist: ['DR'], clist: ['CR'], ssum: ['SY'], psum: ['PY'], vreg: ['VR'], cbsum: ['CS'], mprint: ['MV'], coa: ['AC'], acl: ['LA'], masters: ['MT'], tdsr: ['TQ'], gststk: ['GF'], gtds: ['GW'], isd: ['GJ'], charts: ['CH'], pdffill: ['FQ'], ftools: ['FT'], config: ['CF'],
     gsum: ['GS'], gvch: ['GV'], os: ['OS'], exc: ['TC'], int: ['IR'], bw: ['BW'], ord: ['OU'],
@@ -852,16 +852,17 @@
   var MYKEY = { backup: 'BU' };
   var QAKEY = { party: 'NP', item: 'NI' };   /* Go to codes of New party / New item (quick add) */
   /* Ctrl+Alt + a letter (owner 19 Nov 2026): the Shortcuts panel's items that had no simple key. A letter -> what it opens. */
-  var CAKEY = { p: 'q:party', i: 'q:item', t: 'fin/tb', b: 'fin/bs', l: 'fin/pl', d: 'dlist', r: 'clist', s: 'stock', c: 'calc' };
+  var CAKEY = { q: 'quick', p: 'q:party', i: 'q:item', t: 'fin/tb', b: 'fin/bs', l: 'fin/pl', d: 'dlist', r: 'clist', s: 'stock', c: 'calc' };
   var CALBL = {}; Object.keys(CAKEY).forEach(function (l) { CALBL[CAKEY[l]] = 'Ctrl+Alt+' + l.toUpperCase(); });
   function simpleKey(s) { return CALBL[s] || fName(s); }
   function caRun(job) {
     if (/^q:/.test(job)) { if (NS.quickAddNew) NS.quickAddNew(job.slice(2)); return; }
     if (job === 'calc') { calc(); return; }
+    if (job === 'quick') { var ap = A(); if (ap && ap.quickEntry) ap.quickEntry(); return; }
     if (job === 'stock') { var st = $('#ns-side a[data-sec="stock"]'); if (st) st.click(); else location.hash = 'do/stock/'; return; }
     location.hash = job;
   }   /* ord: orders.js (ERP round 2) */   /* billwise.js (ERP Round 2): interest report, bill-wise settings */   /* reports.js (ERP review round 1): group summary, group vouchers, bill-wise outstanding, things to check */
-  var DOCKEY = { billing: ['IN', 'N'], quotation: ['QT', 'O'], proforma: ['PI'], 'sales-order': ['SO'], challan: ['DC', 'C'], 'purchase-order': ['PO'],
+  var DOCKEY = { billing: ['IN'], quotation: ['QT'], proforma: ['PI'], 'sales-order': ['SO'], challan: ['DC'], 'purchase-order': ['PO'],
     'credit-note': ['CN'], 'debit-note': ['DN'], 'cash-memo': ['CM'], receipt: ['RC'], voucher: ['VC'], 'self-invoice': ['SI'], 'rent-receipt': ['RR'],
     'salary-slip': ['SS'], 'petty-cash': ['PC'], pos: ['PS'], pharmacy: ['PH'], restaurant: ['RT'], bilty: ['LR'], 'job-card': ['JC'], hotel: ['HT'],
     rent: ['RN'], 'contractor-bill': ['CT'], 'fee-receipt': ['FR'], clinic: ['CV'], salon: ['SN'], jewellery: ['JL'], garment: ['GM'], mandi: ['MI'],
@@ -893,7 +894,7 @@
     var app = A(), out = [];
     if (!app || !app.biz) return out;
     FORMKEY.forEach(function (f) { out.push({ g: 'rec', off: offForm(f[0]), t: app.T(f[0] === 'sale' ? 'qe_sale' : f[0]), k: f[2], c: f[1], run: function () { runForm(f[0]); } }); });
-    out.push({ g: 'rec', t: NS.t('app.qe_title'), k: 'Alt+Q', c: 'QE', run: function () { if (app.quickEntry) app.quickEntry(); } });
+    out.push({ g: 'rec', t: NS.t('app.qe_title'), k: 'Ctrl+Alt+Q', c: 'QE', run: function () { if (app.quickEntry) app.quickEntry(); } });
     $$('#ns-side a[data-sec]').forEach(function (a) {
       var s = a.getAttribute('data-sec'), m = SECKEY[s] || [];
       out.push({ g: 'go', off: offSec(s), t: (a.textContent || '').trim(), k: simpleKey(s) || (m[1] ? 'Alt+' + m[1] : ''), c: m[0] || '', run: function () { goSec(s); } });
@@ -965,7 +966,7 @@
         var sec = a.getAttribute('data-sec'), i = sec ? $$('#ns-side a[data-sec]').indexOf(a) : -1;
         var tx = (a.textContent || '').trim();
         out.push({ off: off, s: off ? NS.t('fr.offnote') : '', g: g.getAttribute('data-g') === 'docs' || g.getAttribute('data-g') === 'more' ? 'new' : gk, t: tx, e: NS.meaning(tx) + ' ' + (SYN[sec] || ''),
-          k: a.getAttribute('data-ic') === 'd-billing' ? 'Alt+N' : DOCKEY[(a.getAttribute('data-ic') || '').replace(/^[dt]-/, '')] ? (function (m, s) { return fName(s) || (m[1] ? 'Alt+' + m[1] : 'Alt+G ' + m[0]); })(DOCKEY[(a.getAttribute('data-ic') || '').replace(/^[dt]-/, '')], (a.getAttribute('data-ic') || '').replace(/^[dt]-/, '')) : sec && SECKEY[sec] ? (fName(sec) || (SECKEY[sec][1] ? 'Alt+' + SECKEY[sec][1] : 'Alt+G ' + SECKEY[sec][0])) : i >= 0 && i < 9 ? 'Alt+' + (i + 1) : '', run: function () { a.click(); } });
+          k: a.getAttribute('data-ic') === 'd-billing' ? 'Alt+G IN' : DOCKEY[(a.getAttribute('data-ic') || '').replace(/^[dt]-/, '')] ? (function (m, s) { return fName(s) || (m[1] ? 'Alt+' + m[1] : 'Alt+G ' + m[0]); })(DOCKEY[(a.getAttribute('data-ic') || '').replace(/^[dt]-/, '')], (a.getAttribute('data-ic') || '').replace(/^[dt]-/, '')) : sec && SECKEY[sec] ? (fName(sec) || (SECKEY[sec][1] ? 'Alt+' + SECKEY[sec][1] : 'Alt+G ' + SECKEY[sec][0])) : i >= 0 && i < 9 ? 'Alt+' + (i + 1) : '', run: function () { a.click(); } });
       });
     });
     var app = A();
@@ -1012,7 +1013,7 @@
   function bizActs() {
     var app = A();
     if (!app || !app.setBiz || !app.biz || !app.biz()) return [];
-    return app.data().biz.filter(function (b) { return b.id !== app.biz().id; }).map(function (b) { return { g: 'act', t: NS.t('app.biz') + ': ' + b.name, k: 'Alt+S', run: function () { app.setBiz(b.id); } }; });
+    return app.data().biz.filter(function (b) { return b.id !== app.biz().id; }).map(function (b) { return { g: 'act', t: NS.t('app.biz') + ': ' + b.name, k: 'F3', run: function () { app.setBiz(b.id); } }; });
   }
   function actions() {
     return [
@@ -1417,7 +1418,7 @@
       var fk2 = /^F([3-9]|10)$/.test(e.key) && !e.altKey && !e.shiftKey && !e.metaKey ? FKEY[(e.ctrlKey ? 'Ctrl+' : '') + e.key] : null;
       var al = e.altKey && !e.ctrlKey && !e.metaKey ? (e.code || '').replace('Key', '').toLowerCase() : '';
       if (fk2) { e.preventDefault(); if (!e.repeat) NS.vsLeave(function () { fRun(fk2); }); return; }
-      if (al === 'g' || ALTKEY[al] && !/^[nrpbxsq]$/.test(al)) { e.preventDefault(); if (!e.repeat) NS.vsPark(function () { if (al === 'g') palette(null, 'go'); else { var to = ALTKEY[al]; if (isOff(to.sec || to.site)) NS.toast(NS.t('desk.offkey')); else if (to.sec) goSec(to.sec); else newDoc(to.site); } }); return; }
+      if (al === 'g') { e.preventDefault(); if (!e.repeat) NS.vsPark(function () { palette(null, 'go'); }); return; }
       return;
     }
     /* F keys, Tally style (F8 sale, F9 purchase, F6 receipt, F5 payment, F4 contra, F7 journal, F10 expense, F3 business,
@@ -1432,13 +1433,8 @@
       if (n) { var a = $$('#ns-side a[data-sec]').filter(function (x) { return !(NS.featHidden && NS.featHidden(x)); })[+n[1] - 1]; if (a) { e.preventDefault(); a.click(); a.focus(); } return; }
       var c = (e.code || '').replace('Key', '').toLowerCase();
       if (c === 'g' && app && app.biz) { e.preventDefault(); if (!e.repeat) palette(null, 'go'); return; }
-      if (app && app.biz && ALTKEY[c] && !/^[nrpbxsq]$/.test(c)) { e.preventDefault(); if (e.repeat) return; var to = ALTKEY[c]; (app.whenReady || function (f) { f(); })(function () { if (isOff(to.sec || to.site)) NS.toast(NS.t('desk.offkey')); else if (to.sec) goSec(to.sec); else newDoc(to.site); }); return; }
-      if (c === 'n') { e.preventDefault(); if (app && app.newDoc) app.newDoc('billing'); else goUrl(siteUrl('billing')); return; }
-      if (c === 'q' && app && app.quickEntry) { e.preventDefault(); if (!e.repeat) app.quickEntry(); return; }   /* quick entry (app.js) */
-      /* a key pressed while the App is still fetching its data is kept and runs the moment the data is in (it used to be dropped) */
-      var job = { r: 'min', p: 'mout', b: 'pbill', x: 'exp' }[c];
-      if (app && app.openForm && job) { e.preventDefault(); if (e.repeat) return; (app.whenReady || function (f) { f(); })(function () { if (app.biz() && !$('dialog[open]')) app.openForm(job); }); }
-      else if (app && app.switchBiz && c === 's') { e.preventDefault(); if (!e.repeat) (app.whenReady || function (f) { f(); })(app.switchBiz); }
+      /* Alt + a letter: the letter of something on this screen (altkeys.js, 25 Nov 2026). The old App-wide letters
+         (Alt+N, R, P, B, X, S, Q, H, L ...) are gone: F keys, Alt+G codes and Ctrl+Alt letters open the same things. */
       return;
     }
     /* combinations only, never a bare key (owner 19 Nov 2026): Ctrl+Shift+F searches the list on the screen, Ctrl+/ shows the keys */

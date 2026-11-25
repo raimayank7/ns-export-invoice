@@ -594,3 +594,10 @@ dialog.vs .fg>.f>:is(input:not([type=checkbox]):not([type=radio]),select){height
 /* What's new inside the App: the filter row sticks at the very top of its frame, with no gap above it for text to show through (25 Nov) */
 html.embed .wn-filter,html.inapp .wn-filter{top:0}
 .wn-filter{box-shadow:0 -12px 0 var(--bg)}
+
+/* Alt keys (altkeys.js, 25 Nov 2026): letter badges while Alt is tapped or held */
+.ns-alt-k{position:fixed;min-width:18px;height:18px;padding:0 4px;border-radius:5px;background:#0E746A;color:#fff;font:700 12px/18px ui-monospace,Consolas,monospace;text-align:center;box-shadow:0 1px 4px rgba(0,0,0,.35),0 0 0 1.5px #fff;letter-spacing:.5px;pointer-events:none}
+.ns-alt-k.alt-two{background:#4b5563}.ns-alt-k.alt-side{background:#b7791f}.ns-alt-k.alt-dim{opacity:.18}
+.ns-alt-u{position:fixed;height:2px;background:#0E746A;border-radius:1px;pointer-events:none}
+.ns-alt-tip{position:fixed;left:50%;bottom:14px;transform:translateX(-50%);background:#111827;color:#fff;font:600 13px/1.3 system-ui,sans-serif;padding:7px 14px;border-radius:999px;box-shadow:0 4px 14px rgba(0,0,0,.3);pointer-events:none;white-space:nowrap}
+@media print{.ns-alt{display:none!important}}

@@ -9654,3 +9654,7 @@ NS.addLang('pa', {
   "ax.get": "{b} ਵਰਤਦੇ ਹੋ? ਮੁਫ਼ਤ NSBiz Helper ਐਡ-ਆਨ ਤੁਹਾਡਾ ਬੈਕਅੱਪ ਆਪਣੇ-ਆਪ Downloads › NSBiz ਵਿੱਚ ਸੇਵ ਕਰਦਾ ਹੈ ਅਤੇ ਟੂਲਬਾਰ ਵਿੱਚ ਬਕਾਇਆ ਤੇ ਰਿਮਾਈਂਡਰ ਦਿਖਾਉਂਦਾ ਹੈ।",
   "ax.getbtn": "NSBiz Helper ਨੂੰ {b} ਵਿੱਚ ਜੋੜੋ"
 });
+/* Alt keys (25 Nov 2026) */
+NS.addLang('pa', {
+  "alt.tip": "ਕੋਈ ਅੱਖਰ ਦਬਾਓ। Esc ਨਾਲ ਬੰਦ।"
+});

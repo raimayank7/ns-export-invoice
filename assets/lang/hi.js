@@ -9611,3 +9611,7 @@ NS.addLang('hi', {
   "ax.get": "{b} इस्तेमाल करते हैं? फ्री NSBiz Helper ऐड-ऑन आपका बैकअप अपने-आप Downloads › NSBiz में सेव करता है और टूलबार में बकाया और रिमाइंडर दिखाता है।",
   "ax.getbtn": "NSBiz Helper को {b} में जोड़ें"
 });
+/* Alt keys (25 Nov 2026) */
+NS.addLang('hi', {
+  "alt.tip": "कोई अक्षर दबाएँ। Esc से बंद।"
+});

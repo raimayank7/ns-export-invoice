@@ -2620,7 +2620,14 @@
     /* the loading screen stays until the screen text is in the reader's language (at most 1.2 s), so English never flashes first */
     /* on the first page of a visit it also waits until the logo has drawn itself (NS_BOOT_T, set in the page head; at most 3 s more) */
     var show = function () {
-      var add = function () { if (!NS.leaving) document.documentElement.classList.add('ready'); };
+      var add0 = function () { if (!NS.leaving) document.documentElement.classList.add('ready'); };
+      var full = NS.$('#app:not([data-secs])') && !document.documentElement.classList.contains('embed');
+      var add = !full ? add0 : function () {
+        if (window.__nsAppData) return add0();
+        var go = function () { clearTimeout(t); document.removeEventListener('ns-app-data', go); add0(); };
+        var t = setTimeout(go, Math.max(0, 5000 - performance.now()));
+        document.addEventListener('ns-app-data', go);
+      };
       var boot = NS.$('.boot');
       if (!window.NS_BOOT_T || !boot) return add();
       if (!boot.getAnimations) return setTimeout(add, Math.max(0, NS_BOOT_T - performance.now()));
