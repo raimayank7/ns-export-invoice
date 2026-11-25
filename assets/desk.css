@@ -588,3 +588,9 @@ dialog.vs .fg>.f>label:not(.chk):not(.hd-new){grid-column:1;font-size:.82rem;fon
 dialog.vs .fg>.f:is(:not(.wide),:has(>label:not(.chk):not(.hd-new)+:is(input,select,textarea)))>:not(label){grid-column:2;min-width:0}
 dialog.vs .fg>.f>:is(input:not([type=checkbox]):not([type=radio]),select){height:32px;min-height:32px;padding:3px 8px;font-size:.88rem;border-radius:4px}
 @media (max-width:760px){dialog.vs .fg{grid-template-columns:1fr!important}dialog.vs .fg>.f:not(.wide),dialog.vs .fg>.f.wide:has(>label:not(.chk):not(.hd-new)+:is(input,select,textarea)){grid-template-columns:minmax(100px,36%) minmax(0,1fr)}}
+
+/* status bar: items that do not fit step aside whole (desk.js sbFit, 25 Nov) */
+.sbar .sb-off{display:none!important}
+/* What's new inside the App: the filter row sticks at the very top of its frame, with no gap above it for text to show through (25 Nov) */
+html.embed .wn-filter,html.inapp .wn-filter{top:0}
+.wn-filter{box-shadow:0 -12px 0 var(--bg)}

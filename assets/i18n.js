@@ -2439,7 +2439,7 @@
     'app.charts': "Charts",
     'app.cr_onepdf': "Download as one PDF ({n})", 'app.cr_h_onepdf': "One PDF: every document on its own page(s), each in its own paper size. Making it takes a few seconds for each document.",
     'app.pdffill': "PDF tools: fill, join, split, sign",
-    'app.ftools': "Free tools: pictures, signature, PDF, scanner, steel weight",
+    'app.ftools': "Free tools",
     'app.gststk': "GST stock forms (ITC-01, ITC-03, GSTR-10)",
     'app.gtds': "GST TDS deducted (GSTR-7)",
     'app.isd': "ITC distribution (GSTR-6)",

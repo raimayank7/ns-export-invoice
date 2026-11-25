@@ -497,9 +497,10 @@
     var h = location.hash.replace(/^#/, ''); if (!h || /^(home|day|coa)$/.test(h) || /^do\/(my|page|web)\b/.test(h)) return;
     setTimeout(function () {
       var a = $('#ns-side a[href="#' + h + '"]:not(.gw-row)') || $('#ns-side a[data-hsec="' + h + '"]:not(.gw-row)') || $('#ns-side a[data-sec="' + h.split('/')[0] + '"]:not(.gw-row)');
-      var t = a ? (a.textContent || '').trim() : (($('[data-pane]:not([hidden]) h2') || {}).textContent || '').replace(/\?$/, '').trim();
+      var ph = (($('[data-pane]:not([hidden]) h2') || {}).textContent || '').replace(/\?$/, '').trim();
+      var t = /^ftools\/./.test(h) && ph ? ph : a ? (a.textContent || '').trim() : ph;   /* a free tool or branch is listed by its own name (25 Nov) */
       if (!t) return;
-      var L = lsGet(RECK).filter(function (x) { return x.h !== h; }); L.unshift({ h: h, t: t.slice(0, 60) }); lsSet(RECK, L.slice(0, 8)); gateway();
+      var L = lsGet(RECK).filter(function (x) { return x.h !== h && x.t !== t.slice(0, 60); });   /* one line per name, never three the same */ L.unshift({ h: h, t: t.slice(0, 60) }); lsSet(RECK, L.slice(0, 8)); gateway();
     }, 700);
   }
   function gateway() {
@@ -1294,6 +1295,24 @@
     }).join('') : '';
   }
   document.addEventListener('click', function (e) { var b = e.target.closest && e.target.closest('[data-task]'); if (b) NS.vsResume(+b.getAttribute('data-task')); });
+  /* the status bar never cuts a word in half (owner 25 Nov: "He…", "Last backup: tod"): when everything does not fit, whole
+     items step aside, least needed first, and come back when there is room again */
+  var SBFIT = ['[data-s-path]', '.s-copy', '[data-s-keys]', '.task-tray .tt-l', '[data-s-fy]', '[data-s-store]', '[data-s-backup]', '[data-s-net]'], sbT = 0, sbBusy = false;
+  function sbFit() {
+    var bar = $('[data-sbar]'); if (!bar || sbBusy || !bar.getClientRects().length) return;   /* a fixed bar has no offsetParent */
+    sbBusy = true;
+    $$('.sb-off', bar).forEach(function (x) { x.classList.remove('sb-off'); });
+    var over = function () { var l = $('.s-l', bar); return bar.scrollWidth > bar.clientWidth + 1 || (l && l.scrollWidth > l.clientWidth + 1); };
+    for (var i = 0; i < SBFIT.length && over(); i++) $$(SBFIT[i], bar).forEach(function (x) { x.classList.add('sb-off'); });
+    sbBusy = false;
+  }
+  NS.sbFit = function () { clearTimeout(sbT); sbT = setTimeout(sbFit, 60); };
+  window.addEventListener('resize', NS.sbFit);
+  (function watch() {
+    var bar = $('[data-sbar]'); if (!bar) { if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', watch); return; }
+    new MutationObserver(function () { if (!sbBusy) NS.sbFit(); }).observe(bar, { childList: true, subtree: true, characterData: true, attributes: true, attributeFilter: ['hidden'] });
+    NS.sbFit();
+  })();
   NS.vsPark = function (then) {
     var open = $$('dialog.vs[open]');
     if (!open.length) { if (then) then(); return; }
