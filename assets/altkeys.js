@@ -13,7 +13,7 @@
   var NS = window.NS = window.NS || {};
   var root = document.documentElement;
   /* letters a single badge may use: G = Go to, F = the browser's own menu */
-  var FREE = 'SPNDEAXLWVBKCMORTHYIJUQZ'.split('');
+  var FREE = 'SPNDEAXLWVBKCMORTHYIJUQ'.split('');   /* Z = the start of every Shortcuts panel code (below) */
   /* a job -> its letter on every screen. Matched against the English meaning of the label (any language) or the label. */
   var JOBS = [
     [/\bsave\b|^ok$|^done$|^accept|^apply|^update\b|^confirm|^yes\b/, 'S'],
@@ -59,6 +59,22 @@
       var lb = el.labels && el.labels[0]; if (!(lb && (lb === hit || lb.contains(hit)))) return null;
     }
     return { el: el, r: r };
+  }
+  /* The Shortcuts panel (Customize changes its order, adds and removes items): every item keeps ONE code of its own, Z + two letters,
+     whatever the order, the other items or the rest of the screen. Its own Go to code when it has one, else a fixed code for the entry
+     forms and the two quick-add items. Codes never change, so a habit made once stays true after the panel is rearranged. */
+  var PANEL_FORM = { sale: 'SA', pbill: 'PB', min: 'MI', mout: 'MO', contra: 'CO', exp: 'EX' };
+  var PANEL_NEW = { party: 'NP', item: 'NI' };
+  var PANEL_HREF = { '#dues': 'DU', '#stock': 'SK', '#books': 'CB', '#parties': 'PA', '#dlist': 'DR', '#clist': 'CR', '#fin/tb': 'TB', '#fin/bs': 'BS', '#fin/pl': 'PL', '#b2jv': 'JE' };
+  function panelKey(el) {
+    if (!el.closest('.sc-panel')) return '';
+    if (el.hasAttribute('data-sc-cust')) return 'ZCU';
+    var c = el.getAttribute('data-sccode') || '';
+    if (!c) { var m = /Alt\+G\s+([A-Z]{2})\b/.exec((el.querySelector('kbd') || {}).textContent || ''); c = m ? m[1] : ''; }
+    if (!c && el.hasAttribute('data-dform')) c = PANEL_FORM[el.getAttribute('data-dform')] || '';
+    if (!c && el.hasAttribute('data-qnew')) c = PANEL_NEW[el.getAttribute('data-qnew')] || '';
+    if (!c) c = PANEL_HREF[el.getAttribute('href') || ''] || '';
+    return /^[A-Z]{2}$/.test(c) ? 'Z' + c : '';
   }
   function labelOf(el) {
     var t = '';
@@ -120,6 +136,13 @@
     items.forEach(function (it) {
       if (it.rank === 6 && it.el.matches('#ns-side a[data-sec]') && side < 9 && !(NS.featHidden && NS.featHidden(it.el))) { side++; it.key = String(side); it.side = 1; }
     });
+    var seenP = {};
+    /* Shortcuts panel: the first ten, in the order the person arranged them, are Z1 ... Z9 and Z0 (plain 1-9 belong to the side menu);
+       the rest keep a fixed code of their own */
+    var nth = 0;
+    items.filter(function (it) { return !it.key && it.el.closest('.sc-panel') && !it.el.hasAttribute('data-sc-cust'); })
+      .sort(function (a, b) { return a.r.top - b.r.top; }).forEach(function (it) { if (nth < 10) { it.key = 'Z' + (nth + 1) % 10; nth++; } });
+    items.forEach(function (it) { var k = !it.key && panelKey(it.el); if (k && !seenP[k]) { seenP[k] = 1; it.key = k; } });
     var pend = items.filter(function (it) { return !it.key && it.rank < 6; });
     /* 1: the job letters, best-ranked item first */
     pend.forEach(function (it) { for (var i = 0; i < JOBS.length; i++) if (JOBS[i][0].test(it.mean)) { take(it, JOBS[i][1]); break; } });
@@ -137,8 +160,8 @@
     rest.forEach(function (it) {
       if (singles.length < cap && !starts.length) return;
       if (!starts.length) return;
-      var s = starts[Math.floor(n / 24)]; if (!s) return;
-      it.key = s + FREE[n % 24]; n++;
+      var s = starts[Math.floor(n / FREE.length)]; if (!s) return;
+      it.key = s + FREE[n % FREE.length]; n++;
     });
     return items.filter(function (it) { return it.key; });
   }

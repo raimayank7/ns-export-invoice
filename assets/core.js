@@ -1141,8 +1141,8 @@
   };
   /* a computer (add-ons cannot be added on phones and tablets) */
   NS.onComputer = function () { return !/Android|iPhone|iPad|iPod|Mobile|Tablet/i.test(navigator.userAgent); };
-  /* the NSBiz Helper add-on's store pages, by NS.browserName(); add Edge and Firefox when their reviews pass */
-  NS.addonStores = { Chrome: 'https://chromewebstore.google.com/detail/cgfkgeplflfadejffmomnnhcopjkknpm' };
+  /* the NSBiz Helper add-on's store pages, by NS.browserName(); add Edge when its review passes */
+  NS.addonStores = { Chrome: 'https://chromewebstore.google.com/detail/cgfkgeplflfadejffmomnnhcopjkknpm', Firefox: 'https://addons.mozilla.org/en-US/firefox/addon/nsbiz-helper/' };
   NS.isInstalled = function () { return !!(window.matchMedia && matchMedia('(display-mode: standalone), (display-mode: window-controls-overlay)').matches) || navigator.standalone === true; };
   function afSoon(ms) {
     if (!NS.folderHere() || !(NS.folderSupported() || NS.addon.on)) return;

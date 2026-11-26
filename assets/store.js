@@ -427,7 +427,10 @@
       });
     });
   }
-  /* opts.hard: no bin and no history; only for sample records (A-1: any other caller still goes through the bin and the history) */
+  /* opts.hard: no bin and no history; only for sample records (A-1: any other caller still goes through the bin and the history).
+     opts.batch: taking out a whole import from other software ("Bring data from other software", migrate.js): only the records of that
+     import (src.batch) skip the recycle bin, the earlier-version copy and the delete-or-cancel test (which re-reads every bill: 10,000
+     of them made it crawl); each still gets its line in the edit history. */
   function del(store, id, opts) {
     if (sfDenied('del', store, id)) return sfErr();
     if (store === 'log' || store === 'ver') return Promise.reject(new Error('The edit history cannot be changed or removed'));
@@ -439,20 +442,56 @@
       rec = r;
       if (!rec) return;
       hard = !!(opts && opts.hard && rec.sample);
+      var imp = !!(opts && opts.batch && rec.src && rec.src.batch === opts.batch);
       return checkLock(store, rec, null).then(function () {
-        if (store !== 'doc' || rec.sample) return;
+        if (store !== 'doc' || rec.sample || imp) return;
         return Promise.all([call('list', { store: 'doc' }), call('get', { store: 'meta', id: 'settings' })]).then(function (x) {
           var S = x[1] && x[1].v || {}, own = rec.bizId && S.byBiz && S.byBiz[rec.bizId];
           if (mustCancel(rec, x[0], own && 'allowDel' in own ? own : S)) { if (!(opts && opts.quiet)) offerCancel(rec); throw cancelErr(); }
         });
       }).then(function () {
-        if (hard || rec.sample) return;
+        if (hard || rec.sample || imp) return;
         return keepVersion(store, rec, 'del').then(function (v) { verId = v; return whoName(); })
           .then(function (w) { return call('put', { store: 'bin', value: { id: store + ':' + id, store: store, rec: rec, at: Date.now(), who: w } }); }).catch(function () {});
       });
     }).then(function () {
       if (rec) return call('del', { store: store, id: id });
     }).then(function () { if (store === 'biz') bizC = null; if (rec && !hard) return addLog(store, 'del', rec, [], { ver: verId || undefined }); });
+  }
+  /* taking out a whole import from other software (migrate.js): one rights check per kind of record and one lock date for the lot,
+     then only the deletes, 50 at a time, with their edit-history lines written together. Only records of that import (src.batch)
+     are touched; carried openings (cy-) never. One by one through del() this took about 15 minutes for 10,000 records. */
+  function delImport(batch, list, prog) {
+    list = (list || []).filter(function (x) { return x && x.rec && x.rec.src && x.rec.src.batch === batch && !/^cy-/.test(String(x.rec.id)) && !(x.store === 'log' || x.store === 'ver'); });
+    if (!list.length) return Promise.resolve(0);
+    if (sfDenied('del', list[0].store, list[0].rec.id)) return sfErr();
+    var first = {}; list.forEach(function (x) { if (!(x.store in first)) first[x.store] = x.rec.id; });
+    return Promise.all(Object.keys(first).map(function (st) {
+      return send('can', { store: st, id: first[st], act: 'del' }).catch(function () { return true; }).then(function (ok) { if (ok === false) throw new Error('NSAUTH: no right to delete this'); });
+    })).then(function () {
+      var docs = list.filter(function (x) { return x.store === 'doc'; });
+      return docs.length ? lockDate(docs[0].rec) : '';
+    }).then(function (lk) {
+      var hit = lk && list.filter(function (x) { return x.store === 'doc' && x.rec.date && x.rec.date < lk; })[0];
+      if (hit) throw lockErr(lk);
+      return whoName();
+    }).then(function (w) {
+      var i = 0;
+      function step() {
+        var part = list.slice(i, i + 50); if (!part.length) return Promise.resolve(list.length);
+        i += part.length;
+        return Promise.all(part.map(function (x) { return call('del', { store: x.store, id: x.rec.id }); })).then(function () {
+          var es = part.filter(function (x) { return KEPT[x.store]; }).map(function (x) {
+            var r = x.rec, e = { id: uid(), at: Date.now(), who: w, site: location.hostname, store: x.store, rid: r.id, act: 'del', no: r.no || r.billNo || '', type: r.type || '', name: r.name || r.desc || r.buyer && r.buyer.name || '', ch: [], imp: batch };
+            if (r.date && x.store === 'doc') e.date = r.date;
+            Object.keys(e).forEach(function (k) { if (e[k] === undefined) delete e[k]; });
+            return e;
+          });
+          return es.length ? logEntry(es).catch(function () {}) : null;
+        }).then(function () { if (prog) prog(i, list.length); return new Promise(function (res) { setTimeout(res, 0); }); }).then(step);
+      }
+      return step();
+    }).then(function (n) { bizC = null; return n; });
   }
   /* a Delete button anywhere that hits such a voucher offers Cancel instead (extras.js NS.cancelDoc asks the reason) */
   function offerCancel(rec) { setTimeout(function () { if (window.NS && NS.cancelDoc) NS.cancelDoc(rec, { fromDelete: true }); }, 0); }
@@ -505,6 +544,7 @@
     auth: function (op, args) { return ready().then(function (m) { return m === 'vault' ? send(op, args || {}) : (op === 'authStatus' ? { on: false, local: true } : Promise.reject(new Error('The data home is not reachable'))); }); },
     list: function (store) { return call('list', { store: store }).then(function (r) { r = r || []; return store === 'doc' ? withBizNames(r) : r; }, function (e) { if (store === 'bin' || store === 'log' || store === 'ver') return []; throw e; }); },
     get: function (store, id) { return call('get', { store: store, id: id }).then(function (r) { return store === 'doc' && r ? withBizNames(r) : r; }); },
+    delImport: delImport,
     /* Stage 3: { n, oldest } of the saved documents without reading them (falls back to reading them) */
     docStat: function (noRead) {
       return ready().then(function (m) { return m === 'vault' ? send('docStat', {}).then(null, function () { return null; }) : null; }).then(function (s) {

@@ -18,7 +18,7 @@
   function ic(d) { return '<svg class="ic" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="' + d + '"/></svg>'; }
   /* icons for the App's own screens (the other side-menu icons are CSS masks in desk.css, by data-ic) */
   var SECIC = { home: 'home', sales: 'doc', money: 'money', dues: 'clock', buy: 'cart', parties: 'people', cash: 'bank', chq: 'cheque', books: 'book', khata: 'book', preg: 'cart', ebook: 'cart',
-    day: 'calendar', inbox: 'save', mkimp: 'data', tools: 'layers', repeat: 'repeat', reports: 'chart', b2jv: 'journal', b2fa: 'asset', b2gd: 'box', b2make: 'factory', b2profit: 'trend', b2sman: 'badge', b2year: 'calendar', grp: 'layers', fin: 'scale', fam: 'factory', capl: 'coins', b2job: 'wrench', ledger: 'book', move: 'trend', st: 'list', stf: 'badge', acx: 'tax', tdsr: 'tax', gststk: 'tax', gtds: 'tax', isd: 'tax', charts: 'chart', pdffill: 'doc', ftools: 'wrench', features: 'toggle', bimp: 'bimport', itx: 'itax', msme: 'coins', limits: 'scale', trust: 'coins', warr: 'wrench', fees: 'cap', packs: 'pack', cadb: 'dash', cadoc: 'folder', cagst: 'tax', cacom: 'chat', saved: 'save',
+    day: 'calendar', inbox: 'save', mkimp: 'data', mig: 'data', msg: 'wa', tools: 'layers', repeat: 'repeat', reports: 'chart', b2jv: 'journal', b2fa: 'asset', b2gd: 'box', b2make: 'factory', b2profit: 'trend', b2sman: 'badge', b2year: 'calendar', grp: 'layers', fin: 'scale', fam: 'factory', capl: 'coins', b2job: 'wrench', ledger: 'book', move: 'trend', st: 'list', stf: 'badge', acx: 'tax', tdsr: 'tax', gststk: 'tax', gtds: 'tax', isd: 'tax', charts: 'chart', pdffill: 'doc', ftools: 'wrench', features: 'toggle', bimp: 'bimport', itx: 'itax', msme: 'coins', limits: 'scale', trust: 'coins', warr: 'wrench', fees: 'cap', packs: 'pack', cadb: 'dash', cadoc: 'folder', cagst: 'tax', cacom: 'chat', saved: 'save',
     entries: 'list', low: 'alert', biz: 'shop', party: 'people', pgroups: 'list', item: 'box', igroups: 'list', doc: 'doc', settings: 'set', backup: 'data', bin: 'trash', log: 'clock' };
   /* screen lists that stay inside the page (my., the stock site...) get the same icons */
   function secIcons() { $$('.hub-nav a[data-sec]:not([data-ic])').forEach(function (a) { var k = SECIC[a.getAttribute('data-sec')]; if (k) a.setAttribute('data-ic', k); }); }
@@ -157,7 +157,7 @@
       '§itax', 'tdsr', 'acx', 'itx', 'limits',
       '§payst', { h: 'stf/pf', t: 'v_pf', ic: 'doc' }, { h: 'stf/esi', t: 'v_esi', ic: 'doc' }, { h: 'stf/tax', t: 'v_saltds', ic: 'doc' },
       '§audit', 'cacom', 'cadoc']],
-    ['util', ['§data', { my: 'backup', t: 'v_backup', ic: 'data' }, 'bimp', 'mkimp', { h: 'mprint', t: 'v_mprint', ic: 'doc' }, 'b2year',
+    ['util', ['§data', { my: 'backup', t: 'v_backup', ic: 'data' }, 'bimp', 'mig', 'mkimp', 'msg', { h: 'mprint', t: 'v_mprint', ic: 'doc' }, 'b2year',
       '§setup', { h: 'config', t: 'v_config', ic: 'set' }, { h: 'bw', t: 'v_bw', ic: 'list' }, 'features', 'packs',   /* one Configuration (owner 19 Nov): it opens the My data settings itself */
       '§tools', { site: 'tds' }, { site: 'declaration' }, 'pdffill', 'ftools', 'tools']]];   /* TDS and TCS calculator and Declarations under Utilities (owner 20 Nov) */
   /* the sub-headings inside a group (accounting names; the App is English only) */
@@ -214,11 +214,13 @@
 
   /* the user's own list (Customize): ids of the standard items and 'c:XX' = any screen, entry or document by its Go to code */
   var SCP = 'ns-scp';
+  /* at most ten (owner 26 Nov: they get the numbers Z1-Z9, Z0 in the Alt keys); the standard ten */
+  var SCMAX = 10, SCSTD = ['q:party', 'q:item', 'f:sale', 'f:pbill', 'f:min', 'f:mout', 'f:exp', '#fin/tb', '#parties', '#dues'];
   function scSaved() { try { var v = JSON.parse(localStorage.getItem(SCP) || 'null'); return Array.isArray(v) ? v : null; } catch (e) { return null; } }
   function scSave(v) { try { if (v) localStorage.setItem(SCP, JSON.stringify(v)); else localStorage.removeItem(SCP); } catch (e) {} }
   function scItems() {
     var defs = scDefs(), byId = {}; defs.forEach(function (x) { byId[x.id] = x; });
-    var list = scSaved(); if (!list) return defs;
+    var list = scSaved(); if (!list) { var std = SCSTD.map(function (id) { return byId[id]; }).filter(Boolean); return (std.length ? std : defs).slice(0, SCMAX); }
     var reg = {}; registry().forEach(function (x) { if (x.c && !x.off) reg[x.c] = x; });
     return list.map(function (id) {
       if (byId[id]) return byId[id];
@@ -226,7 +228,7 @@
       var k = x.k || 'Alt+G ' + x.c;
       var lk = x.h && ($('#ns-side a[href="#' + x.h + '"]') || $('#ns-side a[data-hsec="' + x.h + '"]')), ic = lk && lk.getAttribute('data-ic') || (x.k && /^F|Alt\+[A-Z]$/.test(x.k) ? 'doc' : 'list');
       return { id: id, t: x.t, html: '<a class="sc-i" href="#" data-sccode="' + esc(x.c) + '" data-ic="' + esc(ic === 'dot' ? 'list' : ic) + '"><span>' + esc(x.t) + '</span><kbd>' + esc(k) + '</kbd></a>' };
-    }).filter(Boolean);
+    }).filter(Boolean).slice(0, SCMAX);
   }
   function scPanel() {
     return '<aside class="sc-panel" aria-label="' + esc(NS.t('desk.sc_t')) + '"><h3><span>' + esc(NS.t('desk.sc_t')) + '</span><button type="button" class="sc-cust" data-sc-cust title="Customize the shortcuts" aria-label="Customize the shortcuts">Customize</button></h3>' +
@@ -242,17 +244,17 @@
       .forEach(function (x) { name['c:' + x.c] = x.t; all.push({ id: 'c:' + x.c, t: x.t, g: 'All screens, entries and documents' }); });
     var ids = scItems().map(function (x) { return x.id; });
     scDlg.innerHTML = '<div class="dlg-hd"><h2 id="sc-dlg-h">Customize the shortcuts</h2><button type="button" class="btn sm" data-sc-reset>Reset to the standard list</button><button type="button" class="btn sm primary" data-sc-close>Done</button></div>' +
-      '<p class="soft sc-help">Tick what you want on the right of the Dashboard. Drag the list on the right into your order (or Alt+Up / Alt+Down). Saved at once in this browser.</p>' +
+      '<p class="soft sc-help">Tick up to ten shortcuts for the right of the Dashboard (they get the Alt keys Z1 to Z9 and Z0). Drag the list on the right into your order (or Alt+Up / Alt+Down). Saved at once in this browser.</p>' +
       '<div class="sc-cols"><section class="sc-all" aria-label="Every screen"><input type="search" class="sc-q" placeholder="Search every screen…" aria-label="Search every screen"><div class="sc-opts" data-sc-opts></div></section>' +
       '<section class="sc-mine" aria-label="Your shortcuts"><h3>Your shortcuts <span class="soft" data-sc-n></span></h3><ol class="sc-list" data-sc-list></ol></section></div>';
     var opts = $('[data-sc-opts]', scDlg), list = $('[data-sc-list]', scDlg), q = $('.sc-q', scDlg);
-    function save() { scSave(ids.slice()); scRedraw(); $('[data-sc-n]', scDlg).textContent = '(' + ids.length + ')'; }
+    function save() { scSave(ids.slice()); scRedraw(); $('[data-sc-n]', scDlg).textContent = '(' + ids.length + ' of ' + SCMAX + ')'; }
     function drawList(focusId) {
       list.innerHTML = ids.map(function (id, i) {
         return '<li draggable="true" tabindex="0" data-id="' + esc(id) + '"><span class="sc-grip" aria-hidden="true">⠿</span><span class="sc-t">' + esc(name[id] || id) + '</span>' +
           '<button type="button" class="btn sm" data-sc-top' + (i ? '' : ' disabled') + ' title="Move to the top">Top</button><button type="button" class="btn sm sc-x" data-sc-rm title="Remove" aria-label="Remove ' + esc(name[id] || id) + '">×</button></li>';
       }).join('');
-      $('[data-sc-n]', scDlg).textContent = '(' + ids.length + ')';
+      $('[data-sc-n]', scDlg).textContent = '(' + ids.length + ' of ' + SCMAX + ')';
       if (focusId) { var f = $('li[data-id="' + focusId.replace(/"/g, '') + '"]', list); if (f) f.focus(); }
     }
     function drawOpts() {
@@ -268,6 +270,7 @@
     q.addEventListener('input', drawOpts);
     opts.addEventListener('change', function (e) {
       var k = e.target.closest('[data-sc-pick]'); if (!k) return; var id = k.getAttribute('data-sc-pick'), at = ids.indexOf(id);
+      if (k.checked && at < 0 && ids.length >= SCMAX) { k.checked = false; NS.toast('Only ' + SCMAX + ' shortcuts fit. Remove one first.'); return; }
       if (k.checked && at < 0) ids.push(id); else if (!k.checked && at >= 0) ids.splice(at, 1);
       save(); drawList();
     });
@@ -428,7 +431,7 @@
     'h:psum': 'Purchase Register', 'h:exc': 'Exception Reports', 'h:vreg': 'Voucher Registers',
     's:cacom': 'Auditor Comments', 'k:nav.cmp08': 'CMP-08 Statement', 'k:nav.gstr1': 'GSTR-1 Return', 'k:nav.gstr2b': 'GSTR-2B Reconciliation', 'k:nav.gstr3b': 'GSTR-3B Return',
     's:itx': 'Income Tax Computation', 's:limits': 'Statutory Limits', 's:acx': 'Other Income and Tax Payments', 'k:nav.tds': 'TDS and TCS Calculator',
-    's:features': 'Feature Settings', 's:tools': 'All Tools', 'k:desk.v_backup': 'Backup and Restore', 's:bimp': 'Bank Statement Import', 's:mkimp': 'Marketplace and Payment Reports', 'h:mprint': 'Print Many Vouchers',
+    's:features': 'Feature Settings', 's:tools': 'All Tools', 'k:desk.v_backup': 'Backup and Restore', 's:bimp': 'Bank Statement Import', 's:mig': 'Bring Data from Other Software', 's:mkimp': 'Marketplace and Payment Reports', 's:msg': 'Messages (SMS and WhatsApp)', 'h:mprint': 'Print Many Vouchers',
     'k:desk.v_settings': 'Company Settings', 's:packs': 'Trade Packs', 's:b2year': 'Year-End Closing'
   };
   var ERPG = { trans: 'Transactions (Vouchers)', reports: 'Display and Reports', tax: 'Statutory (GST and Tax)', 'x-docs': 'Other Documents' };
@@ -832,7 +835,7 @@
      Tally-style F keys for new entries, Alt+letter for the main screens, and Alt+G + a 2-letter code ("Go to", as in
      TallyPrime) for EVERY screen and document maker. Fixed letters, so a key never moves when the business type hides tools. */
   var SECKEY = { inbox: ['FW'], home: ['DB'],   /* FW = From the add-on (things sent From the Web, NSBiz Helper) */
-    sales: ['SL'], money: ['MN'], acx: ['OI'], stf: ['SF'], itx: ['IT'], bimp: ['BI'], mkimp: ['MQ'], dues: ['DU'],
+    sales: ['SL'], money: ['MN'], acx: ['OI'], stf: ['SF'], itx: ['IT'], bimp: ['BI'], mig: ['SW'], mkimp: ['MQ'], msg: ['MG'], dues: ['DU'],
     msme: ['MS'], limits: ['LH'], buy: ['PE'], parties: ['PA'], grp: ['GR'], chq: ['CQ'], books: ['CB'], cash: ['CK'], repeat: ['RB'],
     reports: ['RE'], day: ['MD'], tools: ['AT'], fin: ['FA'], capl: ['CL'], b2jv: ['JE'], b2fa: ['FX'], b2gd: ['GD'], b2make: ['PR'],
     b2job: ['JW'], b2profit: ['PF'], b2sman: ['SM'], b2year: ['YE'], features: ['AF'], packs: ['TP'], trust: ['DM'], warr: ['WS'], cacom: ['CC'],
