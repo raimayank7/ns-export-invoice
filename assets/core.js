@@ -258,9 +258,11 @@
         });
       });
     }
-    bar._o = o;
+    bar._o = o; NS.mkNav = o;   /* makerux.js: example, copy last, ready strip */
     all().then(function (L) {
       var at = L.map(function (d) { return d.id; }).indexOf(o.current()), n = L.length, cur = at >= 0;
+      bar.hidden = !n;   /* makers-better: First / Back / Next / Find mean nothing until one is saved */
+      document.dispatchEvent(new CustomEvent('ns-mknav', { detail: { n: n, at: at } }));
       var btn = function (k, label, title, off) { return '<button type="button" class="btn sm" data-dnav="' + k + '" title="' + NS.esc(title) + '" aria-label="' + NS.esc(title) + '"' + (off ? ' disabled' : '') + '>' + label + '</button>'; };
       var f = bar.querySelector('.vt-find'), typed = f ? f.value : '', had = f && document.activeElement === f;
       var W = function (k, x) { return NS.t('dnv.' + k, x); };   /* phone test 21 Nov: these were English on every language */
@@ -368,6 +370,11 @@
         g = document.createElement('button'); g.type = 'button'; g.className = b.className; g.setAttribute('data-do', 'rpset');
         g.setAttribute('data-i18n', 'tpr.set'); g.textContent = NS.t('tpr.set'); g.addEventListener('click', function () { NS.rpSetup(); });
         p.insertAdjacentElement('afterend', b); b.insertAdjacentElement('afterend', g);
+        g.setAttribute('data-ic', 'gear');
+        if (window.matchMedia && matchMedia('(max-width:600px)').matches && p.closest('.actions')) {   /* makers-better: a phone's bottom bar had 7 buttons, 3 with a printer: settings become a gear */
+          g.removeAttribute('data-i18n'); g.setAttribute('data-i18n-label', 'tpr.set'); g.setAttribute('data-i18n-title', 'tpr.set');
+          g.setAttribute('aria-label', NS.t('tpr.set')); g.title = NS.t('tpr.set'); g.textContent = ''; g.classList.add('rp-gear');
+        }
       }
       b.hidden = !thermal; if (g) g.hidden = !thermal;
     });
@@ -2620,6 +2627,11 @@
     if (window.MutationObserver) new MutationObserver(function (ms) { ms.forEach(function (m) { [].forEach.call(m.addedNodes, function (n) { if (n.nodeType === 1) pkSet(n); }); if (m.type === 'attributes') { if (m.oldValue && m.oldValue !== m.target.getAttribute('list')) (m.target._pkLists = m.target._pkLists || []).push(m.oldValue); pkSet(m.target); } }); })
       .observe(document.body, { childList: true, subtree: true, attributes: true, attributeOldValue: true, attributeFilter: ['list'] });
     var ok = function (t) { return t && t.hasAttribute && t.hasAttribute('data-pkro') && !t.disabled; };
+    /* makers-better: on a maker page with nothing saved yet (NS.mkFresh, makerux.js) a name box is a plain box: the pick list
+       would only say "Use as typed". It becomes a pick list again when the page next opens with saved names. */
+    var plain = function (t) { return NS.mkFresh && document.documentElement.hasAttribute('data-maker') && ok(t) && !t.closest('dialog'); };
+    var unlock = function (e) { var t = e.target; if (!plain(t)) return; t.readOnly = false; t.removeAttribute('data-pkro'); t.setAttribute('data-pkfree', ''); };
+    document.addEventListener('pointerdown', unlock, true); document.addEventListener('focusin', unlock, true);
     document.addEventListener('click', function (e) { var t = e.target; if (ok(t) && !PK.box) pkOpen(t); }, true);
     document.addEventListener('keydown', function (e) {
       var t = e.target; if (!ok(t)) return;

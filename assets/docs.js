@@ -1068,7 +1068,7 @@
     }).catch(function (e) { if (e.message !== 'cancel') NS.toast(t('nosave', { e: e.message }), 'bad'); throw e; });
   }
   function setStatus() {
-    NS.docNav && NS.docNav(root, { current: function () { return editingId; }, open: function (r) { openDoc(r); }, list: openHistory,
+    NS.docNav && NS.docNav(root, { current: function () { return editingId; }, open: function (r) { openDoc(r); }, list: openHistory, check: validate, copy: function (r) { openDoc(r, true); }, example: function () { var was = JSON.stringify(doc); NS.mkExample(doc, type); buildEditor(); fillForm(); draw(); return function () { doc = JSON.parse(was); buildEditor(); fillForm(); draw(); }; }, 
       mine: function (d) { var me = key(doc.seller && doc.seller.name), tp = type === 'exp' ? 'expinv' : type; return (d.type || 'invoice') === tp && (!T.split || T.kinds.indexOf(d.kind || T.kinds[0]) >= 0) && (!me || !d.seller || key(d.seller.name) === me); } });
     var st = $('#tool-status', root);
     if (st) st.textContent = editingId ? tw('st.edit', { no: doc.no }) : tw('st.new');
@@ -1425,7 +1425,7 @@
         if (a === 'save') save().then(function () { NS.vtAfterSave(vtOf(), printDoc, shareDoc); }).catch(function () {});
         /* a document with a number is saved before it is printed or shared, so the number is taken and the copy sent is the one
            kept (round C: a shared PDF stayed an unsaved draft and its number could be used again) */
-        else if (a === 'print' || a === 'share') { var go = a === 'print' ? printDoc : shareDoc; if (totals(doc).rows.length) save().then(go, function () {}); else go(); }
+        else if (a === 'print' || a === 'share') { var go = a === 'print' ? printDoc : shareDoc; if (totals(doc).rows.length) save().then(go, function () {}); else NS.toast(NS.t('mk.empty'), 'bad'); }   /* makers-better: an empty document never prints (owner 27 Nov) */
         else if (a === 'new') { if (!editingId && totals(doc).rows.length) askBox(tw('c.new')).then(function (ok) { if (ok) startNew(); }); else startNew(); }
         else if (a === 'history') openHistory();
         else if (a === 'toinv') toInvoice();

@@ -536,3 +536,24 @@ dialog.or-pick .or-late{color:var(--bad,#b42318)}
 .dp-ribbon{background-image:linear-gradient(var(--c),var(--c)),linear-gradient(var(--c),var(--c)),linear-gradient(#94A3B8,#94A3B8),linear-gradient(var(--c),var(--c)),repeating-linear-gradient(#fff 0 4px,#E2E8F0 4px 5px);background-position:0 0,22px 8px,12px 14px,12px 24px,12px 30px;background-size:7px 100%,22px 5px,20px 2px,38px 5px,38px 24px}
 .dp-letter{background-image:linear-gradient(var(--c),var(--c)),linear-gradient(#475569,#475569),linear-gradient(#CBD5E1,#CBD5E1),linear-gradient(var(--c),var(--c)),repeating-linear-gradient(#fff 0 4px,#E2E8F0 4px 5px);background-position:0 0,14px 9px,8px 17px,8px 28px,8px 31px;background-size:100% 5px,26px 3px,38px 1px,38px 1.5px,38px 22px}
 .dp-typewriter{background-image:linear-gradient(90deg,#111 0 4px,transparent 4px 7px),linear-gradient(90deg,#111 0 4px,transparent 4px 7px),repeating-linear-gradient(90deg,#9CA3AF 0 3px,transparent 3px 6px),repeating-linear-gradient(90deg,#111 0 3px,transparent 3px 6px),repeating-linear-gradient(90deg,#9CA3AF 0 3px,transparent 3px 6px);background-position:12px 7px,10px 13px,6px 22px,6px 28px,6px 52px;background-size:30px 3px,34px 2px,42px 1px,42px 1px,42px 1px}
+
+/* makers-better (makerux.js): one-tap bar, ready line, short first form, NSBiz and language lines */
+.mk-bar{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin:8px 0}
+.mk-bar .mk-note{font-size:.88rem;color:var(--soft,#5b6672)}
+.mk-chips{display:flex;flex-wrap:wrap;align-items:center;gap:6px}
+.mk-chip{border:1px solid var(--line,#d5dbe1);background:var(--surface,#fff);color:inherit;border-radius:99px;padding:6px 12px;min-height:36px;font:inherit;font-size:.9rem;cursor:pointer}
+.mk-chip:hover,.mk-chip:focus-visible{border-color:var(--link,#0b6b62)}
+.mk-ready{margin:6px 0 0;font-size:.92rem;color:var(--ink);display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+.mk-ready:not(.ok)>span:first-child::before{content:"\25CF  ";color:var(--amber,#F5A524)}
+.mk-ready.ok{color:var(--ok,#15803d)}
+.mk-ready .mk-go{border:0;background:none;color:var(--link,#0b6b62);text-decoration:underline;font:inherit;cursor:pointer;padding:6px 0;min-height:32px;text-align:left}
+.mk-more{margin:4px 0 0;grid-column:1/-1}
+.mk-more>summary{cursor:pointer;color:var(--link,#0b6b62);font-weight:600;padding:8px 0;min-height:36px}
+.mk-more-in{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:0 14px}
+.mk-nsbiz,.mk-readin{display:flex;flex-wrap:wrap;align-items:center;gap:8px;font-size:.9rem;color:var(--soft,#5b6672);margin:10px 0}
+.mk-readin{margin:0 0 8px}
+.mk-x{border:0;background:none;color:inherit;font-size:1.2rem;line-height:1;cursor:pointer;min-width:36px;min-height:36px}
+@media print{.mk-bar,.mk-ready,.mk-nsbiz,.mk-readin{display:none!important}}
+#tool .actions .rp-gear{flex:0 0 auto;min-width:44px;padding-left:8px;padding-right:8px}
+.mk-trade{display:inline-flex;align-items:center;gap:6px;font-size:.88rem;color:var(--soft,#5b6672)}
+.mk-trade select{min-height:36px;padding:4px 8px;font:inherit;font-size:.9rem}

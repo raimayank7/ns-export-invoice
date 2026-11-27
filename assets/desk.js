@@ -1373,13 +1373,13 @@
   })();
 
   /* ---------- keyboard ---------- */
-  var KEYS = [['Alt G', 'k_go'], ['Ctrl K', 'k_cmd'], ['Ctrl B', 'k_menu'], ['Alt 1 … 9', 'k_secs'], ['F3 / Alt S', '=app.biz'],
+  var KEYS = [['Alt G', 'k_go'], ['Ctrl K', 'k_cmd'], ['Ctrl B', 'k_menu'], ['Alt 1 … 9', 'k_secs'], ['Alt Z1 … Z0', '+k_panel'], ['F3', '=app.biz'],
     ['Ctrl Shift F', 'k_find'], ['F1', 'k_hlp'], ['Ctrl /', 'k_help'], ['Ctrl S', 'k_save'], ['F2', 'k_qadd'], ['Ctrl P', 'k_print'], ['Esc', 'k_esc']];
   var keysDlg;
   function keysSheet() {
     if (!keysDlg) { keysDlg = NS.el('dialog', { id: 'desk-keys', class: 'desk-keys', 'aria-labelledby': 'desk-keys-h' }); document.body.appendChild(keysDlg); }
     keysDlg.innerHTML = '<div class="dk-hd"><h2 id="desk-keys-h">' + esc(T('keys')) + '</h2><span><a class="btn sm" href="' + (A() ? '/keyboard-shortcuts/' : appUrl('').replace(/#$/, '') + 'keyboard-shortcuts/') + '" data-dk-full>' + esc(T('k_full')) + '</a> ' + (registry().length ? '<button type="button" class="btn sm" data-dk-print>' + esc(NS.t('b.print')) + '</button> ' : '') + '<button type="button" class="icon-btn" aria-label="' + esc(NS.t('close')) + '" data-close>✕</button></span></div>' +
-      '<h3 class="dk-g">' + esc(T('kg_gen')) + '</h3><table class="dk-t"><tbody>' + KEYS.filter(function (k) { return k[1].charAt(0) !== '=' || A() && A().switchBiz && A().data().biz.length > 1; }).map(function (k) { return '<tr><th scope="row"><kbd>' + esc(k[0]) + '</kbd></th><td>' + esc(k[1].charAt(0) === '=' ? NS.t(k[1].slice(1)) : T(k[1])) + '</td></tr>'; }).join('') + '</tbody></table>' + toolTables() + '<p class="dk-note">' + esc(T('k_note')) + '</p>';
+      '<h3 class="dk-g">' + esc(T('kg_gen')) + '</h3><table class="dk-t"><tbody>' + KEYS.filter(function (k) { return k[1].charAt(0) === '+' ? !!A() : k[1].charAt(0) !== '=' || A() && A().switchBiz && A().data().biz.length > 1; }).map(function (k) { return '<tr><th scope="row"><kbd>' + esc(k[0]) + '</kbd></th><td>' + esc(k[1].charAt(0) === '=' ? NS.t(k[1].slice(1)) : T(k[1].replace(/^\+/, ''))) + '</td></tr>'; }).join('') + '</tbody></table>' + toolTables() + '<p class="dk-note">' + esc(T('k_note')) + '</p>';
     $('[data-close]', keysDlg).onclick = function () { keysDlg.close(); };
     $('[data-dk-full]', keysDlg).addEventListener('click', function () { keysDlg.close(); });
     var pb = $('[data-dk-print]', keysDlg);

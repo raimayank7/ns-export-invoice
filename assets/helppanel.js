@@ -33,6 +33,10 @@
    ['buy', ['voucher-screens', 'cancel-voucher']], ['money', ['voucher-screens', 'cancel-voucher']], ['fin', ['accounting-reports', 'working-period-and-drill-down']],
    ['coa', ['accounting-reports']], ['os', ['bill-wise-and-adjust', 'dues-and-reminders']], ['exc', ['accounting-reports']], ['grp', ['accounting-reports']], ['vreg', ['accounting-reports']]]
     .forEach(function (x) { var l = SEC[x[0]] || (SEC[x[0]] = []); x[1].forEach(function (s) { if (l.indexOf(s) < 0) l.push(s); }); });
+  /* screens added 25-27 Nov 2026: Messages, Bring data from other software, Print designs, Envelopes, From the add-on */
+  [['msg', ['messages-sms-whatsapp', 'dues-and-reminders']], ['mig', ['bring-data-from-other-software', 'opening-balances']], ['pd', ['look-print-designs-envelopes']],
+   ['env', ['look-print-designs-envelopes']], ['inbox', ['nsbiz-helper-add-on']], ['home', ['look-print-designs-envelopes']], ['dues', ['messages-sms-whatsapp']], ['settings', ['nsbiz-helper-add-on']]]
+    .forEach(function (x) { var l = SEC[x[0]] || (SEC[x[0]] = []); x[1].forEach(function (s) { if (l.indexOf(s) < 0) l.push(s); }); });
   SEC.masters.sort(function (a, b) { return (b === 'masters') - (a === 'masters'); });   /* the Masters article first on its own screen */
   var DO = { ifsc: ['ifsc-code-checker', 'pin-code-finder'], pincode: ['pin-code-finder', 'distance-calculator'], distance: ['distance-calculator', 'pin-code-finder'] };
   var IDX = null, loading = null;
