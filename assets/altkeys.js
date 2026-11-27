@@ -49,6 +49,9 @@
     for (var dt = el.closest('details'); dt; dt = dt.parentElement && dt.parentElement.closest('details')) if (!dt.open && !(el.closest('summary') && el.closest('summary').parentElement === dt)) return null;   /* inside a closed fold-out (Export ▾) */
     if (el.matches('input[type=radio],input[type=checkbox]') && el.closest('label') && !el.offsetWidth) el = el.closest('label');
     var r = el.getBoundingClientRect();
+    /* a Shortcuts panel item scrolled out of the panel's view keeps its key (no badge drawn), so Z1 ... Z0 and its own code still work */
+    var sp = el.closest('.sc-panel'), pr = sp && sp.getBoundingClientRect();
+    if (pr && pr.width > 2 && r.height >= 2 && (r.top < pr.top || r.bottom > pr.bottom)) return { el: el, r: r, off: 1 };
     if (r.width < 2 || r.height < 2 || r.bottom < 0 || r.right < 0 || r.top > innerHeight || r.left > innerWidth) return null;
     var cs = getComputedStyle(el); if (cs.visibility === 'hidden') return null;
     for (var pa = el; pa && pa !== document.body; pa = pa.parentElement) if (+getComputedStyle(pa).opacity === 0) return null;   /* inside a see-through pop-up that is closed */
@@ -138,10 +141,11 @@
     });
     var seenP = {};
     /* Shortcuts panel: the first ten, in the order the person arranged them, are Z1 ... Z9 and Z0 (plain 1-9 belong to the side menu);
-       the rest keep a fixed code of their own */
-    var nth = 0;
+       the rest keep a fixed code of their own. Counted in the list's own order, not by what is on screen, so scrolling a long
+       list (no limit since 27 Nov) never moves Z1 ... Z0 to other items */
+    var scAll = Array.prototype.slice.call(document.querySelectorAll('.sc-panel .sc-i'));
     items.filter(function (it) { return !it.key && it.el.closest('.sc-panel') && !it.el.hasAttribute('data-sc-cust'); })
-      .sort(function (a, b) { return a.r.top - b.r.top; }).forEach(function (it) { if (nth < 10) { it.key = 'Z' + (nth + 1) % 10; nth++; } });
+      .forEach(function (it) { var n = scAll.indexOf(it.el); if (n >= 0 && n < 10) it.key = 'Z' + (n + 1) % 10; });
     items.forEach(function (it) { var k = !it.key && panelKey(it.el); if (k && !seenP[k]) { seenP[k] = 1; it.key = k; } });
     var pend = items.filter(function (it) { return !it.key && it.rank < 6; });
     /* 1: the job letters, best-ranked item first */
@@ -194,6 +198,7 @@
     if (!list.length) return false;
     var o = overlay(c.scope);
     list.forEach(function (it) {
+      if (it.off) return;
       var b = document.createElement('span'); b.className = 'ns-alt-k' + (it.key.length > 1 ? ' alt-two' : '') + (it.side ? ' alt-side' : '');
       b.textContent = it.key; b.setAttribute('data-k', it.key);
       var top = Math.max(2, it.r.top - 7), left = Math.max(2, it.r.left - 6);

@@ -214,8 +214,8 @@
 
   /* the user's own list (Customize): ids of the standard items and 'c:XX' = any screen, entry or document by its Go to code */
   var SCP = 'ns-scp';
-  /* at most ten (owner 26 Nov: they get the numbers Z1-Z9, Z0 in the Alt keys); the standard ten */
-  var SCMAX = 10, SCSTD = ['q:party', 'q:item', 'f:sale', 'f:pbill', 'f:min', 'f:mout', 'f:exp', '#fin/tb', '#parties', '#dues'];
+  /* no limit (owner 27 Nov); the first ten get the Alt keys Z1-Z9, Z0, every one keeps its own Z + two-letter code; the standard ten */
+  var SCMAX = Infinity, SCSTD = ['q:party', 'q:item', 'f:sale', 'f:pbill', 'f:min', 'f:mout', 'f:exp', '#fin/tb', '#parties', '#dues'];
   function scSaved() { try { var v = JSON.parse(localStorage.getItem(SCP) || 'null'); return Array.isArray(v) ? v : null; } catch (e) { return null; } }
   function scSave(v) { try { if (v) localStorage.setItem(SCP, JSON.stringify(v)); else localStorage.removeItem(SCP); } catch (e) {} }
   function scItems() {
@@ -244,17 +244,17 @@
       .forEach(function (x) { name['c:' + x.c] = x.t; all.push({ id: 'c:' + x.c, t: x.t, g: 'All screens, entries and documents' }); });
     var ids = scItems().map(function (x) { return x.id; });
     scDlg.innerHTML = '<div class="dlg-hd"><h2 id="sc-dlg-h">Customize the shortcuts</h2><button type="button" class="btn sm" data-sc-reset>Reset to the standard list</button><button type="button" class="btn sm primary" data-sc-close>Done</button></div>' +
-      '<p class="soft sc-help">Tick up to ten shortcuts for the right of the Dashboard (they get the Alt keys Z1 to Z9 and Z0). Drag the list on the right into your order (or Alt+Up / Alt+Down). Saved at once in this browser.</p>' +
+      '<p class="soft sc-help">Tick as many shortcuts as you like for the right of the Dashboard. The first ten get the Alt keys Z1 to Z9 and Z0; every one also keeps its own Alt key code. Drag the list on the right into your order (or Alt+Up / Alt+Down). Saved at once in this browser.</p>' +
       '<div class="sc-cols"><section class="sc-all" aria-label="Every screen"><input type="search" class="sc-q" placeholder="Search every screen…" aria-label="Search every screen"><div class="sc-opts" data-sc-opts></div></section>' +
       '<section class="sc-mine" aria-label="Your shortcuts"><h3>Your shortcuts <span class="soft" data-sc-n></span></h3><ol class="sc-list" data-sc-list></ol></section></div>';
     var opts = $('[data-sc-opts]', scDlg), list = $('[data-sc-list]', scDlg), q = $('.sc-q', scDlg);
-    function save() { scSave(ids.slice()); scRedraw(); $('[data-sc-n]', scDlg).textContent = '(' + ids.length + ' of ' + SCMAX + ')'; }
+    function save() { scSave(ids.slice()); scRedraw(); $('[data-sc-n]', scDlg).textContent = '(' + ids.length + ')'; }
     function drawList(focusId) {
       list.innerHTML = ids.map(function (id, i) {
         return '<li draggable="true" tabindex="0" data-id="' + esc(id) + '"><span class="sc-grip" aria-hidden="true">⠿</span><span class="sc-t">' + esc(name[id] || id) + '</span>' +
           '<button type="button" class="btn sm" data-sc-top' + (i ? '' : ' disabled') + ' title="Move to the top">Top</button><button type="button" class="btn sm sc-x" data-sc-rm title="Remove" aria-label="Remove ' + esc(name[id] || id) + '">×</button></li>';
       }).join('');
-      $('[data-sc-n]', scDlg).textContent = '(' + ids.length + ' of ' + SCMAX + ')';
+      $('[data-sc-n]', scDlg).textContent = '(' + ids.length + ')';
       if (focusId) { var f = $('li[data-id="' + focusId.replace(/"/g, '') + '"]', list); if (f) f.focus(); }
     }
     function drawOpts() {
@@ -270,7 +270,6 @@
     q.addEventListener('input', drawOpts);
     opts.addEventListener('change', function (e) {
       var k = e.target.closest('[data-sc-pick]'); if (!k) return; var id = k.getAttribute('data-sc-pick'), at = ids.indexOf(id);
-      if (k.checked && at < 0 && ids.length >= SCMAX) { k.checked = false; NS.toast('Only ' + SCMAX + ' shortcuts fit. Remove one first.'); return; }
       if (k.checked && at < 0) ids.push(id); else if (!k.checked && at >= 0) ids.splice(at, 1);
       save(); drawList();
     });
