@@ -9658,3 +9658,10 @@ NS.addLang('pa', {
 NS.addLang('pa', {
   "alt.tip": "ਕੋਈ ਅੱਖਰ ਦਬਾਓ। Esc ਨਾਲ ਬੰਦ।"
 });
+/* Long jobs: progress bar (27 Nov 2026) */
+NS.addLang('pa', {
+  "prog.cancel": "ਰੱਦ ਕਰੋ",
+  "prog.of": "{l}: {n} ਵਿੱਚੋਂ {a}",
+  "prog.stopped": "{n} ਵਿੱਚੋਂ {a} ਤੋਂ ਬਾਅਦ ਰੁਕਿਆ। ਜੋ ਸੇਵ ਹੋ ਚੁੱਕਾ ਹੈ ਉਹ ਸੇਵ ਹੀ ਰਹੇਗਾ।",
+  "prog.work": "ਕੰਮ ਹੋ ਰਿਹਾ ਹੈ"
+});

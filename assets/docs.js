@@ -29,7 +29,7 @@
   };
   var COPIES = { inv: ['orig', 'dup', 'trip', 'extra'], invs: ['orig', 'dupsup', 'extra'], dc: ['dcorig', 'dcdup', 'dctrip', 'extra'], note: ['orig', 'dupsup', 'extra'], pnote: ['orig', 'ocopy', 'extra'] };   /* extra: owner 22 Nov, a 4th copy */
   var REASONS = ['ret', 'price', 'disc', 'short', 'tax', 'other'];
-  var PAPERS = ['a4', 'a5', 'th80', 'th58'];
+  var PAPERS = NS.PAPER_ALL;
   /* Batch 1: extra charges on every item document; TCS (collected by the seller under the Income-tax Act) on sale bills; repeat on invoices */
   var TCS_TYPES = { invoice: 1, cashmemo: 1, proforma: 1, exp: 1 }, CHG_NAMES = ['Freight', 'Packing', 'Insurance', 'Loading', 'Delivery', 'Courier', 'Installation'];
   /* TCS rates: Income-tax Act 2025, section 394(1) Table, as amended by the Finance Act 2026 (official text, incometaxindia.gov.in, read 5 Nov 2026).
@@ -301,6 +301,7 @@
         field('b-phone', t('l.phone'), { type: 'tel', mode: 'tel', ltr: 1 }) +
         '<div class="f"' + (type === 'self' ? ' hidden' : '') + '><label class="chk"><input id="b-ship" type="checkbox"> ' + esc(t('l.ship')) + '</label></div>' +
       '</div><div class="fg" id="ship-box" hidden>' +
+        '<div class="f wide" id="sh-pickrow" hidden><label for="sh-pick">' + esc(NS.t('pm.shippick')) + '</label><select id="sh-pick"></select></div>' +   /* the party's other ship-to places (My data / Masters › party › Addresses) */
         field('sh-name', t('l.shname'), { wide: true }) + field('sh-addr', t('l.shaddr'), { type: 'textarea', wide: true }) + field('sh-city', t('l.shcity'), {}) + field('sh-pin', t('l.shpin'), { mode: 'numeric', max: 6, ltr: 1 }) + field('sh-state', t('l.shstate'), { type: 'state' }) +
       '</div></fieldset>' +
 
@@ -331,7 +332,7 @@
         field('d-narr', t('bw.mnarr'), { wide: true, hint: t('bw.mnarrh') }) +   /* A-26 (ERP Round 2): narration for the books (NSBiz ledgers, day book, Tally), never printed */
         (T.copy ? '<div class="f"><label for="d-copy">' + esc(t('l.copy')) + '</label><select id="d-copy">' + COPIES[copyKey()].map(function (k) { return '<option value="' + k + '">' + esc(t('cp.' + k)) + '</option>'; }).join('') + '<option value="">' + esc(t('cp.none')) + '</option></select></div>' +
           '<div class="f"><label for="d-copies">' + esc(t('l.copies')) + '</label><select id="d-copies">' + COPIES[copyKey()].map(function (k, i) { return '<option value="' + (i + 1) + '">' + esc(t(i ? 'cps.n' : 'cps.1', { n: i + 1 })) + '</option>'; }).join('') + '</select><small class="hint">' + esc(t('h.copies')) + '</small></div>' : '') +
-        '<div class="f"><label for="d-paper">' + esc(t('l.paper')) + '</label><select id="d-paper">' + PAPERS.map(function (k) { return '<option value="' + k + '">' + esc(t('pp.' + k)) + '</option>'; }).join('') + '</select></div>' +
+        '<div class="f"><label for="d-paper">' + esc(t('l.paper')) + '</label><select id="d-paper">' + PAPERS.map(function (k) { return '<option value="' + k + '">' + esc(NS.ppName(k)) + '</option>'; }).join('') + '</select></div>' +
         NS.designField('d-design') +
         (T.pay ? '<div class="f"><label for="d-status">' + esc(t('l.pay')) + '</label><select id="d-status"><option value="unpaid">' + esc(t('pay.unpaid')) + '</option><option value="paid">' + esc(t('pay.paid')) + '</option></select></div>'
           : '<div class="f"><label for="d-status">' + esc(t('l.qstat')) + '</label><select id="d-status">' + stList().map(function (k) { return '<option value="' + k + '">' + esc(t('qs.' + k)) + '</option>'; }).join('') + '</select></div>') +
@@ -379,10 +380,20 @@
     NS.suggest($('#b-name', ed), function () { return NSStore.list('party').then(function (l) { return NS.active(NS.forBiz(l, doc.seller)); }); }, function (x) { return x.name; }, function (p) {
       doc.buyer = { name: p.name, addr: p.addr || '', city: p.city || '', pin: p.pin || '', state: p.state || '', gstin: p.gstin || '', phone: p.phone || '', legal: p.gst && p.gst.legal || '', reg: window.NSGst ? NSGst.partyReg(p) : p.reg || '' };   /* reg: r1-gst S-2 (SEZ rows in GSTR-1, 3.2) */
       if (p.ship && p.ship.addr) doc.ship = { name: p.ship.name || p.name, addr: p.ship.addr, city: p.ship.city || '', pin: p.ship.pin || '', state: p.ship.state || p.state || '' };
-      buyerType = p.ptype || '';
+      buyerType = p.ptype || ''; buyerParty = p;
+      if (p.pname) doc.buyer.print = p.pname;   /* the party's print name: shown on the bill instead of the name (party() below) */
+      /* transporter saved on the party: the dispatch details and the e-way bill start with it (only when still empty) */
+      if (p.tname) { doc.disp = doc.disp || {}; if (!doc.disp.tname) doc.disp.tname = p.tname; if (doc.einv) { if (!doc.einv.tname) doc.einv.tname = p.tname; if (!doc.einv.tid && p.tid) doc.einv.tid = p.tid; } }
+      /* a party that collects TCS: sale bills start with TCS switched on (rate when the party has one) */
+      if (p.tcsOn && TCS_TYPES[type]) { doc.tcs = Object.assign({ on: false, rate: '', base: 'total', sec: '' }, doc.tcs || {}); if (!doc.tcs.decl) { doc.tcs.on = true; if (p.tcsRate && !num(doc.tcs.rate)) doc.tcs.rate = String(p.tcsRate); } }
       if (num(p.km) > 0) { doc.buyer.km = num(p.km); if (doc.einv && (!+doc.einv.dist)) doc.einv.dist = String(num(p.km)); }   /* distance saved on the party: the e-way bill's default */
       /* credit days of the party give the due date (only when the bill has none yet, or still has the one set this way) */
       if (T.due && num(p.cdays) > 0 && (!doc.due || doc.due === autoDue)) { doc.cdays = num(p.cdays); doc.due = autoDue = NSBooks.addDays(doc.date, doc.cdays); }
+      fillForm(); draw(); saveDraft();
+    });
+    if ($('#sh-pick', ed)) $('#sh-pick', ed).addEventListener('change', function () {
+      var x = this._list && this._list[+this.value]; if (!x) return;
+      doc.ship = { name: x.name || doc.buyer.name, addr: x.addr || '', city: x.city || '', pin: x.pin || '', state: x.state || doc.buyer.state || '' };
       fillForm(); draw(); saveDraft();
     });
     if (NS.gstFetchButton) NS.gstFetchButton($('#b-gstin', ed), function (d) {
@@ -416,7 +427,17 @@
   var buyerType = '', buyerParty = null, autoDue = '';
   function syncBuyer() {
     var nm = key(doc.buyer.name); if (!nm) { buyerType = ''; buyerParty = null; return; }
-    NSStore.list('party').then(function (all) { var p = all.filter(function (x) { return key(x.name) === nm; })[0]; buyerType = p && p.ptype || ''; buyerParty = p || null; }).catch(function () {});
+    NSStore.list('party').then(function (all) { var p = all.filter(function (x) { return key(x.name) === nm; })[0]; buyerType = p && p.ptype || ''; buyerParty = p || null; shipPicker(); }).catch(function () {});
+  }
+  /* the party's ship-to places: a list in the ship-to box when it has more than one */
+  function shipPicker() {
+    var row = $('#sh-pickrow', root), sel = $('#sh-pick', root); if (!row || !sel) return;
+    var p = buyerParty, list = [];
+    if (p) { if (p.ship && (p.ship.addr || p.ship.name)) list.push(p.ship); (p.ships || []).forEach(function (x) { if (x && (x.addr || x.name)) list.push(x); }); }
+    row.hidden = list.length < 2; if (list.length < 2) return;
+    var cur = -1; if (doc.ship) list.forEach(function (x, i) { if (cur < 0 && String(x.addr || '') === String(doc.ship.addr || '')) cur = i; });
+    sel._list = list;
+    sel.innerHTML = '<option value="">—</option>' + list.map(function (x, i) { return '<option value="' + i + '"' + (i === cur ? ' selected' : '') + '>' + esc([x.name, x.city].filter(Boolean).join(' – ') || String(x.addr || '').slice(0, 40)) + '</option>'; }).join('');
   }
   function rateFor(m) {
     var own = window.NSReuse ? NSReuse.partyRate(buyerParty, m.desc) : null;   /* this party's own price list (My data > party > Special prices) comes first */
@@ -453,6 +474,10 @@
       NS.suggest(inp, function () { return NSStore.list('item').then(function (l) { return NS.active(NS.forBiz(l, doc.seller)); }); }, function (x) { return x.desc; }, function (m) {
         var it = doc.items[i];
         it.desc = m.desc; it.hsn = m.hsn || ''; it.unit = m.unit || it.unit; var rt = rateFor(m); if (rt != null && rt !== '') it.rate = rt; if (window.NSGst && NSGst.hist(m).length) NSGst.fillLine(it, m, doc.date, type === 'self' || doc.side === 'purchase'); else if (m.gst != null && m.gst !== '' && !badGst(m.gst)) it.gst = m.gst;   /* r1-gst S-1: the item's rate on the bill date */
+        /* an item whose saved rates include GST: the bill takes the rate before tax (a party's own price is kept as typed); the party's discount, else the item's, fills an empty discount box; the description prints under the name */
+        if (m.incl && num(it.gst) > 0 && num(it.rate) > 0 && !(window.NSReuse && NSReuse.partyRate && NSReuse.partyRate(buyerParty, m.desc) != null)) it.rate = String(r2(num(it.rate) * 100 / (100 + num(it.gst))));
+        if (!num(it.disc)) { var dd = buyerParty && num(buyerParty.disc) > 0 ? num(buyerParty.disc) : num(m.disc) > 0 ? num(m.disc) : 0; if (dd) it.disc = String(dd); }
+        if (m.descr) it.descr = m.descr; else delete it.descr;
         /* the line is drawn again after the fill: the cursor stays where Tab took it (round C: a second Tab was needed) */
         var was = document.activeElement && document.activeElement.id;
         renderItems(); draw(); saveDraft();
@@ -640,7 +665,7 @@
   }
   function party(p, title) {
     if (!p || !(p.name || p.addr)) return '<div class="pt"><h4>' + title + '</h4><p class="ph">Customer name and address</p></div>';
-    return '<div class="pt"><h4>' + title + '</h4><b>' + esc(p.name) + '</b>' + (p.addr ? '<p>' + esc(p.addr).replace(/\n/g, '<br>') + '</p>' : '') + cityPin(p) +
+    return '<div class="pt"><h4>' + title + '</h4><b>' + esc(p.print || p.name) + '</b>' + (p.addr ? '<p>' + esc(p.addr).replace(/\n/g, '<br>') + '</p>' : '') + cityPin(p) +
       (p.state ? '<p>' + esc(NS.stateName(p.state)) + ' (' + p.state + ')</p>' : '') +
       (p.gstin ? '<p>' + P.gstin + ': <b class="mono">' + esc(p.gstin) + '</b></p>' : '') +
       (p.phone ? '<p>' + P.ph + ': ' + esc(p.phone) + '</p>' : '') + '</div>';
@@ -682,7 +707,7 @@
     var s = d.seller, tt = totals(d), tax = taxOn(d), SG = sgstName(d), note = pur(d) ? (d.kind === 'debit' ? 'pdnnote' : 'pcnnote') : pk(T.note, d.kind);
     if (/^th/.test(d.paper)) return thermalHtml(d, tt, tax, SG, copyLabel);
     var cols = tax ? 9 : 7, pty = pk(T.party, d.kind) || 'billto';
-    return '<div class="sh d-' + esc(d.design || 'classic') + (d.paper === 'a5' ? ' a5' : '') + '" style="--ac:' + esc(d.accent) + '" lang="en-IN" dir="ltr">' +
+    return '<div class="sh d-' + esc(d.design || 'classic') + NS.paperClass(d.paper) + '" style="--ac:' + esc(d.accent) + '" lang="en-IN" dir="ltr">' +
       (d.cancelled ? '<div class="stamp cx-stamp">CANCELLED</div>' : T.pay && d.status === 'paid' ? '<div class="stamp">' + P.paid + '</div>' : '') +   /* A-3 */
       '<header class="sh-top"><div class="sh-from">' + (s.logo ? '<img class="logo" src="' + s.logo + '" alt="">' : '') +
         '<div>' + (T.buying ? '<p class="role">' + P.buyer + '</p>' : '') + '<h2>' + (s.name ? esc(s.name) : '<span class="ph">Your business name</span>') + '</h2>' +
@@ -696,7 +721,7 @@
       '<div class="parties">' + party(d.buyer, P[pty]) + (d.ship ? party(d.ship, P[T.shipLbl || 'shipto']) : '') + '</div>' +
       '<table class="lines"><thead><tr><th>#</th><th class="l">' + P.item + '</th><th>' + P.hsn + '</th><th class="n">' + P.qty + '</th><th class="n">' + P.rate + '</th><th class="n">' + P.disc + '</th><th class="n">' + colLbl(tax, d) + '</th>' + (tax ? '<th class="n">' + P.gst + '</th><th class="n">' + P.amount + '</th>' : '') + '</tr></thead><tbody>' +
       (tt.rows.length ? tt.rows.map(function (r, i) {
-        return '<tr><td>' + (i + 1) + '</td><td class="l">' + esc(r.it.desc) + ext('lineNote', r.it).join('') + '</td><td class="mono">' + esc(r.it.hsn) + '</td><td class="n">' + NS.qty(num(r.it.qty)) + ' ' + esc(r.it.unit) + '</td><td class="n">' + (num(r.it.rate) ? NS.money(num(r.it.rate), false) : '') + '</td><td class="n">' + (num(r.it.disc) ? num(r.it.disc) + '%' : '') + '</td><td class="n">' + (r.taxable ? NS.money(r.taxable, false) : '') + '</td>' +
+        return '<tr><td>' + (i + 1) + '</td><td class="l">' + esc(r.it.desc) + (r.it.descr ? '<br><small class="descr">' + esc(r.it.descr).replace(/\n/g, '<br>') + '</small>' : '') + ext('lineNote', r.it).join('') + '</td><td class="mono">' + esc(r.it.hsn) + '</td><td class="n">' + NS.qty(num(r.it.qty)) + ' ' + esc(r.it.unit) + '</td><td class="n">' + (num(r.it.rate) ? NS.money(num(r.it.rate), false) : '') + '</td><td class="n">' + (num(r.it.disc) ? num(r.it.disc) + '%' : '') + '</td><td class="n">' + (r.taxable ? NS.money(r.taxable, false) : '') + '</td>' +
           (tax ? '<td class="n">' + r.g + '%</td><td class="n">' + NS.money(r.amount, false) + '</td>' : '') + '</tr>';
       }).join('') : '<tr><td colspan="' + cols + '" class="ph">Items you add appear here</td></tr>') +
       tt.charges.map(function (c) {
@@ -848,7 +873,7 @@
   /* the printer's paper follows the chosen size */
   function pageStyle(paper) {
     var st = $('#ns-page') || document.head.appendChild(Object.assign(document.createElement('style'), { id: 'ns-page' }));
-    st.textContent = '@media print{@page{' + ({ a5: 'size:A5;margin:0', th80: 'size:80mm 297mm;margin:0', th58: 'size:58mm 297mm;margin:0' }[paper] || 'size:A4;margin:0') + '}}';
+    st.textContent = '@media print{@page{' + NS.paperCss(paper) + '}}';
   }
   function summaryTable(tt, SG) {
     var rows = Object.keys(tt.sum).map(function (k) { return tt.sum[k]; });
@@ -1340,7 +1365,7 @@
       /* ?open=<id>: NSBiz opens a saved document here to edit, print or share */
       if (open) {
         history.replaceState(null, '', location.pathname + location.hash);
-        return NSStore.get('doc', open).then(function (rec) { if (rec && (rec.type || 'invoice') === (type === 'exp' ? 'expinv' : type) && T.split && T.kinds.indexOf(rec.kind) < 0 && T.split[rec.kind]) { location.replace((NS.siteHref ? NS.siteHref(T.split[rec.kind]) : kindSite(T.split[rec.kind])) + '?open=' + encodeURIComponent(open)); return; } if (rec && (rec.type || 'invoice') === (type === 'exp' ? 'expinv' : type)) { openDoc(rec, false); render(); } else NS.toast(t('conv.none'), 'bad'); }).then(function () { if (NS.autoPrint && NS.autoPrint()) whenDrawn(printDoc); }).catch(function () {});
+        return NSStore.get('doc', open).then(function (rec) { if (rec && (rec.type || 'invoice') === (type === 'exp' ? 'expinv' : type) && T.split && T.kinds.indexOf(rec.kind) < 0 && T.split[rec.kind]) { location.replace((NS.siteHref ? NS.siteHref(T.split[rec.kind]) : kindSite(T.split[rec.kind])) + '?open=' + encodeURIComponent(open)); return; } if (rec && (rec.type || 'invoice') === (type === 'exp' ? 'expinv' : type)) { var ovd = qs.get('dz'), ovp = qs.get('pz'); if ((ovd && NS.DESIGNS.indexOf(ovd) >= 0) || NS.paperRx.test(ovp || '')) { rec = Object.assign({}, rec); if (ovd && NS.DESIGNS.indexOf(ovd) >= 0) rec.design = ovd; if (NS.paperRx.test(ovp || '')) rec.paper = ovp; } /* the App's Print box: another design or paper for this one print only (printdesign.js); nothing is saved */ openDoc(rec, false); render(); } else NS.toast(t('conv.none'), 'bad'); }).then(function () { if (NS.autoPrint && NS.autoPrint()) whenDrawn(printDoc); }).catch(function () {});
       }
       /* ?copy=<id>: the App's "make the same bill again": a saved document of this kind opened as a new one (today's date, next number) */
       if (copy) {

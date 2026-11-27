@@ -756,17 +756,29 @@
   }
 
   /* one account's lines (cash book, bank book) between two dates; a cleared cheque reaches the bank on the day it cleared */
-  function book(docs, biz, acct, from, to) {
-    var open = 0, rows = [];
+  /* Speed (27 Nov 2026): the sorted, non-zero movements of one account, kept for the very list of records they were made from (a new list = a fresh start).
+     A month-by-month cash and bank summary asks for every month of every account: each ask used to sort and post every record again. */
+  var BKM = typeof WeakMap !== 'undefined' ? new WeakMap() : null;
+  function bookMoves(docs, biz, acct) {
+    var obj = docs && typeof docs === 'object', c = BKM && obj ? BKM.get(docs) : null, k = biz + '|' + acct;
+    if (c && c[k] && c[k].n === docs.length) return c[k].v;
+    var v = [];
     inBooks(docs, biz).map(function (d) {
       return { d: d, date: isBank(acct) && d.mode === 'cheque' && d.chq && d.chq.st === 'ok' && d.chq.on ? d.chq.on : d.date };
     }).sort(function (x, y) { return (x.date || '').localeCompare(y.date || ''); }).forEach(function (x) {
-      var d = x.d, dr = 0, cr = 0;
-      postings(d).forEach(function (l) { if (l.a === acct) { dr += l.dr; cr += l.cr; } });
-      if (!dr && !cr) return;
-      if (from && x.date < from) { open = r2(open + dr - cr); return; }
+      var dr = 0, cr = 0;
+      postings(x.d).forEach(function (l) { if (l.a === acct) { dr += l.dr; cr += l.cr; } });
+      if (dr || cr) v.push({ d: x.d, date: x.date, dr: dr, cr: cr });
+    });
+    if (BKM && obj) { c = c || {}; c[k] = { n: docs.length, v: v }; BKM.set(docs, c); }
+    return v;
+  }
+  function book(docs, biz, acct, from, to) {
+    var open = 0, rows = [];
+    bookMoves(docs, biz, acct).forEach(function (x) {
+      if (from && x.date < from) { open = r2(open + x.dr - x.cr); return; }
       if (to && x.date > to) return;
-      rows.push({ d: d, date: x.date, dr: r2(dr), cr: r2(cr) });
+      rows.push({ d: x.d, date: x.date, dr: r2(x.dr), cr: r2(x.cr) });
     });
     var bal = open; rows.forEach(function (r) { bal = r2(bal + r.dr - r.cr); r.bal = bal; });
     return { open: open, rows: rows, close: bal };
@@ -956,11 +968,32 @@
            cdays, side: 'recv' | 'pay' | '' }.
      Each bill: interest runs from (start + grace days) on what is still unpaid, slice by slice between payments, rate / 365 a day.
      { bills: [{ id, no, date, due, start, party, side, total, left, days, interest, slices: [{ from, to, days, bal, amt }] }], total } */
+  /* Speed (27 Nov 2026): NSBooks.upto(docs, date) = the records dated up to a day. When nothing is later it is the very same list (so the answers kept for that list are
+     used again), and a second ask for the same list and day gives the same filtered list. */
+  var UPM = typeof WeakMap !== 'undefined' ? new WeakMap() : null;
+  function upTo(docs, date) {
+    if (!date || !docs || typeof docs !== 'object') return docs;
+    var m = UPM && UPM.get(docs); if (m && m.n === docs.length && m.v[date]) return m.v[date];
+    var r = docs.some(function (d) { return d && d.date && d.date > date; }) ? docs.filter(function (d) { return d && (!d.date || d.date <= date); }) : docs;
+    if (UPM) { if (!m || m.n !== docs.length) { m = { n: docs.length, v: {} }; UPM.set(docs, m); } m.v[date] = r; }
+    return r;
+  }
+  /* every bill of every party for one list, worked out once and kept for that list: the late-payment screen asked bills() again for each of 400 parties */
+  var IBM = typeof WeakMap !== 'undefined' ? new WeakMap() : null;
+  function billsOnce(list, biz) {
+    var c = IBM && list && typeof list === 'object' ? IBM.get(list) : null;
+    if (c && c.n === list.length && c.biz === biz) return c;
+    var R = bills(list, biz), idx = {};   /* idx: the bills of each party, so asking for one party does not walk every bill */
+    R.every.forEach(function (x) { var k = key(x.party); (idx[k] || (idx[k] = [])).push(x); });
+    var o = { n: list && list.length, biz: biz, R: R, idx: idx };
+    if (IBM && list && typeof list === 'object') IBM.set(list, o);
+    return o;
+  }
   function interest(docs, biz, partyKey, upto, set) {
     set = set || {}; upto = upto || '';
-    var rate = num(set.rate), list = upto ? (docs || []).filter(function (d) { return d && (!d.date || d.date <= upto); }) : docs || [];
-    var R = bills(list, biz, partyKey), out = [], tot = 0;
-    R.every.forEach(function (b) {
+    var rate = num(set.rate), list = upto ? upTo(docs || [], upto) : docs || [];
+    var BO = billsOnce(list, biz), out = [], tot = 0;
+    (partyKey ? BO.idx[partyKey] || [] : BO.R.every).forEach(function (b) {
       if (partyKey && key(b.party) !== partyKey) return;
       if (set.side && b.side !== set.side) return;
       if (b.type === 'receipt' || b.type === 'voucher') return;   /* a refund bill: money paid back, not a sale on credit */
@@ -1041,6 +1074,7 @@
   API.memo = function (on) { MEMO = on ? new WeakMap() : null; };
   API.memoOn = function () { return !!MEMO; };
   API.memoize = memoize;
+  API.upto = upTo;
   ['inBooks', 'parties', 'accounts', 'bills'].forEach(function (n) { API[n] = memoize(n, API[n]); });
   if (typeof module !== 'undefined' && module.exports) module.exports = API; else G.NSBooks = API;
 })(this);

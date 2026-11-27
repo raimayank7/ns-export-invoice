@@ -219,100 +219,13 @@
       NS.quickAdd(i);
     });
   };
+  /* the box itself (sections: Basics, GST and tax, Addresses, Credit and prices, Bank, Opening and more) lives in pmforms.js, loaded when first needed */
   NS.quickAdd = function (inp) {
     var q = qaOf(inp); if (!q) return;
-    var item = q.kind === 'item', name = inp.value.trim(), d = document.getElementById('qa-dlg');
-    if (!d) { d = NS.el('dialog', { id: 'qa-dlg', 'class': 'qa-dlg' }); document.body.appendChild(d); }
-    var T = NS.t, E = NS.esc, f = function (id, lbl, html, wide) { return '<label class="qa-f' + (wide ? ' qa-w' : '') + '" for="' + id + '"><span>' + E(T(lbl)) + '</span>' + html + '</label>'; };
-    var states = NS.STATES.map(function (s) { return '<option value="' + s[0] + '">' + E(s[1]) + '</option>'; }).join('');
-    var main = item
-      ? f('qa-n', 'qa.iname', '<input id="qa-n" required>', 1) + f('qa-gr', 'qa.group', '<select id="qa-gr"></select>') + f('qa-k', 'qa.kind', '<select id="qa-k"><option value="goods">' + E(T('qa.goods')) + '</option><option value="service">' + E(T('qa.service')) + '</option></select>') +
-        f('qa-u', 'qa.unit', '<input id="qa-u" value="Nos">') + f('qa-h', 'qa.hsn', '<input id="qa-h" inputmode="numeric">') +
-        f('qa-g', 'qa.gst', '<select id="qa-g">' + [0, 0.1, 0.25, 1.5, 3, 5, 12, 18, 40].map(function (r) { return '<option' + (r === 18 ? ' selected' : '') + '>' + r + '</option>'; }).join('') + '</select>') +
-        f('qa-r', 'qa.srate', '<input id="qa-r" inputmode="decimal">') + f('qa-p', 'qa.prate', '<input id="qa-p" inputmode="decimal">') + f('qa-o', 'qa.open', '<input id="qa-o" inputmode="decimal">')
-      : f('qa-n', 'qa.pname', '<input id="qa-n" required>', 1) + f('qa-t', 'qa.role', '<select id="qa-t"><option value="customer">' + E(T('qa.cust')) + '</option><option value="supplier">' + E(T('qa.supp')) + '</option><option value="both">' + E(T('qa.both')) + '</option></select>') +
-        f('qa-gr', 'qa.group', '<select id="qa-gr"></select>') +
-        f('qa-gs', 'qa.gstin', '<input id="qa-gs" maxlength="15" autocapitalize="characters">') + f('qa-ph', 'qa.phone', '<input id="qa-ph" inputmode="tel">') +
-        f('qa-a', 'qa.addr', '<input id="qa-a">', 1) + f('qa-c', 'qa.city', '<input id="qa-c">') + f('qa-s', 'qa.state', '<select id="qa-s"><option value=""></option>' + states + '</select>');
-    var more = item
-      ? f('qa-code', 'qa.code', '<input id="qa-code">') + f('qa-w', 'qa.wrate', '<input id="qa-w" inputmode="decimal">') + f('qa-m', 'qa.mrp', '<input id="qa-m" inputmode="decimal">') + f('qa-min', 'qa.min', '<input id="qa-min" inputmode="decimal">')
-      : f('qa-pan', 'qa.pan', '<input id="qa-pan" maxlength="10" autocapitalize="characters">') + f('qa-pin', 'qa.pin', '<input id="qa-pin" inputmode="numeric" maxlength="6">') + f('qa-em', 'qa.email', '<input id="qa-em" type="email">') +
-        f('qa-cd', 'qa.cdays', '<input id="qa-cd" inputmode="numeric">') + f('qa-cl', 'qa.climit', '<input id="qa-cl" inputmode="decimal">') +
-        f('qa-km', 'qa.km', '<input id="qa-km" inputmode="decimal">') + f('qa-ag', 'qa.agent', '<input id="qa-ag">') +
-        f('qa-ob', 'qa.ob', '<input id="qa-ob" inputmode="decimal">') + f('qa-obs', 'qa.obside', '<select id="qa-obs"><option value="recv">' + E(T('qa.obrecv')) + '</option><option value="pay">' + E(T('qa.obpay')) + '</option></select>');
-    d.innerHTML = '<div class="dlg-hd"><h2>' + E(T(item ? 'qa.titem' : 'qa.tparty')) + '</h2></div><form class="qa-form"><div class="qa-grid">' + main + '</div>' +
-      '<details class="qa-more"><summary>' + E(T('qa.more')) + '</summary><div class="qa-grid">' + more + '</div></details>' +
-      '<p class="qa-msg" role="alert" hidden></p><div class="qa-acts"><button type="submit" class="btn primary">' + E(T('qa.save')) + '</button><button type="button" class="btn" data-qa-x>' + E(T('qa.cancel')) + '</button></div></form>';
-    var $q = function (id) { return document.getElementById(id); }, gsel = $q('qa-gr');
-    $q('qa-n').value = name;
-    /* the group (ledger group): Sundry Debtors / Sundry Creditors and the user's own groups under them; items: the item groups */
-    NSStore.meta('groups').then(function (meta) {
-      var list = NS.groupsOf(meta || {}, item ? 'item' : 'party'), opt = function (g, sub) { return '<option value="' + E(g.id) + '">' + (sub ? '\u2003' : '') + E(g.name) + '</option>'; };
-      var html = item ? '<option value="">' + E(T('qa.nogroup')) + '</option>' : '';
-      list.filter(function (g) { return !g.under; }).forEach(function (g) { html += opt(g); list.filter(function (x) { return x.under === g.id; }).forEach(function (x) { html += opt(x, 1); list.filter(function (y) { return y.under === x.id; }).forEach(function (y) { html += opt(y, 2); }); }); });
-      gsel.innerHTML = html; if (!item) gsel.value = $q('qa-t').value === 'supplier' ? 'creditors' : 'debtors';
-    }, function () {});
-    if (!item) {
-      $q('qa-t').value = qaSide();
-      $q('qa-t').addEventListener('change', function () { if (/^(debtors|creditors)$/.test(gsel.value)) gsel.value = this.value === 'supplier' ? 'creditors' : 'debtors'; $q('qa-obs').value = this.value === 'supplier' ? 'pay' : 'recv'; });
-      $q('qa-obs').value = $q('qa-t').value === 'supplier' ? 'pay' : 'recv';
-      $q('qa-gs').addEventListener('input', function () { var g = this.value.toUpperCase().replace(/\s/g, ''); this.value = g; if (/^\d{2}/.test(g) && NS.stateName(g.slice(0, 2))) $q('qa-s').value = g.slice(0, 2); if (g.length >= 12 && !$q('qa-pan').value) $q('qa-pan').value = g.slice(2, 12); });
-    } else {
-      $q('qa-h').addEventListener('input', function () { if (/^99/.test(this.value.trim())) $q('qa-k').value = 'service'; });
-    }
-    /* details brought in (the add-on's look-up of a GSTIN on a web page): filled in, More details opened when they hold some (owner 23 Nov) */
-    if (q.pre && !item) {
-      var P = q.pre, put = function (id, val) { var x = $q(id); if (x && val != null && String(val).trim() !== '') x.value = String(val).trim(); };
-      put('qa-gs', P.gstin); if (P.gstin) $q('qa-gs').dispatchEvent(new Event('input'));
-      put('qa-ph', P.phone); put('qa-a', P.addr); put('qa-c', P.city); put('qa-s', P.state); put('qa-pan', P.pan); put('qa-pin', P.pin); put('qa-em', P.email);
-      put('qa-km', P.km); put('qa-ag', P.agent);
-      if (P.role) { $q('qa-t').value = P.role; $q('qa-t').dispatchEvent(new Event('change')); }
-      if (P.pin || P.email || P.km || P.agent) { var dm = d.querySelector('.qa-more'); if (dm) dm.open = true; }
-    }
-    d.querySelector('[data-qa-x]').addEventListener('click', function () { d.removeAttribute('data-dirty'); d.close(); inp.focus(); });
-    d.addEventListener('close', function () { setTimeout(function () { if (document.contains(inp)) inp.focus(); }, 0); }, { once: true });
-    d.querySelector('form').addEventListener('submit', function (e) {
-      e.preventDefault();
-      var msg = d.querySelector('.qa-msg'), nm = $q('qa-n').value.trim(), say = function (t) { msg.textContent = t; msg.hidden = false; }, v = function (id) { var x = $q(id); return x ? x.value.trim() : ''; }, n = function (id) { return NS.num(v(id)); };
-      if (!nm) return say(T('qa.needname'));
-      if (q.known(nm) && nm.toLowerCase() !== name.toLowerCase()) return say(T('qa.exists'));
-      var rec, extra = Promise.resolve(), biz = function () { return window.NSApp && NSApp.biz && NSApp.biz() ? Promise.resolve(NSApp.biz()) : NS.defaultBiz(); };
-      var fyStart = (function () { var t = NS.today(), y = +t.slice(0, 4), m = +t.slice(5, 7); return (m < 4 ? y - 1 : y) + '-04-01'; })();
-      if (item) {
-        rec = { desc: nm, kind: v('qa-k') || 'goods', unit: v('qa-u') || 'Nos', hsn: v('qa-h'), gst: +$q('qa-g').value };
-        if (gsel.value) { rec.group = gsel.value; rec.cat = gsel.options[gsel.selectedIndex].text.trim(); }
-        if (n('qa-r')) rec.rate = n('qa-r'); if (n('qa-p')) rec.prate = n('qa-p'); if (n('qa-w')) rec.wrate = n('qa-w'); if (n('qa-m')) rec.mrp = n('qa-m');
-        if (v('qa-code')) rec.code = v('qa-code'); if (n('qa-min')) rec.min = n('qa-min');
-        var oq = n('qa-o');
-        /* opening stock goes in as an opening stock entry of the business in use, like the Stock screen makes it */
-        if (oq && rec.kind === 'goods') extra = biz().then(function (b) { return b ? NSStore.put('doc', { type: 'stk', kind: 'open', date: NS.fy(NS.today()).slice(0, 4) + '-04-01', no: '', seller: b, lines: [{ desc: nm, unit: rec.unit, qty: oq, rate: rec.prate || 0 }] }) : null; });
-      } else {
-        var g = v('qa-gs').toUpperCase(), ck = NS.gstinCheck(g), pan = v('qa-pan').toUpperCase();
-        if (g && !ck.ok) return say(ck.msg || T('qa.badgst'));
-        if (pan && !/^[A-Z]{5}[0-9]{4}[A-Z]$/.test(pan)) return say(T('qa.badpan'));
-        rec = { name: nm, role: v('qa-t'), gstin: g, phone: v('qa-ph'), addr: v('qa-a'), city: v('qa-c'), state: v('qa-s') || (g ? g.slice(0, 2) : '') };
-        if (gsel.value && !/^(debtors|creditors)$/.test(gsel.value)) rec.group = gsel.value;
-        if (pan) rec.pan = pan; if (v('qa-pin')) rec.pin = v('qa-pin'); if (v('qa-em')) rec.email = v('qa-em');
-        if (n('qa-cd')) rec.cdays = n('qa-cd'); if (n('qa-cl')) rec.climit = n('qa-cl'); if (n('qa-km')) rec.km = n('qa-km'); if (v('qa-ag')) rec.agent = v('qa-ag');
-        var ob = n('qa-ob');
-        /* opening balance: the same entry the App's Opening balance form makes, dated the first day of this financial year */
-        if (ob) extra = biz().then(function (b) { return b ? NSStore.put('doc', { type: 'ob', app: 1, date: fyStart, seller: b, buyer: { name: nm }, side: v('qa-obs') || 'recv', amount: ob, no: '', total: ob }) : null; });
-      }
-      extra.then(function () { return NSStore.put(item ? 'item' : 'party', rec); }).then(function (saved) {
-        var r = saved && saved.id ? saved : rec;
-        d.removeAttribute('data-dirty'); d.close(); if (inp._qaChip) inp._qaChip.hidden = true;
-        NS.toast(T(item ? 'qa.itemok' : 'qa.partyok', { n: nm }));
-        q.done(r);
-      }, function (er) { say((er && er.message) || T('qa.fail')); });
-    });
-    if (!d._qaKeys) { d._qaKeys = 1; d.addEventListener('keydown', function (e) {
-      var k = (e.key || '').toLowerCase(), t = e.target, f = d.querySelector('form'); if (!f) return;
-      if ((e.ctrlKey || e.metaKey) && !e.altKey && (k === 's' || k === 'enter')) { e.preventDefault(); e.stopImmediatePropagation(); if (f.requestSubmit) f.requestSubmit(); return; }
-      if (k !== 'enter' || e.shiftKey || e.ctrlKey || !t || !/^(INPUT|SELECT)$/.test(t.tagName) || /^(checkbox|radio|submit|button)$/.test(t.type)) return;
-      var all = [].filter.call(f.querySelectorAll('input,select'), function (x) { return !x.disabled && x.type !== 'hidden' && x.type !== 'checkbox' && x.offsetParent !== null && !x.closest('details:not([open])'); });
-      var i = all.indexOf(t); e.preventDefault(); e.stopImmediatePropagation(); if (i >= 0 && i < all.length - 1) all[i + 1].focus(); else if (f.requestSubmit) f.requestSubmit();
-    }); }
-    d.showModal(); setTimeout(function () { var x = $q(item ? 'qa-h' : 'qa-gs'); (name ? x : $q('qa-n')).focus(); }, 30);
+    var go = function () { return window.NSPM.quick(inp, q, qaSide()); };
+    if (window.NSPM) return go();
+    var L = (window.NS_CFG && NS_CFG.lazy) || {};
+    return NS.loadJs(L['pmforms.js'] || '/assets/pmforms.js').then(go, function () { NS.toast('Could not open the form. Check the internet connection and try again.', 'bad'); });
   };
 
 
@@ -1096,9 +1009,16 @@
           /* Stage 4: once logins are on no readable file is written (anyone could open it); the locked data files are copied instead */
           return NSStore.auth('authStatus').then(function (s) { return !!(s && s.on); }, function () { return false; }).then(function (locked) {
             if (locked) return null;
-            return NSStore.exportAll().then(function (data) {
-              var b = { app: 'Nivesh Sahayak', kind: 'backup', version: 1, saved: new Date().toISOString(), data: data }, txt = JSON.stringify(b, null, 1);
-              return nsDir(h, ['Data']).then(function (d) { return putFile(d, BACKUP_NAME + '.json', txt); }).then(function () { return dailyCopy(h, txt); });
+            /* Speed (27 Nov 2026): the whole business as one readable file was 74 MB at 90,000 bills and was rewritten after every save. A big business writes it at most
+               every 10 minutes (and always when asked to save now); the copies of the data files below are made every time and are the real backup. */
+            return (NSStore.docStat ? NSStore.docStat().catch(function () { return null; }) : Promise.resolve(null)).then(function (ds) {
+              var big = ds && ds.n > 5000, t0 = Date.now();
+              if (!force && big && AF.jsonAt && t0 - AF.jsonAt < 600000) return null;
+              AF.jsonAt = t0;
+              return NSStore.exportAll().then(function (data) {
+                var b = { app: 'Nivesh Sahayak', kind: 'backup', version: 1, saved: new Date().toISOString(), data: data }, txt = JSON.stringify(b, null, big ? 0 : 1);
+                return nsDir(h, ['Data']).then(function (d) { return putFile(d, BACKUP_NAME + '.json', txt); }).then(function () { return dailyCopy(h, txt); });
+              });
             });
           }).then(function () { return fileCopy(h).catch(function () {}); }).then(function () {
             var now = Date.now();
@@ -1146,8 +1066,13 @@
   NS.isInstalled = function () { return !!(window.matchMedia && matchMedia('(display-mode: standalone), (display-mode: window-controls-overlay)').matches) || navigator.standalone === true; };
   function afSoon(ms) {
     if (!NS.folderHere() || !(NS.folderSupported() || NS.addon.on)) return;
-    clearTimeout(AF.t); AF.t = setTimeout(afWrite, ms == null ? 1500 : ms);
+    clearTimeout(AF.t); AF.t = setTimeout(function () {
+      /* Speed (27 Nov 2026): never copy the data in the middle of typing a bill; wait until the keys have been quiet for two seconds */
+      if (Date.now() - LASTKEY < 2000) return afSoon(2500);
+      afWrite();
+    }, ms == null ? 1500 : ms);
   }
+  var LASTKEY = 0; document.addEventListener('keydown', function () { LASTKEY = Date.now(); }, true);
   function folderOn(name) {
     NS.toast(NS.t('oa.done', { name: name })); hideReminder(); afBar(null);
   }
@@ -1313,7 +1238,7 @@
      Each change is also copied into the data home (meta 'prefs' = {key: {v, t}}), so it is in "Back up everything", the one auto save
      and on every site and device the backup is restored to. On load the newer side wins; values only on this site are carried in.
      Not copied: look and place (theme, language, side menu, chosen business, last screen) and unsaved drafts of a document. */
-  var PREF = /^ns-(aato|tally-led|prl|bc-set|gstcal|gstcal-told|gstcal-note|pl-draft-.+|hsn-band|stock-(sv|lv|mv)|gstin-recent|c8|g1|g3|td|dash|qe|period|ageing|tb-style|lg-view|rep-col|rep-smby)$/;   /* ERP C-13: report choices (trial balance style, party ledger view, columnar, summary by) follow the data home too */
+  var PREF = /^ns-(aato|tally-led|prl|bc-set|gstcal|gstcal-told|gstcal-note|pl-draft-.+|hsn-band|stock-(sv|lv|mv)|gstin-recent|c8|g1|g3|td|dash|qe|period|ageing|tb-style|lg-view|rep-col|rep-smby|pack|dens|tsize)$/;   /* ERP C-13: report choices (trial balance style, party ledger view, columnar, summary by) follow the data home too */
   var lsSet = Storage.prototype.setItem, lsDel = Storage.prototype.removeItem, prefDue = {}, prefT = 0;
   function prefStamps(v) {
     if (v) { try { lsSet.call(localStorage, 'ns-prefs-t', JSON.stringify(v)); } catch (e) {} return v; }
@@ -1832,7 +1757,84 @@
   NS.dropHints = function (root) {
     Array.prototype.forEach.call(root.querySelectorAll('.ph'), function (e) { if (e.tagName === 'P') e.remove(); else e.style.visibility = 'hidden'; });
   };
-  var PAGE = { a4: [210, 297], a5: [148, 210], th80: [80, 0], th58: [58, 0] };
+  var PAGE = { a4: [210, 297], a5: [148, 210], a3: [297, 420], a6: [105, 148], letter: [215.9, 279.4], legal: [215.9, 355.6], th80: [80, 0], th58: [58, 0] };
+  /* PAPER SIZES (owner 26 Nov 2026): one list for every voucher and document maker. Sheets are drawn at A4 size and printed scaled (A3, A5, A6: zoom) or a little wider
+     (Letter, Legal); rolls (80 / 58 mm) have their own narrow layout. */
+  var SZ = { a4: ['A4 (normal page)', 'size:A4;margin:0'], a5: ['A5 (half page)', 'size:A5;margin:0'], a3: ['A3 (large sheet)', 'size:297mm 420mm;margin:0'], a6: ['A6 (quarter page)', 'size:105mm 148mm;margin:0'],
+    letter: ['Letter (US, 8.5 × 11 in)', 'size:215.9mm 279.4mm;margin:0'], legal: ['Legal (US, 8.5 × 14 in)', 'size:215.9mm 355.6mm;margin:0'], th80: ['Thermal roll 80 mm', 'size:80mm 297mm;margin:0'], th58: ['Thermal roll 58 mm', 'size:58mm 297mm;margin:0'] };
+  /* Speed watch (27 Nov 2026): a task that blocks the page for over 200 ms is kept in NS.longTasks [start, ms, screen]; localStorage ns-perf=1 also warns in the console */
+  NS.longTasks = [];
+  try { new PerformanceObserver(function (l) { l.getEntries().forEach(function (e) { if (e.duration < 200) return; NS.longTasks.push([Math.round(e.startTime), Math.round(e.duration), location.hash || '/']); if (NS.longTasks.length > 100) NS.longTasks.shift(); try { if (localStorage.getItem('ns-perf') === '1') console.warn('Slow: ' + Math.round(e.duration) + ' ms on ' + (location.hash || '/')); } catch (x) {} }); }).observe({ type: 'longtask', buffered: true }); } catch (e) {}
+  /* Long jobs (27 Nov 2026): NS.eachSeq(list, fn, { label }) runs fn(item, index) one item after another (fn may return a promise), gives the page a breath now and then so
+     it never freezes, and for more than 40 items shows a small bar with the count and a Cancel button. What was done before Cancel stays done. It resolves with
+     { done, cancelled }. */
+  NS.eachSeq = function (list, fn, o) {
+    o = o || {}; list = list || [];
+    var n = list.length, bar = null, cancelled = false, done = 0, i = 0, last = Date.now(), label = o.label || NS.t('prog.work');
+    function paint() { if (!bar) return; bar.querySelector('.ns-prog-t').textContent = NS.t('prog.of', { l: label, a: done, n: n }); bar.querySelector('i').style.width = (n ? Math.round(done / n * 100) : 100) + '%'; }
+    function close() { if (bar) { bar.remove(); bar = null; } }
+    if (n > 40) {
+      bar = document.createElement('div'); bar.className = 'ns-prog'; bar.setAttribute('role', 'status');
+      bar.innerHTML = '<span class="ns-prog-t"></span><span class="ns-prog-b"><i></i></span><button type="button" class="btn sm">' + NS.esc(NS.t('prog.cancel')) + '</button>';
+      bar.querySelector('button').addEventListener('click', function () { cancelled = true; this.disabled = true; });
+      document.body.appendChild(bar); paint();
+    }
+    return new Promise(function (res, rej) {
+      function next() {
+        if (cancelled || i >= n) {
+          close();
+          if (cancelled && done < n) NS.toast(NS.t('prog.stopped', { a: done, n: n }));
+          return res({ done: done, cancelled: cancelled && done < n });
+        }
+        var item = list[i], at = i; i++;
+        Promise.resolve().then(function () { return fn(item, at); }).then(function () {
+          done++;
+          if (Date.now() - last > 40) { last = Date.now(); paint(); setTimeout(next, 0); } else next();
+        }, function (e) { close(); rej(e); });
+      }
+      next();
+    });
+  };
+  NS.SHEETS = ['a4', 'a5', 'a3', 'a6', 'letter', 'legal'];
+  NS.ROLLS = ['th80', 'th58'];
+  NS.PAPER_ALL = NS.SHEETS.concat(NS.ROLLS);
+  NS.ppName = function (k) { return /^(a4|a5|th80|th58)$/.test(k) ? NS.t('pp.' + k) : (SZ[k] || [k])[0]; };
+  NS.paperCss = function (k) { return (SZ[k] || SZ.a4)[1]; };
+  NS.paperClass = function (k) { return (k === 'a5' ? ' a5' : '') + (/^(a3|a6|letter|legal)$/.test(k) ? ' pz-' + k : ''); };
+  NS.paperRx = /^(a4|a5|a3|a6|letter|legal|th80|th58)$/;
+  /* a roll is 58 or 80 mm wide: a table of more than five columns becomes one block per row (the first cell as the heading, then "heading  value" lines) */
+  NS.rollTables = function (root) {
+    Array.prototype.forEach.call(root.querySelectorAll('.sh.roll table.lines'), function (t) {
+      var heads = t.querySelectorAll('thead tr'), cols = 0, lab = [];
+      Array.prototype.forEach.call(heads, function (tr, r) {
+        var c = 0;
+        Array.prototype.forEach.call(tr.querySelectorAll('th,td'), function (h) {
+          while (lab[c] && lab[c].rs > r) c++;
+          var span = +h.getAttribute('colspan') || 1, rs = +h.getAttribute('rowspan') || 1, tx = (h.textContent || '').replace(/\s+/g, ' ').trim();
+          for (var k = 0; k < span; k++) { var o = lab[c + k] = lab[c + k] || { t: [], rs: 0 }; if (tx && o.t.indexOf(tx) < 0) o.t.push(tx); o.rs = Math.max(o.rs, r + rs); }
+          c += span;
+        });
+        cols = Math.max(cols, c);
+      });
+      if (cols < 6 || !heads.length) return;
+      var out = document.createElement('div'); out.className = 'rl';
+      function cellText(td) { var x = document.createElement('div'); x.innerHTML = td.innerHTML.replace(/<\/?(br|small|span|b|i|em|p)(\s[^>]*)?>/gi, ' '); return (x.textContent || '').replace(/\s+/g, ' ').trim(); }
+      function rowOf(tr, foot) {
+        var c = 0, pairs = [], head = '';
+        Array.prototype.forEach.call(tr.querySelectorAll('td,th'), function (td) {
+          var span = +td.getAttribute('colspan') || 1, tx = cellText(td), l = ((lab[c] || { t: [] }).t.join(' ') || '').trim();
+          if (tx && !/^(0|0\.00|−|-|—)$/.test(tx)) { if (!head && !foot && !td.classList.contains('n') && !/^\d+$/.test(tx)) head = tx; else if (l !== '#') pairs.push([span > 1 || !l ? '' : l, tx]); }
+          c += span;
+        });
+        var d = document.createElement('div'); d.className = 'rl-row' + (foot ? ' rl-foot' : '');
+        d.innerHTML = (head ? '<b class="rl-h">' + NS.esc(head) + '</b>' : '') + pairs.map(function (x) { return '<span class="rl-p"><i>' + NS.esc(x[0]) + '</i><em>' + NS.esc(x[1]) + '</em></span>'; }).join('');
+        if (d.innerHTML) out.appendChild(d);
+      }
+      Array.prototype.forEach.call(t.querySelectorAll('tbody tr'), function (tr) { rowOf(tr, false); });
+      Array.prototype.forEach.call(t.querySelectorAll('tfoot tr'), function (tr) { rowOf(tr, true); });
+      t.parentNode.replaceChild(out, t);
+    });
+  };
   /* text painted with a gradient (the NSBiz wordmark, .nsb-n) is drawn by html2canvas as a filled box: give it its plain colour */
   function plainText(root) {
     Array.prototype.forEach.call(root.querySelectorAll('*'), function (el) {
@@ -1849,7 +1851,7 @@
       box.style.cssText = 'position:fixed;left:-12000px;top:0;background:#fff';
       document.body.appendChild(box);
       var pg = PAGE[paper] || PAGE.a4, pdf = null;
-      var shots = Array.prototype.map.call(nodes, function (n) { var c = n.cloneNode(true); c.classList.remove('a5'); NS.dropHints(c); box.appendChild(c); plainText(c); return c; });
+      var shots = Array.prototype.map.call(nodes, function (n) { var c = n.cloneNode(true); c.classList.remove('a5'); c.className = c.className.replace(/\bpz-\w+\b/g, '').trim(); NS.dropHints(c); box.appendChild(c); plainText(c); return c; });
       return shots.reduce(function (p, c) {
         return p.then(function () { return window.html2canvas(c, { scale: 2, backgroundColor: '#ffffff', logging: false }); }).then(function (cv) {
           var w = pg[0];
@@ -2446,7 +2448,7 @@
 
   /* ---------- printed designs: one list for docs.js, slip.js and kit.js (thermal rolls keep their own look). The record field is a
      hidden <select> (so fill, save and drafts work as before); the reader taps small drawn pages. Every design is free. ---------- */
-  NS.DESIGNS = ['classic', 'modern', 'compact', 'band', 'elegant', 'grid', 'minimal'];
+  NS.DESIGNS = ['classic', 'modern', 'compact', 'band', 'elegant', 'grid', 'minimal', 'ribbon', 'letter', 'typewriter'];
   NS.designField = function (id, attrs) {
     return '<div class="f wide dpick-f"><span class="lbl" id="' + id + '-lbl">' + NS.esc(NS.t('l.design')) + '</span>' +
       '<select id="' + id + '"' + (attrs || '') + ' hidden tabindex="-1" aria-hidden="true">' + NS.DESIGNS.map(function (k) { return '<option value="' + k + '">' + NS.esc(NS.t('ds.' + k)) + '</option>'; }).join('') + '</select>' +

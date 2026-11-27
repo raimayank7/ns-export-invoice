@@ -623,3 +623,8 @@ input[data-pkro]{cursor:pointer}input[data-pkro]:not(:disabled){caret-color:tran
 @media print{.nsb-n,.ns-cl .nsb-n,b.nsb-in .nsb-n{background:none!important;background-image:none!important;-webkit-background-clip:border-box!important;background-clip:border-box!important;color:#0C5F57!important;-webkit-text-fill-color:#0C5F57!important;filter:none!important}}
 @media print{.ns-pcredit{display:block}.ns-cl.ns-fx{position:fixed!important;left:0;right:0;bottom:5mm;margin:0!important;justify-content:center}}
 @media screen{.ns-pcredit{display:none}}
+
+/* NS.eachSeq: the bar of a long job */
+.ns-prog{position:fixed;left:50%;bottom:18px;transform:translateX(-50%);z-index:9999;display:flex;align-items:center;gap:12px;max-width:calc(100vw - 24px);padding:10px 14px;border-radius:12px;background:var(--surface,#fff);color:var(--ink,#111);border:1px solid var(--line,#cbd5e1);box-shadow:0 8px 28px rgba(0,0,0,.25)}
+.ns-prog-t{white-space:nowrap;font-size:.95rem}.ns-prog-b{display:block;width:140px;height:8px;border-radius:99px;background:var(--line,#e2e8f0);overflow:hidden}.ns-prog-b i{display:block;height:100%;width:0;background:var(--accent,#0f766e);transition:width .15s}
+@media print{.ns-prog{display:none}}

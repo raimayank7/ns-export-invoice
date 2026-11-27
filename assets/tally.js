@@ -102,6 +102,7 @@
     if (px === 'exp:' && direct(a)) return 'Direct Expenses';
     if (px === 'inc:' && window.NSHeads) { var hh = NSHeads.find(typed[a] || a); if (hh && hh.t === 'dinc') return 'Direct Incomes'; }   /* heads list (heads.js) */
     if (px === 'od:' && /\b(od|o\/d|overdraft|cc|cash credit)\b/i.test(typed[a] || a.slice(3))) return 'Bank OD A/c';
+    if (a === 'ocl:suspense a/c') return 'Suspense A/c';   /* the bank statement import parks lines with no ledger here */
     if (px) return PFX[px];
     if (OTHER[a]) return OTHER[a][1];
     if (/^gst-|tds-payable/.test(a)) return 'Duties & Taxes';

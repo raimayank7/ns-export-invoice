@@ -18,7 +18,7 @@
   function ic(d) { return '<svg class="ic" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="' + d + '"/></svg>'; }
   /* icons for the App's own screens (the other side-menu icons are CSS masks in desk.css, by data-ic) */
   var SECIC = { home: 'home', sales: 'doc', money: 'money', dues: 'clock', buy: 'cart', parties: 'people', cash: 'bank', chq: 'cheque', books: 'book', khata: 'book', preg: 'cart', ebook: 'cart',
-    day: 'calendar', inbox: 'save', mkimp: 'data', mig: 'data', msg: 'wa', tools: 'layers', repeat: 'repeat', reports: 'chart', b2jv: 'journal', b2fa: 'asset', b2gd: 'box', b2make: 'factory', b2profit: 'trend', b2sman: 'badge', b2year: 'calendar', grp: 'layers', fin: 'scale', fam: 'factory', capl: 'coins', b2job: 'wrench', ledger: 'book', move: 'trend', st: 'list', stf: 'badge', acx: 'tax', tdsr: 'tax', gststk: 'tax', gtds: 'tax', isd: 'tax', charts: 'chart', pdffill: 'doc', ftools: 'wrench', features: 'toggle', bimp: 'bimport', itx: 'itax', msme: 'coins', limits: 'scale', trust: 'coins', warr: 'wrench', fees: 'cap', packs: 'pack', cadb: 'dash', cadoc: 'folder', cagst: 'tax', cacom: 'chat', saved: 'save',
+    day: 'calendar', inbox: 'save', mkimp: 'data', mig: 'data', msg: 'wa', pd: 'doc', env: 'doc', tools: 'layers', repeat: 'repeat', reports: 'chart', b2jv: 'journal', b2fa: 'asset', b2gd: 'box', b2make: 'factory', b2profit: 'trend', b2sman: 'badge', b2year: 'calendar', grp: 'layers', fin: 'scale', fam: 'factory', capl: 'coins', b2job: 'wrench', ledger: 'book', move: 'trend', st: 'list', stf: 'badge', acx: 'tax', tdsr: 'tax', gststk: 'tax', gtds: 'tax', isd: 'tax', charts: 'chart', pdffill: 'doc', ftools: 'wrench', features: 'toggle', bimp: 'bimport', itx: 'itax', msme: 'coins', limits: 'scale', trust: 'coins', warr: 'wrench', fees: 'cap', packs: 'pack', cadb: 'dash', cadoc: 'folder', cagst: 'tax', cacom: 'chat', saved: 'save',
     entries: 'list', low: 'alert', biz: 'shop', party: 'people', pgroups: 'list', item: 'box', igroups: 'list', doc: 'doc', settings: 'set', backup: 'data', bin: 'trash', log: 'clock' };
   /* screen lists that stay inside the page (my., the stock site...) get the same icons */
   function secIcons() { $$('.hub-nav a[data-sec]:not([data-ic])').forEach(function (a) { var k = SECIC[a.getAttribute('data-sec')]; if (k) a.setAttribute('data-ic', k); }); }
@@ -157,7 +157,7 @@
       '§itax', 'tdsr', 'acx', 'itx', 'limits',
       '§payst', { h: 'stf/pf', t: 'v_pf', ic: 'doc' }, { h: 'stf/esi', t: 'v_esi', ic: 'doc' }, { h: 'stf/tax', t: 'v_saltds', ic: 'doc' },
       '§audit', 'cacom', 'cadoc']],
-    ['util', ['§data', { my: 'backup', t: 'v_backup', ic: 'data' }, 'bimp', 'mig', 'mkimp', 'msg', { h: 'mprint', t: 'v_mprint', ic: 'doc' }, 'b2year',
+    ['util', ['§data', { my: 'backup', t: 'v_backup', ic: 'data' }, 'bimp', 'mig', 'mkimp', 'msg', 'pd', 'env', { h: 'mprint', t: 'v_mprint', ic: 'doc' }, 'b2year',
       '§setup', { h: 'config', t: 'v_config', ic: 'set' }, { h: 'bw', t: 'v_bw', ic: 'list' }, 'features', 'packs',   /* one Configuration (owner 19 Nov): it opens the My data settings itself */
       '§tools', { site: 'tds' }, { site: 'declaration' }, 'pdffill', 'ftools', 'tools']]];   /* TDS and TCS calculator and Declarations under Utilities (owner 20 Nov) */
   /* the sub-headings inside a group (accounting names; the App is English only) */
@@ -370,8 +370,9 @@
      folded, sit below the App's own groups, and leave out every tool that is already an App screen (Cash book = Cash and bank,
      Cheques, Khata...), so nothing shows twice. The makers' heading reads "Make a new document" (Billing makes an invoice; Sales lists them). */
   /* the document makers and the more tools in A to Z order of the names on screen (owner 2026-11-18) */
+  var abcCol = {};
   function abcSort(box) {
-    var L = (NS.lang && NS.lang()) || 'en', cmp = function (x, y) { return (x.textContent || '').trim().localeCompare((y.textContent || '').trim(), L, { sensitivity: 'base' }); };
+    var L = (NS.lang && NS.lang()) || 'en', col = abcCol[L] || (abcCol[L] = new Intl.Collator(L, { sensitivity: 'base' })), cmp = function (x, y) { return col.compare((x.textContent || '').trim(), (y.textContent || '').trim()); };   /* one collator per language: localeCompare with options built a new one for every comparison */
     var links = $$(':scope > a', box), subs = $$(':scope > .sg-sub', box), put = function (x) { box.appendChild(x); };
     if (!subs.length) { links.sort(cmp).forEach(put); return; }
     links.filter(function (a) { return !a.getAttribute('data-sub'); }).sort(cmp).forEach(put);   /* the group's own first line (All Masters) stays on top */
@@ -431,7 +432,7 @@
     'h:psum': 'Purchase Register', 'h:exc': 'Exception Reports', 'h:vreg': 'Voucher Registers',
     's:cacom': 'Auditor Comments', 'k:nav.cmp08': 'CMP-08 Statement', 'k:nav.gstr1': 'GSTR-1 Return', 'k:nav.gstr2b': 'GSTR-2B Reconciliation', 'k:nav.gstr3b': 'GSTR-3B Return',
     's:itx': 'Income Tax Computation', 's:limits': 'Statutory Limits', 's:acx': 'Other Income and Tax Payments', 'k:nav.tds': 'TDS and TCS Calculator',
-    's:features': 'Feature Settings', 's:tools': 'All Tools', 'k:desk.v_backup': 'Backup and Restore', 's:bimp': 'Bank Statement Import', 's:mig': 'Bring Data from Other Software', 's:mkimp': 'Marketplace and Payment Reports', 's:msg': 'Messages (SMS and WhatsApp)', 'h:mprint': 'Print Many Vouchers',
+    's:features': 'Feature Settings', 's:tools': 'All Tools', 'k:desk.v_backup': 'Backup and Restore', 's:bimp': 'Bank Statement Import', 's:mig': 'Bring Data from Other Software', 's:mkimp': 'Marketplace and Payment Reports', 's:msg': 'Messages (SMS and WhatsApp)', 's:pd': 'Print Designs', 's:env': 'Envelope Printing', 'h:mprint': 'Print Many Vouchers',
     'k:desk.v_settings': 'Company Settings', 's:packs': 'Trade Packs', 's:b2year': 'Year-End Closing'
   };
   var ERPG = { trans: 'Transactions (Vouchers)', reports: 'Display and Reports', tax: 'Statutory (GST and Tax)', 'x-docs': 'Other Documents' };
@@ -655,10 +656,14 @@
       gwSoon(); setTimeout(sbPath, 50);
       var cur = $('a[aria-current="page"]', hub); if (cur) { var g = cur.closest('.sg'); if (g && g.classList.contains('shut')) { g.classList.remove('shut'); var h = $('.sg-h', g); if (h) h.setAttribute('aria-expanded', 'true'); } }
     }
+    var lastSig = '';
+    function sideSig() { return [$$('a', side || document).length, (NS.lang && NS.lang()) || '', window.NSApp && NSApp.stfTabs ? String(NSApp.stfTabs()) : '', !!(window.NSApp && NSApp.orAct)].join('|'); }
+    var sort0 = sort; sort = function () { sort0(); lastSig = sideSig(); };
     sort();
     document.addEventListener('ns-lang', function () { setTimeout(sort, 60); });   /* another language: another A to Z */
     new MutationObserver(function () { if ($(':scope > a[data-sec]', hub)) sort(); }).observe(hub, { childList: true });
-    window.addEventListener('hashchange', function () { setTimeout(sort, 50); });
+    /* Speed (27 Nov 2026): a screen change does not rebuild and re-sort the whole menu when nothing in it changed (it did, with a layout read for every link) */
+    window.addEventListener('hashchange', function () { setTimeout(function () { if (sideSig() !== lastSig) sort(); else { gwSoon(); sbPath(); var cur2 = $('a[aria-current="page"]', hub); if (cur2) { var g2 = cur2.closest('.sg'); if (g2 && g2.classList.contains('shut')) { g2.classList.remove('shut'); var h2 = $('.sg-h', g2); if (h2) h2.setAttribute('aria-expanded', 'true'); } } } }, 50); });
   }
   function build() {
     side = $('#ns-side'); sbar = $('[data-sbar]');
@@ -835,7 +840,7 @@
      Tally-style F keys for new entries, Alt+letter for the main screens, and Alt+G + a 2-letter code ("Go to", as in
      TallyPrime) for EVERY screen and document maker. Fixed letters, so a key never moves when the business type hides tools. */
   var SECKEY = { inbox: ['FW'], home: ['DB'],   /* FW = From the add-on (things sent From the Web, NSBiz Helper) */
-    sales: ['SL'], money: ['MN'], acx: ['OI'], stf: ['SF'], itx: ['IT'], bimp: ['BI'], mig: ['SW'], mkimp: ['MQ'], msg: ['MG'], dues: ['DU'],
+    sales: ['SL'], money: ['MN'], acx: ['OI'], stf: ['SF'], itx: ['IT'], bimp: ['BI'], mig: ['SW'], mkimp: ['MQ'], msg: ['MG'], pd: ['PD'], env: ['EO'], dues: ['DU'],
     msme: ['MS'], limits: ['LH'], buy: ['PE'], parties: ['PA'], grp: ['GR'], chq: ['CQ'], books: ['CB'], cash: ['CK'], repeat: ['RB'],
     reports: ['RE'], day: ['MD'], tools: ['AT'], fin: ['FA'], capl: ['CL'], b2jv: ['JE'], b2fa: ['FX'], b2gd: ['GD'], b2make: ['PR'],
     b2job: ['JW'], b2profit: ['PF'], b2sman: ['SM'], b2year: ['YE'], features: ['AF'], packs: ['TP'], trust: ['DM'], warr: ['WS'], cacom: ['CC'],
@@ -1021,6 +1026,7 @@
   function actions() {
     return [
       { g: 'act', t: T('a_theme'), run: function () { click('[data-theme-btn]'); } },
+      { g: 'act', t: 'Look and feel: colour pack, spacing, text size', run: function () { if (window.NSTheme) NSTheme.open(); } },
       { g: 'act', t: NS.t('mydata'), run: function () { click('[data-act="my-data"]'); } },
       { g: 'act', t: NS.t('md.save'), run: function () { var b = NS.el('button', { 'data-act': 'backup', hidden: '' }); document.body.appendChild(b); b.click(); b.remove(); } },
       { g: 'act', t: T('mini'), k: 'Ctrl+B', run: toggleMenu },

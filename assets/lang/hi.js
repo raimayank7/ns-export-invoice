@@ -9615,3 +9615,10 @@ NS.addLang('hi', {
 NS.addLang('hi', {
   "alt.tip": "कोई अक्षर दबाएँ। Esc से बंद।"
 });
+/* Long jobs: progress bar (27 Nov 2026) */
+NS.addLang('hi', {
+  "prog.cancel": "रद्द करें",
+  "prog.of": "{l}: {n} में से {a}",
+  "prog.stopped": "{n} में से {a} के बाद रुका। जो सेव हो चुका है वह सेव ही रहेगा।",
+  "prog.work": "काम हो रहा है"
+});

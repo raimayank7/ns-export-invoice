@@ -187,6 +187,10 @@ details.more .fg{margin-top:8px}
 .sh.th .thanks{margin-top:8px;font-weight:700}
 .sh.th .nt1{margin-top:6px;text-align:left}
 .sh.th .made{position:static;margin-top:8px}
+/* every roll sheet keeps the roll's own width in print too (width:100% of a shrink-wrapped preview made long terms lines stretch the roll to 1800 px) */.sh.th.th80{width:302px}.sh.th.th58{width:219px}.sh.th.roll table.lines thead th{word-break:normal;overflow-wrap:normal}.sh.th.roll .nt>div{padding:0;text-align:left}.sh.th58.roll table.lines th:first-child,.sh.th58.roll table.lines td:first-child{display:none}.sh.roll .rl{border-top:1px dashed #111;border-bottom:1px dashed #111;margin:4px 0}.sh.roll .rl-row{padding:3px 0;border-bottom:1px dotted #9ca3af}.sh.roll .rl-row:last-child{border-bottom:0}.sh.roll .rl-h{display:block;font-size:10.5px}.sh.roll .rl-p{display:flex;justify-content:space-between;gap:6px;font-size:9.5px}.sh.roll .rl-p i{font-style:normal;color:#374151}.sh.roll .rl-p em{font-style:normal;text-align:right}.sh.roll .rl-foot{font-weight:700}
+.sh.th.roll table.lines{width:100%}.sh.th.roll table.lines th,.sh.th.roll table.lines td{white-space:normal;overflow-wrap:anywhere}.sh.th.roll table.lines td.n{white-space:nowrap;overflow-wrap:normal}.sh.th.roll .rr{border:0;border-radius:0}.sh.th.roll .rtext{font-size:inherit;line-height:1.35;letter-spacing:0}.sh.th.roll .rr-h p{margin:1px 0}.sh.th58.roll table.lines{font-size:8.5px}.sh.th58.roll table.lines{font-size:8px}.sh.th58.roll table.lines th,.sh.th58.roll table.lines td{padding:1px 1px}
+.sh.th.roll .rr,.sh.th.roll .rr-h,.sh.th.roll .rr-f,.sh.th.roll .rrow{display:block}.sh.th.roll .rr{border-top:1px dashed #111;margin:6px 0;padding-top:4px}.sh.th.roll .rtext{margin:4px 0}.sh.th.roll .amtbox{font-size:15px;font-weight:800;text-align:center;border:1px dashed #111;padding:3px;margin:4px 0}.sh.th.roll .rstamp{border:1px dashed #111;text-align:center;font-size:9px;padding:6px;margin:4px 0}
+.sh.th.roll .parties,.sh.th.roll .foot,.sh.th.roll .signs,.sh.th.roll .grid2,.sh.th.roll .cols{display:block}.sh.th.roll .foot-l,.sh.th.roll .foot-r{width:auto;max-width:100%}.sh.th.roll table.lines{font-size:9.5px}.sh.th.roll table.lines th,.sh.th.roll table.lines td{padding:1px 2px;word-break:break-word}.sh.th.roll table.lines thead th{border-bottom:1px dashed #111;font-weight:700}.sh.th.roll table.lines .n{text-align:right}.sh.th.roll .pt{margin:4px 0}.sh.th.roll .pt h4,.sh.th.roll .nt h4{font-size:10px;margin:2px 0;text-transform:uppercase}.sh.th.roll .nt{border:0;padding:0;margin:4px 0;border-top:1px dashed #111}.sh.th.roll .qr{justify-content:center}.sh.th.roll .stamp{display:none}
 /* designs (classic is the plain look above) */
 .sh.d-modern .sh-top{background:var(--ac);color:#fff;margin:-40px -44px 0;padding:28px 44px 18px;border:0}
 .sh.d-modern .sh-top h2,.sh.d-modern .sh-top .dt,.sh.d-modern .sh-top p,.sh.d-modern .sh-top .role{color:#fff}
@@ -206,6 +210,7 @@ details.more .fg{margin-top:8px}
 @media print{
   #sheet>.sh+.sh{margin-top:0;break-before:page}
   .sh.a5{zoom:.7048}
+  .sh.pz-a3{zoom:1.38}.sh.pz-a6{zoom:.48}.sh.pz-letter{zoom:.93;margin-left:37px}.sh.pz-legal{width:816px;min-height:1338px}
   .sh.th{width:100%;min-height:0;padding:2mm 3mm 6mm}
   .sh.d-modern .sh-top{margin:-12mm -12mm 0;padding:10mm 12mm 6mm}
   .pdf-again{display:none}
@@ -490,3 +495,44 @@ dialog.or-pick .or-late{color:var(--bad,#b42318)}
 .sh .tot th.tcs-dl,.sh .kv th.tcs-dl{font-weight:400;font-size:.82em;text-align:left;white-space:normal;line-height:1.35}
 /* NSBiz Helper add-on: Tally on this PC (tally.js liveCard) */
 .ty-live{margin-top:16px;padding-top:12px;border-top:1px solid var(--line)}.ty-live h4{margin:0 0 4px}.ty-live .row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}.ty-live #ty-port{width:6em}
+/* ---- more printed designs (Dec 2026): Ribbon, Letterhead, Typewriter. Same sheet, own look; the colour you pick is --ac ---- */
+.sh.d-ribbon{border-left:16px solid var(--ac);padding-left:30px}
+.sh.d-ribbon .sh-top{border-bottom:0;padding-bottom:6px}
+.sh.d-ribbon .sh-title .dt{display:inline-block;background:var(--ac);color:#fff;padding:5px 16px;border-radius:0 0 0 14px;font-size:15px;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+.sh.d-ribbon .sh-from h2{font-size:24px}
+.sh.d-ribbon .meta th{background:none;color:var(--ac);font-weight:700}
+.sh.d-ribbon .pt{border:0;border-left:3px solid var(--ac);border-radius:0;background:#F8FAFC;padding:6px 10px}
+.sh.d-ribbon .lines th{background:var(--ac);color:#fff;border-color:var(--ac);-webkit-print-color-adjust:exact;print-color-adjust:exact}
+.sh.d-ribbon .lines tbody tr:nth-child(even) td{background:#F8FAFC}
+.sh.d-ribbon .tot .grand th,.sh.d-ribbon .tot .grand td{background:var(--ac);color:#fff;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+.sh.d-ribbon .signbox p:last-child{border-top-color:var(--ac)}
+.sh.d-letter{border-top:12px solid var(--ac)}
+.sh.d-letter .sh-top{flex-direction:column;align-items:center;text-align:center;border-bottom:1px solid #CBD5E1;gap:8px}
+.sh.d-letter .sh-from{flex-direction:column;align-items:center;gap:6px}
+.sh.d-letter .sh-from h2{font-size:26px;text-transform:uppercase;letter-spacing:.14em;font-weight:600}
+.sh.d-letter .sh-from p{display:inline;margin:0 6px;font-size:11.5px}
+.sh.d-letter .sh-title{text-align:center;width:100%}
+.sh.d-letter .sh-title .dt{font-size:13px;letter-spacing:.4em;text-transform:uppercase;color:#111827}
+.sh.d-letter .meta th,.sh.d-letter .meta td{border:0;border-bottom:1px solid #E5E7EB}
+.sh.d-letter .meta th{background:none;color:#6B7280;font-weight:500}
+.sh.d-letter .pt{border:0;padding:4px 0}
+.sh.d-letter .lines th{background:none;color:var(--ac);border:0;border-bottom:2px solid var(--ac);text-transform:uppercase;font-size:10px;letter-spacing:.08em}
+.sh.d-letter .lines td{border:0;border-bottom:1px solid #E5E7EB}
+.sh.d-letter .lines tbody tr:nth-child(even) td{background:none}
+.sh.d-letter .tot .grand th,.sh.d-letter .tot .grand td{background:none;color:var(--ac);font-size:17px;border-top:2px solid var(--ac)}
+.sh.d-typewriter{--tw:'Courier New',Courier,'Noto Sans Mono',monospace;font-family:var(--tw)}
+.sh.d-typewriter :is(h1,h2,h4,.dt,th,td,p,caption,b){font-family:var(--tw)}
+.sh.d-typewriter .sh-top{border-bottom:2px dashed #111827;flex-direction:column;align-items:center;text-align:center}
+.sh.d-typewriter .sh-from{flex-direction:column;align-items:center;gap:4px}
+.sh.d-typewriter .sh-from h2{color:#111827;font-size:20px;text-transform:uppercase}
+.sh.d-typewriter .sh-title{text-align:center}.sh.d-typewriter .sh-title .dt{color:#111827;font-size:15px;letter-spacing:.2em}
+.sh.d-typewriter .meta th,.sh.d-typewriter .meta td,.sh.d-typewriter .sum th,.sh.d-typewriter .sum td{border:0;border-bottom:1px dashed #9CA3AF;background:none}
+.sh.d-typewriter .pt{border:1px dashed #111827;border-radius:0}
+.sh.d-typewriter .lines th{background:none;color:#111827;border:0;border-top:2px dashed #111827;border-bottom:2px dashed #111827}
+.sh.d-typewriter .lines td{border:0;border-bottom:1px dashed #D1D5DB}
+.sh.d-typewriter .lines tbody tr:nth-child(even) td{background:none}
+.sh.d-typewriter .tot .grand th,.sh.d-typewriter .tot .grand td{background:none;color:#111827;border-top:2px dashed #111827;border-bottom:2px dashed #111827;font-size:15px}
+.sh.d-typewriter .signbox p:last-child{border-top:1px dashed #111827}
+.dp-ribbon{background-image:linear-gradient(var(--c),var(--c)),linear-gradient(var(--c),var(--c)),linear-gradient(#94A3B8,#94A3B8),linear-gradient(var(--c),var(--c)),repeating-linear-gradient(#fff 0 4px,#E2E8F0 4px 5px);background-position:0 0,22px 8px,12px 14px,12px 24px,12px 30px;background-size:7px 100%,22px 5px,20px 2px,38px 5px,38px 24px}
+.dp-letter{background-image:linear-gradient(var(--c),var(--c)),linear-gradient(#475569,#475569),linear-gradient(#CBD5E1,#CBD5E1),linear-gradient(var(--c),var(--c)),repeating-linear-gradient(#fff 0 4px,#E2E8F0 4px 5px);background-position:0 0,14px 9px,8px 17px,8px 28px,8px 31px;background-size:100% 5px,26px 3px,38px 1px,38px 1.5px,38px 22px}
+.dp-typewriter{background-image:linear-gradient(90deg,#111 0 4px,transparent 4px 7px),linear-gradient(90deg,#111 0 4px,transparent 4px 7px),repeating-linear-gradient(90deg,#9CA3AF 0 3px,transparent 3px 6px),repeating-linear-gradient(90deg,#111 0 3px,transparent 3px 6px),repeating-linear-gradient(90deg,#9CA3AF 0 3px,transparent 3px 6px);background-position:12px 7px,10px 13px,6px 22px,6px 28px,6px 52px;background-size:30px 3px,34px 2px,42px 1px,42px 1px,42px 1px}

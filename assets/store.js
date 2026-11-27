@@ -131,7 +131,12 @@
     if (args && args.store === 'meta') { var v = [].concat(args.value || { id: args.id }); if (v.every(function (x) { return x && CHG_SKIP[x.id]; })) return false; }
     return true;
   }
+  /* Speed (27 Nov 2026): at start three parts of the page (stock, custom fields, the export-invoice check) each read EVERY document, one after the other: 12 s at 93,000
+     documents. The list of documents is now read once and shared by callers asking within 2.5 s, as long as nothing was saved or changed meanwhile (DLGEN counts that). */
+  var DLGEN = 0, DL = null;
+  document.addEventListener('ns-data', function () { DLGEN++; });
   function call(op, args) {
+    if (CHG[op]) DLGEN++;
     if (host) return host._call(op, args);
     return ready().then(function () { return mode === 'local' ? LOCAL[op](args || {}) : send(op, args); }).then(function (r) {
       if (changedOp(op, args)) document.dispatchEvent(new CustomEvent('ns-saved'));
@@ -542,7 +547,15 @@
     _call: call, _send: send,   /* for the App's own copies of the makers (see host above) */
     /* user logins (SQLite Stage 2): authStatus, login, logout, setupOwner, recover, users, addUser, setUser, changePw, setRole */
     auth: function (op, args) { return ready().then(function (m) { return m === 'vault' ? send(op, args || {}) : (op === 'authStatus' ? { on: false, local: true } : Promise.reject(new Error('The data home is not reachable'))); }); },
-    list: function (store) { return call('list', { store: store }).then(function (r) { r = r || []; return store === 'doc' ? withBizNames(r) : r; }, function (e) { if (store === 'bin' || store === 'log' || store === 'ver') return []; throw e; }); },
+    list: function (store) {
+      if (store === 'doc') {
+        if (DL && DL.gen === DLGEN && Date.now() - DL.t < 2500) return DL.p.then(function (r) { return r.slice(); });
+        var gen = DLGEN, p0 = NSStore.list0('doc'); DL = { p: p0, t: Date.now(), gen: gen }; p0.catch(function () { if (DL && DL.p === p0) DL = null; });
+        return p0.then(function (r) { return r.slice(); });
+      }
+      return NSStore.list0(store);
+    },
+    list0: function (store) { return call('list', { store: store }).then(function (r) { r = r || []; return store === 'doc' ? withBizNames(r) : r; }, function (e) { if (store === 'bin' || store === 'log' || store === 'ver') return []; throw e; }); },
     get: function (store, id) { return call('get', { store: store, id: id }).then(function (r) { return store === 'doc' && r ? withBizNames(r) : r; }); },
     delImport: delImport,
     /* Stage 3: { n, oldest } of the saved documents without reading them (falls back to reading them) */
