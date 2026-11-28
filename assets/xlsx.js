@@ -34,7 +34,7 @@
     var enc = new TextEncoder(), parts = [], central = [], off = 0;
     function h(n, v) { var a = []; for (var i = 0; i < n; i++) a.push((v >>> (8 * i)) & 255); return a; }
     Object.keys(files).forEach(function (name) {
-      var nm = enc.encode(name), data = enc.encode(files[name]), crc = crc32(data);
+      var nm = enc.encode(name), data = files[name] instanceof Uint8Array ? files[name] : enc.encode(files[name]), crc = crc32(data);   /* bytes (a PDF) stored as they are (byof-salary) */
       var head = [].concat(h(4, 0x04034b50), h(2, 20), h(2, 0x0800), h(2, 0), h(2, 0), h(2, 0x21), h(4, crc), h(4, data.length), h(4, data.length), h(2, nm.length), h(2, 0));
       parts.push(new Uint8Array(head), nm, data);
       central.push(new Uint8Array([].concat(h(4, 0x02014b50), h(2, 20), h(2, 20), h(2, 0x0800), h(2, 0), h(2, 0), h(2, 0x21), h(4, crc), h(4, data.length), h(4, data.length),
@@ -43,7 +43,7 @@
     });
     var size = central.reduce(function (a, x) { return a + x.length; }, 0), n = Object.keys(files).length;
     return new Blob(parts.concat(central, [new Uint8Array([].concat(h(4, 0x06054b50), h(2, 0), h(2, 0), h(2, n), h(2, n), h(4, size), h(4, off), h(2, 0)))]),
-      { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+      { type: zip.type || 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
   }
 
   /* ---------- read ---------- */
@@ -97,13 +97,14 @@
     return rows;
   }
   /* any file the user picks: .xlsx, or .csv/.txt (Excel's "CSV UTF-8") */
-  function readFile(file) {
+  /* o.keepEmpty (byof-bulkcheck, 28 Nov 2026): keep empty rows, so row numbers match the sheet the visitor sees in Excel */
+  function readFile(file, o) {
     return file.arrayBuffer().then(function (buf) {
       var b = new Uint8Array(buf);
       if (b[0] === 0x50 && b[1] === 0x4B) return readXlsx(buf);
       if (b[0] === 0xD0 && b[1] === 0xCF) throw new Error('xls');
       return readCsv(new TextDecoder().decode(buf));
-    }).then(function (rows) { return rows.map(function (r) { return r.map(function (c) { return String(c == null ? '' : c).trim(); }); }).filter(function (r) { return r.some(Boolean); }); });
+    }).then(function (rows) { return rows.map(function (r) { return r.map(function (c) { return String(c == null ? '' : c).trim(); }); }).filter(function (r) { return (o && o.keepEmpty) || r.some(Boolean); }); });
   }
 
   /* ---------- write: one sheet per [name, rows]; the first row is bold and frozen ---------- */
@@ -134,5 +135,7 @@
   /* Excel stores typed dates as day numbers since 30 Dec 1899; turn one into YYYY-MM-DD */
   function serialDate(n) { var d = new Date(Date.UTC(1899, 11, 30) + Math.round(+n) * 864e5); return d.toISOString().slice(0, 10); }
 
-  NS.xlsx = { read: readFile, readCsv: readCsv, write: write, serialDate: serialDate };
+  /* a plain .zip of files { name: text or Uint8Array } (byof-salary: one PDF per payslip) */
+  function zipFiles(files) { zip.type = 'application/zip'; try { return zip(files); } finally { zip.type = ''; } }
+  NS.xlsx = { read: readFile, readCsv: readCsv, write: write, serialDate: serialDate, zip: zipFiles };
 })();

@@ -263,6 +263,16 @@ details.more .fg{margin-top:8px}
 .bk-t tr.ok td:first-child{box-shadow:inset 3px 0 0 var(--ok)}
 .bk-t details ul{margin:4px 0 0;padding-inline-start:18px}
 .pb-t input,.pb-t select{min-width:7.5rem;width:100%}
+/* byof-einv: drop box, privacy line, sample note, Columns screen */
+.bk-local{margin:0 0 10px;padding:8px 12px;border-radius:8px;background:var(--soft,rgba(14,116,106,.08));font-size:.9rem}
+.bk-drop{margin:8px 0 0;padding:18px 12px;border:2px dashed var(--line);border-radius:10px;text-align:center;color:var(--muted,inherit);font-size:.92rem}
+.bk-drop.on{border-color:var(--accent,#0E746A);background:rgba(14,116,106,.08)}
+.bk-smp{padding:6px 10px;border-inline-start:3px solid #D97706;background:rgba(217,119,6,.08);font-size:.9rem}
+.bk-cols{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,13rem),1fr));gap:8px}
+.bk-cols select{width:100%}
+.bk-out .row .chk{align-self:center}
+.bk-t td{overflow-wrap:normal;word-break:normal}
+@media (max-width:640px){.bk-t:not(.pb-t) thead{display:none}.bk-t:not(.pb-t) tr{display:grid;grid-template-columns:1fr auto;gap:2px 10px;padding:8px 0;border-bottom:1px solid var(--line)}.bk-t:not(.pb-t) td{border:0;padding:0 8px}.bk-t:not(.pb-t) td:nth-child(n+5){grid-column:1/-1}.bk-t:not(.pb-t) td.mono{overflow-wrap:anywhere}.bk-t:not(.pb-t) tr.bad td:first-child,.bk-t:not(.pb-t) tr.ok td:first-child{box-shadow:none}.bk-t:not(.pb-t) tr.bad{box-shadow:inset 3px 0 0 var(--bad)}.bk-t:not(.pb-t) tr.ok{box-shadow:inset 3px 0 0 var(--ok)}}
 /* export and SEZ invoice block (export.js), on the printed sheet */
 .xp{margin:10px 0 0;padding:8px 10px;border:1px solid #D1D5DB;border-radius:6px;font-size:10.5px}
 .xp-end{margin:0 0 4px;font-weight:700;letter-spacing:.02em}

@@ -1859,8 +1859,9 @@
       document.body.appendChild(box);
       var pg = PAGE[paper] || PAGE.a4, pdf = null;
       var shots = Array.prototype.map.call(nodes, function (n) { var c = n.cloneNode(true); c.classList.remove('a5'); c.className = c.className.replace(/\bpz-\w+\b/g, '').trim(); NS.dropHints(c); box.appendChild(c); plainText(c); return c; });
-      return shots.reduce(function (p, c) {
-        return p.then(function () { return window.html2canvas(c, { scale: 2, backgroundColor: '#ffffff', logging: false }); }).then(function (cv) {
+      return shots.reduce(function (p, c, ix) {
+        /* opt.step(i, n) before each sheet (byof-salary: progress bar and Cancel for many payslips; it may throw to stop) */
+        return p.then(function () { return opt && opt.step ? opt.step(ix, shots.length) : 0; }).then(function () { return window.html2canvas(c, { scale: 2, backgroundColor: '#ffffff', logging: false }); }).then(function (cv) {
           var w = pg[0];
           /* A4 / A5: a long sheet is cut into real pages of that size (round C: one tall page that printed shrunk or cut);
              a thermal roll stays one long strip */

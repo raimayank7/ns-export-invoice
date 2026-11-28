@@ -1381,6 +1381,7 @@
           var nd = blank(), u0 = nd.items[0];
           if (h.seller && h.seller.name) { nd.seller = Object.assign(nd.seller, h.seller); delete nd.seller.id; delete nd.seller.created; delete nd.seller.updated; }   /* the business the stock site was on */
           if (h.buyer) nd.buyer = Object.assign(nd.buyer, h.buyer);
+          if (h.reason) nd.reason = h.reason; if (h.notes) nd.notes = h.notes; if (h.orig) nd.orig = Object.assign({ no: '', date: '' }, h.orig);   /* byof3-interest: the interest debit note */
           nd.items = (h.items || []).map(function (l) { return Object.assign({}, u0, { desc: l.desc || '', hsn: l.hsn || '', qty: l.qty, unit: l.unit || u0.unit, rate: l.rate != null ? l.rate : '', gst: l.gst != null && l.gst !== '' ? l.gst : u0.gst }); });
           if (!nd.items.length) nd.items = [u0];
           doc = nd; editingId = null; render(); saveDraft(); return suggestNumber(true);
